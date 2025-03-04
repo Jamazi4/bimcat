@@ -1,9 +1,9 @@
-import { ModeToggle } from "@/components/ModeToggle";
+import ComponentCard from "@/components/ComponentCard";
 
 export default function Home() {
   return (
     <main>
-      <div className="border rounded p-8 bg-muted">Hello world</div>
+      <ComponentCard />
     </main>
   );
 }

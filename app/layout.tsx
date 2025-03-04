@@ -1,11 +1,11 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
-import { Inconsolata } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 
-const inconsolata = Inconsolata({
-  variable: "--font-inconsolata",
+const roboto = Roboto({
+  variable: "--font-Roboto",
   subsets: ["latin"],
 });
 
@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inconsolata.className} antialiased`}>
+      <body className={`${roboto.className} antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -29,7 +29,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Navbar />
-          <div className="flex mx-auto justify-center p-12">{children}</div>
+          <div className="max-w-3xl mx-auto justify-center">{children}</div>
         </ThemeProvider>
       </body>
     </html>
