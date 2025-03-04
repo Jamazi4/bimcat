@@ -1,26 +1,112 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: hsl(0 0% 100%);
+    --foreground: hsl(222.2 84% 4.9%);
+    --muted: hsl(210 40% 96.1%);
+    --muted-foreground: hsl(215.4 16.3% 46.9%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(222.2 84% 4.9%);
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(222.2 84% 4.9%);
+    --border: hsl(214.3 31.8% 91.4%);
+    --input: hsl(214.3 31.8% 91.4%);
+    --primary: hsl(220.47 98.26% 36.08%);
+    --primary-foreground: hsl(210 40% 98%);
+    --secondary: hsl(210 40% 96.1%);
+    --secondary-foreground: hsl(222.2 47.4% 11.2%);
+    --accent: hsl(210 40% 96.1%);
+    --accent-foreground: hsl(222.2 47.4% 11.2%);
+    --destructive: hsl(0 92.99% 56.11%);
+    --destructive-foreground: hsl(210 40% 98%);
+    --ring: hsl(220.67 97.83% 36.08%);
+    --chart-1: hsl(220.47 98.26% 36.08%);
+    --chart-2: hsl(210 40% 96.1%);
+    --chart-3: hsl(210 40% 96.1%);
+    --chart-4: hsl(210 40% 99.1%);
+    --chart-5: hsl(220.47 101.26% 36.08%);
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: hsl(240 13.73% 10%);
+    --foreground: hsl(229.76 31.78% 74.71%);
+    --muted: hsl(232.5 15.44% 18.32%);
+    --muted-foreground: hsl(233.79 11.37% 50%);
+    --popover: hsl(234.55 17.46% 12.35%);
+    --popover-foreground: hsl(234 12.4% 52.55%);
+    --card: hsl(234.55 17.46% 12.35%);
+    --card-foreground: hsl(229.76 31.78% 74.71%);
+    --border: hsl(232.5 15.38% 30.59%);
+    --input: hsl(232 20% 14.71%);
+    --primary: hsl(0 0% 82.75%);
+    --primary-foreground: hsl(0 0% 20%);
+    --secondary: hsl(225.45 71.22% 72.75%);
+    --secondary-foreground: hsl(234.55 17.46% 12.35%);
+    --accent: hsl(234.55 17.83% 9.47%);
+    --accent-foreground: hsl(0 0% 82.75%);
+    --destructive: hsl(1.58 47.5% 52.94%);
+    --destructive-foreground: hsl(210 40% 98.04%);
+    --ring: hsl(225.45 71.22% 72.75%);
+    --chart-1: hsl(0 0% 82.75%);
+    --chart-2: hsl(225.45 71.22% 72.75%);
+    --chart-3: hsl(234.55 17.83% 9.47%);
+    --chart-4: hsl(225.45 71.22% 75.75%);
+    --chart-5: hsl(0 3% 82.75%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
