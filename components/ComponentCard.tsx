@@ -1,7 +1,6 @@
 import Renderer from "@/components/Renderer";
 import Title from "@/components/Title";
 import ComponentCardTabs from "./ComponentCardTabs";
-import { Button } from "./ui/button";
 
 const ComponentCard = () => {
   return (
