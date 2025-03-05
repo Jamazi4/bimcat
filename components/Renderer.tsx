@@ -6,7 +6,7 @@ import Box from "./Box";
 
 const Renderer = () => {
   return (
-    <div className="bg-background rounded border w-auto mr-6 aspect-square">
+    <div className="bg-muted rounded border w-auto mr-6 aspect-square">
       <Canvas>
         <ambientLight intensity={Math.PI / 2} />
         <spotLight

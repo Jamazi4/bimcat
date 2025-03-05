@@ -12,10 +12,14 @@ function ComponentCardTabs() {
         <TabsTrigger value="psets">Psets</TabsTrigger>
       </TabsList>
       <TabsContent value="configure">
-        <NumInput title="Width" defaultValue={25} />
-        <NumInput title="Height" defaultValue={25} />
+        {/* Configuration */}
+        <div className="mt-4">
+          <NumInput title="Width" defaultValue={25} />
+          <NumInput title="Height" defaultValue={25} />
+        </div>
       </TabsContent>
       <TabsContent value="psets">
+        {/* Psets */}
         <PsetsList psets={psets} />
       </TabsContent>
     </Tabs>

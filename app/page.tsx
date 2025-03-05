@@ -1,9 +1,9 @@
-import ComponentCard from "@/components/ComponentCard";
+import ComponentMinature from "@/components/ComponentMinature";
 
 export default function Home() {
   return (
     <main>
-      <ComponentCard />
+      <ComponentMinature name="cube" id="1" />
     </main>
   );
 }

@@ -1,11 +1,17 @@
 import Renderer from "@/components/Renderer";
 import Title from "@/components/Title";
-import ComponentCardTabs from "./ComponentCardTabs";
+import ComponentCardTabs from "@/components/ComponentCardTabs";
 
-const ComponentCard = () => {
+const ComponentCard = async ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
+  const resolved = await params;
+
   return (
     <div>
-      <Title text="Cube" />
+      <Title text={resolved.id} />
       <div className="grid grid-cols-2 ">
         <div>
           <Renderer />
