@@ -18,16 +18,15 @@ const FileUpload = () => {
     if (file) {
       const data = await file.arrayBuffer();
       const buffer = new Uint8Array(data);
-      const { fragments, loader, indexer, exporter } =
-        await getFragmentLoader();
+      const { loader, indexer } = await getFragmentLoader();
 
       const webIfc = new WEBIFC.IfcAPI();
       webIfc.SetWasmPath("https://unpkg.com/web-ifc@0.0.66/", true);
 
       await webIfc.Init();
 
-      const modelId = webIfc.OpenModel(buffer);
-      const exported = await exporter.export(webIfc, modelId);
+      // const modelId = webIfc.OpenModel(buffer);
+      // const exported = await exporter.export(webIfc, modelId);
 
       // console.log(exported); // works json of all elements in file
 
