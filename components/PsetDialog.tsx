@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Pset, PsetContent } from "@/utils/types";
-import { Pencil, Plus } from "lucide-react";
+import type { PsetContent } from "@/utils/types";
+import { Pencil } from "lucide-react";
 
 type PsetDialogMode = "edit" | "add";
 

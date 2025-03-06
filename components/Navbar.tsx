@@ -1,10 +1,6 @@
 import { ModeToggle } from "./ModeToggle";
 import FileUpload from "./FileUpload";
 
-import { FileUp } from "lucide-react";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
 import Link from "next/link";
 
 const Navbar = () => {

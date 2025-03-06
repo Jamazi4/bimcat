@@ -7,7 +7,7 @@ import { Input } from "./ui/input";
 import * as WEBIFC from "web-ifc";
 import * as OBC from "@thatopen/components";
 
-import { getFragmentLoader, getModelData } from "@/utils/ifcjs";
+import { getFragmentLoader } from "@/utils/ifcjs";
 import { FragmentMesh } from "@thatopen/fragments";
 
 const FileUpload = () => {
