@@ -31,10 +31,10 @@ const FileUpload = () => {
 
       // console.log(exported); // works json of all elements in file
 
-      const serialized = JSON.stringify(exported);
+      // const serialized = JSON.stringify(exported);
 
       const model = await loader.load(buffer);
-      const fragModel = fragments.load(buffer);
+      // const fragModel = fragments.load(buffer);
       // console.log(model.children);
       const firstElement = model.children[0] as FragmentMesh;
       const ids = firstElement.fragment.ids;

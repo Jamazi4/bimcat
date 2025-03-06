@@ -49,7 +49,7 @@ function PsetDialog({
             {mode} {title}
           </DialogTitle>
           <DialogDescription>
-            Make changes to component's properties. Click save when you're done.
+            Make changes to component properties. Click save when you are done.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
