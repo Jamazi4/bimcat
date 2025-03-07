@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import NumInput from "./NumInput";
+import NumInput from "../NumInput";
 import PsetsList from "./PsetsList";
 
 import { psets } from "@/utils/example";

@@ -1,11 +1,12 @@
 import { ModeToggle } from "./ModeToggle";
-import FileUpload from "./FileUpload";
+import FileUpload from "../FileUpload";
 
 import Link from "next/link";
+import UploadDialog from "../UploadDialog";
 
 const Navbar = () => {
   return (
-    <nav className="mx-auto p-4 bg-muted mb-12">
+    <nav className="mx-auto p-4 border-b bg-secondary-foreground mb-12">
       <div className=" max-w-3xl mx-auto flex justify-between">
         {/* LOGO */}
         <h1 className="font-black text-3xl text-primary">
@@ -18,7 +19,7 @@ const Navbar = () => {
         </h1>
         {/* Navigation */}
         <div>
-          <FileUpload />
+          <UploadDialog />
         </div>
         {/* Mode/account */}
         <ModeToggle />

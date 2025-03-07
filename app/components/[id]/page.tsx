@@ -1,6 +1,7 @@
-import Renderer from "@/components/Renderer";
+import Renderer from "@/components/ComponentEditor/Renderer";
 import Title from "@/components/Title";
-import ComponentCardTabs from "@/components/ComponentCardTabs";
+import ComponentCardTabs from "@/components/ComponentEditor/ComponentCardTabs";
+import { prisma } from "@/db";
 
 const ComponentCard = async ({
   params,

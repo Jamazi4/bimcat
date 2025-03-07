@@ -1,7 +1,7 @@
 import type { Pset, PsetContent } from "@/utils/types";
 import PsetRow from "./PsetRow";
 import PsetDialog from "./PsetDialog";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { X } from "lucide-react";
 import {
   Accordion,

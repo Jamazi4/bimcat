@@ -19,7 +19,10 @@ function Box(props: ThreeElements["mesh"]) {
       onPointerOut={() => setHover(false)}
     >
       <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color={hovered ? "hotpink" : "#2f74c0"} />
+      <meshStandardMaterial
+        color={hovered ? "hotpink" : "#6ccc1e"}
+        wireframe={true}
+      />
     </mesh>
   );
 }

@@ -1,7 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-products = [{ name: "hello world" }];
+products = [{ name: "hello world2" }];
 
 async function main() {
   for (const product of products) {

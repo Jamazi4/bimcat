@@ -2,7 +2,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/Navbar/Navbar";
 
 const roboto = Roboto({
   variable: "--font-Roboto",
@@ -29,7 +29,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Navbar />
-          <div className="max-w-3xl mx-auto justify-center">{children}</div>
+          <div className="max-w-3xl mx-auto px-4 justify-center">
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>

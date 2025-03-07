@@ -18,3 +18,9 @@ model Product {
   id   String @id @default(uuid())
   name String
 }
+
+model ComponentGeometry {
+  id       String @id @default(uuid())
+  position Json
+  indices  Json
+}

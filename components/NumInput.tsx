@@ -15,7 +15,7 @@ const NumInput = ({
         {title}:{" "}
       </Label>
       <div className="flex space-x-4">
-        <Input id="width" defaultValue={defaultValue} />
+        <Input id="width" defaultValue={defaultValue} className="bg-input" />
         <Button variant="ghost" className="cursor-pointer">
           Save
         </Button>

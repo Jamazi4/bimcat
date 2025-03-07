@@ -1,4 +1,4 @@
-import { Separator } from "./ui/separator";
+import { Separator } from "../ui/separator";
 
 const PsetRow = ({ name, value }: { name: string; value: string }) => {
   return (
