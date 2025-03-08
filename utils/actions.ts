@@ -3,25 +3,56 @@
 import { prisma } from "@/db";
 import { ComponentGeometry } from "./types";
 import { validateWithZodSchema, geometrySchema } from "./schemas";
+import { redirect } from "next/navigation";
 
-export const createGeometryAction = async (formData: FormData) => {
-  const file = formData.get("file") as File;
+export const createComponentAction = async (formData: FormData) => {
   const name = formData.get("name") as string;
   const geometry = formData.get("geometry") as string;
   const parsed = JSON.parse(geometry) as ComponentGeometry;
+  const geometryResponse = await createGeometryAction(parsed);
 
+  if (!geometryResponse) return;
+
+  let componentId: string | null;
+  try {
+    const response = await prisma.component.create({
+      data: {
+        name: name,
+        geomId: geometryResponse.id,
+      },
+    });
+    componentId = response.id;
+  } catch (error) {
+    componentId = null;
+    console.log(error);
+  }
+  if (componentId) {
+    redirect(`/components/${componentId}`);
+  }
+};
+
+export const createGeometryAction = async (geometry: ComponentGeometry) => {
   try {
     const response = await prisma.componentGeometry.create({
       data: {
-        position: parsed.position,
-        indices: parsed.indices,
+        position: geometry.position,
+        indices: geometry.indices,
       },
     });
 
-    console.log(response.id);
+    return response;
   } catch (error) {
     console.log(error);
   }
+};
+
+export const fetchSingleComponentAction = async (id: string) => {
+  const component = await prisma.component.findUnique({
+    where: {
+      id: id,
+    },
+  });
+  return component;
 };
 
 export const fetchGeometryAction = async (id: string) => {

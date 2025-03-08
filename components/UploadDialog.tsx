@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileUp } from "lucide-react";
-import { createGeometryAction } from "@/utils/actions";
+import { createComponentAction } from "@/utils/actions";
 
 import { useState } from "react";
 import { getIfcGeometry } from "@/utils/ifcjs";
@@ -43,7 +43,7 @@ function UploadDialog() {
     <Dialog>
       <DialogTrigger asChild>
         <Button size="icon" variant="ghost" asChild>
-          <FileUp className=" p-2" />
+          <FileUp className="p-2 text-secondary-foreground" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -53,7 +53,7 @@ function UploadDialog() {
             Choose an IFC file containing just one 3D object.
           </DialogDescription>
         </DialogHeader>
-        <form action={createGeometryAction}>
+        <form action={createComponentAction}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
