@@ -3,7 +3,7 @@ import { fetchAllComponents } from "@/utils/actions";
 
 export default async function Home() {
   const components = await fetchAllComponents();
-  if (!components) return <div>Couldn&apos;'t connect....</div>;
+  if (!components) return <div>Couldn&apos;t connect....</div>;
   return (
     <main className="grid grid-cols-2 gap-4 md:grid-cols-3">
       {components?.map((component) => {
