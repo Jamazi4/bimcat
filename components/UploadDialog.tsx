@@ -18,7 +18,7 @@ import { createComponentAction } from "@/utils/actions";
 import { useState } from "react";
 import { getIfcData } from "@/utils/ifcjs";
 
-import type { ComponentGeometry, Pset, PsetContent } from "@/utils/types";
+import type { ComponentGeometry, Pset } from "@/utils/types";
 
 function UploadDialog() {
   const [file, setFile] = useState<File | null>(null);
@@ -37,7 +37,6 @@ function UploadDialog() {
 
       if (result.psets) {
         setPsets(result.psets);
-        console.log(psets);
       }
 
       console.log("geom setup");
@@ -87,12 +86,16 @@ function UploadDialog() {
                 required
               />
             </div>
+
             {geometry && (
               <input
                 type="hidden"
                 name="geometry"
                 value={JSON.stringify(geometry)}
               />
+            )}
+            {psets && (
+              <input type="hidden" name="psets" value={JSON.stringify(psets)} />
             )}
           </div>
           <DialogFooter>

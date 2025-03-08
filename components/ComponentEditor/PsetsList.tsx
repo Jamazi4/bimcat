@@ -1,4 +1,4 @@
-import type { Pset } from "@/utils/types";
+import type { Pset } from "@/utils/schemas";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 

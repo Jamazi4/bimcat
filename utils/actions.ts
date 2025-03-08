@@ -2,14 +2,20 @@
 
 import { prisma } from "@/db";
 import { ComponentGeometry } from "./types";
-import { validateWithZodSchema, geometrySchema } from "./schemas";
+import {
+  validateWithZodSchema,
+  geometrySchema,
+  componentSchema,
+} from "./schemas";
 import { redirect } from "next/navigation";
 
 export const createComponentAction = async (formData: FormData) => {
   const name = formData.get("name") as string;
   const geometry = formData.get("geometry") as string;
-  const parsed = JSON.parse(geometry) as ComponentGeometry;
-  const geometryResponse = await createGeometryAction(parsed);
+  const psets = formData.get("psets") as string;
+  const parsedGeometry = JSON.parse(geometry) as ComponentGeometry;
+  const parsedPsets = JSON.parse(psets);
+  const geometryResponse = await createGeometryAction(parsedGeometry);
 
   if (!geometryResponse) return;
 
@@ -19,6 +25,7 @@ export const createComponentAction = async (formData: FormData) => {
       data: {
         name: name,
         geomId: geometryResponse.id,
+        psets: parsedPsets,
       },
     });
     componentId = response.id;
@@ -31,7 +38,7 @@ export const createComponentAction = async (formData: FormData) => {
   }
 };
 
-export const createGeometryAction = async (geometry: ComponentGeometry) => {
+const createGeometryAction = async (geometry: ComponentGeometry) => {
   try {
     const response = await prisma.componentGeometry.create({
       data: {
@@ -52,7 +59,8 @@ export const fetchSingleComponentAction = async (id: string) => {
       id: id,
     },
   });
-  return component;
+
+  return validateWithZodSchema(componentSchema, component);
 };
 
 export const fetchGeometryAction = async (id: string) => {
@@ -78,7 +86,7 @@ export const fetchGeometryAction = async (id: string) => {
 export const fetchAllComponents = async () => {
   try {
     const components = await prisma.component.findMany({});
-    console.log(components);
+
     return components;
   } catch (error) {
     console.log(error);

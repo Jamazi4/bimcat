@@ -26,7 +26,7 @@ const ComponentCard = async ({
           )}
         </div>
         <div>
-          <ComponentCardTabs />
+          <ComponentCardTabs psets={component.psets} />
         </div>
       </div>
     </div>

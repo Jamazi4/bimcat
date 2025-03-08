@@ -18,19 +18,17 @@ const ComponentMinature = ({
   created: Date;
 }) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="mx-auto">
-          <Link className="text-xl text-primary" href={`/components/${id}`}>
-            {name}
-          </Link>
-        </CardTitle>
-      </CardHeader>
-      <CardContent></CardContent>
-      <CardFooter className="text-sm text-secondary-foreground">
-        Created: {format(created, "dd-MM-yy HH:mm")}
-      </CardFooter>{" "}
-    </Card>
+    <Link className="text-xl text-primary" href={`/components/${id}`}>
+      <Card className="hover:bg-card-highlighted">
+        <CardHeader>
+          <CardTitle className="mx-auto">{name}</CardTitle>
+        </CardHeader>
+        <CardContent></CardContent>
+        <CardFooter className="text-sm text-secondary-foreground">
+          Created: {format(created, "dd-MM-yy HH:mm")}
+        </CardFooter>{" "}
+      </Card>
+    </Link>
   );
 };
 export default ComponentMinature;

@@ -31,6 +31,7 @@ model Component {
   name      String
   geometry  ComponentGeometry @relation(fields: [geomId], references: [id])
   geomId    String
+  psets     Json
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 }

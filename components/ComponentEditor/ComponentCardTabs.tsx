@@ -1,10 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NumInput from "../NumInput";
 import PsetsList from "./PsetsList";
+import { Pset } from "@/utils/schemas";
 
-import { psets } from "@/utils/example";
-
-function ComponentCardTabs() {
+function ComponentCardTabs({ psets }: { psets: Pset[] }) {
   return (
     <Tabs defaultValue="configure" className=" w-auto">
       <TabsList className="grid w-auto grid-cols-2 rounded-sm">

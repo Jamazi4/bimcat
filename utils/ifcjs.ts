@@ -69,7 +69,6 @@ export const getIfcPsets = async (
           async (propExpressID) => {
             const prop = await model.getProperties(propExpressID); //values
             if (prop) {
-              console.log(prop);
               const propName = prop["Name"]?.value || "";
               const propValue = prop["NominalValue"]?.value ?? "";
               curPset.content.push({ [propName]: propValue });

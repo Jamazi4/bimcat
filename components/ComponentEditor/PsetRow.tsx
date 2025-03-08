@@ -1,6 +1,6 @@
 import { Separator } from "../ui/separator";
 
-const PsetRow = ({ name, value }: { name: string; value: string }) => {
+const PsetRow = ({ name, value }: { name: any; value: any }) => {
   return (
     <div className="mb-4">
       <div className="flex justify-between p-2">

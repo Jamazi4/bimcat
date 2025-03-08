@@ -29,7 +29,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Navbar />
-          <div className="max-w-3xl mx-auto px-4 justify-center">
+          <div className="px-4 max-w-3xl mx-auto justify-center">
             {children}
           </div>
         </ThemeProvider>
