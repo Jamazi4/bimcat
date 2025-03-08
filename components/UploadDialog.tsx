@@ -16,13 +16,14 @@ import { FileUp } from "lucide-react";
 import { createComponentAction } from "@/utils/actions";
 
 import { useState } from "react";
-import { getIfcGeometry } from "@/utils/ifcjs";
+import { getIfcData } from "@/utils/ifcjs";
 
-import type { ComponentGeometry } from "@/utils/types";
+import type { ComponentGeometry, Pset, PsetContent } from "@/utils/types";
 
 function UploadDialog() {
   const [file, setFile] = useState<File | null>(null);
   const [geometry, setGeometry] = useState<ComponentGeometry | null>(null);
+  const [psets, setPsets] = useState<Pset[] | null>(null);
 
   async function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = event.target.files?.[0];
@@ -31,8 +32,14 @@ function UploadDialog() {
     setFile(selectedFile);
 
     try {
-      const result = await getIfcGeometry(selectedFile);
-      setGeometry(result);
+      const result = await getIfcData(selectedFile);
+      setGeometry(result.geometry);
+
+      if (result.psets) {
+        setPsets(result.psets);
+        console.log(psets);
+      }
+
       console.log("geom setup");
     } catch (error) {
       console.error("Error processing IFC file:", error);
@@ -43,7 +50,7 @@ function UploadDialog() {
     <Dialog>
       <DialogTrigger asChild>
         <Button size="icon" variant="ghost" asChild>
-          <FileUp className="p-2 text-secondary-foreground" />
+          <FileUp className="p-2 text-primary-foreground" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

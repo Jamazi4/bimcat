@@ -75,6 +75,16 @@ export const fetchGeometryAction = async (id: string) => {
   }
 };
 
+export const fetchAllComponents = async () => {
+  try {
+    const components = await prisma.component.findMany({});
+    console.log(components);
+    return components;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const writeDb = async (formData: FormData) => {
   console.log("hello world");
   await prisma.product.create({

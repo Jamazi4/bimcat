@@ -4,8 +4,7 @@ export type Pset = {
 };
 
 export type PsetContent = {
-  name: string;
-  value: string;
+  [attribute: string]: any;
 };
 
 export type ComponentGeometry = {

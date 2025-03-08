@@ -6,10 +6,14 @@ import { psets } from "@/utils/example";
 
 function ComponentCardTabs() {
   return (
-    <Tabs defaultValue="configure" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="configure">Configure</TabsTrigger>
-        <TabsTrigger value="psets">Psets</TabsTrigger>
+    <Tabs defaultValue="configure" className=" w-auto">
+      <TabsList className="grid w-auto grid-cols-2 rounded-sm">
+        <TabsTrigger value="configure" className="rounded-sm">
+          Configure
+        </TabsTrigger>
+        <TabsTrigger value="psets" className="rounded-sm">
+          Psets
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="configure">
         {/* Configuration */}

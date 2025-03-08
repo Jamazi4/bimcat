@@ -9,15 +9,13 @@ const ComponentCard = async ({
   params: Promise<{ id: string }>;
 }) => {
   const resolved = await params;
-  // const [component, setComponent] = useState<>(null);
 
-  const geomId = "040002d1-03e5-4d77-8ece-2c3f698e243a"; //temp
   const component = await fetchSingleComponentAction(resolved.id);
 
   return (
     <div>
       <Title text={component ? component.name : "loading..."} />
-      <div className="grid grid-cols-2 ">
+      <div className="grid grid-cols-2 gap-4">
         <div>
           {component ? (
             <>

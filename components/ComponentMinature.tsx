@@ -6,17 +6,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { format } from "date-fns";
 
-const ComponentMinature = ({ id, name }: { id: string; name: string }) => {
+const ComponentMinature = ({
+  id,
+  name,
+  created,
+}: {
+  id: string;
+  name: string;
+  created: Date;
+}) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="mx-auto">{name}</CardTitle>
+        <CardTitle className="mx-auto">
+          <Link className="text-xl text-primary" href={`/components/${id}`}>
+            {name}
+          </Link>
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <Link href={`/components/${id}`}>{name}</Link>
-      </CardContent>
-      <CardFooter>lorem</CardFooter>
+      <CardContent></CardContent>
+      <CardFooter className="text-sm text-secondary-foreground">
+        Created: {format(created, "dd-MM-yy HH:mm")}
+      </CardFooter>{" "}
     </Card>
   );
 };

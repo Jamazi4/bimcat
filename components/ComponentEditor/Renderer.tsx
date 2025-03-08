@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { Bounds, OrbitControls } from "@react-three/drei";
+import { Bounds, Grid, OrbitControls } from "@react-three/drei";
 import { fetchGeometryAction } from "@/utils/actions";
 import { useEffect, useMemo } from "react";
 import { useState } from "react";
@@ -33,15 +33,23 @@ const Renderer = ({ id }: { id: string }) => {
   }, [geometry]);
 
   return (
-    <div className="bg-muted rounded border w-auto mr-6 aspect-square">
-      <Canvas camera={{ position: [1, 1, 1] }}>
+    <div className="bg-muted rounded border w-auto aspect-square">
+      <Canvas camera={{ position: [0, 1, 0] }}>
         <ambientLight intensity={2} />
         <pointLight
           position={[-10, 10, -10]}
           decay={0}
           intensity={Math.PI / 2}
         />
-        <Bounds fit clip observe margin={1}>
+        <Grid
+          cellThickness={0.1}
+          cellSize={100}
+          sectionColor={"#8b8b8b"}
+          fadeDistance={40}
+          infiniteGrid={true}
+        />
+
+        <Bounds fit clip observe margin={1.2}>
           {bufferGeometry && (
             <>
               <mesh geometry={bufferGeometry} scale={0.01}>
@@ -53,6 +61,7 @@ const Renderer = ({ id }: { id: string }) => {
             </>
           )}
         </Bounds>
+
         <OrbitControls enableZoom={true} />
       </Canvas>
     </div>
