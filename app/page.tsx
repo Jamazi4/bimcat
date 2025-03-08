@@ -1,12 +1,18 @@
 import ComponentMinature from "@/components/ComponentMinature";
 import { fetchAllComponents } from "@/utils/actions";
+import { Component, componentsArraySchema } from "@/utils/schemas";
+import { validateWithZodSchema } from "@/utils/schemas";
 
 export default async function Home() {
   const components = await fetchAllComponents();
-  if (!components) return <div>Couldn&apos;t connect....</div>;
+  const validatedComponents = validateWithZodSchema(
+    componentsArraySchema,
+    components
+  );
+  if (!validatedComponents) return <div>Couldn&apos;t connect....</div>;
   return (
     <main className="grid grid-cols-2 gap-4 md:grid-cols-3">
-      {components?.map((component) => {
+      {validatedComponents?.map((component: Component) => {
         const { id, name, createdAt } = component;
         return (
           <ComponentMinature

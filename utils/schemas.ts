@@ -40,3 +40,7 @@ export const componentSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
 });
+
+export type Component = z.infer<typeof componentSchema>;
+
+export const componentsArraySchema = z.array(componentSchema);
