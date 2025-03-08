@@ -1,11 +1,8 @@
 "use server";
 
 import { prisma } from "@/db";
-
-export type ComponentGeometry = {
-  position: number[];
-  indices: number[];
-};
+import { ComponentGeometry } from "./types";
+import { validateWithZodSchema, geometrySchema } from "./schemas";
 
 export const createGeometryAction = async (formData: FormData) => {
   const file = formData.get("file") as File;
@@ -22,6 +19,26 @@ export const createGeometryAction = async (formData: FormData) => {
     });
 
     console.log(response.id);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const fetchGeometryAction = async (id: string) => {
+  if (!id) return;
+
+  try {
+    const response = await prisma.componentGeometry.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (response) {
+      return validateWithZodSchema(geometrySchema, {
+        position: response.position,
+        indices: response.indices,
+      });
+    }
   } catch (error) {
     console.log(error);
   }

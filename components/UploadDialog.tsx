@@ -18,7 +18,7 @@ import { createGeometryAction } from "@/utils/actions";
 import { useState } from "react";
 import { getIfcGeometry } from "@/utils/ifcjs";
 
-import type { ComponentGeometry } from "@/utils/actions";
+import type { ComponentGeometry } from "@/utils/types";
 
 function UploadDialog() {
   const [file, setFile] = useState<File | null>(null);

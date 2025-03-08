@@ -21,7 +21,7 @@ function Box(props: ThreeElements["mesh"]) {
       <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial
         color={hovered ? "hotpink" : "#6ccc1e"}
-        wireframe={true}
+        wireframe={false}
       />
     </mesh>
   );
