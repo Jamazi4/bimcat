@@ -19,7 +19,7 @@ const Renderer = ({ id }: { id: string }) => {
       setGeometry(response);
     };
     asyncFetch();
-  }, []);
+  }, [id]);
 
   const bufferGeometry = useMemo(() => {
     if (!geometry) return null;

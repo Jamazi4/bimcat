@@ -29,6 +29,7 @@ function UploadDialog() {
     const selectedFile = event.target.files?.[0];
     if (!selectedFile) return;
 
+    if (file) setFile(null);
     setFile(selectedFile);
 
     try {
