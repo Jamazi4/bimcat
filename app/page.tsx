@@ -1,4 +1,4 @@
-import ComponentMinature from "@/components/ComponentMinature";
+import ComponentMinature from "@/components/componentList/ComponentMinature";
 import { fetchAllComponents } from "@/utils/actions";
 import { Component, componentsArraySchema } from "@/utils/schemas";
 import { validateWithZodSchema } from "@/utils/schemas";

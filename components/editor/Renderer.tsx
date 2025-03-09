@@ -42,8 +42,10 @@ const Renderer = ({ id }: { id: string }) => {
           intensity={Math.PI / 2}
         />
         <Grid
+          side={2}
+          sectionSize={1}
           cellThickness={0.1}
-          cellSize={100}
+          cellSize={1}
           sectionColor={"#8b8b8b"}
           fadeDistance={40}
           infiniteGrid={true}

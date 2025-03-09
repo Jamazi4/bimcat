@@ -56,7 +56,7 @@ export const getIfcPsets = async (
       // You can get the pset attributes like this
       const pset = await model.getProperties(expressID);
       if (pset) {
-        const curPsetTitle = pset["Name"]?.value || "";
+        const curPsetTitle = pset["Name"]?.value || " ";
 
         const curPset: Pset = {
           title: curPsetTitle,
@@ -69,8 +69,8 @@ export const getIfcPsets = async (
           async (propExpressID) => {
             const prop = await model.getProperties(propExpressID); //values
             if (prop) {
-              const propName = prop["Name"]?.value || "";
-              const propValue = prop["NominalValue"]?.value ?? "";
+              const propName = prop["Name"]?.value || " ";
+              const propValue = prop["NominalValue"]?.value ?? " ";
               curPset.content.push({ [propName]: propValue });
             }
           }

@@ -1,5 +1,5 @@
-import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
+import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
 import { DownloadIcon, Star } from "lucide-react";
 
 const Title = ({ text }: { text: string }) => {

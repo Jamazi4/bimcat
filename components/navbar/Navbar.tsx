@@ -2,11 +2,19 @@ import { ModeToggle } from "./ModeToggle";
 
 import Link from "next/link";
 import UploadDialog from "../UploadDialog";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
+import { Button } from "../ui/button";
 
 const Navbar = () => {
   return (
-    <nav className="px-4 pb-4 pt-6 border-b bg-secondary mb-12">
-      <div className=" max-w-3xl mx-auto flex justify-between">
+    <nav className="  px-4 pb-4 pt-6 border-b bg-secondary mb-12 ">
+      <div className="flex justify-between max-w-[1120px] mx-auto">
         {/* LOGO */}
         <h1 className="font-black text-3xl text-primary-foreground">
           <Link href="/">
@@ -23,7 +31,23 @@ const Navbar = () => {
           <UploadDialog />
         </div>
         {/* Mode/account */}
-        <ModeToggle />
+
+        <div className="flex gap-2 justify-center align-middle">
+          <ModeToggle />
+          <SignedOut>
+            <Button asChild>
+              <SignInButton />
+            </Button>
+            <Button asChild>
+              <SignUpButton />
+            </Button>
+          </SignedOut>
+          <SignedIn>
+            <Button size="icon" asChild>
+              <UserButton />
+            </Button>
+          </SignedIn>
+        </div>
       </div>
     </nav>
   );

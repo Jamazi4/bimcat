@@ -1,4 +1,5 @@
 import { Separator } from "../ui/separator";
+import { Badge } from "../ui/badge";
 
 const PsetRow = ({
   name,
@@ -9,9 +10,11 @@ const PsetRow = ({
 }) => {
   return (
     <div className="mb-4">
-      <div className="flex justify-between p-2">
-        <p>{name}</p>
-        <p>{value}</p>
+      <div className="justify-between p-2">
+        <p className="mb-2">
+          <Badge>{name}</Badge>
+        </p>
+        <p className="text-right">{value}</p>
       </div>
       <Separator />
     </div>
