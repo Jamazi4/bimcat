@@ -34,12 +34,8 @@ const PsetAccordion = ({ psets }: { psets: psetType[] }) => {
                 {/* Edit button */}
                 <PsetDialog content={pset.content} title={pset.title} />
                 {/* Delete Button */}
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="place-items-end cursor-pointer "
-                >
-                  <X className=" " />
+                <Button variant="destructive" size="icon">
+                  <X />
                 </Button>
               </div>
             </AccordionContent>
