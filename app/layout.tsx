@@ -23,12 +23,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${roboto.className} antialiased`}>
+        <body className={`${roboto.className} antialiased p-0 m-0`}>
           <Providers>
             <Navbar />
-            <div className="px-4 max-w-[1120px] mx-auto justify-center">
-              {children}
-            </div>
+            <div className="max-w-[1120px] mx-auto">{children}</div>
           </Providers>
         </body>
       </html>

@@ -13,8 +13,8 @@ import { Button } from "../ui/button";
 
 const Navbar = () => {
   return (
-    <nav className="  px-4 pb-4 pt-6 border-b bg-secondary mb-12 ">
-      <div className="flex justify-between max-w-[1120px] mx-auto">
+    <nav className=" mx-auto px-4 py-4 border-b bg-secondary mb-12 ">
+      <div className="flex justify-between max-w-[1120px] mx-auto items-center">
         {/* LOGO */}
         <h1 className="font-black text-3xl text-primary-foreground">
           <Link href="/">
@@ -27,12 +27,12 @@ const Navbar = () => {
           </Link>
         </h1>
         {/* Navigation */}
-        <div>
+        <div className="flex items-center">
           <UploadDialog />
         </div>
         {/* Mode/account */}
 
-        <div className="flex gap-2 justify-center align-middle">
+        <div className="flex gap-2 justify-center items-center">
           <ModeToggle />
           <SignedOut>
             <Button asChild>
@@ -43,9 +43,9 @@ const Navbar = () => {
             </Button>
           </SignedOut>
           <SignedIn>
-            <Button size="icon" asChild>
+            <div className="flex items-center">
               <UserButton />
-            </Button>
+            </div>
           </SignedIn>
         </div>
       </div>

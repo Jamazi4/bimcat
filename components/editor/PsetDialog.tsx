@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { PsetContent } from "@/utils/types";
 import { Pencil } from "lucide-react";
+import { Badge } from "../ui/badge";
+import PsetEditInput from "./PsetEditInput";
 
 type PsetDialogMode = "edit" | "add";
 
@@ -53,8 +55,9 @@ function PsetDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          {content.map((row, index) => {
-            return <Row name={row.name} value={row.value} key={index} />;
+          {content.map((entry, index) => {
+            const [[name, value]] = Object.entries(entry);
+            return <Row name={name} value={value} key={index} />;
           })}
         </div>
         <DialogFooter>
@@ -67,13 +70,19 @@ function PsetDialog({
 
 export default PsetDialog;
 
-const Row = ({ name, value }: { name: string; value: string }) => {
+const Row = ({
+  name,
+  value,
+}: {
+  name: string;
+  value: string | boolean | number;
+}) => {
   return (
-    <div className="grid grid-cols-4 items-center gap-4">
-      <Label htmlFor="username" className="text-right">
-        {name}
+    <div className="items-center gap-4">
+      <Label htmlFor={name} className="mb-2">
+        <Badge>{name}</Badge>
       </Label>
-      <Input id="username" defaultValue={value} className="col-span-3" />
+      <PsetEditInput value={value} name={name} />
     </div>
   );
 };
