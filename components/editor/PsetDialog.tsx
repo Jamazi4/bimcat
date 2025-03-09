@@ -18,13 +18,12 @@ import {
 import { Label } from "@/components/ui/label";
 import type { PsetContent } from "@/utils/types";
 import { Pencil } from "lucide-react";
-import PsetEditInput from "./PsetEditInput";
 import { updatePsetsAction } from "@/utils/actions";
 import { useParams } from "next/navigation";
 import FormContainer from "../global/FormContainer";
 import { Plus } from "lucide-react";
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Input } from "../ui/input";
 
 function PsetDialog({
