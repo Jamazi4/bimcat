@@ -17,8 +17,10 @@ import { createComponentAction } from "@/utils/actions";
 
 import { useState } from "react";
 import { getIfcData } from "@/utils/ifcjs";
+import Form from "next/form";
 
 import type { ComponentGeometry, Pset } from "@/utils/types";
+import FormContainer from "./global/FormContainer";
 
 function UploadDialog() {
   const [file, setFile] = useState<File | null>(null);
@@ -60,7 +62,7 @@ function UploadDialog() {
             Choose an IFC file containing just one 3D object.
           </DialogDescription>
         </DialogHeader>
-        <form action={createComponentAction}>
+        <FormContainer action={createComponentAction}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
@@ -104,7 +106,7 @@ function UploadDialog() {
               Upload
             </Button>
           </DialogFooter>
-        </form>
+        </FormContainer>
       </DialogContent>
     </Dialog>
   );

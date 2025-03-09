@@ -32,11 +32,7 @@ const PsetAccordion = ({ psets }: { psets: psetType[] }) => {
               })}
               <div className="ml-auto space-x-4">
                 {/* Edit button */}
-                <PsetDialog
-                  mode="edit"
-                  content={pset.content}
-                  title={pset.title}
-                />
+                <PsetDialog content={pset.content} title={pset.title} />
                 {/* Delete Button */}
                 <Button
                   variant="destructive"

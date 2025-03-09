@@ -44,3 +44,9 @@ export const componentSchema = z.object({
 export type Component = z.infer<typeof componentSchema>;
 
 export const componentsArraySchema = z.array(componentSchema);
+
+export const editPsetSchema = z.object({
+  componentId: z.string().uuid(),
+  psetTitle: z.string(),
+  psets: z.record(z.union([z.string(), z.number(), z.boolean()])),
+});

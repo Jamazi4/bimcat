@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
-      <Toaster />
+      <Toaster closeButton />
       <ThemeProvider
         attribute="class"
         defaultTheme="system"

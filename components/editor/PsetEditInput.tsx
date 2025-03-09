@@ -1,3 +1,5 @@
+"use client";
+
 import { Input } from "../ui/input";
 import {
   Select,
@@ -6,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
 
 const PsetEditInput = ({
   value,
@@ -14,9 +17,16 @@ const PsetEditInput = ({
   value: number | string | boolean;
   name: string;
 }) => {
+  const [selectedValue, setSelectedValue] = useState(value.toString());
   if (typeof value === "boolean") {
     return (
-      <Select>
+      <Select
+        value={selectedValue}
+        onValueChange={(newVal) => {
+          setSelectedValue(newVal);
+        }}
+        name={name}
+      >
         <SelectTrigger className="w-full">
           <SelectValue
             defaultValue={value.toString()}
@@ -30,6 +40,8 @@ const PsetEditInput = ({
       </Select>
     );
   }
-  return <Input id={name} defaultValue={value} className="col-span-3" />;
+  return (
+    <Input id={name} name={name} defaultValue={value} className="col-span-3" />
+  );
 };
 export default PsetEditInput;

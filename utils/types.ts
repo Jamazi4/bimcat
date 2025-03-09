@@ -11,3 +11,8 @@ export type ComponentGeometry = {
   position: number[];
   indices: number[];
 };
+
+export type actionFunction = (
+  prevState: any,
+  formData: FormData
+) => Promise<{ message: string }>;
