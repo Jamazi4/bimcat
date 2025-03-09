@@ -17,7 +17,6 @@ import { createComponentAction } from "@/utils/actions";
 
 import { useState } from "react";
 import { getIfcData } from "@/utils/ifcjs";
-import Form from "next/form";
 
 import type { ComponentGeometry, Pset } from "@/utils/types";
 import FormContainer from "./global/FormContainer";

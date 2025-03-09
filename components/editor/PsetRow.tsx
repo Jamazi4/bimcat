@@ -1,5 +1,4 @@
 import { Separator } from "../ui/separator";
-import { Badge } from "../ui/badge";
 
 const PsetRow = ({
   name,
