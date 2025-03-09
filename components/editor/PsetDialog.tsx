@@ -39,18 +39,22 @@ function PsetDialog({
   const [curContent, setCurContent] = useState(content);
 
   const removePsetRow = (index: number) => {
-    const updatedContent = curContent.filter((el, i) => !(i === index));
-    setCurContent(updatedContent);
+    setCurContent((prevContent) => prevContent.filter((_, i) => i !== index));
   };
 
   const addPsetRow = ({ key, value }: { key: string; value: string }) => {
-    const updatedContent = [...curContent, { [key]: value }];
-    setCurContent(updatedContent);
+    if (!key) return;
+    setCurContent((prevContent) => [...prevContent, { [key]: value }]);
   };
 
-  useEffect(() => {
-    setCurContent(content);
-  }, [content]);
+  const updatePsetValue = (index: number, newValue: string) => {
+    setCurContent((prevContent) => {
+      const updatedContent = [...prevContent];
+      const key = Object.keys(updatedContent[index])[0];
+      updatedContent[index] = { [key]: newValue };
+      return updatedContent;
+    });
+  };
 
   return (
     <Dialog
@@ -78,7 +82,8 @@ function PsetDialog({
           <div className="grid gap-4 py-4">
             {/* Map over content */}
             {curContent.map((entry, index) => {
-              const [[name, value]] = Object.entries(entry);
+              const name = Object.keys(entry)[0];
+              const value = entry[name];
               return (
                 <div className="items-center gap-4" key={index}>
                   <Label htmlFor={name} className="mb-2">
@@ -86,7 +91,14 @@ function PsetDialog({
                   </Label>
                   <div className="flex gap-4">
                     {/* Custom inputs */}
-                    <PsetEditInput value={value} name={name} />
+                    <div className="flex-grow">
+                      <Input
+                        id={name}
+                        name={name}
+                        value={value}
+                        onChange={(e) => updatePsetValue(index, e.target.value)}
+                      />
+                    </div>
 
                     {/* Remove button */}
                     <Button

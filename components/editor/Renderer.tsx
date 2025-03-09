@@ -33,7 +33,7 @@ const Renderer = ({ id }: { id: string }) => {
   }, [geometry]);
 
   return (
-    <div className="bg-muted rounded border w-auto aspect-square">
+    <div className="bg-muted rounded border w-full aspect-square">
       <Canvas camera={{ position: [0, 1, 0] }}>
         <ambientLight intensity={2} />
         <pointLight
