@@ -13,13 +13,14 @@ export default async function Home() {
   return (
     <main className="grid grid-cols-2 gap-4 md:grid-cols-3">
       {validatedComponents?.map((component: Component) => {
-        const { id, name, createdAt } = component;
+        const { id, name, createdAt, updatedAt } = component;
         return (
           <ComponentMinature
             key={component.id}
             name={name}
             id={id}
             created={createdAt}
+            updated={updatedAt}
           />
         );
       })}

@@ -12,10 +12,12 @@ const ComponentMinature = ({
   id,
   name,
   created,
+  updated,
 }: {
   id: string;
   name: string;
   created: Date;
+  updated: Date;
 }) => {
   return (
     <Link className="text-xl text-primary" href={`/components/${id}`}>
@@ -25,7 +27,10 @@ const ComponentMinature = ({
         </CardHeader>
         <CardContent></CardContent>
         <CardFooter className="text-sm text-secondary-foreground">
-          Created: {format(created, "dd-MM-yy HH:mm")}
+          <div>
+            <p>Created: {format(created, "dd-MM-yy HH:mm")}</p>
+            <p>Updated: {format(updated, "dd-MM-yy HH:mm")}</p>
+          </div>
         </CardFooter>{" "}
       </Card>
     </Link>
