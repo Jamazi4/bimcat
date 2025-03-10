@@ -79,7 +79,7 @@
   .dark {
     --background: hsl(240, 2%, 9%);
     --foreground: hsl(230, 7%, 82%);
-    --muted: hsl(240, 3%, 18%);
+    --muted: hsl(240, 5%, 12%);
     --muted-foreground: hsl(240, 3%, 53%);
     --popover: hsl(240, 5%, 13%);
     --popover-foreground: hsl(235, 5%, 55%);

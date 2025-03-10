@@ -13,14 +13,12 @@ const ComponentCard = async ({
   const component = await fetchSingleComponentAction(resolved.id);
 
   return (
-    <div className=" justify-center flex flex-col px-4 mx-auto  ">
+    <div className=" justify-center flex flex-col px-4 mx-auto">
       <Title text={component ? component.name : "loading..."} />
-      <div className="justify-center grid lg:grid-cols-6 gap-4 ">
+      <div className="justify-center grid grid-cols-1 lg:grid-cols-6 gap-4 sm:w-2/3 sm:mx-auto lg:w-full mx-auto">
         <div className="lg:col-span-4">
           {component ? (
-            <div>
-              <Renderer id={component ? component.geomId : ""} />
-            </div>
+            <Renderer id={component ? component.geomId : ""} />
           ) : (
             <div>Please wait...</div>
           )}

@@ -34,7 +34,7 @@ const Renderer = ({ id }: { id: string }) => {
 
   return (
     <div className="bg-muted rounded border w-full aspect-square">
-      <Canvas camera={{ position: [0, 1, 0] }}>
+      <Canvas camera={{ position: [0, 1, 0] }} className="w-full">
         <ambientLight intensity={2} />
         <pointLight
           position={[-10, 10, -10]}
