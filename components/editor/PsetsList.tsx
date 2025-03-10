@@ -9,7 +9,7 @@ function PsetsList({ psets }: { psets: Pset[] }) {
     <>
       <PsetAccordion psets={psets} />
       {/* Add button */}
-      <Button className="w-full cursor-pointer mt-4">
+      <Button className="w-full cursor-pointer mt-4 mb-4">
         <Plus />
       </Button>
     </>

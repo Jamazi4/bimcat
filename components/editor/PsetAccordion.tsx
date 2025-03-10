@@ -1,14 +1,13 @@
 import type { Pset as psetType } from "@/utils/schemas";
 import PsetRow from "./PsetRow";
 import PsetDialog from "./PsetDialog";
-import { Button } from "../ui/button";
-import { X } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import RemovePsetButton from "./RemovePsetButton";
 
 const PsetAccordion = ({ psets }: { psets: psetType[] }) => {
   return (
@@ -34,9 +33,7 @@ const PsetAccordion = ({ psets }: { psets: psetType[] }) => {
                 {/* Edit button */}
                 <PsetDialog content={pset.content} title={pset.title} />
                 {/* Delete Button */}
-                <Button variant="destructive" size="icon">
-                  <X />
-                </Button>
+                <RemovePsetButton title={pset.title} />
               </div>
             </AccordionContent>
           </AccordionItem>

@@ -19,6 +19,11 @@ const renderError = (error: unknown): { message: string } => {
   };
 };
 
+const getAuthUser = async () => {
+  const user = await currentUser();
+  if (!user) redirect("/");
+};
+
 export const createComponentAction = async (
   prevState: any,
   formData: FormData
@@ -32,7 +37,6 @@ export const createComponentAction = async (
 
   if (!geometryResponse) throw new Error("Error processing geometry.");
 
-  let componentId: string;
   try {
     const response = await prisma.component.create({
       data: {
@@ -41,7 +45,6 @@ export const createComponentAction = async (
         psets: parsedPsets,
       },
     });
-    componentId = response.id;
     revalidatePath(`/components`);
     return { message: `Component ${name} created succesfully!` };
   } catch (error) {
@@ -113,11 +116,7 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
   );
 
   try {
-    const component = await prisma.component.findUnique({
-      where: {
-        id: componentId,
-      },
-    });
+    const component = await fetchSingleComponentAction(componentId);
 
     const validatedComponent = validateWithZodSchema(
       componentSchema,
@@ -136,8 +135,6 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
       return pset;
     });
 
-    console.log(newPsets);
-    console.log(validatedComponent.psets);
     await prisma.component.update({
       where: {
         id: componentId,
@@ -153,9 +150,36 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
   }
 };
 
-const getAuthUser = async () => {
-  const user = await currentUser();
-  if (!user) redirect("/");
+export const removePsetAction = async (prevState: any, formData: FormData) => {
+  const componentId = formData.get("componentId") as string;
+  const psetTitle = formData.get("psetTitle") as string;
+
+  try {
+    const component = await fetchSingleComponentAction(componentId);
+    const validatedComponent = validateWithZodSchema(
+      componentSchema,
+      component
+    );
+
+    const newPsets: Pset[] = validatedComponent.psets.filter(
+      (pset) => pset.title !== psetTitle
+    );
+
+    await prisma.component.update({
+      where: {
+        id: componentId,
+      },
+      data: {
+        psets: newPsets,
+      },
+    });
+
+    revalidatePath(`/components/${componentId}`);
+  } catch (error) {
+    return renderError(error);
+  }
+
+  return { message: "Succesfully removed pset" };
 };
 
 export const writeDb = async (formData: FormData) => {

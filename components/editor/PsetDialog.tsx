@@ -69,6 +69,7 @@ function PsetDialog({
       <DialogContent className="sm:max-w-[425px] overflow-y-scroll max-h-screen">
         <FormContainer action={updatePsetsAction}>
           {/* Metadata for backend queries */}
+
           <input type="hidden" value={id} name="componentId" />
           <input type="hidden" value={title} name="psetTitle" />
           <DialogHeader>
@@ -80,6 +81,7 @@ function PsetDialog({
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {/* Map over content */}
+
             {curContent.map((entry, index) => {
               const name = Object.keys(entry)[0];
               const value = entry[name];
@@ -89,7 +91,8 @@ function PsetDialog({
                     <p className="text-sm text-secondary-foreground">{name}</p>
                   </Label>
                   <div className="flex gap-4">
-                    {/* Custom inputs */}
+                    {/* Inputs */}
+
                     <div className="flex-grow">
                       <Input
                         id={name}
@@ -116,6 +119,7 @@ function PsetDialog({
               );
             })}
             {/* Add row */}
+
             <AddRow updateFunction={addPsetRow} />
           </div>
           <DialogFooter>
