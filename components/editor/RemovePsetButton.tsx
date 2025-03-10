@@ -14,6 +14,8 @@ import { X } from "lucide-react";
 import FormContainer from "../global/FormContainer";
 import { removePsetAction } from "@/utils/actions";
 import { useParams } from "next/navigation";
+import { useFormStatus } from "react-dom";
+import { AiOutlineReload } from "react-icons/ai";
 
 const RemovePsetButton = ({ title }: { title: string }) => {
   const { id } = useParams();
@@ -40,7 +42,7 @@ const RemovePsetButton = ({ title }: { title: string }) => {
           <FormContainer action={removePsetAction}>
             <input type="hidden" value={id} name="componentId" />
             <input type="hidden" value={title} name="psetTitle" />
-            <Button type="submit">OK</Button>
+            <SubmitButton />
           </FormContainer>
         </DialogFooter>
       </DialogContent>
@@ -48,3 +50,12 @@ const RemovePsetButton = ({ title }: { title: string }) => {
   );
 };
 export default RemovePsetButton;
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending} className="w-30">
+      {pending ? <AiOutlineReload className="animate-spin" /> : "OK"}
+    </Button>
+  );
+}

@@ -121,7 +121,7 @@ export default UploadDialog;
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
+    <Button type="submit" disabled={pending} className="w-30">
       {pending ? <AiOutlineReload className="animate-spin" /> : "Upload"}
     </Button>
   );
