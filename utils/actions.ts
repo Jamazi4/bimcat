@@ -175,11 +175,10 @@ export const removePsetAction = async (prevState: any, formData: FormData) => {
     });
 
     revalidatePath(`/components/${componentId}`);
+    return { message: `successfully removed ${psetTitle}` };
   } catch (error) {
     return renderError(error);
   }
-
-  return { message: `successfully removed ${psetTitle}` };
 };
 
 export const addPsetAction = async (prevState: any, formData: FormData) => {

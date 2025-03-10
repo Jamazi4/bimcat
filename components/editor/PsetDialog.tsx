@@ -25,6 +25,8 @@ import { Plus } from "lucide-react";
 import { X } from "lucide-react";
 import { useState } from "react";
 import { Input } from "../ui/input";
+import { useFormStatus } from "react-dom";
+import { AiOutlineReload } from "react-icons/ai";
 
 function PsetDialog({
   content,
@@ -36,6 +38,7 @@ function PsetDialog({
   const { id } = useParams();
 
   const [curContent, setCurContent] = useState(content);
+  const [open, setOpen] = useState(false);
 
   const removePsetRow = (index: number) => {
     setCurContent((prevContent) => prevContent.filter((_, i) => i !== index));
@@ -57,7 +60,9 @@ function PsetDialog({
 
   return (
     <Dialog
-      onOpenChange={() => {
+      open={open}
+      onOpenChange={(newState) => {
+        setOpen(newState);
         setCurContent(content);
       }}
     >
@@ -67,7 +72,10 @@ function PsetDialog({
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] overflow-y-scroll max-h-screen">
-        <FormContainer action={updatePsetsAction}>
+        <FormContainer
+          action={updatePsetsAction}
+          onSuccess={() => setOpen(false)}
+        >
           {/* Metadata for backend queries */}
 
           <input type="hidden" value={id} name="componentId" />
@@ -123,7 +131,7 @@ function PsetDialog({
             <AddRow updateFunction={addPsetRow} />
           </div>
           <DialogFooter>
-            <Button type="submit">Save changes</Button>
+            <SubmitButton />
           </DialogFooter>
         </FormContainer>
       </DialogContent>
@@ -133,6 +141,15 @@ function PsetDialog({
 
 export default PsetDialog;
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending} className="w-30">
+      {pending ? <AiOutlineReload className="animate-spin" /> : "Save Changes"}
+    </Button>
+  );
+}
+
 const AddRow = ({
   updateFunction,
 }: {
@@ -140,8 +157,9 @@ const AddRow = ({
 }) => {
   const [curKey, setCurKey] = useState("");
   const [curValue, setCurValue] = useState("");
+  const [open, setOpen] = useState(false);
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="flex w-full bg-primary text-primary-foreground justify-center p-2 rounded-sm cursor-pointer hover:brightness-90">
         <Plus size={15} />
       </PopoverTrigger>
@@ -170,6 +188,7 @@ const AddRow = ({
             updateFunction({ key: curKey, value: curValue });
             setCurKey("");
             setCurValue("");
+            setOpen(false);
           }}
         >
           Add

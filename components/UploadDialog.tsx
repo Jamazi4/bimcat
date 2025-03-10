@@ -20,11 +20,14 @@ import { getIfcData } from "@/utils/ifcjs";
 
 import type { ComponentGeometry, Pset } from "@/utils/types";
 import FormContainer from "./global/FormContainer";
+import { useFormStatus } from "react-dom";
+import { AiOutlineReload } from "react-icons/ai";
 
 function UploadDialog() {
   const [file, setFile] = useState<File | null>(null);
   const [geometry, setGeometry] = useState<ComponentGeometry | null>(null);
   const [psets, setPsets] = useState<Pset[] | null>(null);
+  const [open, setOpen] = useState(false);
 
   async function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = event.target.files?.[0];
@@ -48,7 +51,7 @@ function UploadDialog() {
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="icon" variant="ghost" asChild>
           <FileUp className="p-2 text-primary-foreground" />
@@ -61,7 +64,12 @@ function UploadDialog() {
             Choose an IFC file containing just one 3D object.
           </DialogDescription>
         </DialogHeader>
-        <FormContainer action={createComponentAction}>
+        <FormContainer
+          action={createComponentAction}
+          onSuccess={() => {
+            setOpen(false);
+          }}
+        >
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
@@ -101,9 +109,7 @@ function UploadDialog() {
             )}
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={!geometry}>
-              Upload
-            </Button>
+            <SubmitButton />
           </DialogFooter>
         </FormContainer>
       </DialogContent>
@@ -111,3 +117,12 @@ function UploadDialog() {
   );
 }
 export default UploadDialog;
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? <AiOutlineReload className="animate-spin" /> : "Upload"}
+    </Button>
+  );
+}

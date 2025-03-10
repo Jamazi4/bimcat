@@ -13,6 +13,7 @@ import { addPsetAction } from "@/utils/actions";
 import FormContainer from "../global/FormContainer";
 import { useFormStatus } from "react-dom";
 import { useState } from "react";
+import { AiOutlineReload } from "react-icons/ai";
 
 const AddPsetButton = () => {
   const { id } = useParams() || "";
@@ -30,6 +31,7 @@ const AddPsetButton = () => {
             setOpen(false);
           }}
         >
+          <p>Creating new Pset, please enter name:</p>
           <div className="flex gap-2 mb-4 mt-4">
             <Input name="psetTitle" required={true} placeholder="Pset name" />
             <input type="hidden" name="componentId" value={id} />
@@ -47,7 +49,7 @@ function SubmitButton() {
 
   return (
     <Button type="submit" className="w-full" disabled={pending}>
-      Add
+      {pending ? <AiOutlineReload className="animate-spin" /> : "Add"}
     </Button>
   );
 }
