@@ -46,7 +46,7 @@ export const createComponentAction = async (
       },
     });
     revalidatePath(`/components`);
-    return { message: `Component ${name} created succesfully!` };
+    return { message: `Component ${name} created successfully!` };
   } catch (error) {
     return renderError(error);
   }
@@ -144,7 +144,7 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
       },
     });
     revalidatePath(`/components/${componentId}`);
-    return { message: `${psetTitle} updated succesfully!` };
+    return { message: `${psetTitle} updated successfully!` };
   } catch (error) {
     return renderError(error);
   }
@@ -179,7 +179,40 @@ export const removePsetAction = async (prevState: any, formData: FormData) => {
     return renderError(error);
   }
 
-  return { message: "Succesfully removed pset" };
+  return { message: `successfully removed ${psetTitle}` };
+};
+
+export const addPsetAction = async (prevState: any, formData: FormData) => {
+  const componentId = formData.get("componentId") as string;
+  const psetTitle = formData.get("psetTitle") as string;
+
+  try {
+    const component = await fetchSingleComponentAction(componentId);
+    const validatedComponent = validateWithZodSchema(
+      componentSchema,
+      component
+    );
+
+    const newPsets: Pset[] = [
+      ...validatedComponent.psets,
+      { title: psetTitle, content: [] },
+    ];
+
+    await prisma.component.update({
+      where: {
+        id: componentId,
+      },
+      data: {
+        psets: newPsets,
+      },
+    });
+    revalidatePath(`/components/${componentId}`);
+    return {
+      message: `Pset ${psetTitle} successfully added to ${validatedComponent.name}.`,
+    };
+  } catch (error) {
+    return renderError(error);
+  }
 };
 
 export const writeDb = async (formData: FormData) => {
