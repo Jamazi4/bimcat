@@ -1,3 +1,4 @@
+import DownloadIfcButton from "../editor/DownloadIfcButton";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { DownloadIcon, Star } from "lucide-react";
@@ -9,9 +10,7 @@ const Title = ({ text }: { text: string }) => {
         <h1 className="font-bold text-xl text-primary">{text}</h1>
         {/* Title buttons */}
         <div className="space-x-4">
-          <Button size="icon" variant="ghost" className="cursor-pointer">
-            <DownloadIcon />
-          </Button>
+          <DownloadIfcButton />
           <Button size="icon" variant="ghost" className="cursor-pointer">
             <Star />
           </Button>
