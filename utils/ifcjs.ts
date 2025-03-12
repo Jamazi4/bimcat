@@ -104,10 +104,13 @@ export const getIfcData = async (file: File) => {
   return { geometry, psets };
 };
 
-export const downloadIfcFile = async (geometry?: ComponentGeometry) => {
+export const downloadIfcFile = async (
+  geometry?: ComponentGeometry,
+  psets?: Pset[]
+) => {
   if (!geometry) throw new Error("Could not get the object geometry");
+  if (!psets) throw new Error("Could not get the object psets");
 
-  console.log(geometry);
   const ifcApi = new WEBIFC.IfcAPI();
   ifcApi.SetWasmPath("/web-ifc/");
   await ifcApi.Init();
@@ -115,7 +118,7 @@ export const downloadIfcFile = async (geometry?: ComponentGeometry) => {
   const newIfcModel: WEBIFC.NewIfcModel = {
     schema: WEBIFC.Schemas.IFC4,
     name: "Model",
-    description: ["demo ifc model"],
+    description: ["ViewDefinition [IFC4Precast]"],
     authors: ["Jakub Zimnoch"],
     organizations: [""],
     authorization: "None",
@@ -314,8 +317,49 @@ export const downloadIfcFile = async (geometry?: ComponentGeometry) => {
   ifcApi.WriteLine(modelId, relContainedInSpatialStructure);
   ifcApi.WriteLine(modelId, proj);
   ifcApi.WriteLine(modelId, relAggregates);
-
   ifcApi.WriteLine(modelId, buildingElementProxy);
+
+  //PSETS
+
+  psets.forEach((pset) => {
+    const { title, content } = pset;
+    if (content.length === 0) return;
+
+    const propertiesArray: WEBIFC.IFC4.IfcPropertySingleValue[] = [];
+
+    content.forEach((entry) => {
+      Object.entries(entry).forEach(([key, value]) => {
+        const propertySingleValue = new WEBIFC.IFC4.IfcPropertySingleValue(
+          new WEBIFC.IFC4.IfcIdentifier(key),
+          null,
+          new WEBIFC.IFC4.IfcIdentifier(value),
+          null
+        );
+        ifcApi.WriteLine(modelId, propertySingleValue);
+        propertiesArray.push(propertySingleValue);
+      });
+    });
+
+    const propertySet = new WEBIFC.IFC4.IfcPropertySet(
+      new WEBIFC.IFC4.IfcGloballyUniqueId(createGuid()),
+      null,
+      new WEBIFC.IFC4.IfcIdentifier(title),
+      null,
+      propertiesArray
+    );
+
+    ifcApi.WriteLine(modelId, propertySet);
+
+    const relDefinesByProperties = new WEBIFC.IFC4.IfcRelDefinesByProperties(
+      new WEBIFC.IFC4.IfcGloballyUniqueId(createGuid()),
+      null,
+      null,
+      null,
+      [buildingElementProxy],
+      propertySet
+    );
+    ifcApi.WriteLine(modelId, relDefinesByProperties);
+  });
 
   const bin = ifcApi.SaveModel(modelId);
 

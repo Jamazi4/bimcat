@@ -12,9 +12,9 @@ const DownloadIfcButton = () => {
   const { id } = params;
   const handleDownload = async () => {
     const component = await fetchSingleComponentAction(id);
-    const { geomId } = component;
+    const { geomId, psets } = component;
     const geometry = await fetchGeometryAction(geomId);
-    await downloadIfcFile(geometry);
+    await downloadIfcFile(geometry, psets);
   };
 
   return (
