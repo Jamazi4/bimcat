@@ -2,7 +2,8 @@ import * as OBC from "@thatopen/components";
 import { FragmentMesh, FragmentsGroup } from "@thatopen/fragments";
 import * as WEBIFC from "web-ifc";
 import { Pset } from "./types";
-import { v4 as uuidv4 } from "uuid";
+import { type ComponentGeometry } from "./types";
+import { createGuid } from "./createGuid";
 
 /**
  * Create instances of thatOpen components classes
@@ -79,7 +80,7 @@ export const getIfcPsets = async (
  * Returns vertices and faces of the first mesh in the file in three
  * BufferGeometry format as number[]
  *
- * @param file
+ * @param model
  * @returns {position: number[], indices: number[]}
  */
 export const getIfcGeometry = async (model: FragmentsGroup) => {
@@ -103,81 +104,95 @@ export const getIfcData = async (file: File) => {
   return { geometry, psets };
 };
 
-export const downloadIfcFile = async () => {
+export const downloadIfcFile = async (geometry?: ComponentGeometry) => {
+  if (!geometry) throw new Error("Could not get the object geometry");
+
+  console.log(geometry);
   const ifcApi = new WEBIFC.IfcAPI();
   ifcApi.SetWasmPath("/web-ifc/");
   await ifcApi.Init();
 
   const newIfcModel: WEBIFC.NewIfcModel = {
-    schema: WEBIFC.Schemas.IFC4X3,
+    schema: WEBIFC.Schemas.IFC4,
     name: "Model",
     description: ["demo ifc model"],
     authors: ["Jakub Zimnoch"],
-    organizations: [],
+    organizations: [""],
+    authorization: "None",
   };
 
   const modelId = ifcApi.CreateModel(newIfcModel);
 
-  // IfcOrganization
-  const org = new WEBIFC.IFC4X3.IfcOrganization(
-    null,
-    new WEBIFC.IFC4X3.IfcLabel("Jakub"),
-    null,
-    null,
-    null
-  );
+  // // IfcOrganization
+  // const org = new WEBIFC.IFC4.IfcOrganization(
+  //   null,
+  //   new WEBIFC.IFC4.IfcLabel("Jakub"),
+  //   null,
+  //   null,
+  //   null
+  // );
 
-  // IfcApplication
-  const app = new WEBIFC.IFC4X3.IfcApplication(
-    org,
-    new WEBIFC.IFC4X3.IfcLabel("0.0.1"),
-    new WEBIFC.IFC4X3.IfcLabel("BIMCat"),
-    new WEBIFC.IFC4X3.IfcLabel("app")
-  );
+  // // IfcApplication
+  // const app = new WEBIFC.IFC4.IfcApplication(
+  //   org,
+  //   new WEBIFC.IFC4.IfcLabel("0.0.1"),
+  //   new WEBIFC.IFC4.IfcLabel("BIMCat"),
+  //   new WEBIFC.IFC4.IfcLabel("app")
+  // );
 
   // Units
   // prettier-ignore
-  const cubicMetre = new WEBIFC.IFC4X3.IfcSIUnit(
-    WEBIFC.IFC4X3.IfcUnitEnum.VOLUMEUNIT,
-    WEBIFC.IFC4X3.IfcSIPrefix.MILLI,
-    WEBIFC.IFC4X3.IfcSIUnitName.CUBIC_METRE
+  const cubicMetre = new WEBIFC.IFC4.IfcSIUnit(
+    WEBIFC.IFC4.IfcUnitEnum.LENGTHUNIT,
+    WEBIFC.IFC4.IfcSIPrefix.MILLI,
+    WEBIFC.IFC4.IfcSIUnitName.METRE
   );
 
-  const unitAssignment = new WEBIFC.IFC4X3.IfcUnitAssignment([cubicMetre]);
+  const unitAssignment = new WEBIFC.IFC4.IfcUnitAssignment([cubicMetre]);
 
   // Geometrical representation
   const originCoords = [
-    new WEBIFC.IFC4X3.IfcLengthMeasure(0),
-    new WEBIFC.IFC4X3.IfcLengthMeasure(0),
-    new WEBIFC.IFC4X3.IfcLengthMeasure(0),
+    new WEBIFC.IFC4.IfcLengthMeasure(0.0),
+    new WEBIFC.IFC4.IfcLengthMeasure(0.0),
+    new WEBIFC.IFC4.IfcLengthMeasure(0.0),
   ];
 
-  const cartPoint = new WEBIFC.IFC4X3.IfcCartesianPoint(originCoords);
+  const cartPoint = new WEBIFC.IFC4.IfcCartesianPoint(originCoords);
 
-  const dirCoords = [
-    new WEBIFC.IFC4X3.IfcLengthMeasure(0),
-    new WEBIFC.IFC4X3.IfcLengthMeasure(0),
-    new WEBIFC.IFC4X3.IfcLengthMeasure(1),
-  ];
+  // const dirCoords = [
+  //   new WEBIFC.IFC4.IfcLengthMeasure(0.0),
+  //   new WEBIFC.IFC4.IfcLengthMeasure(0.0),
+  //   new WEBIFC.IFC4.IfcLengthMeasure(1.0),
+  // ];
 
-  const dir = new WEBIFC.IFC4X3.IfcDirection(dirCoords);
+  // const dir = new WEBIFC.IFC4.IfcDirection(dirCoords);
 
-  const axis = new WEBIFC.IFC4X3.IfcAxis2Placement2D(cartPoint, dir); //maybe 3d?
+  const axis = new WEBIFC.IFC4.IfcAxis2Placement3D(cartPoint, null, null);
 
-  const geomContext = new WEBIFC.IFC4X3.IfcGeometricRepresentationContext(
-    new WEBIFC.IFC4X3.IfcLabel("3D context"),
-    new WEBIFC.IFC4X3.IfcLabel("Model"),
-    new WEBIFC.IFC4X3.IfcDimensionCount(3),
+  const geomContext = new WEBIFC.IFC4.IfcGeometricRepresentationContext(
+    new WEBIFC.IFC4.IfcLabel("3D context"),
+    new WEBIFC.IFC4.IfcLabel("Model"),
+    new WEBIFC.IFC4.IfcDimensionCount(3),
     null,
     axis,
-    dir
+    null
   );
 
-  const proj = new WEBIFC.IFC4X3.IfcProject(
-    new WEBIFC.IFC4X3.IfcGloballyUniqueId(uuidv4()), //ref tutorial
+  // prettier-ignore
+  const geomSubcontext = new WEBIFC.IFC4.IfcGeometricRepresentationSubContext(
+    new WEBIFC.IFC4.IfcLabel("Body"),
+    new WEBIFC.IFC4.IfcLabel("Model"),
+    geomContext,
     null,
-    new WEBIFC.IFC4X3.IfcLabel("project"),
-    new WEBIFC.IFC4X3.IfcLabel("project desc"),
+    WEBIFC.IFC4.IfcGeometricProjectionEnum.MODEL_VIEW,
+    null
+  );
+
+  const proj = new WEBIFC.IFC4.IfcProject(
+    new WEBIFC.IFC4.IfcGloballyUniqueId(createGuid()),
+    null,
+    new WEBIFC.IFC4.IfcLabel("project"),
+    new WEBIFC.IFC4.IfcLabel("project desc"),
     null,
     null,
     null,
@@ -185,50 +200,68 @@ export const downloadIfcFile = async () => {
     unitAssignment
   );
 
-  //TODO buidling, relcontainedinspatialstructure, relaggregates
+  const convertedVertices: WEBIFC.IFC4.IfcLengthMeasure[][] = [];
+  let curVert: WEBIFC.IFC4.IfcLengthMeasure[] = [];
+  geometry.position.forEach((val, index) => {
+    const lengthMeasue = new WEBIFC.IFC4.IfcLengthMeasure(val);
+    curVert.push(lengthMeasue);
+    if ((index + 1) % 3 === 0) {
+      convertedVertices.push(curVert);
+      curVert = [];
+    }
+  });
 
-  /*
-  const cartesianPointList = new WEBIFC.IFC4X3.IfcCartesianPointList3D(
-    [[new WEBIFC.IFC4X3.IfcLengthMeasure()]], // verts here
-    null
+  const cartesianPointList = new WEBIFC.IFC4.IfcCartesianPointList3D(
+    convertedVertices // verts here
   );
 
-  const triangulatedFaceset = new WEBIFC.IFC4X3.IfcTriangulatedFaceSet(
+  const convertedFaces: WEBIFC.IFC4.IfcPositiveInteger[][] = [];
+  let curFace: WEBIFC.IFC4.IfcPositiveInteger[] = [];
+  geometry.indices.forEach((val, index) => {
+    const positiveInteger = new WEBIFC.IFC4.IfcPositiveInteger(val + 1);
+    curFace.push(positiveInteger);
+    if ((index + 1) % 3 === 0) {
+      convertedFaces.push(curFace);
+      curFace = [];
+    }
+  });
+
+  const triangulatedFaceset = new WEBIFC.IFC4.IfcTriangulatedFaceSet(
     cartesianPointList,
-    new WEBIFC.IFC4X3.IfcBoolean(true),
     null,
-    [[new WEBIFC.IFC4X3.IfcPositiveInteger()]], // faces here
+    new WEBIFC.IFC4.IfcBoolean(true),
+    convertedFaces, // faces here
     null
   );
 
-  const shapeRepresentation = new WEBIFC.IFC4X3.IfcShapeRepresentation(
-    geomContext,
-    new WEBIFC.IFC4X3.IfcLabel("Body"),
-    new WEBIFC.IFC4X3.IfcLabel("Tesselation"),
+  const shapeRepresentation = new WEBIFC.IFC4.IfcShapeRepresentation(
+    geomSubcontext,
+    new WEBIFC.IFC4.IfcLabel("Body"),
+    new WEBIFC.IFC4.IfcLabel("Tessellation"),
     [triangulatedFaceset]
   );
 
-  const axis2Placement3d = new WEBIFC.IFC4X3.IfcAxis2Placement3D(
+  const axis2Placement3d = new WEBIFC.IFC4.IfcAxis2Placement3D(
     cartPoint,
     null,
     null
   );
 
-  const localPlacement = new WEBIFC.IFC4X3.IfcLocalPlacement(
+  const localPlacement = new WEBIFC.IFC4.IfcLocalPlacement(
     null,
     axis2Placement3d
   );
 
-  const productDefinitionShape = new WEBIFC.IFC4X3.IfcProductDefinitionShape(
+  const productDefinitionShape = new WEBIFC.IFC4.IfcProductDefinitionShape(
     null,
     null,
     [shapeRepresentation]
   );
 
-  const buildingElementProxy = new WEBIFC.IFC4X3.IfcBuildingElementProxy(
-    new WEBIFC.IFC4X3.IfcGloballyUniqueId(uuidv4()),
+  const buildingElementProxy = new WEBIFC.IFC4.IfcBuildingElementProxy(
+    new WEBIFC.IFC4.IfcGloballyUniqueId(createGuid()),
     null,
-    null,
+    new WEBIFC.IFC4.IfcLabel("Component"),
     null,
     null,
     localPlacement,
@@ -236,15 +269,53 @@ export const downloadIfcFile = async () => {
     null,
     null
   );
-  */
 
-  ifcApi.WriteLine(modelId, org);
-  ifcApi.WriteLine(modelId, app);
+  const building = new WEBIFC.IFC4.IfcBuilding(
+    new WEBIFC.IFC4.IfcGloballyUniqueId(createGuid()),
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  );
+
+  const relContainedInSpatialStructure =
+    new WEBIFC.IFC4.IfcRelContainedInSpatialStructure(
+      new WEBIFC.IFC4.IfcGloballyUniqueId(createGuid()),
+      null,
+      null,
+      null,
+      [buildingElementProxy],
+      building
+    );
+
+  const relAggregates = new WEBIFC.IFC4.IfcRelAggregates(
+    new WEBIFC.IFC4.IfcGloballyUniqueId(createGuid()),
+    null,
+    null,
+    null,
+    proj,
+    [building]
+  );
+
+  // ifcApi.WriteLine(modelId, org);
+  // ifcApi.WriteLine(modelId, app);
   ifcApi.WriteLine(modelId, unitAssignment);
   ifcApi.WriteLine(modelId, cartPoint);
-  ifcApi.WriteLine(modelId, dir);
+  // ifcApi.WriteLine(modelId, dir);
   ifcApi.WriteLine(modelId, geomContext);
+  ifcApi.WriteLine(modelId, building);
+  ifcApi.WriteLine(modelId, relContainedInSpatialStructure);
   ifcApi.WriteLine(modelId, proj);
+  ifcApi.WriteLine(modelId, relAggregates);
+
+  ifcApi.WriteLine(modelId, buildingElementProxy);
 
   const bin = ifcApi.SaveModel(modelId);
 

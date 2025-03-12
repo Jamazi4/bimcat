@@ -3,10 +3,18 @@
 import { DownloadIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { downloadIfcFile } from "@/utils/ifcjs";
+import { useParams } from "next/navigation";
+import { fetchSingleComponentAction } from "@/utils/actions";
+import { fetchGeometryAction } from "@/utils/actions";
 
 const DownloadIfcButton = () => {
+  const params = useParams<{ id: string }>();
+  const { id } = params;
   const handleDownload = async () => {
-    await downloadIfcFile();
+    const component = await fetchSingleComponentAction(id);
+    const { geomId } = component;
+    const geometry = await fetchGeometryAction(geomId);
+    await downloadIfcFile(geometry);
   };
 
   return (
