@@ -1,7 +1,7 @@
 import DownloadIfcButton from "../editor/DownloadIfcButton";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
-import { DownloadIcon, Star } from "lucide-react";
+import { Star } from "lucide-react";
 
 const Title = ({ text }: { text: string }) => {
   return (
