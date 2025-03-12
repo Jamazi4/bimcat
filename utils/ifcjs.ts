@@ -112,7 +112,7 @@ export const downloadIfcFile = async (
   if (!psets) throw new Error("Could not get the object psets");
 
   const ifcApi = new WEBIFC.IfcAPI();
-  ifcApi.SetWasmPath("/web-ifc/");
+  ifcApi.SetWasmPath("https://unpkg.com/web-ifc@0.0.66/", true);
   await ifcApi.Init();
 
   const newIfcModel: WEBIFC.NewIfcModel = {
