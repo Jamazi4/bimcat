@@ -13,7 +13,7 @@ const ComponentCard = async ({
   const component = await fetchSingleComponentAction(resolved.id);
 
   return (
-    <div className=" justify-center flex flex-col px-4 mx-auto">
+    <div>
       <Title text={component ? component.name : "loading..."} />
       <div className="justify-center grid grid-cols-1 lg:grid-cols-6 gap-4 sm:w-2/3 sm:mx-auto lg:w-full mx-auto">
         <div className="lg:col-span-4">

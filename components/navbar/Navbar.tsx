@@ -10,10 +10,11 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import { Button } from "../ui/button";
+import { Cuboid } from "lucide-react";
 
 const Navbar = () => {
   return (
-    <nav className=" mx-auto px-4 py-4 border-b bg-secondary mb-12 ">
+    <nav className=" mx-auto px-4 py-4 border-b bg-secondary h-[72px]">
       <div className="flex justify-between max-w-[1024px] mx-auto items-center">
         {/* LOGO */}
         <h1 className="font-black text-3xl text-primary-foreground">
@@ -29,6 +30,11 @@ const Navbar = () => {
         {/* Navigation */}
         <div className="flex items-center">
           <UploadDialog />
+          <Button asChild>
+            <Link href="/componentPicker">
+              <Cuboid />
+            </Link>
+          </Button>
         </div>
         {/* Mode/account */}
 

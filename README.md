@@ -6,8 +6,3 @@
 4. [Ifc Validation Service](https://validate.buildingsmart.org/)
 5. [Open IFC Model Database](https://openifcmodel.cs.auckland.ac.nz/)
 
-https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/IfcPropertySingleValue.htm
-
-https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/IfcSimpleValue.htm
-
-also quantities
