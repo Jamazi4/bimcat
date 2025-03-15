@@ -16,7 +16,7 @@ import { FileUp } from "lucide-react";
 import { createComponentAction } from "@/utils/actions";
 
 import { useState } from "react";
-import { getIfcData } from "@/utils/ifcjs";
+import { getIfcData } from "@/utils/ifc/ifcjs";
 
 import type { ComponentGeometry, Pset } from "@/utils/types";
 import FormContainer from "./global/FormContainer";

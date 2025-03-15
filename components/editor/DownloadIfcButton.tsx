@@ -2,7 +2,7 @@
 
 import { DownloadIcon } from "lucide-react";
 import { Button } from "../ui/button";
-import { downloadIfcFile } from "@/utils/ifcjs";
+import { downloadIfcFile } from "@/utils/ifc/ifcFileBuilder";
 import { useParams } from "next/navigation";
 import { fetchSingleComponentAction } from "@/utils/actions";
 import { fetchGeometryAction } from "@/utils/actions";

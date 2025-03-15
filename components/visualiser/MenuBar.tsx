@@ -13,16 +13,21 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import FileUpload from "./FileUpload";
+import { Dispatch, SetStateAction } from "react";
 
-const MenuBar = () => {
+const MenuBar = ({
+  setFile,
+}: {
+  setFile: Dispatch<SetStateAction<File | null>>;
+}) => {
   return (
     <Menubar className="absolute m-4 z-10">
       <MenubarMenu>
         <MenubarTrigger>File</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>
-            New Tab <MenubarShortcut>⌘T</MenubarShortcut>
-          </MenubarItem>
+          {/* File Upload */}
+          <FileUpload setFile={setFile} />
           <MenubarItem>
             New Window <MenubarShortcut>⌘N</MenubarShortcut>
           </MenubarItem>
