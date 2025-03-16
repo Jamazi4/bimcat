@@ -1,7 +1,6 @@
 import { ModeToggle } from "./ModeToggle";
 
 import Link from "next/link";
-import UploadDialog from "../UploadDialog";
 import {
   SignedIn,
   SignedOut,
@@ -10,7 +9,6 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import { Button } from "../ui/button";
-import { Cuboid } from "lucide-react";
 
 const Navbar = () => {
   return (

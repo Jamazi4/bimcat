@@ -1,6 +1,7 @@
 import { useMemo, useEffect } from "react";
 import * as THREE from "three";
 import { ThreeEvent } from "@react-three/fiber";
+import { Fragment } from "@thatopen/fragments";
 
 const MeshItem = ({
   obj,
@@ -11,7 +12,7 @@ const MeshItem = ({
   onPointerMissed,
   colorHighlighted,
 }: {
-  obj: any;
+  obj: Fragment;
   selectedId: number | null;
   onMeshClick: (e: ThreeEvent<MouseEvent>, id: number) => void;
   onPointerOver: (e: ThreeEvent<PointerEvent>) => void;
