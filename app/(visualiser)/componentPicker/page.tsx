@@ -11,6 +11,7 @@ import { type IfcRelationsIndexer } from "@thatopen/components";
 import type { ComponentGeometry, Pset, PsetContent } from "@/utils/types";
 import { getIfcPsetsById } from "@/utils/ifc/ifcjs";
 import PsetAccordion from "@/components/editor/PsetAccordion";
+import MeshItem from "@/components/visualiser/MeshItem";
 
 const page = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -26,7 +27,7 @@ const page = () => {
 
   return (
     <div className="w-full h-[calc(100vh-72px)]">
-      {selected && displayPsets && (
+      {selected && displayPsets && displayPsets.length > 0 && (
         <div className="absolute right-4 top-22 z-10 bg-background-transparent rounded p-4 w-md border max-h-1/2 overflow-scroll overflow-x-hidden">
           <PsetAccordion edit={false} psets={displayPsets} />
         </div>
@@ -36,8 +37,9 @@ const page = () => {
         camera={{ position: [0, 1, 0] }}
         onPointerMissed={handlePointerMissed}
       >
-        <ambientLight intensity={2} />
-        <directionalLight position={[-10, 10, -10]} intensity={0.5} />
+        <ambientLight intensity={1} />
+        <directionalLight position={[-100, 100, -100]} intensity={0.5} />
+
         <Grid
           side={2}
           sectionSize={1}
@@ -52,6 +54,7 @@ const page = () => {
             file={file}
             setSelected={setSelected}
             setDisplayPsets={setDisplayPsets}
+            selected={selected}
           />
         )}
 
@@ -66,14 +69,24 @@ const Model = ({
   file,
   setSelected,
   setDisplayPsets,
+  selected,
 }: {
   file: File;
   setSelected: Dispatch<SetStateAction<number | null>>;
   setDisplayPsets: Dispatch<SetStateAction<Pset[] | null>>;
+  selected: number | null;
 }) => {
   // const [meshes, setMeshes] = useState<THREE.Mesh[]>([]);
   const [fragments, setFragments] = useState<FragmentsGroup>();
   const [indexer, setIndexer] = useState<IfcRelationsIndexer | null>(null);
+  const [selectedMesh, setSelectedMesh] = useState<THREE.Mesh | null>(null);
+  const [originalMaterial, setOriginalMaterial] =
+    useState<THREE.Material | null>(null);
+
+  const colorHighlighted = new THREE.Color().setRGB(0.9, 0.1, 0.9);
+  const [highlightedMaterial] = useState(
+    new THREE.MeshStandardMaterial({ color: colorHighlighted })
+  );
 
   const { scene } = useThree();
 
@@ -82,6 +95,7 @@ const Model = ({
       const components = new OBC.Components();
       const loader = components.get(OBC.IfcLoader);
       const indexer = components.get(OBC.IfcRelationsIndexer);
+
       await loader.setup();
       // loader.settings.webIfc.COORDINATE_TO_ORIGIN = false;
 
@@ -113,67 +127,51 @@ const Model = ({
     setDisplayPsets(psets);
   };
 
-  const colorHighlighted = new THREE.Color().setRGB(0.9, 0.1, 0.9);
-
-  const handlePointerOver = (
-    e: ThreeEvent<PointerEvent>,
-    material: THREE.MeshBasicMaterial
-  ) => {
-    e.stopPropagation();
-    console.log("Pointer over!", e.object);
-    document.body.style.cursor = "pointer";
-    material.color = colorHighlighted;
-  };
-
-  const handlePointerOut = (
-    e: ThreeEvent<PointerEvent>,
-    material: THREE.MeshBasicMaterial,
-    curColor: THREE.Color | undefined
-  ) => {
-    e.stopPropagation();
-    console.log("Pointer out!");
-    document.body.style.cursor = "default";
-    material.color = curColor!;
-  };
-
-  const handleClick = (e: ThreeEvent<MouseEvent>, id: number) => {
+  const handleMeshClick = (e: ThreeEvent<MouseEvent>, id: number) => {
     e.stopPropagation();
     retrievePsets(id);
     setSelected(id);
   };
 
+  const handlePointerOver = (
+    e: ThreeEvent<PointerEvent>,
+    material: THREE.MeshStandardMaterial
+  ) => {
+    e.stopPropagation();
+    document.body.style.cursor = "pointer";
+  };
+
+  const handlePointerOut = (
+    e: ThreeEvent<PointerEvent>,
+    material: THREE.MeshStandardMaterial,
+    curColor: THREE.Color
+  ) => {
+    e.stopPropagation();
+    document.body.style.cursor = "default";
+  };
+
+  const handlePointerMissed = (
+    e: MouseEvent,
+    material: THREE.MeshStandardMaterial,
+    curColor: THREE.Color
+  ) => {
+    e.stopPropagation();
+  };
+
   return (
     <>
-      {fragments.items.map((obj, index) => {
-        const mesh = obj.mesh;
-        const id = obj.ids.values().next().value!;
-        const transform = obj.get(id).transforms[0];
-        const curColor = obj.get(id).colors?.[0];
-        const material = new THREE.MeshBasicMaterial({
-          color: curColor,
-        });
-
-        return (
-          <mesh
-            key={index}
-            geometry={mesh.geometry}
-            material={material}
-            matrix={transform}
-            matrixAutoUpdate={false}
-            userData={{ expressId: id }}
-            // scale={0.01}
-            onPointerOver={(e) => {
-              handlePointerOver(e, material);
-            }}
-            onPointerOut={(e) => {
-              handlePointerOut(e, material, curColor);
-            }}
-            onClick={(e) => {
-              handleClick(e, id);
-            }}
-          ></mesh>
-        );
-      })}
+      {fragments.items.map((obj, index) => (
+        <MeshItem
+          key={index}
+          obj={obj}
+          selectedId={selected}
+          onMeshClick={handleMeshClick}
+          onPointerOver={handlePointerOver}
+          onPointerOut={handlePointerOut}
+          onPointerMissed={handlePointerMissed}
+          colorHighlighted={colorHighlighted}
+        />
+      ))}
     </>
   );
 };
