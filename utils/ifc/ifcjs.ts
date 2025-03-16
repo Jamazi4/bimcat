@@ -74,6 +74,47 @@ export const getIfcPsets = async (
   }
 };
 
+export const getIfcGeometry = async (model: FragmentsGroup) => {
+  const firstElement = model.children[0] as FragmentMesh;
+  const bufferGeom = firstElement.geometry;
+  const position = Array.from(bufferGeom.attributes.position.array);
+  const indices = Array.from(bufferGeom.index.array);
+
+  return { position, indices };
+};
+
+export const getIfcData = async (file: File) => {
+  const { loader, indexer } = await getFragmentLoader();
+  const model = await getIfcModel(file, loader);
+  const geometry = await getIfcGeometry(model);
+  const psets = await getIfcPsets(model, indexer);
+
+  return { geometry, psets };
+};
+//////////////////ById (componentPicker)////////////////////////////////////////
+
+export const getIfcDataById = async (file: File, id: number) => {
+  const { loader, indexer } = await getFragmentLoader();
+  const model = await getIfcModel(file, loader);
+  await indexer.process(model);
+  const geometry = await getIfcGeometryById(model, id);
+  const psets = await getIfcPsetsById(model, indexer, id);
+
+  return { geometry, psets };
+};
+
+export const getIfcGeometryById = async (model: FragmentsGroup, id: number) => {
+  const elements = model.items.filter((item) => {
+    const itemId = item.ids.values().next().value;
+    return itemId === id;
+  });
+  const elementMesh = elements[0].mesh;
+  const bufferGeom = elementMesh.geometry;
+  const position = Array.from(bufferGeom.attributes.position.array);
+  const indices = Array.from(bufferGeom.index.array);
+
+  return { position, indices };
+};
 /**
  * Indexer must have processed the model before entering here
  */
@@ -113,22 +154,4 @@ export const getIfcPsetsById = async (
     }
   }
   return psets;
-};
-
-export const getIfcGeometry = async (model: FragmentsGroup) => {
-  const firstElement = model.children[0] as FragmentMesh;
-  const bufferGeom = firstElement.geometry;
-  const position = Array.from(bufferGeom.attributes.position.array);
-  const indices = Array.from(bufferGeom.index.array);
-
-  return { position, indices };
-};
-
-export const getIfcData = async (file: File) => {
-  const { loader, indexer } = await getFragmentLoader();
-  const model = await getIfcModel(file, loader);
-  const geometry = await getIfcGeometry(model);
-  const psets = await getIfcPsets(model, indexer);
-
-  return { geometry, psets };
 };

@@ -36,11 +36,7 @@ const Renderer = ({ id }: { id: string }) => {
     <div className="bg-muted rounded border w-full aspect-square">
       <Canvas camera={{ position: [0, 1, 0] }} className="w-full">
         <ambientLight intensity={2} />
-        <pointLight
-          position={[-10, 10, -10]}
-          decay={0}
-          intensity={Math.PI / 2}
-        />
+        <directionalLight position={[-100, 100, -100]} intensity={0.5} />
         <Grid
           side={2}
           sectionSize={1}
@@ -54,10 +50,10 @@ const Renderer = ({ id }: { id: string }) => {
         <Bounds fit clip observe margin={1.2}>
           {bufferGeometry && (
             <>
-              <mesh geometry={bufferGeometry} scale={0.01}>
+              <mesh geometry={bufferGeometry}>
                 <meshStandardMaterial color="orange" />
               </mesh>
-              <mesh geometry={bufferGeometry} scale={0.01}>
+              <mesh geometry={bufferGeometry}>
                 <meshStandardMaterial color="black" wireframe />
               </mesh>
             </>

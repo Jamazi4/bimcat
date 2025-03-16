@@ -8,7 +8,7 @@ import * as THREE from "three";
 import * as OBC from "@thatopen/components";
 import { FragmentsGroup } from "@thatopen/fragments";
 import { type IfcRelationsIndexer } from "@thatopen/components";
-import type { ComponentGeometry, Pset, PsetContent } from "@/utils/types";
+import type { Pset } from "@/utils/types";
 import { getIfcPsetsById } from "@/utils/ifc/ifcjs";
 import PsetAccordion from "@/components/editor/PsetAccordion";
 import MeshItem from "@/components/visualiser/MeshItem";
@@ -32,7 +32,7 @@ const page = () => {
           <PsetAccordion edit={false} psets={displayPsets} />
         </div>
       )}
-      <MenuBar setFile={setFile} />
+      <MenuBar setFile={setFile} file={file} selected={selected} />
       <Canvas
         camera={{ position: [0, 1, 0] }}
         onPointerMissed={handlePointerMissed}
@@ -76,17 +76,10 @@ const Model = ({
   setDisplayPsets: Dispatch<SetStateAction<Pset[] | null>>;
   selected: number | null;
 }) => {
-  // const [meshes, setMeshes] = useState<THREE.Mesh[]>([]);
   const [fragments, setFragments] = useState<FragmentsGroup>();
   const [indexer, setIndexer] = useState<IfcRelationsIndexer | null>(null);
-  const [selectedMesh, setSelectedMesh] = useState<THREE.Mesh | null>(null);
-  const [originalMaterial, setOriginalMaterial] =
-    useState<THREE.Material | null>(null);
 
   const colorHighlighted = new THREE.Color().setRGB(0.9, 0.1, 0.9);
-  const [highlightedMaterial] = useState(
-    new THREE.MeshStandardMaterial({ color: colorHighlighted })
-  );
 
   const { scene } = useThree();
 
@@ -133,28 +126,17 @@ const Model = ({
     setSelected(id);
   };
 
-  const handlePointerOver = (
-    e: ThreeEvent<PointerEvent>,
-    material: THREE.MeshStandardMaterial
-  ) => {
+  const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     document.body.style.cursor = "pointer";
   };
 
-  const handlePointerOut = (
-    e: ThreeEvent<PointerEvent>,
-    material: THREE.MeshStandardMaterial,
-    curColor: THREE.Color
-  ) => {
+  const handlePointerOut = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     document.body.style.cursor = "default";
   };
 
-  const handlePointerMissed = (
-    e: MouseEvent,
-    material: THREE.MeshStandardMaterial,
-    curColor: THREE.Color
-  ) => {
+  const handlePointerMissed = (e: MouseEvent) => {
     e.stopPropagation();
   };
 
