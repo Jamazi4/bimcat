@@ -28,12 +28,12 @@ const Navbar = () => {
           </Link>
         </h1>
         {/* Navigation */}
-        <div className="flex items-center">
-          <UploadDialog />
-          <Button asChild>
-            <Link href="/componentPicker">
-              <Cuboid />
-            </Link>
+        <div className="flex text-center w-full">
+          <Button variant="link" asChild className="text-primary-foreground">
+            <Link href="/componentPicker">Create</Link>
+          </Button>
+          <Button variant="link" asChild className="text-primary-foreground">
+            <Link href="/">Library</Link>
           </Button>
         </div>
         {/* Mode/account */}

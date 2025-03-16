@@ -3,7 +3,7 @@
 import MenuBar from "@/components/visualiser/MenuBar";
 import { Grid, OrbitControls } from "@react-three/drei";
 import { Canvas, ThreeEvent, useThree } from "@react-three/fiber";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import * as THREE from "three";
 import * as OBC from "@thatopen/components";
 import { FragmentsGroup } from "@thatopen/fragments";
@@ -13,7 +13,7 @@ import { getIfcPsetsById } from "@/utils/ifc/ifcjs";
 import PsetAccordion from "@/components/editor/PsetAccordion";
 import MeshItem from "@/components/visualiser/MeshItem";
 
-const page = () => {
+const Page = () => {
   const [file, setFile] = useState<File | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [displayPsets, setDisplayPsets] = useState<Pset[] | null>(null);
@@ -63,7 +63,7 @@ const page = () => {
     </div>
   );
 };
-export default page;
+export default Page;
 
 const Model = ({
   file,
