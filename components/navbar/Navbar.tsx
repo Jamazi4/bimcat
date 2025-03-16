@@ -12,7 +12,7 @@ import { Button } from "../ui/button";
 
 const Navbar = () => {
   return (
-    <nav className=" mx-auto px-4 py-4 border-b bg-secondary h-[72px]">
+    <nav className=" mx-auto px-4 py-4 top-0 border-b bg-secondary h-[72px] fixed w-full z-10">
       <div className="flex justify-between max-w-[1024px] mx-auto items-center">
         {/* LOGO */}
         <h1 className="font-black text-3xl text-primary-foreground">

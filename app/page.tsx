@@ -11,7 +11,7 @@ export default async function Home() {
   );
   if (!validatedComponents) return <div>Couldn&apos;t connect....</div>;
   return (
-    <main className="grid grid-cols-2 gap-4 md:grid-cols-3 mt-12 max-w-[1024px] mx-auto mb-4 w-auto px-4 justify-center flex-col">
+    <main className="grid grid-cols-2 gap-4 md:grid-cols-3 mt-[92px] max-w-[1024px] mx-auto mb-4 w-auto px-4 justify-center flex-col">
       {validatedComponents?.map((component: Component) => {
         const { id, name, createdAt, updatedAt } = component;
         return (
