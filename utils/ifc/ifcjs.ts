@@ -24,6 +24,7 @@ const getIfcModel = async (file: File, loader: OBC.IfcLoader) => {
   return await loader.load(buffer);
 };
 
+//DELETE THIS
 export const getIfcPsets = async (
   model: FragmentsGroup,
   indexer: OBC.IfcRelationsIndexer
@@ -71,6 +72,47 @@ export const getIfcPsets = async (
     }
     return psets;
   }
+};
+
+/**
+ * Indexer must have processed the model before entering here
+ */
+export const getIfcPsetsById = async (
+  model: FragmentsGroup,
+  indexer: OBC.IfcRelationsIndexer,
+  id: number
+) => {
+  const psets: Pset[] = [];
+
+  const psetsExpressIds = indexer.getEntityRelations(model, id, "IsDefinedBy");
+
+  for (const expressID of psetsExpressIds) {
+    // You can get the pset attributes like this
+    const pset = await model.getProperties(expressID);
+    if (pset) {
+      const curPsetTitle = pset["Name"]?.value || " ";
+
+      const curPset: Pset = {
+        title: curPsetTitle,
+        content: [],
+      };
+
+      await OBC.IfcPropertiesUtils.getPsetProps(
+        model,
+        expressID,
+        async (propExpressID) => {
+          const prop = await model.getProperties(propExpressID); //values
+          if (prop) {
+            const propName = prop["Name"]?.value || " ";
+            const propValue = prop["NominalValue"]?.value ?? " ";
+            curPset.content.push({ [propName]: propValue });
+          }
+        }
+      );
+      psets.push(curPset);
+    }
+  }
+  return psets;
 };
 
 export const getIfcGeometry = async (model: FragmentsGroup) => {

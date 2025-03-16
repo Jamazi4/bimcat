@@ -6,7 +6,7 @@ import AddPsetButton from "./AddPsetButton";
 function PsetsList({ psets }: { psets: Pset[] }) {
   return (
     <>
-      <PsetAccordion psets={psets} />
+      <PsetAccordion edit={true} psets={psets} />
       <AddPsetButton />
     </>
   );

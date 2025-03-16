@@ -28,7 +28,7 @@ import { Input } from "../ui/input";
 import { useFormStatus } from "react-dom";
 import { AiOutlineReload } from "react-icons/ai";
 
-function PsetDialog({
+function PsetEditDialog({
   content,
   title,
 }: {
@@ -139,7 +139,7 @@ function PsetDialog({
   );
 }
 
-export default PsetDialog;
+export default PsetEditDialog;
 
 function SubmitButton() {
   const { pending } = useFormStatus();

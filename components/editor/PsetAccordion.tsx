@@ -1,6 +1,6 @@
 import type { Pset as psetType } from "@/utils/schemas";
 import PsetRow from "./PsetRow";
-import PsetDialog from "./PsetDialog";
+import PsetEditDialog from "./PsetEditDialog";
 import {
   Accordion,
   AccordionContent,
@@ -9,7 +9,13 @@ import {
 } from "@/components/ui/accordion";
 import RemovePsetButton from "./RemovePsetButton";
 
-const PsetAccordion = ({ psets }: { psets: psetType[] }) => {
+const PsetAccordion = ({
+  psets,
+  edit,
+}: {
+  psets: psetType[];
+  edit: boolean;
+}) => {
   return (
     <Accordion type="multiple" className="w-full flex-1">
       {psets.map((pset, index) => {
@@ -29,12 +35,14 @@ const PsetAccordion = ({ psets }: { psets: psetType[] }) => {
                   />
                 );
               })}
-              <div className="ml-auto space-x-4">
-                {/* Edit button */}
-                <PsetDialog content={pset.content} title={pset.title} />
-                {/* Delete Button */}
-                <RemovePsetButton title={pset.title} />
-              </div>
+              {edit && (
+                <div className="ml-auto space-x-4">
+                  {/* Edit button */}
+                  <PsetEditDialog content={pset.content} title={pset.title} />
+                  {/* Delete Button */}
+                  <RemovePsetButton title={pset.title} />
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
         );

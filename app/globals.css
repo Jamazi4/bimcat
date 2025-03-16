@@ -6,6 +6,7 @@
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-transparent: var(--background-transparent);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -49,6 +50,7 @@
 @layer base {
   :root {
     --background: hsl(0 0% 100%);
+    --background-transparent: hsla(0, 0%, 100%, 0.8);
     --foreground: hsl(222.2 84% 4.9%);
     --muted: hsl(210 40% 96.1%);
     --muted-foreground: hsl(215.4 16.3% 46.9%);
@@ -78,6 +80,7 @@
 
   .dark {
     --background: hsl(240, 2%, 9%);
+    --background-transparent: hsla(240, 2%, 9%, 0.8);
     --foreground: hsl(230, 7%, 82%);
     --muted: hsl(240, 5%, 12%);
     --muted-foreground: hsl(240, 3%, 53%);

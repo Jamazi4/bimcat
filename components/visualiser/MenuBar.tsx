@@ -28,7 +28,7 @@ const MenuBar = ({
         <MenubarContent>
           {/* File Upload */}
           <FileUpload setFile={setFile} />
-          <MenubarItem>
+          {/* <MenubarItem>
             New Window <MenubarShortcut>⌘N</MenubarShortcut>
           </MenubarItem>
           <MenubarItem disabled>New Incognito Window</MenubarItem>
@@ -44,8 +44,9 @@ const MenuBar = ({
           <MenubarSeparator />
           <MenubarItem>
             Print... <MenubarShortcut>⌘P</MenubarShortcut>
-          </MenubarItem>
-        </MenubarContent>
+          </MenubarItem> */}
+
+          {/* </MenubarContent>
       </MenubarMenu>
       <MenubarMenu>
         <MenubarTrigger>Edit</MenubarTrigger>
@@ -104,7 +105,7 @@ const MenuBar = ({
           <MenubarSeparator />
           <MenubarItem inset>Edit...</MenubarItem>
           <MenubarSeparator />
-          <MenubarItem inset>Add Profile...</MenubarItem>
+          <MenubarItem inset>Add Profile...</MenubarItem> */}
         </MenubarContent>
       </MenubarMenu>
     </Menubar>

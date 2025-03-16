@@ -8,30 +8,36 @@ import * as THREE from "three";
 import * as OBC from "@thatopen/components";
 import { FragmentsGroup } from "@thatopen/fragments";
 import { type IfcRelationsIndexer } from "@thatopen/components";
+import type { ComponentGeometry, Pset, PsetContent } from "@/utils/types";
+import { getIfcPsetsById } from "@/utils/ifc/ifcjs";
+import PsetAccordion from "@/components/editor/PsetAccordion";
 
 const page = () => {
   const [file, setFile] = useState<File | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
+  const [displayPsets, setDisplayPsets] = useState<Pset[] | null>(null);
 
   const handlePointerMissed = (e: MouseEvent) => {
-    console.log("nothing selected");
+    if (e.button !== 0) return;
+    console.log(e.button);
     setSelected(null);
+    setDisplayPsets(null);
   };
 
   return (
     <div className="w-full h-[calc(100vh-72px)]">
-      {selected && <p className="absolute right-4 top-18">selection</p>}
+      {selected && displayPsets && (
+        <div className="absolute right-4 top-22 z-10 bg-background-transparent rounded p-4 w-md border max-h-1/2 overflow-scroll overflow-x-hidden">
+          <PsetAccordion edit={false} psets={displayPsets} />
+        </div>
+      )}
       <MenuBar setFile={setFile} />
       <Canvas
         camera={{ position: [0, 1, 0] }}
         onPointerMissed={handlePointerMissed}
       >
         <ambientLight intensity={2} />
-        <directionalLight
-          position={[-10, 10, -10]}
-          intensity={Math.PI / 2}
-          rotateX={12}
-        />
+        <directionalLight position={[-10, 10, -10]} intensity={0.5} />
         <Grid
           side={2}
           sectionSize={1}
@@ -41,7 +47,13 @@ const page = () => {
           fadeDistance={40}
           infiniteGrid={true}
         />
-        {file && <Model file={file} setSelected={setSelected} />}
+        {file && (
+          <Model
+            file={file}
+            setSelected={setSelected}
+            setDisplayPsets={setDisplayPsets}
+          />
+        )}
 
         <OrbitControls enableZoom={true} makeDefault />
       </Canvas>
@@ -53,9 +65,11 @@ export default page;
 const Model = ({
   file,
   setSelected,
+  setDisplayPsets,
 }: {
   file: File;
   setSelected: Dispatch<SetStateAction<number | null>>;
+  setDisplayPsets: Dispatch<SetStateAction<Pset[] | null>>;
 }) => {
   // const [meshes, setMeshes] = useState<THREE.Mesh[]>([]);
   const [fragments, setFragments] = useState<FragmentsGroup>();
@@ -92,14 +106,11 @@ const Model = ({
 
   if (!fragments) return;
 
-  const displayPsets = (id: number) => {
-    const psetIds = indexer?.getEntityRelations(fragments, id, "IsDefinedBy");
-    psetIds?.map(async (psetId) => {
-      const pset = await fragments.getProperties(psetId);
-      console.log(pset);
-    });
-
-    console.log(id);
+  const retrievePsets = async (id: number) => {
+    if (!indexer) return;
+    let psets = [];
+    psets = await getIfcPsetsById(fragments, indexer, id); //granted that the indexer already processed the model
+    setDisplayPsets(psets);
   };
 
   const colorHighlighted = new THREE.Color().setRGB(0.9, 0.1, 0.9);
@@ -127,8 +138,7 @@ const Model = ({
 
   const handleClick = (e: ThreeEvent<MouseEvent>, id: number) => {
     e.stopPropagation();
-    // console.log("Clicked!", e.object.userData);
-    displayPsets(id);
+    retrievePsets(id);
     setSelected(id);
   };
 
