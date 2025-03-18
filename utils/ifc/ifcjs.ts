@@ -96,21 +96,46 @@ export const getIfcData = async (file: File) => {
 export const getIfcDataById = async (file: File, id: number) => {
   const { loader, indexer } = await getFragmentLoader();
   const model = await getIfcModel(file, loader);
+  const units = await model.getAllPropertiesOfType(180925521); //IFC4.IfcUnitAssignment
+  let isMili: boolean = false;
+
+  await Promise.all(
+    Object.values(units!)[0].Units.map(
+      async (unit: { value: number; type: number }) => {
+        const unitValue = await model.getProperties(unit.value);
+        if (unitValue?.UnitType.value === "LENGTHUNIT") {
+          isMili = unitValue?.Prefix?.value === "MILLI";
+        }
+      }
+    )
+  );
+
   await indexer.process(model);
-  const geometry = await getIfcGeometryById(model, id);
+  const geometry = await getIfcGeometryById(model, id, isMili);
   const psets = await getIfcPsetsById(model, indexer, id);
 
   return { geometry, psets };
 };
 
-export const getIfcGeometryById = async (model: FragmentsGroup, id: number) => {
+export const getIfcGeometryById = async (
+  model: FragmentsGroup,
+  id: number,
+  isMili: boolean
+) => {
   const elements = model.items.filter((item) => {
     const itemId = item.ids.values().next().value;
     return itemId === id;
   });
+
   const elementMesh = elements[0].mesh;
   const bufferGeom = elementMesh.geometry;
-  const position = Array.from(bufferGeom.attributes.position.array);
+  let position = Array.from(bufferGeom.attributes.position.array);
+
+  if (!isMili) {
+    position = position.map((value) => {
+      return value * 1000;
+    });
+  }
   const indices = Array.from(bufferGeom.index.array);
 
   return { position, indices };

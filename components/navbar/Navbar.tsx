@@ -1,13 +1,7 @@
 import { ModeToggle } from "./ModeToggle";
 
 import Link from "next/link";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { Button } from "../ui/button";
 
 const Navbar = () => {
@@ -15,7 +9,7 @@ const Navbar = () => {
     <nav className=" mx-auto px-4 py-4 top-0 border-b bg-secondary h-[72px] fixed w-full z-10">
       <div className="flex justify-between max-w-[1024px] mx-auto items-center">
         {/* LOGO */}
-        <h1 className="font-black text-3xl text-primary-foreground">
+        <h1 className="font-black text-3xl text-primary-foreground hover:brightness-150">
           <Link href="/">
             <div className="flex flex-col gap-0 leading-none">
               <span className="font-extralight leading-4 tracking-[0.08em]">
@@ -39,12 +33,16 @@ const Navbar = () => {
         <div className="flex gap-2 justify-center items-center">
           <ModeToggle />
           <SignedOut>
-            <Button asChild>
+            <Button
+              asChild
+              variant="link"
+              className="text-primary-foreground cursor-pointer"
+            >
               <SignInButton />
             </Button>
-            <Button asChild>
+            {/* <Button asChild>
               <SignUpButton />
-            </Button>
+            </Button> */}
           </SignedOut>
           <SignedIn>
             <div className="flex items-center">

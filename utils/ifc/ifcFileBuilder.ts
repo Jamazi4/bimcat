@@ -44,13 +44,13 @@ export const downloadIfcFile = async (
 
   // Units
   // prettier-ignore
-  const cubicMetre = new WEBIFC.IFC4.IfcSIUnit(
+  const lengthUnit = new WEBIFC.IFC4.IfcSIUnit(
     WEBIFC.IFC4.IfcUnitEnum.LENGTHUNIT,
     WEBIFC.IFC4.IfcSIPrefix.MILLI,
     WEBIFC.IFC4.IfcSIUnitName.METRE
   );
 
-  const unitAssignment = new WEBIFC.IFC4.IfcUnitAssignment([cubicMetre]);
+  const unitAssignment = new WEBIFC.IFC4.IfcUnitAssignment([lengthUnit]);
 
   // Geometrical representation
   const originCoords = [

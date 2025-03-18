@@ -50,10 +50,10 @@ const Renderer = ({ id }: { id: string }) => {
         <Bounds fit clip observe margin={1.2}>
           {bufferGeometry && (
             <>
-              <mesh geometry={bufferGeometry}>
+              <mesh geometry={bufferGeometry} scale={0.001}>
                 <meshStandardMaterial color="orange" />
               </mesh>
-              <mesh geometry={bufferGeometry}>
+              <mesh geometry={bufferGeometry} scale={0.001}>
                 <meshStandardMaterial color="black" wireframe />
               </mesh>
             </>

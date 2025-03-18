@@ -20,7 +20,6 @@ const Page = () => {
 
   const handlePointerMissed = (e: MouseEvent) => {
     if (e.button !== 0) return;
-    console.log(e.button);
     setSelected(null);
     setDisplayPsets(null);
   };
