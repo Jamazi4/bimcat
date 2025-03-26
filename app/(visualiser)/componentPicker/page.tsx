@@ -89,7 +89,6 @@ const Model = ({
       const indexer = components.get(OBC.IfcRelationsIndexer);
 
       await loader.setup();
-      // loader.settings.webIfc.COORDINATE_TO_ORIGIN = false;
 
       const data = await file.arrayBuffer();
       const buffer = new Uint8Array(data);

@@ -7,7 +7,6 @@ import { ComponentGeometry } from "@/utils/types";
 import * as THREE from "three";
 
 const Renderer = ({ geometry }: { geometry: ComponentGeometry[] }) => {
-  const group = new THREE.Group();
   const geometries = geometry.map((geom) => {
     const bufferGeometry = new THREE.BufferGeometry();
     const position = new Float32Array(geom.position);
