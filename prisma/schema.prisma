@@ -14,24 +14,18 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Product {
-  id   String @id @default(uuid())
-  name String
-}
-
 model ComponentGeometry {
-  id        String      @id @default(uuid())
-  position  Json
-  indices   Json
-  Component Component[]
+  id         String      @id @default(uuid())
+  position   Json
+  indices    Json
+  components Component[] @relation("ComponentToGeometry")
 }
 
 model Component {
-  id        String            @id @default(uuid())
+  id        String              @id @default(uuid())
   name      String
-  geometry  ComponentGeometry @relation(fields: [geomId], references: [id])
-  geomId    String
+  geometry  ComponentGeometry[] @relation("ComponentToGeometry")
   psets     Json
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
 }

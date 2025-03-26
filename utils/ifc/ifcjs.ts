@@ -1,6 +1,7 @@
 import * as OBC from "@thatopen/components";
 import { FragmentMesh, FragmentsGroup } from "@thatopen/fragments";
-import { Pset } from "../types";
+import { ComponentGeometry, Pset } from "../types";
+import * as THREE from "three";
 
 /**
  * Create instances of thatOpen components classes
@@ -103,7 +104,7 @@ export const getIfcDataById = async (file: File, id: number) => {
     Object.values(units!)[0].Units.map(
       async (unit: { value: number; type: number }) => {
         const unitValue = await model.getProperties(unit.value);
-        if (unitValue?.UnitType.value === "LENGTHUNIT") {
+        if (unitValue?.UnitType?.value === "LENGTHUNIT") {
           isMili = unitValue?.Prefix?.value === "MILLI";
         }
       }
@@ -112,6 +113,7 @@ export const getIfcDataById = async (file: File, id: number) => {
 
   await indexer.process(model);
   const geometry = await getIfcGeometryById(model, id, isMili);
+
   const psets = await getIfcPsetsById(model, indexer, id);
 
   return { geometry, psets };
@@ -124,21 +126,38 @@ export const getIfcGeometryById = async (
 ) => {
   const elements = model.items.filter((item) => {
     const itemId = item.ids.values().next().value;
+
+    if (itemId === id) {
+      const transform = item.get(itemId).transforms[0];
+      item.mesh.geometry.applyMatrix4(transform);
+      item.mesh.geometry.computeVertexNormals(); //TODO: saved file have no normals, maybe it's problem with ifcBuilder
+      item.mesh.geometry.attributes.position.needsUpdate = true;
+      return true;
+    }
     return itemId === id;
   });
 
-  const elementMesh = elements[0].mesh;
-  const bufferGeom = elementMesh.geometry;
-  let position = Array.from(bufferGeom.attributes.position.array);
+  const geometry: ComponentGeometry[] = [];
+  elements.forEach((element) => {
+    element.update();
+    const bufferGeom = element.mesh.geometry;
 
-  if (!isMili) {
-    position = position.map((value) => {
-      return value * 1000;
+    let positionArray = Array.from(bufferGeom.attributes.position.array);
+    const indicesArray = Array.from(bufferGeom.index.array);
+
+    if (!isMili) {
+      positionArray = positionArray.map((value) => {
+        return value * 1000;
+      });
+    }
+
+    geometry.push({
+      position: positionArray,
+      indices: indicesArray,
     });
-  }
-  const indices = Array.from(bufferGeom.index.array);
+  });
 
-  return { position, indices };
+  return geometry;
 };
 /**
  * Indexer must have processed the model before entering here

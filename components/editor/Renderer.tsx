@@ -2,35 +2,35 @@
 
 import { Canvas } from "@react-three/fiber";
 import { Bounds, Grid, OrbitControls } from "@react-three/drei";
-import { fetchGeometryAction } from "@/utils/actions";
-import { useEffect, useMemo } from "react";
-import { useState } from "react";
+import { useMemo } from "react";
+
 import { ComponentGeometry } from "@/utils/types";
 import * as THREE from "three";
 
-const Renderer = ({ id }: { id: string }) => {
-  const [geometry, setGeometry] = useState<
-    ComponentGeometry | null | undefined
-  >(null);
+const Renderer = ({ geometry }: { geometry: ComponentGeometry[] }) => {
+  const group = new THREE.Group();
+  const geometries = geometry.map((geom) => {
+    const bufferGeometry = new THREE.BufferGeometry();
+    const position = new Float32Array(geom.position);
+    bufferGeometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(position, 3)
+    );
+    bufferGeometry.setIndex(geom.indices);
+    bufferGeometry.computeVertexNormals();
+    return bufferGeometry;
+  });
 
-  useEffect(() => {
-    const asyncFetch = async () => {
-      const response = await fetchGeometryAction(id);
-      setGeometry(response);
-    };
-    asyncFetch();
-  }, [id]);
+  // const bufferGeometry = useMemo(() => {
+  //   if (!geometry) return null;
+  //   const geo = new THREE.BufferGeometry();
+  //   const position = new Float32Array(geometry.position);
 
-  const bufferGeometry = useMemo(() => {
-    if (!geometry) return null;
-    const geo = new THREE.BufferGeometry();
-    const position = new Float32Array(geometry.position);
-
-    geo.setAttribute("position", new THREE.BufferAttribute(position, 3));
-    geo.setIndex(geometry.indices);
-    geo.computeVertexNormals();
-    return geo;
-  }, [geometry]);
+  //   geo.setAttribute("position", new THREE.BufferAttribute(position, 3));
+  //   geo.setIndex(geometry.indices);
+  //   geo.computeVertexNormals();
+  //   return geo;
+  // }, [geometry]);
 
   return (
     <div className="bg-muted rounded border w-full aspect-square">
@@ -48,16 +48,30 @@ const Renderer = ({ id }: { id: string }) => {
         />
 
         <Bounds fit clip observe margin={1.2}>
-          {bufferGeometry && (
-            <>
+          <group>
+            {geometries.map((geom, index) => {
+              for (let index = 0; index < 2; index++) {}
+              return (
+                <group key={index}>
+                  <mesh geometry={geom} scale={0.001}>
+                    <meshStandardMaterial color="orange" />
+                  </mesh>
+                  <mesh geometry={geom} scale={0.001}>
+                    <meshStandardMaterial color="black" wireframe />
+                  </mesh>
+                </group>
+              );
+            })}
+          </group>
+
+          {/* <>
               <mesh geometry={bufferGeometry} scale={0.001}>
                 <meshStandardMaterial color="orange" />
               </mesh>
               <mesh geometry={bufferGeometry} scale={0.001}>
                 <meshStandardMaterial color="black" wireframe />
               </mesh>
-            </>
-          )}
+            </> */}
         </Bounds>
 
         <OrbitControls enableZoom={true} />

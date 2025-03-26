@@ -17,6 +17,8 @@ export const geometrySchema = z.object({
   indices: z.coerce.number().array(),
 });
 
+export const geometryArraySchema = z.array(geometrySchema);
+
 export const PsetAttributeSchema = z.record(
   z.union([z.string(), z.boolean(), z.number()])
 );
@@ -33,10 +35,19 @@ export type Pset = z.infer<typeof PsetSchema>;
 export type PsetContent = z.infer<typeof PsetContentSchema>;
 
 export const componentSchema = z.object({
-  name: z.string(),
-  psets: z.array(PsetSchema),
   id: z.string(),
-  geomId: z.string(),
+  name: z.string(),
+  // geometry: geometryArraySchema, //used in lists, no need for geom
+  psets: z.array(PsetSchema),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export const componentWithGeometrySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  geometry: geometryArraySchema,
+  psets: z.array(PsetSchema),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

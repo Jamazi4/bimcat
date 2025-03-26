@@ -6,4 +6,12 @@ const nextConfig: NextConfig = {
   /* config options here */
 };
 
+module.exports = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "9mb",
+    },
+  },
+};
+
 export default nextConfig;

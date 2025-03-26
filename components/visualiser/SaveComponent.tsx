@@ -27,7 +27,7 @@ const SaveComponent = ({
   file: File | null;
 }) => {
   const [open, setOpen] = useState(false);
-  const [geometry, setGeometry] = useState<ComponentGeometry | null>(null);
+  const [geometry, setGeometry] = useState<ComponentGeometry[] | null>(null);
   const [psets, setPsets] = useState<Pset[] | null>(null);
   const [retrieved, setRetrieved] = useState(false);
 

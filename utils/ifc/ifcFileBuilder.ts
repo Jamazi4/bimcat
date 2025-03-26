@@ -4,7 +4,7 @@ import * as WEBIFC from "web-ifc";
 import { Pset } from "../types";
 
 export const downloadIfcFile = async (
-  geometry?: ComponentGeometry,
+  geometry?: ComponentGeometry[],
   psets?: Pset[]
 ) => {
   if (!geometry) throw new Error("Could not get the object geometry");
@@ -103,45 +103,53 @@ export const downloadIfcFile = async (
   );
 
   const convertedVertices: WEBIFC.IFC4.IfcLengthMeasure[][] = [];
-  let curVert: WEBIFC.IFC4.IfcLengthMeasure[] = [];
-  geometry.position.forEach((val, index) => {
-    const lengthMeasue = new WEBIFC.IFC4.IfcLengthMeasure(val);
-    curVert.push(lengthMeasue);
-    if ((index + 1) % 3 === 0) {
-      convertedVertices.push(curVert);
-      curVert = [];
-    }
+
+  const shapereps: WEBIFC.IFC4.IfcShapeRepresentation[] = [];
+
+  geometry.forEach((geom) => {
+    let curVert: WEBIFC.IFC4.IfcLengthMeasure[] = [];
+    geom.position.forEach((val, index) => {
+      const lengthMeasue = new WEBIFC.IFC4.IfcLengthMeasure(val);
+      curVert.push(lengthMeasue);
+      if ((index + 1) % 3 === 0) {
+        convertedVertices.push(curVert);
+        curVert = [];
+      }
+    });
+
+    const cartesianPointList = new WEBIFC.IFC4.IfcCartesianPointList3D(
+      convertedVertices // verts here
+    );
+
+    const convertedFaces: WEBIFC.IFC4.IfcPositiveInteger[][] = [];
+    let curFace: WEBIFC.IFC4.IfcPositiveInteger[] = [];
+
+    geom.indices.forEach((val, index) => {
+      const positiveInteger = new WEBIFC.IFC4.IfcPositiveInteger(val + 1);
+      curFace.push(positiveInteger);
+      if ((index + 1) % 3 === 0) {
+        convertedFaces.push(curFace);
+        curFace = [];
+      }
+    });
+
+    const triangulatedFaceset = new WEBIFC.IFC4.IfcTriangulatedFaceSet(
+      cartesianPointList,
+      null,
+      new WEBIFC.IFC4.IfcBoolean(true),
+      convertedFaces, // faces here
+      null
+    );
+
+    const shapeRepresentation = new WEBIFC.IFC4.IfcShapeRepresentation(
+      geomSubcontext,
+      new WEBIFC.IFC4.IfcLabel("Body"),
+      new WEBIFC.IFC4.IfcLabel("Tessellation"),
+      [triangulatedFaceset]
+    );
+
+    shapereps.push(shapeRepresentation);
   });
-
-  const cartesianPointList = new WEBIFC.IFC4.IfcCartesianPointList3D(
-    convertedVertices // verts here
-  );
-
-  const convertedFaces: WEBIFC.IFC4.IfcPositiveInteger[][] = [];
-  let curFace: WEBIFC.IFC4.IfcPositiveInteger[] = [];
-  geometry.indices.forEach((val, index) => {
-    const positiveInteger = new WEBIFC.IFC4.IfcPositiveInteger(val + 1);
-    curFace.push(positiveInteger);
-    if ((index + 1) % 3 === 0) {
-      convertedFaces.push(curFace);
-      curFace = [];
-    }
-  });
-
-  const triangulatedFaceset = new WEBIFC.IFC4.IfcTriangulatedFaceSet(
-    cartesianPointList,
-    null,
-    new WEBIFC.IFC4.IfcBoolean(true),
-    convertedFaces, // faces here
-    null
-  );
-
-  const shapeRepresentation = new WEBIFC.IFC4.IfcShapeRepresentation(
-    geomSubcontext,
-    new WEBIFC.IFC4.IfcLabel("Body"),
-    new WEBIFC.IFC4.IfcLabel("Tessellation"),
-    [triangulatedFaceset]
-  );
 
   const axis2Placement3d = new WEBIFC.IFC4.IfcAxis2Placement3D(
     cartPoint,
@@ -157,7 +165,7 @@ export const downloadIfcFile = async (
   const productDefinitionShape = new WEBIFC.IFC4.IfcProductDefinitionShape(
     null,
     null,
-    [shapeRepresentation]
+    shapereps
   );
 
   const buildingElementProxy = new WEBIFC.IFC4.IfcBuildingElementProxy(

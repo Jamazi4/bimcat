@@ -7,6 +7,8 @@ import {
   geometrySchema,
   componentSchema,
   Pset,
+  geometryArraySchema,
+  componentWithGeometrySchema,
 } from "./schemas";
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@clerk/nextjs/server";
@@ -31,18 +33,24 @@ export const createComponentAction = async (
   const name = formData.get("name") as string;
   const geometry = formData.get("geometry") as string;
   const psets = formData.get("psets") as string;
-  const parsedGeometry = JSON.parse(geometry) as ComponentGeometry;
+  const parsedGeometry = validateWithZodSchema(
+    geometryArraySchema,
+    JSON.parse(geometry)
+  );
   const parsedPsets = JSON.parse(psets);
-  const geometryResponse = await createGeometryAction(parsedGeometry);
 
-  if (!geometryResponse) throw new Error("Error processing geometry.");
+  // const geometryResponse = await createGeometryAction(parsedGeometry);
+
+  // if (!geometryResponse) throw new Error("Error processing geometry.");
 
   try {
     const response = await prisma.component.create({
       data: {
         name: name,
-        geomId: geometryResponse.id,
         psets: parsedPsets,
+        geometry: {
+          create: parsedGeometry,
+        },
       },
     });
     revalidatePath(`/components`);
@@ -69,12 +77,13 @@ const createGeometryAction = async (geometry: ComponentGeometry) => {
 
 export const fetchSingleComponentAction = async (id: string) => {
   const component = await prisma.component.findUnique({
-    where: {
-      id: id,
+    where: { id: id },
+    include: {
+      geometry: true,
     },
   });
 
-  return validateWithZodSchema(componentSchema, component);
+  return validateWithZodSchema(componentWithGeometrySchema, component);
 };
 
 export const fetchGeometryAction = async (id: string) => {
@@ -212,13 +221,4 @@ export const addPsetAction = async (prevState: any, formData: FormData) => {
   } catch (error) {
     return renderError(error);
   }
-};
-
-export const writeDb = async (formData: FormData) => {
-  console.log("hello world");
-  await prisma.product.create({
-    data: {
-      name: "zimnoch2",
-    },
-  });
 };
