@@ -2,7 +2,6 @@ import Renderer from "@/components/editor/Renderer";
 import Title from "@/components/componentList/Title";
 import ComponentCardTabs from "@/components/editor/ComponentCardTabs";
 import { fetchSingleComponentAction } from "@/utils/actions";
-import { useMemo } from "react";
 
 const ComponentCard = async ({
   params,

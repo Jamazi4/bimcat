@@ -2,7 +2,6 @@
 
 import { Canvas } from "@react-three/fiber";
 import { Bounds, Grid, OrbitControls } from "@react-three/drei";
-import { useMemo } from "react";
 
 import { ComponentGeometry } from "@/utils/types";
 import * as THREE from "three";
