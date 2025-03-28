@@ -98,14 +98,20 @@ export const getIfcDataById = async (file: File, id: number) => {
   const { loader, indexer } = await getFragmentLoader();
   const model = await getIfcModel(file, loader);
   const units = await model.getAllPropertiesOfType(180925521); //IFC4.IfcUnitAssignment
-  let isMili: boolean = false;
+  let isMili: boolean = true;
 
   await Promise.all(
     Object.values(units!)[0].Units.map(
       async (unit: { value: number; type: number }) => {
         const unitValue = await model.getProperties(unit.value);
         if (unitValue?.UnitType?.value === "LENGTHUNIT") {
-          isMili = unitValue?.Prefix?.value === "MILLI";
+          isMili =
+            unitValue?.Prefix?.value !== undefined
+              ? unitValue.Prefix.value === "MILLI"
+              : true;
+
+          console.log(isMili);
+          console.log(unitValue?.Prefix?.value);
         }
       }
     )
@@ -126,11 +132,18 @@ export const getIfcGeometryById = async (
 ) => {
   const elements = model.items.filter((item) => {
     const itemId = item.ids.values().next().value;
+    console.log(item.ids); // checking if there are more
 
     if (itemId === id) {
-      const transform = item.get(itemId).transforms[0];
+      let transform = item.get(itemId).transforms[0];
+      const scaleMatrix = new THREE.Matrix4().makeScale(1000, 1000, 1000);
+      if (!isMili) transform = transform.multiply(scaleMatrix);
+
       item.mesh.geometry.applyMatrix4(transform);
-      item.mesh.geometry.computeVertexNormals(); //TODO: saved file have no normals, maybe it's problem with ifcBuilder
+
+      //TODO: saved file have messed up normals,
+      // maybe it's problem with ifcBuilder
+
       item.mesh.geometry.attributes.position.needsUpdate = true;
       return true;
     }
@@ -139,17 +152,10 @@ export const getIfcGeometryById = async (
 
   const geometry: ComponentGeometry[] = [];
   elements.forEach((element) => {
-    element.update();
     const bufferGeom = element.mesh.geometry;
 
     let positionArray = Array.from(bufferGeom.attributes.position.array);
     const indicesArray = Array.from(bufferGeom.index.array);
-
-    if (!isMili) {
-      positionArray = positionArray.map((value) => {
-        return value * 1000;
-      });
-    }
 
     geometry.push({
       position: positionArray,
@@ -172,7 +178,6 @@ export const getIfcPsetsById = async (
   const psetsExpressIds = indexer.getEntityRelations(model, id, "IsDefinedBy");
 
   for (const expressID of psetsExpressIds) {
-    // You can get the pset attributes like this
     const pset = await model.getProperties(expressID);
     if (pset) {
       const curPsetTitle = pset["Name"]?.value || " ";

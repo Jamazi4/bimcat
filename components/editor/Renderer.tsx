@@ -45,16 +45,16 @@ const Renderer = ({ geometry }: { geometry: ComponentGeometry[] }) => {
           infiniteGrid={true}
         />
 
-        <Bounds fit clip observe margin={1.2}>
+        <Bounds fit clip margin={1.2}>
           <group>
             {geometries.map((geom, index) => {
               for (let index = 0; index < 2; index++) {}
               return (
                 <group key={index}>
-                  <mesh geometry={geom} scale={0.001}>
+                  <mesh geometry={geom} scale={1}>
                     <meshStandardMaterial color="orange" />
                   </mesh>
-                  <mesh geometry={geom} scale={0.001}>
+                  <mesh geometry={geom} scale={1}>
                     <meshStandardMaterial color="black" wireframe />
                   </mesh>
                 </group>

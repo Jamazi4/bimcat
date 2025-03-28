@@ -46,7 +46,8 @@ export const downloadIfcFile = async (
   // prettier-ignore
   const lengthUnit = new WEBIFC.IFC4.IfcSIUnit(
     WEBIFC.IFC4.IfcUnitEnum.LENGTHUNIT,
-    WEBIFC.IFC4.IfcSIPrefix.MILLI,
+    // WEBIFC.IFC4.IfcSIPrefix.MILLI,
+    null,
     WEBIFC.IFC4.IfcSIUnitName.METRE
   );
 
@@ -102,11 +103,10 @@ export const downloadIfcFile = async (
     unitAssignment
   );
 
-  const convertedVertices: WEBIFC.IFC4.IfcLengthMeasure[][] = [];
-
   const shapereps: WEBIFC.IFC4.IfcShapeRepresentation[] = [];
 
   geometry.forEach((geom) => {
+    const convertedVertices: WEBIFC.IFC4.IfcLengthMeasure[][] = [];
     let curVert: WEBIFC.IFC4.IfcLengthMeasure[] = [];
     geom.position.forEach((val, index) => {
       const lengthMeasue = new WEBIFC.IFC4.IfcLengthMeasure(val);
