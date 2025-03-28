@@ -15,7 +15,7 @@ const PsetRow = ({
         </div>
         <p>{value || "-"}</p>
       </div>
-      <Separator />
+      {/* <Separator /> */}
     </div>
   );
 };

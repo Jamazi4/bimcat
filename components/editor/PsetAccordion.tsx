@@ -24,7 +24,7 @@ const PsetAccordion = ({
             <AccordionTrigger className="text-primary">
               {pset.title}
             </AccordionTrigger>
-            <AccordionContent className=" rounded p-2 flex flex-col bg-muted">
+            <AccordionContent className="rounded flex flex-col ">
               {pset.content.map((entry, index) => {
                 const [[name, value]] = Object.entries(entry);
                 return (
