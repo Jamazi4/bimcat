@@ -1,0 +1,49 @@
+"use client";
+
+import { ColumnDef } from "@tanstack/react-table";
+import Link from "next/link";
+import { Button } from "../ui/button";
+import { Trash } from "lucide-react";
+
+export type ComponentRow = {
+  id: string;
+  name: any;
+  createdAt: string;
+  updatedAt: string;
+  author: string;
+};
+
+export const columns: ColumnDef<ComponentRow>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => {
+      const link = `/components/${row.original.id}`;
+      return <Link href={link}>{row.getValue("name")}</Link>;
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created",
+  },
+  {
+    accessorKey: "updatedAt",
+    header: "Updated",
+  },
+  {
+    accessorKey: "author",
+    header: "Author",
+  },
+
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const component = row.original;
+      return (
+        <Button asChild size="icon" variant="destructive" className="h-8 w-8">
+          <Trash className="p-2" />
+        </Button>
+      );
+    },
+  },
+];
