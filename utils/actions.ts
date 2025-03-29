@@ -11,7 +11,7 @@ import {
   componentWithGeometrySchema,
 } from "./schemas";
 import { revalidatePath } from "next/cache";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 const renderError = (error: unknown): { message: string } => {

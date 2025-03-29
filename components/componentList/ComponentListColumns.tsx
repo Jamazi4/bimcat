@@ -1,7 +1,6 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import Link from "next/link";
 import { Button } from "../ui/button";
 import { Trash } from "lucide-react";
 
@@ -17,10 +16,6 @@ export const columns: ColumnDef<ComponentRow>[] = [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => {
-      const link = `/components/${row.original.id}`;
-      return <Link href={link}>{row.getValue("name")}</Link>;
-    },
   },
   {
     accessorKey: "createdAt",

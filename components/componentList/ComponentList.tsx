@@ -4,6 +4,7 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -15,8 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { ComponentRow } from "./ComponentListColumns";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { testAuth } from "@/utils/actions";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -27,11 +30,18 @@ export function ComponentList<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const router = useRouter();
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  const handleRowClick = (row: Row<TData>) => {
+    const originalRow = row.original as ComponentRow;
+    router.push(`/components/${originalRow.id}`);
+  };
 
   return (
     <div className="rounded-md mt-24">
@@ -60,6 +70,8 @@ export function ComponentList<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                onClick={() => handleRowClick(row)}
+                className="cursor-pointer"
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
