@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/table";
 import { ComponentRow } from "./ComponentListColumns";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { testAuth } from "@/utils/actions";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

@@ -34,8 +34,20 @@ export const columns: ColumnDef<ComponentRow>[] = [
     id: "actions",
     cell: ({ row }) => {
       const component = row.original;
+      const handleClick = (
+        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+      ) => {
+        e.stopPropagation();
+        console.log(component.id);
+      };
       return (
-        <Button asChild size="icon" variant="destructive" className="h-8 w-8">
+        <Button
+          asChild
+          size="icon"
+          variant="destructive"
+          className="h-8 w-8"
+          onClick={(e) => handleClick(e)}
+        >
           <Trash className="p-2" />
         </Button>
       );

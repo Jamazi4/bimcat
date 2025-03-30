@@ -1,4 +1,5 @@
 import { z, ZodSchema } from "zod";
+import { Library, User } from "./types";
 
 export function validateWithZodSchema<T>(
   schema: ZodSchema<T>,
@@ -37,11 +38,41 @@ export type PsetContent = z.infer<typeof PsetContentSchema>;
 export const componentSchema = z.object({
   id: z.string(),
   name: z.string(),
-  // geometry: geometryArraySchema, //used in lists, no need for geom
   psets: z.array(PsetSchema),
   createdAt: z.date(),
   updatedAt: z.date(),
+  userId: z.string(),
+  author: z.string(),
 });
+
+export const userSchema: z.ZodType<User> = z.lazy(
+  (): z.ZodType<User> =>
+    z.object({
+      id: z.string(),
+      clerkId: z.string(),
+      email: z.string(),
+      firstName: z.string(),
+      secondName: z.string().nullable(),
+      Libraries: z.array(librarySchema),
+    })
+);
+
+export type userSchemaType = z.infer<typeof userSchema>;
+
+export const librarySchema: z.ZodType<Library> = z.lazy(
+  (): z.ZodType<Library> =>
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      components: z.array(componentSchema).optional(),
+      createdAt: z.date(),
+      updatedAt: z.date(),
+      User: userSchema.optional(),
+      userId: z.string().nullable(),
+    })
+);
+
+export type librarySchemaType = z.infer<typeof librarySchema>;
 
 export const componentWithGeometrySchema = z.object({
   id: z.string(),
@@ -50,6 +81,8 @@ export const componentWithGeometrySchema = z.object({
   psets: z.array(PsetSchema),
   createdAt: z.date(),
   updatedAt: z.date(),
+  userId: z.string(),
+  author: z.string(),
 });
 
 export type Component = z.infer<typeof componentSchema>;

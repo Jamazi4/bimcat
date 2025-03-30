@@ -1,7 +1,6 @@
 "use server";
 
 import { prisma } from "@/db";
-import { ComponentGeometry } from "./types";
 import {
   validateWithZodSchema,
   geometrySchema,
@@ -11,8 +10,9 @@ import {
   componentWithGeometrySchema,
 } from "./schemas";
 import { revalidatePath } from "next/cache";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { User } from "./types";
 
 const renderError = (error: unknown): { message: string } => {
   console.log(error);
@@ -24,12 +24,15 @@ const renderError = (error: unknown): { message: string } => {
 const getAuthUser = async () => {
   const user = await currentUser();
   if (!user) redirect("/");
+  return user;
 };
 
 export const createComponentAction = async (
   prevState: any,
   formData: FormData
 ) => {
+  const user = await getAuthUser();
+
   const name = formData.get("name") as string;
   const geometry = formData.get("geometry") as string;
   const psets = formData.get("psets") as string;
@@ -39,39 +42,30 @@ export const createComponentAction = async (
   );
   const parsedPsets = JSON.parse(psets);
 
-  // const geometryResponse = await createGeometryAction(parsedGeometry);
-
-  // if (!geometryResponse) throw new Error("Error processing geometry.");
-
   try {
+    const dbUser = await prisma.user.findUnique({
+      where: {
+        clerkId: user.id,
+      },
+    });
+
+    const author = `${dbUser?.firstName} ${dbUser?.secondName}`;
+
     const response = await prisma.component.create({
       data: {
-        name: name,
+        name,
         psets: parsedPsets,
         geometry: {
           create: parsedGeometry,
         },
+        userId: dbUser?.id,
+        author,
       },
     });
     revalidatePath(`/components`);
     return { message: `Component ${name} created successfully!` };
   } catch (error) {
     return renderError(error);
-  }
-};
-
-const createGeometryAction = async (geometry: ComponentGeometry) => {
-  try {
-    const response = await prisma.componentGeometry.create({
-      data: {
-        position: geometry.position,
-        indices: geometry.indices,
-      },
-    });
-
-    return response;
-  } catch (error) {
-    console.log(error);
   }
 };
 
@@ -221,4 +215,26 @@ export const addPsetAction = async (prevState: any, formData: FormData) => {
   } catch (error) {
     return renderError(error);
   }
+};
+
+export const createUserAciton = async (user: Partial<User>) => {
+  if (!user.clerkId || !user.email || !user.firstName || !user.secondName)
+    return;
+  try {
+    await prisma.user.create({
+      data: {
+        clerkId: user.clerkId,
+        firstName: user.firstName,
+        secondName: user.secondName,
+      },
+      include: {
+        Libraries: {
+          include: {
+            components: true,
+          },
+        },
+        Components: true,
+      },
+    });
+  } catch (error) {}
 };

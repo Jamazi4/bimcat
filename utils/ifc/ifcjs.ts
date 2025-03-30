@@ -109,9 +109,6 @@ export const getIfcDataById = async (file: File, id: number) => {
             unitValue?.Prefix?.value !== undefined
               ? unitValue.Prefix.value === "MILLI"
               : true;
-
-          console.log(isMili);
-          console.log(unitValue?.Prefix?.value);
         }
       }
     )
@@ -132,7 +129,6 @@ export const getIfcGeometryById = async (
 ) => {
   const elements = model.items.filter((item) => {
     const itemId = item.ids.values().next().value;
-    console.log(item.ids); // checking if there are more
 
     if (itemId === id) {
       let transform = item.get(itemId).transforms[0];

@@ -31,6 +31,7 @@ model Component {
   updatedAt DateTime            @updatedAt
   User      User?               @relation(fields: [userId], references: [id])
   userId    String?
+  author    String?
 }
 
 model Library {
@@ -45,6 +46,9 @@ model Library {
 
 model User {
   id         String      @id @default(uuid())
+  clerkId    String      @unique
+  firstName  String
+  secondName String?
   Libraries  Library[]
   Components Component[]
 }
