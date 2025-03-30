@@ -42,7 +42,7 @@ export function ComponentList<TData, TValue>({
   };
 
   return (
-    <div className="rounded-md mt-24">
+    <div className="rounded-md">
       <Table>
         <TableHeader className="bg-muted">
           {table.getHeaderGroups().map((headerGroup) => (

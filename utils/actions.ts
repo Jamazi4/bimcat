@@ -45,7 +45,7 @@ export const createComponentAction = async (
   try {
     const dbUser = await prisma.user.findUnique({
       where: {
-        clerkId: user.id,
+        clerkId: user?.id,
       },
     });
 
@@ -102,7 +102,16 @@ export const fetchGeometryAction = async (id: string) => {
 
 export const fetchAllComponents = async () => {
   try {
-    const components = await prisma.component.findMany({});
+    const components = await prisma.component.findMany({
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+        author: true,
+        userId: true,
+      },
+    });
 
     return components;
   } catch (error) {
@@ -125,6 +134,8 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
       componentSchema,
       component
     );
+
+    if (!validatedComponent.psets) throw new Error("No psets in component");
 
     const newPsets: Pset[] = validatedComponent.psets.map((pset: Pset) => {
       if (pset.title === psetTitle) {
@@ -164,6 +175,8 @@ export const removePsetAction = async (prevState: any, formData: FormData) => {
       component
     );
 
+    if (!validatedComponent.psets) throw new Error("No psets in component");
+
     const newPsets: Pset[] = validatedComponent.psets.filter(
       (pset) => pset.title !== psetTitle
     );
@@ -194,6 +207,8 @@ export const addPsetAction = async (prevState: any, formData: FormData) => {
       componentSchema,
       component
     );
+
+    if (!validatedComponent.psets) throw new Error("No psets in component");
 
     const newPsets: Pset[] = [
       ...validatedComponent.psets,
@@ -238,3 +253,17 @@ export const createUserAciton = async (user: Partial<User>) => {
     });
   } catch (error) {}
 };
+
+// export const createLibrary = async () => {
+//   const user = await getAuthUser();
+
+//   const dbUser = await prisma.user.findUnique({
+//     where: {
+//       clerkId: user.id,
+//     },
+//   });
+
+//   const library = await prisma.library.create({
+
+//   })
+// };

@@ -10,6 +10,7 @@ export type ComponentRow = {
   createdAt: string;
   updatedAt: string;
   author: string;
+  editable: boolean;
 };
 
 export const columns: ColumnDef<ComponentRow>[] = [
@@ -40,7 +41,8 @@ export const columns: ColumnDef<ComponentRow>[] = [
         e.stopPropagation();
         console.log(component.id);
       };
-      return (
+
+      return component.editable ? (
         <Button
           asChild
           size="icon"
@@ -50,6 +52,8 @@ export const columns: ColumnDef<ComponentRow>[] = [
         >
           <Trash className="p-2" />
         </Button>
+      ) : (
+        <></>
       );
     },
   },

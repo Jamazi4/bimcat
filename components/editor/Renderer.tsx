@@ -31,8 +31,8 @@ const Renderer = ({ geometry }: { geometry: ComponentGeometry[] }) => {
   // }, [geometry]);
 
   return (
-    <div className="bg-muted rounded border w-full aspect-square">
-      <Canvas camera={{ position: [0, 1, 0] }} className="w-full">
+    <div className="bg-background border rounded w-full aspect-square">
+      <Canvas camera={{ position: [0, 1, 0] }} className=" h-1/2">
         <ambientLight intensity={2} />
         <directionalLight position={[-100, 100, -100]} intensity={0.5} />
         <Grid

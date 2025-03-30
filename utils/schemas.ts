@@ -38,10 +38,10 @@ export type PsetContent = z.infer<typeof PsetContentSchema>;
 export const componentSchema = z.object({
   id: z.string(),
   name: z.string(),
-  psets: z.array(PsetSchema),
+  psets: z.array(PsetSchema).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  userId: z.string(),
+  userId: z.string().optional(),
   author: z.string(),
 });
 
