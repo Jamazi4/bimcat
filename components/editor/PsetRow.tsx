@@ -1,5 +1,3 @@
-import { Separator } from "../ui/separator";
-
 const PsetRow = ({
   name,
   value,
@@ -15,7 +13,6 @@ const PsetRow = ({
         </div>
         <p>{value || "-"}</p>
       </div>
-      {/* <Separator /> */}
     </div>
   );
 };

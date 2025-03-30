@@ -6,7 +6,7 @@ import { Trash } from "lucide-react";
 
 export type ComponentRow = {
   id: string;
-  name: any;
+  name: string;
   createdAt: string;
   updatedAt: string;
   author: string;

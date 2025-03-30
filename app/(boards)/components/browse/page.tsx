@@ -17,7 +17,7 @@ async function getData(): Promise<ComponentRow[]> {
   );
 
   const user = await currentUser();
-  const clerkId = user?.id;
+  // const clerkId = user?.id; //TODO: verify via clerk id, not password
   const thisAuthor = `${user?.firstName} ${user?.lastName}`;
 
   return validatedComponents.map((component) => {
