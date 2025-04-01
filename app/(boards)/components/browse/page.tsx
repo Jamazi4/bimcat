@@ -6,7 +6,6 @@ import {
 import { fetchAllComponents } from "@/utils/actions";
 import { componentsArraySchema } from "@/utils/schemas";
 import { validateWithZodSchema } from "@/utils/schemas";
-import { currentUser } from "@clerk/nextjs/server";
 import { format } from "date-fns";
 
 async function getData(): Promise<ComponentRow[]> {
@@ -16,10 +15,6 @@ async function getData(): Promise<ComponentRow[]> {
     components
   );
 
-  const user = await currentUser();
-  // const clerkId = user?.id; //TODO: verify via clerk id, not password
-  const thisAuthor = `${user?.firstName} ${user?.lastName}`;
-
   return validatedComponents.map((component) => {
     return {
       id: component.id,
@@ -27,7 +22,7 @@ async function getData(): Promise<ComponentRow[]> {
       createdAt: format(component.createdAt, "dd-MM-yy HH:mm"),
       updatedAt: format(component.updatedAt, "dd-MM-yy HH:mm"),
       author: component.author,
-      editable: component.author === thisAuthor,
+      editable: component.editable,
     };
   });
 }

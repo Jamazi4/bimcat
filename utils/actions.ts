@@ -101,7 +101,14 @@ export const fetchGeometryAction = async (id: string) => {
 };
 
 export const fetchAllComponents = async () => {
+  const user = await getAuthUser();
+
   try {
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: user.id },
+    });
+    const dbUserId = dbUser?.id;
+
     const components = await prisma.component.findMany({
       select: {
         id: true,
@@ -113,7 +120,14 @@ export const fetchAllComponents = async () => {
       },
     });
 
-    return components;
+    const componentsWithEditable = components.map((component) => {
+      return {
+        ...component,
+        editable: component.userId === dbUserId,
+      };
+    });
+
+    return componentsWithEditable;
   } catch (error) {
     console.log(error);
   }

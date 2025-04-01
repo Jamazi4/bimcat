@@ -43,6 +43,7 @@ export const componentSchema = z.object({
   updatedAt: z.date(),
   userId: z.string().optional(),
   author: z.string(),
+  editable: z.boolean(),
 });
 
 export const userSchema: z.ZodType<User> = z.lazy(

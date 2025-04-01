@@ -137,9 +137,6 @@ export const getIfcGeometryById = async (
 
       item.mesh.geometry.applyMatrix4(transform);
 
-      //TODO: saved file have messed up normals,
-      // maybe it's problem with ifcBuilder
-
       item.mesh.geometry.attributes.position.needsUpdate = true;
       return true;
     }
