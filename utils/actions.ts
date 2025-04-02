@@ -23,7 +23,7 @@ const renderError = (error: unknown): { message: string } => {
 
 const getAuthUser = async () => {
   const user = await currentUser();
-  if (!user) redirect("/");
+  // if (!user) redirect("/");
   return user;
 };
 
@@ -104,10 +104,17 @@ export const fetchAllComponents = async () => {
   const user = await getAuthUser();
 
   try {
-    const dbUser = await prisma.user.findUnique({
-      where: { clerkId: user.id },
-    });
-    const dbUserId = dbUser?.id;
+    let dbUserId = "0";
+
+    if (user) {
+      const dbUser = await prisma.user.findUnique({
+        where: { clerkId: user.id },
+      });
+
+      if (dbUser) {
+        dbUserId = dbUser.id;
+      }
+    }
 
     const components = await prisma.component.findMany({
       select: {
@@ -117,6 +124,7 @@ export const fetchAllComponents = async () => {
         updatedAt: true,
         author: true,
         userId: true,
+        public: true,
       },
     });
 
@@ -144,9 +152,11 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
   try {
     const component = await fetchSingleComponentAction(componentId);
 
+    const componentWithEditable = { ...component, editable: true };
+
     const validatedComponent = validateWithZodSchema(
       componentSchema,
-      component
+      componentWithEditable
     );
 
     if (!validatedComponent.psets) throw new Error("No psets in component");

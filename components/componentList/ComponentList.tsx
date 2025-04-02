@@ -6,6 +6,8 @@ import {
   getCoreRowModel,
   Row,
   useReactTable,
+  SortingState,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 
 import {
@@ -18,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { ComponentRow } from "./ComponentListColumns";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -29,11 +32,17 @@ export function ComponentList<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
   });
 
   const handleRowClick = (row: Row<TData>) => {
@@ -69,7 +78,7 @@ export function ComponentList<TData, TValue>({
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => handleRowClick(row)}
-                className="cursor-pointer"
+                className="cursor-pointer h-12"
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
@@ -80,7 +89,11 @@ export function ComponentList<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell
+                rowSpan={2}
+                colSpan={columns.length}
+                className="h-24 text-center"
+              >
                 No results.
               </TableCell>
             </TableRow>

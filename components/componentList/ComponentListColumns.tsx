@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
 import { Trash } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 
 export type ComponentRow = {
   id: string;
@@ -11,24 +12,65 @@ export type ComponentRow = {
   updatedAt: string;
   author: string;
   editable: boolean;
+  public: boolean;
 };
 
 export const columns: ColumnDef<ComponentRow>[] = [
   {
     accessorKey: "name",
-    header: "Name",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Name
+          <ArrowUpDown />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "createdAt",
-    header: "Created",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Created
+          <ArrowUpDown />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "updatedAt",
-    header: "Updated",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Updated
+          <ArrowUpDown />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "author",
-    header: "Author",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Author
+          <ArrowUpDown />
+        </Button>
+      );
+    },
   },
 
   {
@@ -47,10 +89,10 @@ export const columns: ColumnDef<ComponentRow>[] = [
           asChild
           size="icon"
           variant="destructive"
-          className="h-8 w-8"
+          className="h-6 w-6"
           onClick={(e) => handleClick(e)}
         >
-          <Trash className="p-2" />
+          <Trash className="p-1" />
         </Button>
       ) : (
         <></>

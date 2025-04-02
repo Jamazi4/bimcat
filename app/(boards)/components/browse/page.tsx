@@ -3,6 +3,15 @@ import {
   columns,
   ComponentRow,
 } from "@/components/componentList/ComponentListColumns";
+import Filters from "@/components/componentList/Filters";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { fetchAllComponents } from "@/utils/actions";
 import { componentsArraySchema } from "@/utils/schemas";
 import { validateWithZodSchema } from "@/utils/schemas";
@@ -23,6 +32,7 @@ async function getData(): Promise<ComponentRow[]> {
       updatedAt: format(component.updatedAt, "dd-MM-yy HH:mm"),
       author: component.author,
       editable: component.editable,
+      public: component.public,
     };
   });
 }
@@ -34,6 +44,23 @@ export default async function page() {
 
   return (
     <main className="w-full px-4 justify-center mx-auto">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink>Components</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Browse</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <h1 className="text-2xl font-bold my-6">Component browser</h1>
+      <Filters />
       <ComponentList columns={columns} data={data} />
     </main>
   );

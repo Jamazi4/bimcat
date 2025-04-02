@@ -43,8 +43,27 @@ export const componentSchema = z.object({
   updatedAt: z.date(),
   userId: z.string().optional(),
   author: z.string(),
+  public: z.boolean(),
   editable: z.boolean(),
+  //editable is not stored in db, but assigned
+  //on backend depending on the user
 });
+
+export const componentWithGeometrySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  geometry: geometryArraySchema,
+  psets: z.array(PsetSchema),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  userId: z.string(),
+  author: z.string(),
+  public: z.boolean(),
+});
+
+export type Component = z.infer<typeof componentSchema>;
+
+export const componentsArraySchema = z.array(componentSchema);
 
 export const userSchema: z.ZodType<User> = z.lazy(
   (): z.ZodType<User> =>
@@ -74,21 +93,6 @@ export const librarySchema: z.ZodType<Library> = z.lazy(
 );
 
 export type librarySchemaType = z.infer<typeof librarySchema>;
-
-export const componentWithGeometrySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  geometry: geometryArraySchema,
-  psets: z.array(PsetSchema),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  userId: z.string(),
-  author: z.string(),
-});
-
-export type Component = z.infer<typeof componentSchema>;
-
-export const componentsArraySchema = z.array(componentSchema);
 
 export const editPsetSchema = z.object({
   componentId: z.string().uuid(),
