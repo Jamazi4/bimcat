@@ -13,6 +13,7 @@ import { revalidatePath } from "next/cache";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { User } from "./types";
+import { searchParamsType } from "@/app/(boards)/components/browse/page";
 
 const renderError = (error: unknown): { message: string } => {
   console.log(error);
@@ -100,11 +101,12 @@ export const fetchGeometryAction = async (id: string) => {
   }
 };
 
-export const fetchAllComponents = async () => {
+export const fetchAllComponents = async (params: searchParamsType) => {
+  const { myComponents, search } = params;
   const user = await getAuthUser();
 
   try {
-    let dbUserId = "0";
+    let dbUserId = "";
 
     if (user) {
       const dbUser = await prisma.user.findUnique({
@@ -116,7 +118,18 @@ export const fetchAllComponents = async () => {
       }
     }
 
+    const whereCondition: any = {};
+
+    if (!dbUserId) {
+      whereCondition.public = true;
+    } else if (myComponents) {
+      whereCondition.userId = dbUserId;
+    } else {
+      whereCondition.OR = [{ public: true }, { userId: dbUserId }];
+    }
+
     const components = await prisma.component.findMany({
+      where: whereCondition,
       select: {
         id: true,
         name: true,
@@ -153,6 +166,7 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
     const component = await fetchSingleComponentAction(componentId);
 
     const componentWithEditable = { ...component, editable: true };
+    //TODO: add actual verification of editable.
 
     const validatedComponent = validateWithZodSchema(
       componentSchema,

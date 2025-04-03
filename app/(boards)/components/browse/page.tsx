@@ -17,8 +17,13 @@ import { componentsArraySchema } from "@/utils/schemas";
 import { validateWithZodSchema } from "@/utils/schemas";
 import { format } from "date-fns";
 
-async function getData(): Promise<ComponentRow[]> {
-  const components = await fetchAllComponents();
+export type searchParamsType = {
+  myComponents: string;
+  search: string;
+};
+
+async function getData(params: searchParamsType): Promise<ComponentRow[]> {
+  const components = await fetchAllComponents(params);
   const validatedComponents = validateWithZodSchema(
     componentsArraySchema,
     components
@@ -37,8 +42,13 @@ async function getData(): Promise<ComponentRow[]> {
   });
 }
 
-export default async function page() {
-  const data = await getData();
+export default async function page({
+  searchParams,
+}: {
+  searchParams: Promise<{ myComponents: string; search: string }>;
+}) {
+  const params = await searchParams;
+  const data = await getData(params);
 
   if (!data) return <div>Nothing to look at here...</div>;
 
