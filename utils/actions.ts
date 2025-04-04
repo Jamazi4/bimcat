@@ -8,6 +8,7 @@ import {
   Pset,
   geometryArraySchema,
   componentWithGeometrySchema,
+  Component,
 } from "./schemas";
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@clerk/nextjs/server";
@@ -41,6 +42,18 @@ const getDbUser = async () => {
   } catch (error) {
     console.log("No user in db for this clerkId");
   }
+};
+
+const addEditableToComponent = async (component: Partial<Component>) => {
+  const dbUser = await getDbUser();
+  const dbUserId = dbUser?.id;
+
+  const componentWithEditable = {
+    ...component,
+    editable: dbUserId === component.userId,
+  };
+
+  return componentWithEditable;
 };
 
 export const createComponentAction = async (
@@ -175,8 +188,10 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
   try {
     const component = await fetchSingleComponentAction(componentId);
 
-    const componentWithEditable = { ...component, editable: true };
-    //TODO: add actual verification of editable.
+    const componentWithEditable = await addEditableToComponent(component);
+
+    if (!componentWithEditable.editable)
+      throw new Error("User has no rights to edit this component");
 
     const validatedComponent = validateWithZodSchema(
       componentSchema,
@@ -218,9 +233,15 @@ export const removePsetAction = async (prevState: any, formData: FormData) => {
 
   try {
     const component = await fetchSingleComponentAction(componentId);
+
+    const componentWithEditable = await addEditableToComponent(component);
+
+    if (!componentWithEditable.editable)
+      throw new Error("User has no rights to edit this component");
+
     const validatedComponent = validateWithZodSchema(
       componentSchema,
-      component
+      componentWithEditable
     );
 
     if (!validatedComponent.psets) throw new Error("No psets in component");
@@ -251,9 +272,15 @@ export const addPsetAction = async (prevState: any, formData: FormData) => {
 
   try {
     const component = await fetchSingleComponentAction(componentId);
+
+    const componentWithEditable = await addEditableToComponent(component);
+
+    if (!componentWithEditable.editable)
+      throw new Error("User has no rights to edit this component");
+
     const validatedComponent = validateWithZodSchema(
       componentSchema,
-      component
+      componentWithEditable
     );
 
     if (!validatedComponent.psets) throw new Error("No psets in component");
@@ -283,6 +310,7 @@ export const addPsetAction = async (prevState: any, formData: FormData) => {
 export const createUserAciton = async (user: Partial<User>) => {
   if (!user.clerkId || !user.email || !user.firstName || !user.secondName)
     return;
+
   try {
     await prisma.user.create({
       data: {
