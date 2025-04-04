@@ -11,7 +11,6 @@ import {
 } from "./schemas";
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { User } from "./types";
 import { searchParamsType } from "@/app/(boards)/components/browse/page";
 
@@ -28,12 +27,26 @@ const getAuthUser = async () => {
   return user;
 };
 
+const getDbUser = async () => {
+  try {
+    const user = await currentUser();
+
+    if (!user) return;
+    const clerkId = user.id;
+    const dbUser = prisma.user.findUnique({
+      where: { clerkId },
+      include: { Components: true, Libraries: true },
+    });
+    return dbUser;
+  } catch (error) {
+    console.log("No user in db for this clerkId");
+  }
+};
+
 export const createComponentAction = async (
   prevState: any,
   formData: FormData
 ) => {
-  const user = await getAuthUser();
-
   const name = formData.get("name") as string;
   const geometry = formData.get("geometry") as string;
   const psets = formData.get("psets") as string;
@@ -44,12 +57,7 @@ export const createComponentAction = async (
   const parsedPsets = JSON.parse(psets);
 
   try {
-    const dbUser = await prisma.user.findUnique({
-      where: {
-        clerkId: user?.id,
-      },
-    });
-
+    const dbUser = await getDbUser();
     const author = `${dbUser?.firstName} ${dbUser?.secondName}`;
 
     const response = await prisma.component.create({
@@ -103,20 +111,10 @@ export const fetchGeometryAction = async (id: string) => {
 
 export const fetchAllComponents = async (params: searchParamsType) => {
   const { myComponents, search } = params;
-  const user = await getAuthUser();
 
   try {
-    let dbUserId = "";
-
-    if (user) {
-      const dbUser = await prisma.user.findUnique({
-        where: { clerkId: user.id },
-      });
-
-      if (dbUser) {
-        dbUserId = dbUser.id;
-      }
-    }
+    const dbUser = await getDbUser();
+    const dbUserId = dbUser?.id;
 
     const whereCondition: any = {};
 
@@ -126,6 +124,18 @@ export const fetchAllComponents = async (params: searchParamsType) => {
       whereCondition.userId = dbUserId;
     } else {
       whereCondition.OR = [{ public: true }, { userId: dbUserId }];
+    }
+
+    if (search) {
+      whereCondition.AND = [
+        ...(whereCondition.AND || []),
+        {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { author: { contains: search, mode: "insensitive" } },
+          ],
+        },
+      ];
     }
 
     const components = await prisma.component.findMany({
@@ -289,7 +299,33 @@ export const createUserAciton = async (user: Partial<User>) => {
         Components: true,
       },
     });
-  } catch (error) {}
+  } catch (error) {
+    return renderError(error);
+  }
+};
+
+export const deleteComponentAction = async (componentId: string) => {
+  try {
+    const dbUser = await getDbUser();
+    const allowed = dbUser?.Components.map((component) => {
+      return component.id === componentId;
+    });
+
+    if (!allowed)
+      throw new Error("Error deleting component, user or wrong component");
+
+    await prisma.component.delete({
+      where: {
+        id: componentId,
+      },
+    });
+
+    revalidatePath(`/components`);
+
+    return { message: `Component ${componentId} deleted successfully!` };
+  } catch (error) {
+    return renderError(error);
+  }
 };
 
 // export const createLibrary = async () => {
