@@ -5,7 +5,7 @@ import { Star } from "lucide-react";
 
 const Title = ({ text }: { text: string }) => {
   return (
-    <div className="mb-8">
+    <div className="my-6">
       <div className="flex justify-between">
         <h1 className="font-bold text-xl text-primary">{text}</h1>
         {/* Title buttons */}

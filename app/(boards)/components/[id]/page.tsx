@@ -2,6 +2,14 @@ import Renderer from "@/components/editor/Renderer";
 import Title from "@/components/componentList/Title";
 import { fetchSingleComponentAction } from "@/utils/actions";
 import PsetsList from "@/components/editor/PsetsList";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 
 const ComponentCard = async ({
   params,
@@ -17,6 +25,7 @@ const ComponentCard = async ({
 
   return (
     <div>
+      <BreadCrumbs name={component.name} />
       <Title text={component.name} />
       <div
         className="justify-center grid grid-cols-1 lg:grid-cols-6
@@ -38,3 +47,27 @@ const ComponentCard = async ({
   );
 };
 export default ComponentCard;
+
+const BreadCrumbs = ({ name }: { name: string }) => {
+  return (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/">Home</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbLink>Components</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/components/browse">Browse</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>{name}</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+};
