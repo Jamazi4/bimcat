@@ -64,7 +64,6 @@ export const createComponentAction = async (
   const geometry = formData.get("geometry") as string;
   const psets = formData.get("psets") as string;
   const makePrivate = formData.get("makePrivate") === "on";
-  console.log(makePrivate);
 
   const parsedGeometry = validateWithZodSchema(
     geometryArraySchema,
@@ -372,7 +371,7 @@ export const deleteComponentAction = async (componentId: string) => {
 
     revalidatePath(`/components/browse`);
 
-    return; //toas handled in the ComponentListColumns
+    return { message: `${component.name} succesfully deleted.` };
   } catch (error) {
     return renderError(error);
   }

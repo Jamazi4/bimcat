@@ -10,6 +10,18 @@ import { format } from "date-fns";
 import { Eye, EyeOff } from "lucide-react";
 import { TooltipTrigger, Tooltip, TooltipProvider } from "../ui/tooltip";
 import { TooltipContent } from "@radix-ui/react-tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { useState } from "react";
+import FormContainer from "../global/FormContainer";
+import SubmitButton from "../global/SubmitButton";
 
 export type ComponentRow = {
   id: string;
@@ -97,32 +109,13 @@ export const columns: ColumnDef<ComponentRow>[] = [
     id: "actions",
     cell: ({ row }) => {
       const component = row.original;
-      const handleClick = async (
-        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-      ) => {
-        e.stopPropagation();
-        await deleteComponentAction(component.id);
-        toast(`Component ${component.name} deleted successfully!`);
-      };
 
       return component.editable ? (
         <div className="flex">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  asChild
-                  size="icon"
-                  variant="destructive"
-                  className="h-6 w-6 mr-2"
-                  onClick={(e) => handleClick(e)}
-                >
-                  <Trash className="p-1" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Remove component</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <RemoveButton
+            componentId={component.id}
+            componentName={component.name}
+          />
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -140,3 +133,55 @@ export const columns: ColumnDef<ComponentRow>[] = [
     },
   },
 ];
+
+const RemoveButton = ({
+  componentId,
+  componentName,
+}: {
+  componentId: string;
+  componentName: string;
+}) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const removeActionWithId = deleteComponentAction.bind(null, componentId);
+
+  return (
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <DialogTrigger asChild>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                asChild
+                size="icon"
+                variant="destructive"
+                className="h-6 w-6 mr-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <Trash className="p-1" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Remove</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Remove {componentName}</DialogTitle>
+          <DialogDescription>
+            You are about to remove your component, there is no undo
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <FormContainer
+            action={removeActionWithId}
+            onSuccess={() => setDialogOpen(false)}
+          >
+            <SubmitButton />
+          </FormContainer>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};

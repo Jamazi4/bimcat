@@ -8,9 +8,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useFormStatus } from "react-dom";
-import { AiOutlineReload } from "react-icons/ai";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useEffect, useState } from "react";
@@ -19,6 +16,9 @@ import { ComponentGeometry, Pset } from "@/utils/types";
 import { createComponentAction } from "@/utils/actions";
 import FormContainer from "../global/FormContainer";
 import { Checkbox } from "../ui/checkbox";
+import { useFormStatus } from "react-dom";
+import { Button } from "../ui/button";
+import { AiOutlineReload } from "react-icons/ai";
 
 const SaveComponent = ({
   selected,
