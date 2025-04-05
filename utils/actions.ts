@@ -345,7 +345,7 @@ export const deleteComponentAction = async (componentId: string) => {
     });
 
     if (!component || component.User?.id !== dbUser?.id) {
-      throw new Error("Error deleting component or wrong user");
+      throw new Error("Error deleting component or unauthorized");
     }
 
     const geometryIds = component.geometry.map((g) => g.id);
@@ -372,6 +372,39 @@ export const deleteComponentAction = async (componentId: string) => {
     revalidatePath(`/components/browse`);
 
     return { message: `${component.name} succesfully deleted.` };
+  } catch (error) {
+    return renderError(error);
+  }
+};
+
+export const toggleComponentPrivateAction = async (componentId: string) => {
+  try {
+    const dbUser = await getDbUser();
+    const component = await prisma.component.findUnique({
+      where: { id: componentId },
+      include: { User: true },
+    });
+
+    if (!component || component.User?.id !== dbUser?.id) {
+      throw new Error("Error changing private attribute or unauthorized");
+    }
+
+    const curPublic = component.public;
+
+    await prisma.component.update({
+      where: {
+        id: componentId,
+      },
+      data: {
+        public: !curPublic,
+      },
+    });
+
+    revalidatePath(`/components/browse`);
+
+    return {
+      message: `${component.name} is now ${!curPublic ? "public" : "private"}.`,
+    };
   } catch (error) {
     return renderError(error);
   }

@@ -4,8 +4,10 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
 import { Trash } from "lucide-react";
 import { ArrowUpDown } from "lucide-react";
-import { deleteComponentAction } from "@/utils/actions";
-import { toast } from "sonner";
+import {
+  deleteComponentAction,
+  toggleComponentPrivateAction,
+} from "@/utils/actions";
 import { format } from "date-fns";
 import { Eye, EyeOff } from "lucide-react";
 import { TooltipTrigger, Tooltip, TooltipProvider } from "../ui/tooltip";
@@ -111,21 +113,16 @@ export const columns: ColumnDef<ComponentRow>[] = [
       const component = row.original;
 
       return component.editable ? (
-        <div className="flex">
+        <div className="flex items-center justify-between">
+          <PrivateToggle
+            componentId={component.id}
+            componentName={component.name}
+            componentPublic={component.public}
+          />
           <RemoveButton
             componentId={component.id}
             componentName={component.name}
           />
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                {component.public ? <Eye /> : <EyeOff />}
-              </TooltipTrigger>
-              <TooltipContent>
-                {component.public ? "Public" : "Private"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
       ) : (
         <></>
@@ -133,6 +130,64 @@ export const columns: ColumnDef<ComponentRow>[] = [
     },
   },
 ];
+
+const PrivateToggle = ({
+  componentId,
+  componentName,
+  componentPublic,
+}: {
+  componentId: string;
+  componentName: string;
+  componentPublic: boolean;
+}) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const togglePrivateActionWithId = toggleComponentPrivateAction.bind(
+    null,
+    componentId
+  );
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                {componentPublic ? <Eye /> : <EyeOff />}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Toggle public status {componentName}</DialogTitle>
+                <DialogDescription>
+                  You are about to change {componentName} to be{" "}
+                  {componentPublic ? "private" : "public"}.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <FormContainer
+                  action={togglePrivateActionWithId}
+                  onSuccess={() => setDialogOpen(false)}
+                >
+                  <SubmitButton />
+                </FormContainer>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </TooltipTrigger>
+        <TooltipContent>
+          {componentPublic ? "Public" : "Private"}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 const RemoveButton = ({
   componentId,
@@ -145,43 +200,43 @@ const RemoveButton = ({
   const removeActionWithId = deleteComponentAction.bind(null, componentId);
 
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger asChild>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
               <Button
                 asChild
                 size="icon"
-                variant="destructive"
-                className="h-6 w-6 mr-2"
+                variant="ghost"
+                className="h-6 w-6 text-destructive"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
               >
                 <Trash className="p-1" />
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>Remove</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Remove {componentName}</DialogTitle>
-          <DialogDescription>
-            You are about to remove your component, there is no undo
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <FormContainer
-            action={removeActionWithId}
-            onSuccess={() => setDialogOpen(false)}
-          >
-            <SubmitButton />
-          </FormContainer>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Remove {componentName}</DialogTitle>
+                <DialogDescription>
+                  You are about to remove your component, there is no undo
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <FormContainer
+                  action={removeActionWithId}
+                  onSuccess={() => setDialogOpen(false)}
+                >
+                  <SubmitButton />
+                </FormContainer>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </TooltipTrigger>
+        <TooltipContent>Remove</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };

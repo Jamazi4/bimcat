@@ -49,6 +49,8 @@ export function ComponentList<TData, TValue>({
   });
 
   const handleRowClick = (row: Row<TData>) => {
+    const isAnyDialogOpen = document.querySelector('[data-state="open"]');
+    if (isAnyDialogOpen) return;
     const originalRow = row.original as ComponentRow;
     router.push(`/components/${originalRow.id}`);
   };
