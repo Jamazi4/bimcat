@@ -10,10 +10,6 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import {
-  componentWithGeometrySchema,
-  validateWithZodSchema,
-} from "@/utils/schemas";
 
 const ComponentCard = async ({
   params,

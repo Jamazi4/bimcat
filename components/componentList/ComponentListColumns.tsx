@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
-import { Trash } from "lucide-react";
+import { BookUp, Trash } from "lucide-react";
 import { ArrowUpDown } from "lucide-react";
 import {
   deleteComponentAction,
@@ -114,6 +114,7 @@ export const columns: ColumnDef<ComponentRow>[] = [
 
       return component.editable ? (
         <div className="flex items-center justify-between">
+          <AddToLibrary />
           <PrivateToggle
             componentId={component.id}
             componentName={component.name}
@@ -125,11 +126,28 @@ export const columns: ColumnDef<ComponentRow>[] = [
           />
         </div>
       ) : (
-        <></>
+        <>
+          <AddToLibrary />
+        </>
       );
     },
   },
 ];
+
+const AddToLibrary = () => {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-6 w-6 cursor-pointer"
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+    >
+      <BookUp />
+    </Button>
+  );
+};
 
 const PrivateToggle = ({
   componentId,
@@ -154,7 +172,7 @@ const PrivateToggle = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-6 w-6 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
