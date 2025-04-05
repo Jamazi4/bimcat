@@ -20,17 +20,8 @@ const Navbar = () => {
             </div>
           </Link>
         </h1>
-        {/* Navigation */}
-        {/* <div className="flex text-center w-full">
-          <Button variant="link" asChild className="text-primary-foreground">
-            <Link href="/componentPicker">Create</Link>
-          </Button>
-          <Button variant="link" asChild className="text-primary-foreground">
-            <Link href="/">Library</Link>
-          </Button>
-        </div> */}
+
         <NavbarMenu />
-        {/* Mode/account */}
 
         <div className="flex gap-2 justify-center items-center">
           <ModeToggle />

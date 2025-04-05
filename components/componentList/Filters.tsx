@@ -1,9 +1,7 @@
 "use client";
 
-import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
-import { Search } from "lucide-react";
 import { Label } from "../ui/label";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -58,7 +56,7 @@ const Filters = () => {
               className="mx-2"
               id="my"
               onCheckedChange={handleSwitchMyComponents}
-              // checked={myComponents}
+              checked={myComponents}
             />
             <Label htmlFor="my">Your components</Label>
           </div>

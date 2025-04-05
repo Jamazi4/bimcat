@@ -6,12 +6,13 @@ import { Trash } from "lucide-react";
 import { ArrowUpDown } from "lucide-react";
 import { deleteComponentAction } from "@/utils/actions";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 export type ComponentRow = {
   id: string;
   name: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   author: string;
   editable: boolean;
   public: boolean;
@@ -20,6 +21,7 @@ export type ComponentRow = {
 export const columns: ColumnDef<ComponentRow>[] = [
   {
     accessorKey: "name",
+    sortingFn: "text",
     header: ({ column }) => {
       return (
         <Button
@@ -34,6 +36,12 @@ export const columns: ColumnDef<ComponentRow>[] = [
   },
   {
     accessorKey: "createdAt",
+    sortingFn: "datetime",
+    cell: ({ row }) => {
+      const date = row.getValue("createdAt") as Date;
+      const formatted = format(date, "dd-MM-yy HH:mm");
+      return formatted;
+    },
     header: ({ column }) => {
       return (
         <Button
@@ -48,6 +56,12 @@ export const columns: ColumnDef<ComponentRow>[] = [
   },
   {
     accessorKey: "updatedAt",
+    sortingFn: "datetime",
+    cell: ({ row }) => {
+      const date = row.getValue("updatedAt") as Date;
+      const formatted = format(date, "dd-MM-yy HH:mm");
+      return formatted;
+    },
     header: ({ column }) => {
       return (
         <Button
@@ -62,6 +76,7 @@ export const columns: ColumnDef<ComponentRow>[] = [
   },
   {
     accessorKey: "author",
+    sortingFn: "text",
     header: ({ column }) => {
       return (
         <Button

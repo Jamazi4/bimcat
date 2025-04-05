@@ -33,8 +33,10 @@ async function getData(params: searchParamsType): Promise<ComponentRow[]> {
     return {
       id: component.id,
       name: component.name,
-      createdAt: format(component.createdAt, "dd-MM-yy HH:mm"),
-      updatedAt: format(component.updatedAt, "dd-MM-yy HH:mm"),
+      // createdAt: format(component.createdAt, "dd-MM-yy HH:mm"),
+      // updatedAt: format(component.updatedAt, "dd-MM-yy HH:mm"),
+      createdAt: component.createdAt,
+      updatedAt: component.updatedAt,
       author: component.author,
       editable: component.editable,
       public: component.public,
