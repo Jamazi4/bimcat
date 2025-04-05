@@ -7,6 +7,9 @@ import { ArrowUpDown } from "lucide-react";
 import { deleteComponentAction } from "@/utils/actions";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { Eye, EyeOff } from "lucide-react";
+import { TooltipTrigger, Tooltip, TooltipProvider } from "../ui/tooltip";
+import { TooltipContent } from "@radix-ui/react-tooltip";
 
 export type ComponentRow = {
   id: string;
@@ -103,15 +106,34 @@ export const columns: ColumnDef<ComponentRow>[] = [
       };
 
       return component.editable ? (
-        <Button
-          asChild
-          size="icon"
-          variant="destructive"
-          className="h-6 w-6"
-          onClick={(e) => handleClick(e)}
-        >
-          <Trash className="p-1" />
-        </Button>
+        <div className="flex">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  asChild
+                  size="icon"
+                  variant="destructive"
+                  className="h-6 w-6 mr-2"
+                  onClick={(e) => handleClick(e)}
+                >
+                  <Trash className="p-1" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Remove component</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {component.public ? <Eye /> : <EyeOff />}
+              </TooltipTrigger>
+              <TooltipContent>
+                {component.public ? "Public" : "Private"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       ) : (
         <></>
       );

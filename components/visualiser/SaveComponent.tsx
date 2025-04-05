@@ -18,6 +18,7 @@ import { getIfcDataById } from "@/utils/ifc/ifcjs";
 import { ComponentGeometry, Pset } from "@/utils/types";
 import { createComponentAction } from "@/utils/actions";
 import FormContainer from "../global/FormContainer";
+import { Checkbox } from "../ui/checkbox";
 
 const SaveComponent = ({
   selected,
@@ -58,7 +59,7 @@ const SaveComponent = ({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Save Component To Your Library:</DialogTitle>
+          <DialogTitle>Upload component to BimCAT:</DialogTitle>
           <DialogDescription>
             Please provide a name for the component.
           </DialogDescription>
@@ -73,6 +74,10 @@ const SaveComponent = ({
             <p className="text-sm text-secondary-foreground">Component Name</p>
           </Label>
           <Input name="name" id="name"></Input>
+          <div className="flex mt-4 space-x-2">
+            <Checkbox name="makePrivate" id="makePrivate" />
+            <Label htmlFor="makePrivate">Make private</Label>
+          </div>
           {geometry && (
             <input
               type="hidden"

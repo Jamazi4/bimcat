@@ -14,7 +14,6 @@ import { revalidatePath } from "next/cache";
 import { currentUser } from "@clerk/nextjs/server";
 import { User } from "./types";
 import { searchParamsType } from "@/app/(boards)/components/browse/page";
-import { count } from "console";
 
 const renderError = (error: unknown): { message: string } => {
   console.log(error);
@@ -64,6 +63,9 @@ export const createComponentAction = async (
   const name = formData.get("name") as string;
   const geometry = formData.get("geometry") as string;
   const psets = formData.get("psets") as string;
+  const makePrivate = formData.get("makePrivate") === "on";
+  console.log(makePrivate);
+
   const parsedGeometry = validateWithZodSchema(
     geometryArraySchema,
     JSON.parse(geometry)
@@ -74,10 +76,11 @@ export const createComponentAction = async (
     const dbUser = await getDbUser();
     const author = `${dbUser?.firstName} ${dbUser?.secondName}`;
 
-    const response = await prisma.component.create({
+    await prisma.component.create({
       data: {
         name,
         psets: parsedPsets,
+        public: !makePrivate,
         geometry: {
           create: parsedGeometry,
         },

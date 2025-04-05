@@ -15,7 +15,6 @@ import {
 import { fetchAllComponents } from "@/utils/actions";
 import { componentsArraySchema } from "@/utils/schemas";
 import { validateWithZodSchema } from "@/utils/schemas";
-import { format } from "date-fns";
 
 export type searchParamsType = {
   myComponents: string;
@@ -33,8 +32,6 @@ async function getData(params: searchParamsType): Promise<ComponentRow[]> {
     return {
       id: component.id,
       name: component.name,
-      // createdAt: format(component.createdAt, "dd-MM-yy HH:mm"),
-      // updatedAt: format(component.updatedAt, "dd-MM-yy HH:mm"),
       createdAt: component.createdAt,
       updatedAt: component.updatedAt,
       author: component.author,

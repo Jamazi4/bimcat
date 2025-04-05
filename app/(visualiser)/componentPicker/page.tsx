@@ -12,6 +12,7 @@ import type { Pset } from "@/utils/types";
 import { getIfcPsetsById } from "@/utils/ifc/ifcjs";
 import PsetAccordion from "@/components/editor/PsetAccordion";
 import MeshItem from "@/components/visualiser/MeshItem";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Page = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -27,7 +28,7 @@ const Page = () => {
   return (
     <div className="w-full h-[calc(100vh-72px)]">
       {selected && displayPsets && displayPsets.length > 0 && (
-        <div className="absolute right-4 top-22 z-10 bg-background-transparent rounded p-4 w-md border max-h-1/2 overflow-scroll overflow-x-hidden">
+        <div className="absolute right-4 top-22 z-10 bg-background-transparent rounded p-4 w-xs border max-h-1/2 overflow-scroll overflow-x-hidden">
           <PsetAccordion edit={false} psets={displayPsets} />
         </div>
       )}
