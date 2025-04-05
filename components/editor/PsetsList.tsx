@@ -3,11 +3,12 @@ import type { Pset } from "@/utils/schemas";
 import PsetAccordion from "./PsetAccordion";
 import AddPsetButton from "./AddPsetButton";
 
-function PsetsList({ psets }: { psets: Pset[] }) {
+function PsetsList({ psets, editable }: { psets: Pset[]; editable: boolean }) {
   return (
     <>
-      <PsetAccordion edit={true} psets={psets} />
-      <AddPsetButton />
+      <PsetAccordion edit={editable} psets={psets} />
+
+      {editable && <AddPsetButton />}
     </>
   );
 }

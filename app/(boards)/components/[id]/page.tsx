@@ -10,6 +10,10 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import {
+  componentWithGeometrySchema,
+  validateWithZodSchema,
+} from "@/utils/schemas";
 
 const ComponentCard = async ({
   params,
@@ -21,6 +25,7 @@ const ComponentCard = async ({
   const component = await fetchSingleComponentAction(resolvedParams.id);
 
   if (!component) return <p>Could not fetch component</p>;
+
   if (!component.geometry) return <p>Could not fetch geometry</p>;
 
   return (
@@ -40,7 +45,10 @@ const ComponentCard = async ({
         </div>
         <div className="lg:col-span-2">
           {/* <ComponentCardTabs psets={component.psets} /> */}
-          <PsetsList psets={component.psets} />
+          <PsetsList
+            psets={component.psets ?? []}
+            editable={component.editable}
+          />
         </div>
       </div>
     </div>

@@ -8,7 +8,8 @@ import {
   Pset,
   geometryArraySchema,
   componentWithGeometrySchema,
-  Component,
+  ComponentSchemaType,
+  ComponentWithGeometrySchemaType,
 } from "./schemas";
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@clerk/nextjs/server";
@@ -20,12 +21,6 @@ const renderError = (error: unknown): { message: string } => {
   return {
     message: error instanceof Error ? error.message : "an error occured...",
   };
-};
-
-const getAuthUser = async () => {
-  const user = await currentUser();
-  // if (!user) redirect("/");
-  return user;
 };
 
 const getDbUser = async () => {
@@ -44,9 +39,14 @@ const getDbUser = async () => {
   }
 };
 
-const addEditableToComponent = async (component: Partial<Component>) => {
+const addEditableToComponent = async (
+  component: ComponentSchemaType | ComponentWithGeometrySchemaType
+) => {
   const dbUser = await getDbUser();
   const dbUserId = dbUser?.id;
+
+  if (!component.userId)
+    throw new Error("Could not find the owner of the component");
 
   const componentWithEditable = {
     ...component,
@@ -95,14 +95,32 @@ export const createComponentAction = async (
 };
 
 export const fetchSingleComponentAction = async (id: string) => {
-  const component = await prisma.component.findUnique({
-    where: { id: id },
-    include: {
-      geometry: true,
-    },
-  });
+  try {
+    const dbUser = await getDbUser();
 
-  return validateWithZodSchema(componentWithGeometrySchema, component);
+    const component = await prisma.component.findUnique({
+      where: { id: id },
+      include: {
+        geometry: true,
+      },
+    });
+
+    if (!component) throw new Error("No component with this id");
+
+    const componentWithEditable = {
+      ...component,
+      editable: component.userId === dbUser?.id,
+    };
+
+    const validatedComponent = validateWithZodSchema(
+      componentWithGeometrySchema,
+      componentWithEditable
+    );
+
+    return validatedComponent;
+  } catch (error) {
+    renderError(error);
+  }
 };
 
 export const fetchGeometryAction = async (id: string) => {
@@ -191,6 +209,7 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
   try {
     const component = await fetchSingleComponentAction(componentId);
 
+    if (!component) throw new Error("No component with this id");
     const componentWithEditable = await addEditableToComponent(component);
 
     if (!componentWithEditable.editable)
@@ -237,6 +256,7 @@ export const removePsetAction = async (prevState: any, formData: FormData) => {
   try {
     const component = await fetchSingleComponentAction(componentId);
 
+    if (!component) throw new Error("No component with this id");
     const componentWithEditable = await addEditableToComponent(component);
 
     if (!componentWithEditable.editable)
@@ -276,6 +296,7 @@ export const addPsetAction = async (prevState: any, formData: FormData) => {
   try {
     const component = await fetchSingleComponentAction(componentId);
 
+    if (!component) throw new Error("No component with this id");
     const componentWithEditable = await addEditableToComponent(component);
 
     if (!componentWithEditable.editable)

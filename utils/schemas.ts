@@ -53,15 +53,19 @@ export const componentWithGeometrySchema = z.object({
   id: z.string(),
   name: z.string(),
   geometry: geometryArraySchema,
-  psets: z.array(PsetSchema),
+  psets: z.array(PsetSchema).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  userId: z.string(),
+  userId: z.string().optional(),
   author: z.string(),
   public: z.boolean(),
+  editable: z.boolean(),
 });
 
-export type Component = z.infer<typeof componentSchema>;
+export type ComponentSchemaType = z.infer<typeof componentSchema>;
+export type ComponentWithGeometrySchemaType = z.infer<
+  typeof componentWithGeometrySchema
+>;
 
 export const componentsArraySchema = z.array(componentSchema);
 
