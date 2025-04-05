@@ -4,6 +4,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
 import { Trash } from "lucide-react";
 import { ArrowUpDown } from "lucide-react";
+import { deleteComponentAction } from "@/utils/actions";
+import { toast } from "sonner";
 
 export type ComponentRow = {
   id: string;
@@ -77,11 +79,12 @@ export const columns: ColumnDef<ComponentRow>[] = [
     id: "actions",
     cell: ({ row }) => {
       const component = row.original;
-      const handleClick = (
+      const handleClick = async (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
       ) => {
         e.stopPropagation();
-        console.log(component.id);
+        await deleteComponentAction(component.id);
+        toast(`Component ${component.name} deleted successfully!`);
       };
 
       return component.editable ? (

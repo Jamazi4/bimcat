@@ -14,6 +14,7 @@ import { revalidatePath } from "next/cache";
 import { currentUser } from "@clerk/nextjs/server";
 import { User } from "./types";
 import { searchParamsType } from "@/app/(boards)/components/browse/page";
+import { count } from "console";
 
 const renderError = (error: unknown): { message: string } => {
   console.log(error);
@@ -335,12 +336,17 @@ export const createUserAciton = async (user: Partial<User>) => {
 export const deleteComponentAction = async (componentId: string) => {
   try {
     const dbUser = await getDbUser();
-    const allowed = dbUser?.Components.map((component) => {
-      return component.id === componentId;
+
+    const component = await prisma.component.findUnique({
+      where: { id: componentId },
+      include: { geometry: true, User: true },
     });
 
-    if (!allowed)
-      throw new Error("Error deleting component, user or wrong component");
+    if (!component || component.User?.id !== dbUser?.id) {
+      throw new Error("Error deleting component or wrong user");
+    }
+
+    const geometryIds = component.geometry.map((g) => g.id);
 
     await prisma.component.delete({
       where: {
@@ -348,9 +354,22 @@ export const deleteComponentAction = async (componentId: string) => {
       },
     });
 
-    revalidatePath(`/components`);
+    for (const geometryId of geometryIds) {
+      const count = await prisma.componentGeometry.findUnique({
+        where: { id: geometryId },
+        include: { components: true },
+      });
 
-    return { message: `Component ${componentId} deleted successfully!` };
+      if (count?.components.length === 0) {
+        await prisma.componentGeometry.delete({
+          where: { id: geometryId },
+        });
+      }
+    }
+
+    revalidatePath(`/components/browse`);
+
+    return; //toas handled in the ComponentListColumns
   } catch (error) {
     return renderError(error);
   }
