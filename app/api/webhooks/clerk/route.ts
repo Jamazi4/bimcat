@@ -57,7 +57,6 @@ export async function POST(req: Request) {
 
   const user: Partial<User> = {
     clerkId: evt.data.id,
-    email: evt.data.email_addresses[0].email_address,
     firstName: evt.data.first_name,
     secondName: evt.data.last_name,
   };
