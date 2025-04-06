@@ -25,7 +25,7 @@ const ComponentCard = async ({
   if (!component.geometry) return <p>Could not fetch geometry</p>;
 
   return (
-    <div>
+    <main className="w-full px-4 justify-center mx-auto">
       <BreadCrumbs name={component.name} />
       <Title text={component.name} />
       <div
@@ -47,7 +47,7 @@ const ComponentCard = async ({
           />
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 export default ComponentCard;

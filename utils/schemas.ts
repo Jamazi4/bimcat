@@ -77,7 +77,9 @@ export const userSchema: z.ZodType<User> = z.lazy(
       email: z.string(),
       firstName: z.string(),
       secondName: z.string().nullable(),
-      Libraries: z.array(librarySchema),
+      authoredLibraries: z.array(librarySchema),
+      guestLibraries: z.array(librarySchema),
+      Components: z.array(componentSchema),
     })
 );
 
@@ -91,8 +93,10 @@ export const librarySchema: z.ZodType<Library> = z.lazy(
       components: z.array(componentSchema).optional(),
       createdAt: z.date(),
       updatedAt: z.date(),
-      User: userSchema.optional(),
+      author: userSchema,
       userId: z.string().nullable(),
+      guests: z.array(userSchema),
+      public: z.boolean(),
     })
 );
 

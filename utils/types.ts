@@ -1,4 +1,4 @@
-import { Component } from "./schemas";
+import { ComponentSchemaType } from "./schemas";
 
 export type Pset = {
   title: string;
@@ -25,13 +25,15 @@ export interface User {
   clerkId: string;
   firstName: string;
   secondName: string | null;
-  Libraries: Library[];
+  authoredLibraries: Library[];
+  guestLibraries: Library[];
+  Components: ComponentSchemaType[];
 }
 
 export interface Library {
   id: string;
   name: string;
-  components?: Component[];
+  components?: ComponentSchemaType[];
   createdAt: Date;
   updatedAt: Date;
   User?: User;

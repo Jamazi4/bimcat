@@ -31,7 +31,11 @@ const getDbUser = async () => {
     const clerkId = user.id;
     const dbUser = prisma.user.findUnique({
       where: { clerkId },
-      include: { Components: true, Libraries: true },
+      include: {
+        Components: true,
+        authoredLibraries: true,
+        guestLibraries: true,
+      },
     });
     return dbUser;
   } catch (error) {
@@ -343,12 +347,17 @@ export const createUserAciton = async (user: Partial<User>) => {
         secondName: user.secondName,
       },
       include: {
-        Libraries: {
+        authoredLibraries: {
           include: {
-            components: true,
+            Components: true,
           },
         },
         Components: true,
+        guestLibraries: {
+          include: {
+            Components: true,
+          },
+        },
       },
     });
   } catch (error) {
@@ -431,16 +440,28 @@ export const toggleComponentPrivateAction = async (componentId: string) => {
   }
 };
 
-// export const createLibrary = async () => {
-//   const user = await getAuthUser();
+export const createLibraryAction = async (
+  prevState: any,
+  formData: FormData
+) => {
+  const libraryName = formData.get("name") as string;
+  const libraryDesc = formData.get("description") as string;
+  const makePrivate = formData.get("makePrivate") === "on";
+  try {
+    const dbUser = await getDbUser();
 
-//   const dbUser = await prisma.user.findUnique({
-//     where: {
-//       clerkId: user.id,
-//     },
-//   });
+    if (!dbUser) throw new Error("You must be logged in to create a library");
 
-//   const library = await prisma.library.create({
-
-//   })
-// };
+    const library = await prisma.library.create({
+      data: {
+        name: libraryName,
+        description: libraryDesc,
+        userId: dbUser.id,
+        public: !makePrivate,
+      },
+    });
+    return { message: `Library ${libraryName} succesfully created!` };
+  } catch (error) {
+    return renderError(error);
+  }
+};

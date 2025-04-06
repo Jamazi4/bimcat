@@ -5,4 +5,5 @@
 3. [Ifc tesselation example](https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/annex_e/advanced-geometric-shape/basin-tessellation.html)
 4. [Ifc Validation Service](https://validate.buildingsmart.org/)
 5. [Open IFC Model Database](https://openifcmodel.cs.auckland.ac.nz/)
-
+6. [BS EN ISO 19650-2:2018 UK National Annex](https://dl.bonrocollege.com/Files/BS_EN-ISO_19650-2_2018-%5Bbonrocollege.com%5D.pdf)
+7. [Information management according to BS EN ISO 19650 Guidance Part 2](https://ukbimframework.org/wp-content/uploads/2020/09/Guidance-Part-2_Parties-teams-and-processes-for-the-delivery-phase-of-assets_Edition-5.pdf)
