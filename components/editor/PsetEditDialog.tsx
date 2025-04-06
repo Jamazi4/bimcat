@@ -67,7 +67,11 @@ function PsetEditDialog({
       }}
     >
       <DialogTrigger asChild>
-        <Button size="icon" className="place-items-end cursor-pointer ml-auto">
+        <Button
+          variant="outline"
+          size="icon"
+          className="place-items-end cursor-pointer ml-auto"
+        >
           <Pencil />
         </Button>
       </DialogTrigger>

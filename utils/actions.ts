@@ -459,6 +459,7 @@ export const createLibraryAction = async (
         public: !makePrivate,
       },
     });
+    revalidatePath("/libraries");
     return { message: `Library ${libraryName} succesfully created!` };
   } catch (error) {
     return renderError(error);
@@ -474,20 +475,29 @@ export const fetchAllLibraries = async () => {
         author: true,
         Components: true,
       },
+      where: {
+        OR: [{ public: true }, { userId: dbUser?.id }],
+      },
     });
 
     const frontEndLibraries = libraries.map((lib) => {
       const { clerkId, ...authorWithoutClerkId } = lib.author;
+
       const guestsWithoutClerkId = lib.guests.map((guest) => {
         const { clerkId, ...restOfGuest } = guest;
         return restOfGuest;
       });
+
+      const editable = lib.userId === dbUser?.id;
+
       return {
         ...lib,
         author: authorWithoutClerkId,
         guests: guestsWithoutClerkId,
+        editable,
       };
     });
+
     return frontEndLibraries;
   } catch (error) {
     console.log(error);

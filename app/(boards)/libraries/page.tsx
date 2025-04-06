@@ -25,18 +25,19 @@ const page = async () => {
       updatedAt: library.updatedAt,
       numComponents: library.Components.length,
       numGuests: library.guests.length,
+      editable: library.editable,
     };
   });
 
   return (
-    <main className="w-full px-4 justify-center mx-auto">
+    <main className="w-full px-4 justify-center mx-auto ">
       <BreadCrumbs />
-      <div className="mt-4">
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
         {frontendLibraries.map((library) => {
           return <LibraryMinature key={library.libId} library={library} />;
         })}
-        <CreateLibraryButton />
       </div>
+      <CreateLibraryButton />
     </main>
   );
 };

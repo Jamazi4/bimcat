@@ -21,8 +21,15 @@ const AddPsetButton = () => {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="flex w-full bg-primary text-primary-foreground justify-center p-2 rounded-sm cursor-pointer hover:brightness-90 mb-4 mt-4">
-        <Plus size={15} />
+      <PopoverTrigger className="flex w-full">
+        <Button
+          asChild
+          className="flex w-full justify-center p-2 rounded-sm cursor-pointer mb-4 mt-4"
+          variant="outline"
+          size="icon"
+        >
+          <Plus size={15} />
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="bg-background w-100" align="center">
         <FormContainer

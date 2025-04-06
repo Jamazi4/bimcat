@@ -23,9 +23,9 @@ const RemovePsetButton = ({ title }: { title: string }) => {
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          variant="destructive"
+          variant="outline"
           size="icon"
-          className="place-items-end cursor-pointer ml-auto"
+          className="place-items-end cursor-pointer ml-auto text-destructive"
         >
           <X />
         </Button>
