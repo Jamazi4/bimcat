@@ -1,4 +1,4 @@
-import { z, ZodSchema } from "zod";
+import { boolean, z, ZodSchema } from "zod";
 import { Library, User } from "./types";
 
 export function validateWithZodSchema<T>(
@@ -80,6 +80,7 @@ export const userSchema: z.ZodType<User> = z.lazy(
       authoredLibraries: z.array(librarySchema),
       guestLibraries: z.array(librarySchema),
       Components: z.array(componentSchema),
+      premium: z.boolean(),
     })
 );
 
@@ -90,6 +91,7 @@ export const librarySchema: z.ZodType<Library> = z.lazy(
     z.object({
       id: z.string(),
       name: z.string(),
+      description: z.string(),
       components: z.array(componentSchema).optional(),
       createdAt: z.date(),
       updatedAt: z.date(),

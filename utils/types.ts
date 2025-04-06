@@ -21,21 +21,24 @@ export type actionFunction = (
 
 export interface User {
   id: string;
-  email: string;
   clerkId: string;
   firstName: string;
   secondName: string | null;
   authoredLibraries: Library[];
   guestLibraries: Library[];
-  Components: ComponentSchemaType[];
+  Components: Partial<ComponentSchemaType>[];
+  premium: boolean;
 }
 
 export interface Library {
   id: string;
   name: string;
-  components?: ComponentSchemaType[];
+  description: string;
+  Components?: Partial<ComponentSchemaType>[];
   createdAt: Date;
   updatedAt: Date;
-  User?: User;
+  author: Partial<User>;
   userId?: string | null;
+  guests: Partial<User>[];
+  public: boolean;
 }

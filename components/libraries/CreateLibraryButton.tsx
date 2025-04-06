@@ -21,7 +21,9 @@ const CreateLibraryButton = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Create</Button>
+        <Button variant="default" className="cursor-pointer">
+          Create
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

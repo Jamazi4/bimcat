@@ -336,8 +336,7 @@ export const addPsetAction = async (prevState: any, formData: FormData) => {
 };
 
 export const createUserAciton = async (user: Partial<User>) => {
-  if (!user.clerkId || !user.email || !user.firstName || !user.secondName)
-    return;
+  if (!user.clerkId || !user.firstName || !user.secondName) return;
 
   try {
     await prisma.user.create({
@@ -463,5 +462,34 @@ export const createLibraryAction = async (
     return { message: `Library ${libraryName} succesfully created!` };
   } catch (error) {
     return renderError(error);
+  }
+};
+
+export const fetchAllLibraries = async () => {
+  try {
+    const dbUser = await getDbUser();
+    const libraries = await prisma.library.findMany({
+      include: {
+        guests: true,
+        author: true,
+        Components: true,
+      },
+    });
+
+    const frontEndLibraries = libraries.map((lib) => {
+      const { clerkId, ...authorWithoutClerkId } = lib.author;
+      const guestsWithoutClerkId = lib.guests.map((guest) => {
+        const { clerkId, ...restOfGuest } = guest;
+        return restOfGuest;
+      });
+      return {
+        ...lib,
+        author: authorWithoutClerkId,
+        guests: guestsWithoutClerkId,
+      };
+    });
+    return frontEndLibraries;
+  } catch (error) {
+    console.log(error);
   }
 };
