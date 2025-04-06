@@ -8,10 +8,10 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { fetchAllLibraries } from "@/utils/actions";
+import { fetchAllLibrariesAction } from "@/utils/actions";
 
 const page = async () => {
-  const libraries = await fetchAllLibraries();
+  const libraries = await fetchAllLibrariesAction();
 
   if (!libraries) return <div>Nothing to look at here...</div>;
 
@@ -26,6 +26,7 @@ const page = async () => {
       numComponents: library.Components.length,
       numGuests: library.guests.length,
       editable: library.editable,
+      publicFlag: library.public,
     };
   });
 

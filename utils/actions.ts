@@ -466,7 +466,7 @@ export const createLibraryAction = async (
   }
 };
 
-export const fetchAllLibraries = async () => {
+export const fetchAllLibrariesAction = async () => {
   try {
     const dbUser = await getDbUser();
     const libraries = await prisma.library.findMany({
@@ -501,5 +501,46 @@ export const fetchAllLibraries = async () => {
     return frontEndLibraries;
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const getUserLibrariesAction = async () => {
+  try {
+    const dbUser = await getDbUser();
+    return dbUser?.authoredLibraries;
+  } catch (error) {
+    console.log("Could not get user libraries");
+  }
+};
+
+export const addComponentToLibraryAction = async (
+  prevState: any,
+  formData: FormData
+) => {
+  try {
+    const dbUser = await getDbUser();
+    const libraryId = formData.get("libraryId") as string;
+    const componentId = formData.get("componentId") as string;
+
+    const allowed = dbUser?.authoredLibraries.filter((lib) => {
+      return lib.id === libraryId;
+    });
+
+    if (!allowed) throw new Error("User not authorized to modify this library");
+
+    await prisma.library.update({
+      where: {
+        id: libraryId,
+      },
+      data: {
+        Components: {
+          connect: { id: componentId },
+        },
+      },
+    });
+
+    return { message: "Component succesfully added to the library" };
+  } catch (error) {
+    return renderError(error);
   }
 };

@@ -17,9 +17,11 @@ import { Checkbox } from "../ui/checkbox";
 import SubmitButton from "../global/SubmitButton";
 import FormContainer from "../global/FormContainer";
 import { createLibraryAction } from "@/utils/actions";
+import { useState } from "react";
 const CreateLibraryButton = () => {
+  const [open, setOpen] = useState(false);
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default" className="cursor-pointer">
           Create
@@ -32,7 +34,12 @@ const CreateLibraryButton = () => {
             Provide a name and a short description for your new library.
           </DialogDescription>
         </DialogHeader>
-        <FormContainer action={createLibraryAction}>
+        <FormContainer
+          action={createLibraryAction}
+          onSuccess={() => {
+            setOpen;
+          }}
+        >
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
