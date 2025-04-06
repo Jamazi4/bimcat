@@ -15,6 +15,7 @@ const DownloadIfcButton = () => {
   const handleDownload = async () => {
     setPending(true);
     const component = await fetchSingleComponentAction(id);
+    if (!component) return setPending(false);
     const { geometry, psets } = component;
     // const geometry = await fetchGeometryAction(geomId);
     await downloadIfcFile(geometry, psets);
