@@ -12,7 +12,6 @@ import type { Pset } from "@/utils/types";
 import { getIfcPsetsById } from "@/utils/ifc/ifcjs";
 import PsetAccordion from "@/components/editor/PsetAccordion";
 import MeshItem from "@/components/visualiser/MeshItem";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Page = () => {
   const [file, setFile] = useState<File | null>(null);

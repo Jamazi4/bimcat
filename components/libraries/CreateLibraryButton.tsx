@@ -37,7 +37,7 @@ const CreateLibraryButton = () => {
         <FormContainer
           action={createLibraryAction}
           onSuccess={() => {
-            setOpen;
+            setOpen(!open);
           }}
         >
           <div className="grid gap-4 py-4">
