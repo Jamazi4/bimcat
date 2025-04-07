@@ -12,7 +12,7 @@ import {
   ComponentWithGeometrySchemaType,
 } from "./schemas";
 import { revalidatePath } from "next/cache";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { User } from "./types";
 import { searchParamsType } from "@/app/(boards)/components/browse/page";
 
@@ -25,14 +25,14 @@ const renderError = (error: unknown): { message: string } => {
 
 const getDbUser = async () => {
   try {
-    const user = await currentUser();
+    const { userId } = await auth();
 
-    if (!user) return;
-    const clerkId = user.id;
+    if (!userId) return;
+    const clerkId = userId;
     const dbUser = prisma.user.findUnique({
       where: { clerkId },
       include: {
-        Components: true,
+        // Components: true,
         authoredLibraries: true,
         guestLibraries: true,
       },
@@ -43,9 +43,9 @@ const getDbUser = async () => {
   }
 };
 
-const addEditableToComponent = async (
-  component: ComponentSchemaType | ComponentWithGeometrySchemaType
-) => {
+const addEditableToComponent = async <T extends { userId: string }>(
+  component: T
+): Promise<T & { editable: boolean }> => {
   const dbUser = await getDbUser();
   const dbUserId = dbUser?.id;
 
@@ -211,7 +211,15 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
   );
 
   try {
-    const component = await fetchSingleComponentAction(componentId);
+    const component = await prisma.component.findUnique({
+      where: {
+        id: componentId,
+      },
+      select: {
+        psets: true,
+        userId: true,
+      },
+    });
 
     if (!component) throw new Error("No component with this id");
     const componentWithEditable = await addEditableToComponent(component);
@@ -258,7 +266,15 @@ export const removePsetAction = async (prevState: any, formData: FormData) => {
   const psetTitle = formData.get("psetTitle") as string;
 
   try {
-    const component = await fetchSingleComponentAction(componentId);
+    const component = await prisma.component.findUnique({
+      where: {
+        id: componentId,
+      },
+      select: {
+        psets: true,
+        userId: true,
+      },
+    });
 
     if (!component) throw new Error("No component with this id");
     const componentWithEditable = await addEditableToComponent(component);
@@ -298,7 +314,15 @@ export const addPsetAction = async (prevState: any, formData: FormData) => {
   const psetTitle = formData.get("psetTitle") as string;
 
   try {
-    const component = await fetchSingleComponentAction(componentId);
+    const component = await prisma.component.findUnique({
+      where: {
+        id: componentId,
+      },
+      select: {
+        psets: true,
+        userId: true,
+      },
+    });
 
     if (!component) throw new Error("No component with this id");
     const componentWithEditable = await addEditableToComponent(component);
@@ -344,19 +368,6 @@ export const createUserAciton = async (user: Partial<User>) => {
         clerkId: user.clerkId,
         firstName: user.firstName,
         secondName: user.secondName,
-      },
-      include: {
-        authoredLibraries: {
-          include: {
-            Components: true,
-          },
-        },
-        Components: true,
-        guestLibraries: {
-          include: {
-            Components: true,
-          },
-        },
       },
     });
   } catch (error) {
@@ -473,7 +484,7 @@ export const fetchAllLibrariesAction = async () => {
       include: {
         guests: true,
         author: true,
-        Components: true,
+        Components: { select: { id: true } },
       },
       where: {
         OR: [{ public: true }, { userId: dbUser?.id }],

@@ -9,12 +9,11 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { fetchAllLibrariesAction } from "@/utils/actions";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 
 const page = async () => {
   const libraries = await fetchAllLibrariesAction();
-  const user = await currentUser();
-  console.log(user);
+  const { userId } = await auth();
 
   if (!libraries) return <div>Nothing to look at here...</div>;
 
@@ -37,7 +36,7 @@ const page = async () => {
     <main className="w-full px-4 justify-center mx-auto ">
       <BreadCrumbs />
       <h1 className="text-2xl font-bold my-6">Libraries</h1>
-      {user && <CreateLibraryButton />}
+      {userId && <CreateLibraryButton />}
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         {frontendLibraries.map((library) => {

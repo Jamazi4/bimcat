@@ -30,7 +30,7 @@ model Component {
   createdAt DateTime            @default(now())
   updatedAt DateTime            @updatedAt
   User      User?               @relation(fields: [userId], references: [id])
-  userId    String?
+  userId    String
   author    String?
   public    Boolean             @default(true)
 }
