@@ -15,6 +15,7 @@ import {
 import { fetchAllComponents } from "@/utils/actions";
 import { componentsArraySchema } from "@/utils/schemas";
 import { validateWithZodSchema } from "@/utils/schemas";
+import { Suspense } from "react";
 
 export type searchParamsType = {
   myComponents: string;
@@ -56,7 +57,9 @@ export default async function page({
       <BreadCrumbs />
       <h1 className="text-2xl font-bold my-6">Component browser</h1>
       <Filters />
-      <ComponentList columns={columns} data={data} />
+      <Suspense fallback={<div>Getting all the components...</div>}>
+        <ComponentList columns={columns} data={data} />
+      </Suspense>
     </main>
   );
 }

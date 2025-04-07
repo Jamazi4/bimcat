@@ -422,7 +422,7 @@ export const toggleComponentPrivateAction = async (componentId: string) => {
     const dbUser = await getDbUser();
     const component = await prisma.component.findUnique({
       where: { id: componentId },
-      include: { User: true },
+      select: { User: true, public: true, name: true },
     });
 
     if (!component || component.User?.id !== dbUser?.id) {
@@ -462,7 +462,7 @@ export const createLibraryAction = async (
 
     if (!dbUser) throw new Error("You must be logged in to create a library");
 
-    const library = await prisma.library.create({
+    await prisma.library.create({
       data: {
         name: libraryName,
         description: libraryDesc,
