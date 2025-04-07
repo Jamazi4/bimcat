@@ -104,8 +104,10 @@ export const downloadIfcFile = async (
   );
 
   const shapereps: WEBIFC.IFC4.IfcShapeRepresentation[] = [];
+  const facesets: WEBIFC.IFC4.IfcTriangulatedFaceSet[] = [];
 
   geometry.forEach((geom) => {
+    console.log("there is one geom");
     const convertedVertices: WEBIFC.IFC4.IfcLengthMeasure[][] = [];
     let curVert: WEBIFC.IFC4.IfcLengthMeasure[] = [];
     geom.position.forEach((val, index) => {
@@ -141,15 +143,16 @@ export const downloadIfcFile = async (
       null
     );
 
-    const shapeRepresentation = new WEBIFC.IFC4.IfcShapeRepresentation(
-      geomSubcontext,
-      new WEBIFC.IFC4.IfcLabel("Body"),
-      new WEBIFC.IFC4.IfcLabel("Tessellation"),
-      [triangulatedFaceset]
-    );
-
-    shapereps.push(shapeRepresentation);
+    facesets.push(triangulatedFaceset);
   });
+
+  const shapeRepresentation = new WEBIFC.IFC4.IfcShapeRepresentation(
+    geomSubcontext,
+    new WEBIFC.IFC4.IfcLabel("Body"),
+    new WEBIFC.IFC4.IfcLabel("Tessellation"),
+    facesets
+  );
+  console.log(shapereps.length);
 
   const axis2Placement3d = new WEBIFC.IFC4.IfcAxis2Placement3D(
     cartPoint,
@@ -165,7 +168,7 @@ export const downloadIfcFile = async (
   const productDefinitionShape = new WEBIFC.IFC4.IfcProductDefinitionShape(
     null,
     null,
-    shapereps
+    [shapeRepresentation]
   );
 
   const buildingElementProxy = new WEBIFC.IFC4.IfcBuildingElementProxy(
