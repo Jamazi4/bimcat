@@ -8,7 +8,7 @@ import {
   Pset,
   geometryArraySchema,
   componentWithGeometrySchema,
-  addPsetComponentSchema,
+  PsetActionsComponentSchema,
 } from "./schemas";
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
@@ -218,6 +218,7 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
       select: {
         psets: true,
         userId: true,
+        name: true,
       },
     });
 
@@ -228,7 +229,7 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
       throw new Error("User has no rights to edit this component");
 
     const validatedComponent = validateWithZodSchema(
-      componentSchema,
+      PsetActionsComponentSchema,
       componentWithEditable
     );
 
@@ -273,6 +274,7 @@ export const removePsetAction = async (prevState: any, formData: FormData) => {
       select: {
         psets: true,
         userId: true,
+        name: true,
       },
     });
 
@@ -283,7 +285,7 @@ export const removePsetAction = async (prevState: any, formData: FormData) => {
       throw new Error("User has no rights to edit this component");
 
     const validatedComponent = validateWithZodSchema(
-      componentSchema,
+      PsetActionsComponentSchema,
       componentWithEditable
     );
 
@@ -332,7 +334,7 @@ export const addPsetAction = async (prevState: any, formData: FormData) => {
       throw new Error("User has no rights to edit this component");
 
     const validatedComponent = validateWithZodSchema(
-      addPsetComponentSchema,
+      PsetActionsComponentSchema,
       componentWithEditable
     );
 

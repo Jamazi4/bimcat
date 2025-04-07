@@ -116,10 +116,10 @@ function PsetEditDialog({
 
                     {/* Remove button */}
                     <Button
-                      className="cursor-pointer"
+                      className="cursor-pointer text-destructive"
                       type="button"
                       size="icon"
-                      variant="destructive"
+                      variant="outline"
                       onClick={() => {
                         removePsetRow(index);
                       }}
@@ -148,7 +148,7 @@ export default PsetEditDialog;
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="w-30">
+    <Button type="submit" disabled={pending} className="w-30 cursor-pointer">
       {pending ? <AiOutlineReload className="animate-spin" /> : "Save Changes"}
     </Button>
   );
@@ -164,8 +164,15 @@ const AddRow = ({
   const [open, setOpen] = useState(false);
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="flex w-full bg-primary text-primary-foreground justify-center p-2 rounded-sm cursor-pointer hover:brightness-90">
-        <Plus size={15} />
+      <PopoverTrigger className="flex w-full  justify-center rounded-sm cursor-pointer hover:brightness-90">
+        <Button
+          asChild
+          size="icon"
+          variant="outline"
+          className="w-full cursor-pointer p-2 m-0"
+        >
+          <Plus className="h-9 w-8" />
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="bg-background w-100" align="center">
         <div className="flex gap-2 mb-4">

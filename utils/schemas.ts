@@ -110,7 +110,7 @@ export const editPsetSchema = z.object({
   psets: z.record(z.union([z.string(), z.number(), z.boolean()])),
 });
 
-export const addPsetComponentSchema = z.object({
+export const PsetActionsComponentSchema = z.object({
   psets: z.array(PsetSchema),
   userId: z.string(),
   name: z.string(),
