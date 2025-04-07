@@ -8,14 +8,13 @@ import {
   Pset,
   geometryArraySchema,
   componentWithGeometrySchema,
-  ComponentSchemaType,
-  ComponentWithGeometrySchemaType,
   addPsetComponentSchema,
 } from "./schemas";
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { User } from "./types";
 import { searchParamsType } from "../components/componentList/ComponentListWrapper";
+import { cache } from "react";
 
 const renderError = (error: unknown): { message: string } => {
   console.log(error);
