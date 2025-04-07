@@ -1,5 +1,6 @@
 import CreateLibraryButton from "@/components/libraries/CreateLibraryButton";
-import LibraryMinature from "@/components/libraries/LibraryMinature";
+import LibrariesFallback from "@/components/libraries/LibrariesFallback";
+import LibraryList from "@/components/libraries/LibraryList";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -8,41 +9,24 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { fetchAllLibrariesAction } from "@/utils/actions";
 import { auth } from "@clerk/nextjs/server";
 
+import { Suspense } from "react";
+
 const page = async () => {
-  const libraries = await fetchAllLibrariesAction();
   const { userId } = await auth();
-
-  if (!libraries) return <div>Nothing to look at here...</div>;
-
-  const frontendLibraries = libraries.map((library) => {
-    return {
-      libId: library.id,
-      libName: library.name,
-      description: library.description,
-      libAuthor: `${library.author.firstName} ${library.author.secondName}`,
-      createdAt: library.createdAt,
-      updatedAt: library.updatedAt,
-      numComponents: library.Components.length,
-      numGuests: library.guests.length,
-      editable: library.editable,
-      publicFlag: library.public,
-    };
-  });
 
   return (
     <main className="w-full px-4 justify-center mx-auto ">
       <BreadCrumbs />
-      <h1 className="text-2xl font-bold my-6">Libraries</h1>
-      {userId && <CreateLibraryButton />}
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        {frontendLibraries.map((library) => {
-          return <LibraryMinature key={library.libId} library={library} />;
-        })}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold my-6">Libraries</h1>
+        {userId && <CreateLibraryButton />}
       </div>
+
+      <Suspense key={1} fallback={<LibrariesFallback />}>
+        <LibraryList />
+      </Suspense>
     </main>
   );
 };

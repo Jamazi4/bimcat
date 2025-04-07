@@ -10,7 +10,9 @@ import { useDebouncedCallback } from "use-debounce";
 const Filters = () => {
   const { replace } = useRouter();
   const searchParams = useSearchParams();
-  const myComponents = searchParams.get("myComponents") === "true";
+  const [myComponents, setMyComponents] = useState(
+    searchParams.get("myComponents") === "true"
+  );
 
   const [search, setSearch] = useState(
     searchParams.get("search")?.toString() || ""
@@ -26,7 +28,8 @@ const Filters = () => {
     replace(`/components/browse?${params.toString()}`);
   }, 500);
 
-  const handleSwitchMyComponents = () => {
+  const handleSwitchMyComponents = (checked: boolean) => {
+    setMyComponents(checked);
     const params = new URLSearchParams(searchParams);
     if (myComponents) {
       params.delete("myComponents");

@@ -10,11 +10,12 @@ import {
   componentWithGeometrySchema,
   ComponentSchemaType,
   ComponentWithGeometrySchemaType,
+  addPsetComponentSchema,
 } from "./schemas";
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { User } from "./types";
-import { searchParamsType } from "@/app/(boards)/components/browse/page";
+import { searchParamsType } from "../components/componentList/ComponentListWrapper";
 
 const renderError = (error: unknown): { message: string } => {
   console.log(error);
@@ -321,6 +322,7 @@ export const addPsetAction = async (prevState: any, formData: FormData) => {
       select: {
         psets: true,
         userId: true,
+        name: true,
       },
     });
 
@@ -331,11 +333,11 @@ export const addPsetAction = async (prevState: any, formData: FormData) => {
       throw new Error("User has no rights to edit this component");
 
     const validatedComponent = validateWithZodSchema(
-      componentSchema,
+      addPsetComponentSchema,
       componentWithEditable
     );
 
-    if (!validatedComponent.psets) throw new Error("No psets in component");
+    if (!component.psets) throw new Error("No psets in component");
 
     const newPsets: Pset[] = [
       ...validatedComponent.psets,
