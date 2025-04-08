@@ -28,7 +28,7 @@ export function NavbarMenu() {
         <NavigationMenuItem>
           <NavigationMenuTrigger>Components</NavigationMenuTrigger>
           <NavigationMenuContent>
-            <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+            <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[1fr_1fr] mx-auto">
               <ListItem href="/componentPicker" title="Create">
                 Open your .ifc file to select components to add.
               </ListItem>

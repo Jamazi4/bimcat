@@ -4,7 +4,6 @@ import { prisma } from "@/db";
 import {
   validateWithZodSchema,
   geometrySchema,
-  componentSchema,
   Pset,
   geometryArraySchema,
   componentWithGeometrySchema,
@@ -14,7 +13,6 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { User } from "./types";
 import { searchParamsType } from "../components/componentList/ComponentListWrapper";
-import { cache } from "react";
 
 const renderError = (error: unknown): { message: string } => {
   console.log(error);
@@ -198,7 +196,7 @@ export const fetchAllComponents = async (params: searchParamsType) => {
 
     return componentsWithEditable;
   } catch (error) {
-    console.log(error);
+    throw new Error("Could not fetch components");
   }
 };
 
@@ -556,5 +554,33 @@ export const addComponentToLibraryAction = async (
     return { message: "Component succesfully added to the library" };
   } catch (error) {
     return renderError(error);
+  }
+};
+
+export const fetchLibraryComponents = async (libraryId: string) => {
+  try {
+    const dbUser = await getDbUser();
+    const library = await prisma.library.findUnique({
+      where: { id: libraryId },
+      include: { Components: true },
+    });
+
+    if (!library) throw new Error("Could not fetch library");
+
+    const frontendComponents = library?.Components.map((component) => {
+      return {
+        ...component,
+        editable: component.userId === dbUser?.id,
+      };
+    });
+
+    const libraryInfo = {
+      libraryName: library?.name,
+      desc: library?.description,
+    };
+
+    return { libraryInfo, frontendComponents };
+  } catch (error) {
+    throw new Error("Unable to fetch library components");
   }
 };

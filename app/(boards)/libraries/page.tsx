@@ -9,19 +9,14 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-// import { auth } from "@clerk/nextjs/server";
-
 import { Suspense } from "react";
 
 const page = async () => {
-  // const { userId } = await auth();
-
   return (
     <main className="w-full px-4 justify-center mx-auto ">
       <BreadCrumbs />
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold my-6">Libraries</h1>
-        {/* {userId && <CreateLibraryButton />} */}
         <CreateLibraryButton />
       </div>
 

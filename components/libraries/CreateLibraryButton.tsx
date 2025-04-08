@@ -18,7 +18,10 @@ import SubmitButton from "../global/SubmitButton";
 import FormContainer from "../global/FormContainer";
 import { createLibraryAction } from "@/utils/actions";
 import { useState } from "react";
+import { SignInButton, useUser } from "@clerk/nextjs";
+
 const CreateLibraryButton = () => {
+  const { isSignedIn } = useUser();
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -65,7 +68,21 @@ const CreateLibraryButton = () => {
             </div>
           </div>
           <DialogFooter>
-            <SubmitButton />
+            {isSignedIn ? (
+              <SubmitButton />
+            ) : (
+              <div>
+                <SignInButton>
+                  <Button
+                    type="button"
+                    className="w-30 mt-4"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Log in
+                  </Button>
+                </SignInButton>
+              </div>
+            )}
           </DialogFooter>
         </FormContainer>
       </DialogContent>

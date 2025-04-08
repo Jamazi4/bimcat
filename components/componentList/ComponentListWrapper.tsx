@@ -4,7 +4,6 @@ import {
 } from "@/components/componentList/ComponentListColumns";
 import { ComponentList } from "@/components/componentList/ComponentList";
 import { fetchAllComponents } from "@/utils/actions";
-import { componentsArraySchema, validateWithZodSchema } from "@/utils/schemas";
 
 export type searchParamsType = {
   myComponents: string;
@@ -13,12 +12,8 @@ export type searchParamsType = {
 
 async function getData(params: searchParamsType): Promise<ComponentRow[]> {
   const components = await fetchAllComponents(params);
-  const validatedComponents = validateWithZodSchema(
-    componentsArraySchema,
-    components
-  );
 
-  return validatedComponents.map((component) => {
+  return components.map((component) => {
     return {
       id: component.id,
       name: component.name,
