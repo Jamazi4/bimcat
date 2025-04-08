@@ -1,4 +1,3 @@
-import LoadingRouteSpinner from "@/components/global/LoadingRouteSpinner";
 import { AiOutlineReload } from "react-icons/ai";
 
 const loading = () => {

@@ -1,8 +1,5 @@
 import { fetchLibraryComponents } from "@/utils/actions";
-import {
-  columns,
-  ComponentRow,
-} from "@/components/componentList/ComponentListColumns";
+import { columns } from "@/components/componentList/ComponentListColumns";
 import { ComponentList } from "@/components/componentList/ComponentList";
 import {
   Breadcrumb,
@@ -34,7 +31,7 @@ export default page;
 
 const BreadCrumbs = ({ name, id }: { name: string; id: string }) => {
   return (
-    <Breadcrumb>
+    <Breadcrumb className="border-accent">
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink href="/">Home</BreadcrumbLink>
