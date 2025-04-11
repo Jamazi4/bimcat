@@ -23,7 +23,7 @@ export default async function page({
       <BreadCrumbs />
       <h1 className="text-2xl font-bold my-6">Component browser</h1>
       <Filters />
-      <Suspense key={params.search} fallback={<BrowserFallback />}>
+      <Suspense fallback={<BrowserFallback />}>
         <ComponentListWrapper params={params} />
       </Suspense>
     </main>

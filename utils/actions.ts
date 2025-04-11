@@ -147,7 +147,6 @@ export const fetchGeometryAction = async (id: string) => {
 
 export const fetchAllComponents = async (params: searchParamsType) => {
   const { myComponents, search } = params;
-
   try {
     const dbUser = await getDbUser();
     const dbUserId = dbUser?.id;

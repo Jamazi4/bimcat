@@ -11,6 +11,7 @@ export type searchParamsType = {
 };
 
 async function getData(params: searchParamsType): Promise<ComponentRow[]> {
+  "use client";
   const components = await fetchAllComponents(params);
 
   return components.map((component) => {

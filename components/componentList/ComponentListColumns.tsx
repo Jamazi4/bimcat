@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { format } from "date-fns";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import ComponentPrivateToggle from "./ComponentPrivateToggle";
 import ComponentDeleteButton from "./ComponentDeleteButton";
@@ -21,6 +22,29 @@ export type ComponentRow = {
 };
 
 export const columns: ColumnDef<ComponentRow>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        onClick={(e) => e.stopPropagation()}
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "name",
     sortingFn: "text",
@@ -92,35 +116,35 @@ export const columns: ColumnDef<ComponentRow>[] = [
     },
   },
 
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const component = row.original;
+  // {
+  //   id: "actions",
+  //   cell: ({ row }) => {
+  //     const component = row.original;
 
-      return component.editable ? (
-        <div className="flex items-center justify-between">
-          <AddComponentToLibraryButton
-            componentId={component.id}
-            componentName={component.name}
-          />
-          <ComponentPrivateToggle
-            componentId={component.id}
-            componentName={component.name}
-            componentPublic={component.public}
-          />
-          <ComponentDeleteButton
-            componentId={component.id}
-            componentName={component.name}
-          />
-        </div>
-      ) : (
-        <>
-          <AddComponentToLibraryButton
-            componentId={component.id}
-            componentName={component.name}
-          />
-        </>
-      );
-    },
-  },
+  //     return component.editable ? (
+  //       <div className="flex items-center justify-between">
+  //         <AddComponentToLibraryButton
+  //           componentId={component.id}
+  //           componentName={component.name}
+  //         />
+  //         <ComponentPrivateToggle
+  //           componentId={component.id}
+  //           componentName={component.name}
+  //           componentPublic={component.public}
+  //         />
+  //         <ComponentDeleteButton
+  //           componentId={component.id}
+  //           componentName={component.name}
+  //         />
+  //       </div>
+  //     ) : (
+  //       <>
+  //         <AddComponentToLibraryButton
+  //           componentId={component.id}
+  //           componentName={component.name}
+  //         />
+  //       </>
+  //     );
+  //   },
+  // },
 ];

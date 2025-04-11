@@ -31,10 +31,10 @@ const Filters = () => {
   const handleSwitchMyComponents = (checked: boolean) => {
     setMyComponents(checked);
     const params = new URLSearchParams(searchParams);
-    if (myComponents) {
-      params.delete("myComponents");
-    } else {
+    if (checked) {
       params.set("myComponents", "true");
+    } else {
+      params.delete("myComponents");
     }
     replace(`/components/browse?${params.toString()}`);
   };
