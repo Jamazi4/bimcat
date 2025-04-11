@@ -6,11 +6,6 @@ import { ArrowUpDown } from "lucide-react";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import ComponentPrivateToggle from "./ComponentPrivateToggle";
-import ComponentDeleteButton from "./ComponentDeleteButton";
-
-import AddComponentToLibraryButton from "./AddComponentToLibraryButton";
-
 export type ComponentRow = {
   id: string;
   name: string;

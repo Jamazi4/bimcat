@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { ComponentRow } from "./ComponentListColumns";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import ActionButtons from "./ActionButtons";
 import { useDispatch, useSelector } from "react-redux";
