@@ -23,10 +23,13 @@ import { ComponentRow } from "./ComponentListColumns";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import ActionButtons from "./ActionButtons";
+import BrowserActionButtons from "./BrowserActionButtons";
 import { useDispatch, useSelector } from "react-redux";
-import { updateSelection } from "@/lib/features/browser/componentBrowserSlice";
+import { updateBrowserSelection } from "@/lib/features/browser/componentBrowserSlice";
+import { updateLibrarySelection } from "@/lib/features/libraries/libraryBrowserSlice";
 import { RootState } from "@/lib/store";
+import { usePathname } from "next/navigation";
+import LibraryActionButtons from "../libraries/LibraryActionButtons";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -37,12 +40,19 @@ export function ComponentList<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const { selectedComponents } = useSelector(
-    (state: RootState) => state.componentBrowser
+  const isInLibraries = usePathname().split("/")[1] === "libraries";
+  const router = useRouter();
+
+  const { selectedComponents } = useSelector((state: RootState) =>
+    isInLibraries ? state.libraryBrowser : state.componentBrowser
   );
+
+  const updateSelection = isInLibraries
+    ? updateLibrarySelection
+    : updateBrowserSelection;
+
   const [rowSelection, setRowSelection] = useState(selectedComponents);
 
   const dispatch = useDispatch();
@@ -133,9 +143,7 @@ export function ComponentList<TData, TValue>({
       </Table>
       <div className="flex items-center justify-between space-x-2 py-4">
         <div className="text-sm text-muted-foreground space-x-2">
-          <ActionButtons />
-          {/* {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected. */}
+          {isInLibraries ? <LibraryActionButtons /> : <BrowserActionButtons />}
         </div>
 
         <p className="text-muted-foreground">

@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import componentBrowserReducer from "./features/browser/componentBrowserSlice";
+import LibraryBrowserReducer from "./features/libraries/libraryBrowserSlice";
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       componentBrowser: componentBrowserReducer,
+      libraryBrowser: LibraryBrowserReducer,
     },
   });
 };

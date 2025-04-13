@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { selectedRows } from "../browser/componentBrowserSlice";
 
 export type selectedComponent = {
   id: string;
@@ -6,31 +7,29 @@ export type selectedComponent = {
   editable: string;
 };
 
-export type selectedRows = Record<string, boolean>;
-
-interface ComponentBrowserState {
+interface LibraryBrowserState {
   selectedComponents: selectedRows;
 }
 
-const initialState: ComponentBrowserState = {
+const initialState: LibraryBrowserState = {
   selectedComponents: {},
 };
 
 //TODO: selection persists when I select in
 // component browser and go to libraries - route specific store maybe
-const componentBrowserSlice = createSlice({
-  name: "componentBrowser",
+const libraryBrowserSlice = createSlice({
+  name: "libraryBrowser",
   initialState,
   reducers: {
-    updateBrowserSelection: (state, action) => {
+    updateLibrarySelection: (state, action) => {
       state.selectedComponents = action.payload;
     },
-    clearBrowserSelection: (state) => {
+    clearLibrarySelection: (state) => {
       state.selectedComponents = {};
     },
   },
 });
 
-export const { updateBrowserSelection, clearBrowserSelection } =
-  componentBrowserSlice.actions;
-export default componentBrowserSlice.reducer;
+export const { updateLibrarySelection, clearLibrarySelection } =
+  libraryBrowserSlice.actions;
+export default libraryBrowserSlice.reducer;

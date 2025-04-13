@@ -3,9 +3,9 @@
 import { Trash, BookUp, EyeIcon, Eraser } from "lucide-react";
 import { Button } from "../ui/button";
 import { useDispatch } from "react-redux";
-import { clearSelection } from "@/lib/features/browser/componentBrowserSlice";
+import { clearLibrarySelection } from "@/lib/features/libraries/libraryBrowserSlice";
 
-const ActionButtons = () => {
+const LibraryActionButtons = () => {
   const dispatch = useDispatch();
   return (
     <div className="flex space-x-2">
@@ -20,7 +20,7 @@ const ActionButtons = () => {
         variant="outline"
         className="text-destructive"
         onClick={() => {
-          dispatch(clearSelection());
+          dispatch(clearLibrarySelection());
         }}
       >
         <Eraser />
@@ -31,4 +31,4 @@ const ActionButtons = () => {
     </div>
   );
 };
-export default ActionButtons;
+export default LibraryActionButtons;
