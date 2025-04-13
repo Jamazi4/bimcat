@@ -5,7 +5,6 @@ import { Button } from "../ui/button";
 import { ArrowUpDown, Eye, EyeOff } from "lucide-react";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
-import ComponentPrivateToggle from "./ComponentPrivateToggle";
 
 export type ComponentRow = {
   id: string;

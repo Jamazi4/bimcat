@@ -74,7 +74,7 @@ function RemoveComponentButton({
               disabled={pending}
               className="w-30 mt-4"
             >
-              "Accept"
+              Accept
             </Button>
           </DialogFooter>
         </DialogContent>

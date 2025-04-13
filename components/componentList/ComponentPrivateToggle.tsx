@@ -53,7 +53,7 @@ function ComponentPrivateToggle({
               {components.length > 1 ? "s" : ""}
             </DialogTitle>
             <DialogDescription>
-              You are about to invert "private" property for:
+              You are about to invert &quot;private&quot; property for:
               <NameList components={components} />
             </DialogDescription>
           </DialogHeader>

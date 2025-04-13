@@ -1,6 +1,6 @@
 "use client";
 
-import { BookUp, Eraser } from "lucide-react";
+import { Eraser } from "lucide-react";
 import { Button } from "../ui/button";
 import { Dispatch, SetStateAction } from "react";
 import RemoveComponentButton from "./RemoveComponentButton";
