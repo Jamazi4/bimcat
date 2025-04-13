@@ -40,7 +40,7 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
   const charLimit = 140;
   return (
     <Link className="text-primary" href={`/libraries/${libId}`}>
-      <Card className="hover:bg-card-highlighted h-48 gap-2 py-4 rounded-md">
+      <Card className="hover:bg-card-highlighted h-48 gap-2 py-4 rounded-md transition-all bg-muted">
         <CardHeader>
           <CardTitle className="h-12 flex justify-between text-lg pb-2 items-center">
             {libName}

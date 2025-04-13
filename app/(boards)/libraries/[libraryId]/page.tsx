@@ -10,10 +10,12 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-const page = async ({ params }: { params: Promise<{ id: string }> }) => {
-  const { id } = await params;
-  const { libraryInfo, frontendComponents } = await fetchLibraryComponents(id);
-  if (!id) return <div>Library does not exist</div>;
+const page = async ({ params }: { params: Promise<{ libraryId: string }> }) => {
+  const { libraryId } = await params;
+  const { libraryInfo, frontendComponents } = await fetchLibraryComponents(
+    libraryId
+  );
+  if (!libraryId) return <div>Library does not exist</div>;
 
   if (!frontendComponents) return <div>No components found.</div>;
 

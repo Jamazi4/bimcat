@@ -17,6 +17,7 @@ const ComponentContent = async ({
   params: Promise<{ id: string }>;
 }) => {
   const resolvedParams = await params;
+  console.log(resolvedParams);
   const id = resolvedParams.id;
   const component = await fetchSingleComponentAction(id);
 
