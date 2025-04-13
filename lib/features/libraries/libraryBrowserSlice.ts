@@ -1,5 +1,5 @@
+import { selectedRow } from "@/utils/types";
 import { createSlice } from "@reduxjs/toolkit";
-import { selectedRows } from "../browser/componentBrowserSlice";
 
 export type selectedComponent = {
   id: string;
@@ -8,7 +8,7 @@ export type selectedComponent = {
 };
 
 interface LibraryBrowserState {
-  selectedComponents: selectedRows;
+  selectedComponents: selectedRow;
 }
 
 const initialState: LibraryBrowserState = {

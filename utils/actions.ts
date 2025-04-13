@@ -21,13 +21,13 @@ const renderError = (error: unknown): { message: string } => {
   };
 };
 
-const getDbUser = async () => {
+export const getDbUser = async () => {
   try {
     const { userId } = await auth();
 
     if (!userId) return;
     const clerkId = userId;
-    const dbUser = prisma.user.findUnique({
+    const dbUser = await prisma.user.findUnique({
       where: { clerkId },
       include: {
         // Components: true,
@@ -375,43 +375,57 @@ export const createUserAciton = async (user: Partial<User>) => {
   }
 };
 
-export const deleteComponentAction = async (componentId: string) => {
+export const deleteComponentAction = async (componentIds: string[]) => {
   try {
     const dbUser = await getDbUser();
 
-    const component = await prisma.component.findUnique({
-      where: { id: componentId },
+    const components = await prisma.component.findMany({
+      where: { id: { in: componentIds } },
       include: { geometry: true, User: true },
     });
 
-    if (!component || component.User?.id !== dbUser?.id) {
-      throw new Error("Error deleting component or unauthorized");
+    const userIds = components.map((component) => component.userId);
+
+    if (!components || !userIds.every((id) => id === dbUser?.id)) {
+      throw new Error("Error deleting component(s) or unauthorized");
     }
 
-    const geometryIds = component.geometry.map((g) => g.id);
+    const geometryIds = components.map((component) =>
+      component.geometry.map((g) => g.id)
+    );
 
-    await prisma.component.delete({
+    const geometriesToRemove = [];
+    for (const geometryId of geometryIds) {
+      const geometries = await prisma.componentGeometry.findMany({
+        where: { id: { in: geometryId } },
+        include: { components: { select: { id: true } } },
+      });
+
+      for (const geometry of geometries) {
+        if (geometry.components.length === 1) {
+          geometriesToRemove.push(geometry.id);
+        }
+      }
+    }
+    console.log("fired");
+
+    await prisma.componentGeometry.deleteMany({
+      where: { id: { in: geometriesToRemove } },
+    });
+
+    await prisma.component.deleteMany({
       where: {
-        id: componentId,
+        id: { in: componentIds },
       },
     });
 
-    for (const geometryId of geometryIds) {
-      const count = await prisma.componentGeometry.findUnique({
-        where: { id: geometryId },
-        include: { components: true },
-      });
-
-      if (count?.components.length === 0) {
-        await prisma.componentGeometry.delete({
-          where: { id: geometryId },
-        });
-      }
-    }
-
     revalidatePath(`/components/browse`);
 
-    return { message: `${component.name} succesfully deleted.` };
+    return {
+      message: `Successfully removed ${components.length} component${
+        components.length > 1 ? "s" : ""
+      }.`,
+    };
   } catch (error) {
     return renderError(error);
   }

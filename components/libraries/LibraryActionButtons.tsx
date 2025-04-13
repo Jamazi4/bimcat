@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash, BookUp, EyeIcon, Eraser } from "lucide-react";
+import { BookX, Eraser } from "lucide-react";
 import { Button } from "../ui/button";
 import { useDispatch } from "react-redux";
 import { clearLibrarySelection } from "@/lib/features/libraries/libraryBrowserSlice";
@@ -11,10 +11,7 @@ const LibraryActionButtons = () => {
     <div className="flex space-x-2">
       {" "}
       <Button variant="outline">
-        <BookUp />
-      </Button>
-      <Button variant="outline">
-        <EyeIcon />
+        <BookX />
       </Button>
       <Button
         variant="outline"
@@ -24,9 +21,6 @@ const LibraryActionButtons = () => {
         }}
       >
         <Eraser />
-      </Button>
-      <Button variant="outline" className="text-destructive">
-        <Trash />
       </Button>
     </div>
   );

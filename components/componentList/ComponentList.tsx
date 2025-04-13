@@ -24,12 +24,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import BrowserActionButtons from "./BrowserActionButtons";
-import { useDispatch, useSelector } from "react-redux";
-import { updateBrowserSelection } from "@/lib/features/browser/componentBrowserSlice";
-import { updateLibrarySelection } from "@/lib/features/libraries/libraryBrowserSlice";
-import { RootState } from "@/lib/store";
 import { usePathname } from "next/navigation";
 import LibraryActionButtons from "../libraries/LibraryActionButtons";
+import { selectedRow } from "@/utils/types";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -40,26 +37,13 @@ export function ComponentList<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-
-  const isInLibraries = usePathname().split("/")[1] === "libraries";
   const router = useRouter();
 
-  const { selectedComponents } = useSelector((state: RootState) =>
-    isInLibraries ? state.libraryBrowser : state.componentBrowser
-  );
+  const isInLibraries = usePathname().split("/")[1] === "libraries";
 
-  const updateSelection = isInLibraries
-    ? updateLibrarySelection
-    : updateBrowserSelection;
-
-  const [rowSelection, setRowSelection] = useState(selectedComponents);
-
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    setRowSelection(selectedComponents);
-  }, [selectedComponents]);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [localSelection, setLocalSelection] = useState({});
+  const [actionableItems, setActionableItems] = useState<selectedRow[]>([]);
 
   const table = useReactTable({
     data,
@@ -67,22 +51,29 @@ export function ComponentList<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: setLocalSelection,
     getRowId: (data) => (data as ComponentRow).id,
     state: {
       sorting,
-      rowSelection,
+      rowSelection: localSelection,
     },
     getPaginationRowModel: getPaginationRowModel(),
   });
 
   useEffect(() => {
-    dispatch(updateSelection(rowSelection));
-  }, [rowSelection]);
-
-  useEffect(() => {
-    console.log("component browser mounted");
-  }, []);
+    const tempSelectedComponents: selectedRow[] = Object.entries(
+      table.getSelectedRowModel().rows
+    ).map((entry) => {
+      const { id, name, editable } = entry[1].original as ComponentRow;
+      return {
+        [id]: {
+          name,
+          editable,
+        },
+      };
+    });
+    setActionableItems(tempSelectedComponents);
+  }, [localSelection]);
 
   const handleRowClick = (row: Row<TData>) => {
     const isAnyDialogOpen = document.querySelector('[data-state="open"]');
@@ -143,11 +134,18 @@ export function ComponentList<TData, TValue>({
       </Table>
       <div className="flex items-center justify-between space-x-2 py-4">
         <div className="text-sm text-muted-foreground space-x-2">
-          {isInLibraries ? <LibraryActionButtons /> : <BrowserActionButtons />}
+          {isInLibraries ? (
+            <LibraryActionButtons />
+          ) : (
+            <BrowserActionButtons
+              components={actionableItems}
+              setSelection={setLocalSelection}
+            />
+          )}
         </div>
 
         <p className="text-muted-foreground">
-          Selected {Object.keys(selectedComponents).length}
+          Selected {Object.keys(localSelection).length}
         </p>
 
         <div className="space-x-2">

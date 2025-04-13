@@ -1,23 +1,14 @@
+import { selectedRow } from "@/utils/types";
 import { createSlice } from "@reduxjs/toolkit";
 
-export type selectedComponent = {
-  id: string;
-  name: string;
-  editable: string;
-};
-
-export type selectedRows = Record<string, boolean>;
-
 interface ComponentBrowserState {
-  selectedComponents: selectedRows;
+  selectedComponents: selectedRow[];
 }
 
 const initialState: ComponentBrowserState = {
-  selectedComponents: {},
+  selectedComponents: [],
 };
 
-//TODO: selection persists when I select in
-// component browser and go to libraries - route specific store maybe
 const componentBrowserSlice = createSlice({
   name: "componentBrowser",
   initialState,
@@ -26,7 +17,7 @@ const componentBrowserSlice = createSlice({
       state.selectedComponents = action.payload;
     },
     clearBrowserSelection: (state) => {
-      state.selectedComponents = {};
+      state.selectedComponents = [];
     },
   },
 });

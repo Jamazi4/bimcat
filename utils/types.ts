@@ -42,3 +42,5 @@ export interface Library {
   guests: Partial<User>[];
   public: boolean;
 }
+
+export type selectedRow = Record<string, { name: string; editable: boolean }>;
