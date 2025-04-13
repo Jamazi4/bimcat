@@ -11,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import ComponentPrivateToggle from "./ComponentPrivateToggle";
 
 const BrowserActionButtons = ({
   components,
@@ -29,9 +30,11 @@ const BrowserActionButtons = ({
       <Button variant="ghost" disabled={noSelected}>
         <BookUp />
       </Button>
-      <Button variant="ghost" disabled={noSelected || !onlyEditable}>
-        <EyeIcon />
-      </Button>
+      <ComponentPrivateToggle
+        components={components}
+        disabled={noSelected || !onlyEditable}
+        setSelection={setSelection}
+      />
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>

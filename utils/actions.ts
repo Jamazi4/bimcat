@@ -431,33 +431,38 @@ export const deleteComponentAction = async (componentIds: string[]) => {
   }
 };
 
-export const toggleComponentPrivateAction = async (componentId: string) => {
+export const toggleComponentPrivateAction = async (componentIds: string[]) => {
   try {
     const dbUser = await getDbUser();
-    const component = await prisma.component.findUnique({
-      where: { id: componentId },
-      select: { User: true, public: true, name: true },
+
+    const components = await prisma.component.findMany({
+      where: { id: { in: componentIds } },
+      select: { User: true, public: true, name: true, userId: true },
     });
 
-    if (!component || component.User?.id !== dbUser?.id) {
-      throw new Error("Error changing private attribute or unauthorized");
+    const userIds = components.map((component) => component.userId);
+
+    if (!components || !userIds.every((id) => id === dbUser?.id)) {
+      throw new Error("Error deleting component(s) or unauthorized");
     }
 
-    const curPublic = component.public;
+    const curPublic = components.map((component) => component.public);
 
-    await prisma.component.update({
-      where: {
-        id: componentId,
-      },
-      data: {
-        public: !curPublic,
-      },
-    });
+    await Promise.all(
+      componentIds.map((id, i) =>
+        prisma.component.update({
+          where: { id },
+          data: { public: !curPublic[i] },
+        })
+      )
+    );
 
     revalidatePath(`/components/browse`);
 
     return {
-      message: `${component.name} is now ${!curPublic ? "public" : "private"}.`,
+      message: `Successfully toggled private for ${
+        components.length
+      } component${components.length > 1 ? "s" : ""}.`,
     };
   } catch (error) {
     return renderError(error);

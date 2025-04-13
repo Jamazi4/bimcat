@@ -2,9 +2,10 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Eye, EyeOff } from "lucide-react";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
+import ComponentPrivateToggle from "./ComponentPrivateToggle";
 
 export type ComponentRow = {
   id: string;
@@ -111,35 +112,22 @@ export const columns: ColumnDef<ComponentRow>[] = [
     },
   },
 
-  // {
-  //   id: "actions",
-  //   cell: ({ row }) => {
-  //     const component = row.original;
-
-  //     return component.editable ? (
-  //       <div className="flex items-center justify-between">
-  //         <AddComponentToLibraryButton
-  //           componentId={component.id}
-  //           componentName={component.name}
-  //         />
-  //         <ComponentPrivateToggle
-  //           componentId={component.id}
-  //           componentName={component.name}
-  //           componentPublic={component.public}
-  //         />
-  //         <ComponentDeleteButton
-  //           componentId={component.id}
-  //           componentName={component.name}
-  //         />
-  //       </div>
-  //     ) : (
-  //       <>
-  //         <AddComponentToLibraryButton
-  //           componentId={component.id}
-  //           componentName={component.name}
-  //         />
-  //       </>
-  //     );
-  //   },
-  // },
+  {
+    id: "private",
+    cell: ({ row }) => {
+      const component = row.original;
+      const className = "h-5 w-5";
+      return component.editable ? (
+        <div className="flex items-center justify-between">
+          {component.public ? (
+            <Eye className={className} />
+          ) : (
+            <EyeOff className={className} />
+          )}
+        </div>
+      ) : (
+        <></>
+      );
+    },
+  },
 ];
