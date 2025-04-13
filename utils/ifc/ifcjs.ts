@@ -143,6 +143,28 @@ export const getIfcGeometryById = async (
     return itemId === id;
   });
 
+  // Combine bounding boxes of all geometries
+  const combinedBox = new THREE.Box3();
+  elements.forEach((element) => {
+    element.mesh.geometry.computeBoundingBox();
+    combinedBox.union(element.mesh.geometry.boundingBox!);
+  });
+
+  // Compute center of the entire group
+  const center = new THREE.Vector3();
+  combinedBox.getCenter(center);
+
+  // Move all geometries so that group is centered at origin
+  const centerMatrix = new THREE.Matrix4().makeTranslation(
+    -center.x,
+    -center.y,
+    -center.z
+  );
+  elements.forEach((element) => {
+    element.mesh.geometry.applyMatrix4(centerMatrix);
+    element.mesh.geometry.attributes.position.needsUpdate = true;
+  });
+
   const geometry: ComponentGeometry[] = [];
   elements.forEach((element) => {
     const bufferGeom = element.mesh.geometry;
