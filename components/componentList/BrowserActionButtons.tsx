@@ -1,6 +1,6 @@
 "use client";
 
-import { BookUp, EyeIcon, Eraser } from "lucide-react";
+import { BookUp, Eraser } from "lucide-react";
 import { Button } from "../ui/button";
 import { Dispatch, SetStateAction } from "react";
 import RemoveComponentButton from "./RemoveComponentButton";
@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import ComponentPrivateToggle from "./ComponentPrivateToggle";
+import AddComponentToLibraryButton from "./AddComponentToLibraryButton";
 
 const BrowserActionButtons = ({
   components,
@@ -27,9 +28,11 @@ const BrowserActionButtons = ({
 
   return (
     <div className="flex space-x-2">
-      <Button variant="ghost" disabled={noSelected}>
-        <BookUp />
-      </Button>
+      <AddComponentToLibraryButton
+        components={components}
+        disabled={noSelected}
+        setSelection={setSelection}
+      />
       <ComponentPrivateToggle
         components={components}
         disabled={noSelected || !onlyEditable}

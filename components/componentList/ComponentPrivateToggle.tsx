@@ -2,15 +2,7 @@
 
 import { toggleComponentPrivateAction } from "@/utils/actions";
 import { Dispatch, SetStateAction, useState } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
 import { Eye } from "lucide-react";
-import FormContainer from "../global/FormContainer";
-import SubmitButton from "../global/SubmitButton";
 import { Button } from "../ui/button";
 import {
   DialogHeader,
@@ -23,6 +15,8 @@ import {
 import { selectedRow } from "@/utils/types";
 import { AiOutlineReload } from "react-icons/ai";
 import { toast } from "sonner";
+import NameList from "./NameList";
+import TooltipActionButton from "./TooltipActionButton";
 
 function ComponentPrivateToggle({
   components,
@@ -42,28 +36,15 @@ function ComponentPrivateToggle({
   const [pending, setPending] = useState(false);
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            disabled={disabled}
-            variant="ghost"
-            size="icon"
-            className="cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDialogOpen(true);
-            }}
-          >
-            {pending ? (
-              <AiOutlineReload className="animate-spin w-10 h-10" />
-            ) : (
-              <Eye />
-            )}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Toggle Private</TooltipContent>
-      </Tooltip>
+    <>
+      <TooltipActionButton
+        action={setDialogOpen}
+        disabled={disabled}
+        pending={pending}
+        icon={<Eye />}
+        tooltip="Toggle Private"
+        destructive={false}
+      />
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
@@ -73,16 +54,7 @@ function ComponentPrivateToggle({
             </DialogTitle>
             <DialogDescription>
               You are about to invert "private" property for:
-              {components.map((component) => {
-                return (
-                  <span
-                    className="flex font-semibold "
-                    key={Object.keys(component)[0]}
-                  >
-                    {`- ${Object.values(component)[0].name}`}
-                  </span>
-                );
-              })}
+              <NameList components={components} />
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -101,7 +73,7 @@ function ComponentPrivateToggle({
                   toast("Something went wrong");
                 }
 
-                setPending(false); // Reset spinner
+                setPending(false);
               }}
               disabled={pending}
               className="w-30 mt-4"
@@ -115,7 +87,7 @@ function ComponentPrivateToggle({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </TooltipProvider>
+    </>
   );
 }
 

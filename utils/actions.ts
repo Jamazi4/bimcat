@@ -544,13 +544,11 @@ export const getUserLibrariesAction = async () => {
 };
 
 export const addComponentToLibraryAction = async (
-  prevState: any,
-  formData: FormData
+  componentIds: string[],
+  libraryId: string
 ) => {
   try {
     const dbUser = await getDbUser();
-    const libraryId = formData.get("libraryId") as string;
-    const componentId = formData.get("componentId") as string;
 
     const allowed = dbUser?.authoredLibraries.filter((lib) => {
       return lib.id === libraryId;
@@ -558,18 +556,22 @@ export const addComponentToLibraryAction = async (
 
     if (!allowed) throw new Error("User not authorized to modify this library");
 
-    await prisma.library.update({
+    const library = await prisma.library.update({
       where: {
         id: libraryId,
       },
       data: {
         Components: {
-          connect: { id: componentId },
+          connect: componentIds.map((id) => ({ id: id })),
         },
       },
     });
 
-    return { message: "Component succesfully added to the library" };
+    return {
+      message: `Successfully added ${componentIds.length} component${
+        componentIds.length > 1 ? "s" : ""
+      }. to ${library.name}.`,
+    };
   } catch (error) {
     return renderError(error);
   }

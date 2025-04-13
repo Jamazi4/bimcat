@@ -1,12 +1,6 @@
 "use client";
 
 import { Dispatch, SetStateAction, useState } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
 import { Button } from "../ui/button";
 import {
   DialogHeader,
@@ -19,8 +13,9 @@ import {
 import { deleteComponentAction } from "@/utils/actions";
 import { Trash } from "lucide-react";
 import { selectedRow } from "@/utils/types";
-import { AiOutlineReload } from "react-icons/ai";
 import { toast } from "sonner";
+import NameList from "./NameList";
+import TooltipActionButton from "./TooltipActionButton";
 
 function RemoveComponentButton({
   components,
@@ -37,28 +32,15 @@ function RemoveComponentButton({
   const [pending, setPending] = useState(false);
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            disabled={disabled}
-            size="icon"
-            variant="ghost"
-            className="text-destructive cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDialogOpen(true);
-            }}
-          >
-            {pending ? (
-              <AiOutlineReload className="animate-spin w-10 h-10" />
-            ) : (
-              <Trash />
-            )}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Remove</TooltipContent>
-      </Tooltip>
+    <>
+      <TooltipActionButton
+        action={setDialogOpen}
+        disabled={disabled}
+        pending={pending}
+        icon={<Trash />}
+        tooltip="Remove"
+        destructive={true}
+      />
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
@@ -68,16 +50,7 @@ function RemoveComponentButton({
             </DialogTitle>
             <DialogDescription>
               You are about to remove:
-              {components.map((component) => {
-                return (
-                  <span
-                    className="flex font-semibold "
-                    key={Object.keys(component)[0]}
-                  >
-                    {`- ${Object.values(component)[0].name}`}
-                  </span>
-                );
-              })}
+              <NameList components={components} />
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -96,21 +69,17 @@ function RemoveComponentButton({
                   toast("Something went wrong");
                 }
 
-                setPending(false); // Reset spinner
+                setPending(false);
               }}
               disabled={pending}
               className="w-30 mt-4"
             >
-              {pending ? (
-                <AiOutlineReload className="animate-spin" />
-              ) : (
-                "Accept"
-              )}
+              "Accept"
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </TooltipProvider>
+    </>
   );
 }
 

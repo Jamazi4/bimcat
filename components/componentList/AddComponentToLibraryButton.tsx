@@ -9,18 +9,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "../ui/dialog";
-import FormContainer from "../global/FormContainer";
-import SubmitButton from "../global/SubmitButton";
 import {
   addComponentToLibraryAction,
   getUserLibrariesAction,
 } from "@/utils/actions";
-import {
-  TooltipTrigger,
-  Tooltip,
-  TooltipProvider,
-  TooltipContent,
-} from "../ui/tooltip";
 import { BookUp, Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -33,7 +25,11 @@ import {
   CommandList,
 } from "../ui/command";
 import { cn } from "@/lib/utils";
-import { Input } from "../ui/input";
+import { selectedRow } from "@/utils/types";
+import { toast } from "sonner";
+import { AiOutlineReload } from "react-icons/ai";
+import NameList from "./NameList";
+import TooltipActionButton from "./TooltipActionButton";
 
 type libraryListPosition = {
   value: string;
@@ -41,16 +37,20 @@ type libraryListPosition = {
 };
 
 const AddComponentToLibraryButton = ({
-  componentId,
-  componentName,
+  components,
+  disabled,
+  setSelection,
 }: {
-  componentId: string;
-  componentName: string;
+  components: selectedRow[];
+  disabled: boolean;
+  setSelection: Dispatch<SetStateAction<object>>;
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [libraryId, setLibraryId] = useState("");
-
+  const [pending, setPending] = useState(false);
   const [userLibraries, setUserLibraries] = useState<libraryListPosition[]>([]);
+
+  const componentIds = components.map((component) => Object.keys(component)[0]);
 
   useEffect(() => {
     const fetchLibraries = async () => {
@@ -68,29 +68,22 @@ const AddComponentToLibraryButton = ({
   }, [dialogOpen]);
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDialogOpen(true);
-            }}
-          >
-            <BookUp />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Add to library</TooltipContent>
-      </Tooltip>
+    <>
+      <TooltipActionButton
+        action={setDialogOpen}
+        disabled={disabled}
+        pending={pending}
+        icon={<BookUp />}
+        tooltip="Add to library"
+        destructive={false}
+      />
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle>Add {componentName} to library.</DialogTitle>
+            <DialogTitle>Add to library.</DialogTitle>
             <DialogDescription>
-              Pick one of your libraries from the list below:
+              <span>Pick library for:</span>
+              <NameList components={components} />
             </DialogDescription>
           </DialogHeader>
           <LibraryList
@@ -99,28 +92,39 @@ const AddComponentToLibraryButton = ({
             libraries={userLibraries}
           />
           <DialogFooter>
-            <FormContainer
-              action={addComponentToLibraryAction}
-              onSuccess={() => setDialogOpen(false)}
+            <Button
+              onClick={async (e) => {
+                e.stopPropagation();
+                setDialogOpen(false);
+                setPending(true);
+
+                const result = await addComponentToLibraryAction(
+                  componentIds,
+                  libraryId
+                );
+
+                if (result.message) {
+                  toast(result.message);
+                  setSelection([]);
+                } else {
+                  toast("Something went wrong");
+                }
+
+                setPending(false);
+              }}
+              disabled={pending}
+              className="w-30 mt-4"
             >
-              <Input
-                type="hidden"
-                value={libraryId}
-                name="libraryId"
-                id="libraryId"
-              />
-              <Input
-                type="hidden"
-                value={componentId}
-                name="componentId"
-                id="componentId"
-              />
-              <SubmitButton />
-            </FormContainer>
+              {pending ? (
+                <AiOutlineReload className="animate-spin" />
+              ) : (
+                "Accept"
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </TooltipProvider>
+    </>
   );
 };
 
