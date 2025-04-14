@@ -12,9 +12,9 @@ import {
 
 const page = async ({ params }: { params: Promise<{ libraryId: string }> }) => {
   const { libraryId } = await params;
-  const { libraryInfo, frontendComponents } = await fetchLibraryComponents(
-    libraryId
-  );
+  const result = await fetchLibraryComponents(libraryId);
+  if (result === undefined) return <div>Library does not exist</div>;
+  const { libraryInfo, frontendComponents } = result;
   if (!libraryId) return <div>Library does not exist</div>;
 
   if (!frontendComponents) return <div>No components found.</div>;
