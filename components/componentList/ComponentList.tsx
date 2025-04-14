@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ComponentRow } from "./ComponentListColumns";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import BrowserActionButtons from "./BrowserActionButtons";
@@ -37,6 +37,8 @@ export function ComponentList<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const searchParams = useSearchParams();
+
   const router = useRouter();
 
   const isInLibraries = usePathname().split("/")[1] === "libraries";
@@ -72,8 +74,14 @@ export function ComponentList<TData, TValue>({
         },
       };
     });
-    setActionableItems([...tempSelectedComponents, ...actionableItems]);
+
+    setActionableItems(tempSelectedComponents);
   }, [localSelection]);
+
+  useEffect(() => {
+    setActionableItems([]);
+    setLocalSelection([]);
+  }, [searchParams]);
 
   const handleRowClick = (row: Row<TData>) => {
     const isAnyDialogOpen = document.querySelector('[data-state="open"]');
