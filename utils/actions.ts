@@ -601,6 +601,28 @@ export const fetchLibraryComponents = async (libraryId: string) => {
 
     return { libraryInfo, frontendComponents };
   } catch (error) {
-    throw new Error("Unable to fetch library components");
+    console.log(error);
+  }
+};
+
+export const deleteLibraryAction = async (libraryId: string) => {
+  try {
+    const dbUser = await getDbUser();
+    const library = await prisma.library.findUnique({
+      where: { id: libraryId },
+    });
+
+    if (!library) throw new Error("Could not fetch library");
+    if (!(library.userId === dbUser?.id) || !dbUser)
+      throw new Error("Unauthorized");
+
+    await prisma.library.delete({ where: { id: libraryId } });
+    revalidatePath("/libraries");
+
+    return {
+      message: `Successfully removed ${library.name}`,
+    };
+  } catch (error) {
+    return renderError(error);
   }
 };

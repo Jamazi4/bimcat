@@ -37,6 +37,7 @@ const TooltipActionButton = ({
             className={className}
             onClick={(e) => {
               e.stopPropagation();
+              e.preventDefault();
               action(true);
             }}
           >
