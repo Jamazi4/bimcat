@@ -72,7 +72,7 @@ export function ComponentList<TData, TValue>({
         },
       };
     });
-    setActionableItems(tempSelectedComponents);
+    setActionableItems([...tempSelectedComponents, ...actionableItems]);
   }, [localSelection]);
 
   const handleRowClick = (row: Row<TData>) => {

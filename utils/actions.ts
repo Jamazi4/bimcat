@@ -570,7 +570,7 @@ export const addComponentToLibraryAction = async (
     return {
       message: `Successfully added ${componentIds.length} component${
         componentIds.length > 1 ? "s" : ""
-      }. to ${library.name}.`,
+      } to ${library.name}.`,
     };
   } catch (error) {
     return renderError(error);
