@@ -1,6 +1,5 @@
 "use client";
 
-import { Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
