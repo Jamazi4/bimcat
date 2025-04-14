@@ -63,6 +63,12 @@ export function ComponentList<TData, TValue>({
   });
 
   useEffect(() => {
+    if (isInLibraries) {
+      table.getColumn("private")?.toggleVisibility();
+    }
+  }, []);
+
+  useEffect(() => {
     const tempSelectedComponents: selectedRow[] = Object.entries(
       table.getSelectedRowModel().rows
     ).map((entry) => {
@@ -153,7 +159,8 @@ export function ComponentList<TData, TValue>({
         </div>
 
         <p className="text-muted-foreground">
-          Selected {Object.keys(localSelection).length}
+          Selected {Object.keys(localSelection).length} /{" "}
+          {table.getFilteredRowModel().rows.length}
         </p>
 
         <div className="space-x-2">
