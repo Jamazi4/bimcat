@@ -506,8 +506,13 @@ export const fetchAllLibrariesAction = async () => {
         Components: { select: { id: true } },
       },
       where: {
-        OR: [{ public: true }, { userId: dbUser?.id }],
+        OR: [
+          { public: true },
+          { userId: dbUser?.id },
+          { guests: { some: { id: dbUser?.id } } },
+        ],
       },
+      orderBy: { createdAt: "asc" },
     });
 
     const frontEndLibraries = libraries.map((lib) => {
@@ -617,10 +622,40 @@ export const deleteLibraryAction = async (libraryId: string) => {
       throw new Error("Unauthorized");
 
     await prisma.library.delete({ where: { id: libraryId } });
+
     revalidatePath("/libraries");
 
     return {
       message: `Successfully removed ${library.name}`,
+    };
+  } catch (error) {
+    return renderError(error);
+  }
+};
+
+export const libraryTogglePrivateAction = async (libraryId: string) => {
+  try {
+    const dbUser = await getDbUser();
+    const library = await prisma.library.findUnique({
+      where: { id: libraryId },
+    });
+
+    if (!library) throw new Error("Could not fetch library");
+    if (!(library.userId === dbUser?.id) || !dbUser)
+      throw new Error("Unauthorized");
+
+    const curPublic = library.public;
+    await prisma.library.update({
+      where: { id: libraryId },
+      data: { public: !curPublic },
+    });
+
+    revalidatePath("/libraries");
+
+    return {
+      message: `Successfully changed ${library.name} to ${
+        curPublic ? "private" : "public"
+      }.`,
     };
   } catch (error) {
     return renderError(error);

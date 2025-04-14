@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -11,7 +10,7 @@ import {
 import { format } from "date-fns";
 import { Star } from "lucide-react";
 import { Button } from "../ui/button";
-import LibraryMinatureIcons from "./LibraryMiniatureIcons";
+import LibraryMinatureButtons from "./LibraryMiniatureButtons";
 import { useRouter } from "next/navigation";
 
 type frontendLibrary = {
@@ -42,9 +41,8 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
   } = library;
   const charLimit = 140;
   return (
-    // <Link className="text-primary" href={`/libraries/${libId}`}>
     <Card
-      className="hover:bg-card-highlighted h-48 gap-2 py-4 rounded-md transition-all bg-muted"
+      className="cursor-pointer hover:border-primary h-48 gap-2 py-4 rounded-md transition-all bg-accent"
       onClick={() => {
         const isAnyDialogOpen = document.querySelector('[data-state="open"]');
         if (isAnyDialogOpen) return;
@@ -55,7 +53,7 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
         <CardTitle className="h-12 flex justify-between text-lg pb-2 items-center">
           {libName}
           {editable ? (
-            <LibraryMinatureIcons
+            <LibraryMinatureButtons
               publicFlag={publicFlag}
               libraryId={libId}
               libraryName={libName}
