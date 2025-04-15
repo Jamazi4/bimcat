@@ -598,6 +598,29 @@ export const addComponentToLibraryAction = async (
       },
     });
 
+    const libraryPublic = library.public;
+    if (libraryPublic) {
+      const components = await prisma.component.findMany({
+        where: { id: { in: componentIds } },
+        select: { public: true, id: true },
+      });
+      const privateComponents = components.filter(
+        (component) => !component.public
+      );
+
+      if (privateComponents.length > 0) {
+        await prisma.component.updateMany({
+          where: {
+            id: {
+              in: privateComponents.map((component) => component.id),
+            },
+          },
+          data: { public: true },
+        });
+        revalidatePath("/components/browser");
+      }
+    }
+
     revalidatePath("/libraries");
     return {
       message: `Successfully added ${componentIds.length} component${

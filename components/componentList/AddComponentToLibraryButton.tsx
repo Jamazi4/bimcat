@@ -30,18 +30,25 @@ import TooltipActionButton from "./TooltipActionButton";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
 
+import { AlertCircle } from "lucide-react";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 const AddComponentToLibraryButton = ({
   components,
   disabled,
   setSelection,
+  anyComponentPrivate,
 }: {
   components: selectedRow[];
   disabled: boolean;
   setSelection: Dispatch<SetStateAction<object>>;
+  anyComponentPrivate: boolean;
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [libraryId, setLibraryId] = useState("");
   const [pending, setPending] = useState(false);
+  const [displayAlert, setDisplayAlert] = useState(false);
 
   const componentIds = components.map((component) => Object.keys(component)[0]);
 
@@ -55,7 +62,14 @@ const AddComponentToLibraryButton = ({
         tooltip="Add to library"
         destructive={false}
       />
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={() => {
+          setDialogOpen(!dialogOpen);
+          setDisplayAlert(false);
+          setLibraryId("");
+        }}
+      >
         <DialogContent onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Add to library.</DialogTitle>
@@ -64,7 +78,14 @@ const AddComponentToLibraryButton = ({
               <NameList components={components} />
             </DialogDescription>
           </DialogHeader>
-          <LibraryList setValue={setLibraryId} value={libraryId} />
+          <LibraryList
+            anyComponentPrivate={anyComponentPrivate}
+            setValue={setLibraryId}
+            setDisplayAlert={setDisplayAlert}
+            value={libraryId}
+            componentIds={componentIds}
+          />
+          {displayAlert && <PrivateComponentPublicLibraryAlert />}
           <DialogFooter>
             <Button
               onClick={async (e) => {
@@ -80,6 +101,8 @@ const AddComponentToLibraryButton = ({
                 if (result.message) {
                   toast(result.message);
                   setSelection([]);
+                  setLibraryId("");
+                  setDisplayAlert(false);
                 } else {
                   toast("Something went wrong");
                 }
@@ -107,9 +130,15 @@ export default AddComponentToLibraryButton;
 const LibraryList = ({
   setValue,
   value,
+  setDisplayAlert,
+  componentIds,
+  anyComponentPrivate,
 }: {
   setValue: Dispatch<SetStateAction<string>>;
+  setDisplayAlert: Dispatch<SetStateAction<boolean>>;
   value: string;
+  componentIds: string[];
+  anyComponentPrivate: boolean;
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -118,14 +147,26 @@ const LibraryList = ({
     label: string;
   };
 
-  const libraries: libraryListPosition[] = useSelector(
-    (state: RootState) => state.userSlice
-  ).libraries.map((lib) => {
+  const userState = useSelector((state: RootState) => state.userSlice);
+
+  const libraries: libraryListPosition[] = userState.libraries.map((lib) => {
     return {
       value: lib.id,
       label: lib.name,
     };
   });
+
+  const onSelect = (currentValue: string) => {
+    const selectedLibrary = libraries.find((lib) => lib.label === currentValue);
+
+    const selectedLibraryPublic = userState.libraries.find((stateLib) => {
+      return stateLib.name === currentValue;
+    })?.public!;
+
+    setValue(selectedLibrary ? selectedLibrary.value : "");
+    setDisplayAlert(selectedLibraryPublic && anyComponentPrivate);
+    setOpen(false);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -152,13 +193,7 @@ const LibraryList = ({
                 <CommandItem
                   key={library.value}
                   value={library.label}
-                  onSelect={(currentValue) => {
-                    const selectedLibrary = libraries.find(
-                      (lib) => lib.label === currentValue
-                    );
-                    setValue(selectedLibrary ? selectedLibrary.value : "");
-                    setOpen(false);
-                  }}
+                  onSelect={(currentValue) => onSelect(currentValue)}
                 >
                   <Check
                     className={cn(
@@ -174,5 +209,19 @@ const LibraryList = ({
         </Command>
       </PopoverContent>
     </Popover>
+  );
+};
+
+const PrivateComponentPublicLibraryAlert = () => {
+  return (
+    <Alert variant="destructive">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>Warning</AlertTitle>
+      <AlertDescription>
+        One or more component is private, while the selected library is public.
+        Continuing this action will cause the component to automatically switch
+        to public. If this is not intended, close this window.
+      </AlertDescription>
+    </Alert>
   );
 };

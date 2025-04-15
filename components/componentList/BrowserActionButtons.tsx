@@ -25,10 +25,14 @@ const BrowserActionButtons = ({
   const onlyEditable = components.every(
     (component) => Object.values(component)[0].editable
   );
+  const anyComponentPrivate = components.some((component) => {
+    return Object.values(component)[0].isPublic === false;
+  });
 
   return (
     <div className="flex space-x-2">
       <AddComponentToLibraryButton
+        anyComponentPrivate={anyComponentPrivate}
         components={components}
         disabled={noSelected}
         setSelection={setSelection}

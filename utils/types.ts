@@ -43,4 +43,7 @@ export interface Library {
   public: boolean;
 }
 
-export type selectedRow = Record<string, { name: string; editable: boolean }>;
+export type selectedRow = Record<
+  string,
+  { name: string; editable: boolean; isPublic: boolean }
+>;

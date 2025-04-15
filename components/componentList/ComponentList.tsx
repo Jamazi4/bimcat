@@ -72,11 +72,17 @@ export function ComponentList<TData, TValue>({
     const tempSelectedComponents: selectedRow[] = Object.entries(
       table.getSelectedRowModel().rows
     ).map((entry) => {
-      const { id, name, editable } = entry[1].original as ComponentRow;
+      const {
+        id,
+        name,
+        editable,
+        public: isPublic,
+      } = entry[1].original as ComponentRow;
       return {
         [id]: {
           name,
           editable,
+          isPublic,
         },
       };
     });
