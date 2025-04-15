@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import {
   DialogHeader,
   DialogFooter,
@@ -9,10 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "../ui/dialog";
-import {
-  addComponentToLibraryAction,
-  getUserLibrariesAction,
-} from "@/utils/actions";
+import { addComponentToLibraryAction } from "@/utils/actions";
 import { BookUp, Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -30,11 +27,8 @@ import { toast } from "sonner";
 import { AiOutlineReload } from "react-icons/ai";
 import NameList from "./NameList";
 import TooltipActionButton from "./TooltipActionButton";
-
-type libraryListPosition = {
-  value: string;
-  label: string;
-};
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/store";
 
 const AddComponentToLibraryButton = ({
   components,
@@ -48,24 +42,8 @@ const AddComponentToLibraryButton = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [libraryId, setLibraryId] = useState("");
   const [pending, setPending] = useState(false);
-  const [userLibraries, setUserLibraries] = useState<libraryListPosition[]>([]);
 
   const componentIds = components.map((component) => Object.keys(component)[0]);
-
-  useEffect(() => {
-    const fetchLibraries = async () => {
-      const libraries = await getUserLibrariesAction();
-      if (!libraries) return; //TODO: handle
-      const libraryListPositions = libraries.map((lib) => {
-        return {
-          value: lib.id,
-          label: lib.name,
-        };
-      });
-      setUserLibraries(libraryListPositions);
-    };
-    fetchLibraries();
-  }, [dialogOpen]);
 
   return (
     <>
@@ -86,11 +64,7 @@ const AddComponentToLibraryButton = ({
               <NameList components={components} />
             </DialogDescription>
           </DialogHeader>
-          <LibraryList
-            setValue={setLibraryId}
-            value={libraryId}
-            libraries={userLibraries}
-          />
+          <LibraryList setValue={setLibraryId} value={libraryId} />
           <DialogFooter>
             <Button
               onClick={async (e) => {
@@ -133,13 +107,25 @@ export default AddComponentToLibraryButton;
 const LibraryList = ({
   setValue,
   value,
-  libraries,
 }: {
   setValue: Dispatch<SetStateAction<string>>;
   value: string;
-  libraries: libraryListPosition[];
 }) => {
   const [open, setOpen] = useState(false);
+
+  type libraryListPosition = {
+    value: string;
+    label: string;
+  };
+
+  const libraries: libraryListPosition[] = useSelector(
+    (state: RootState) => state.userSlice
+  ).libraries.map((lib) => {
+    return {
+      value: lib.id,
+      label: lib.name,
+    };
+  });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
