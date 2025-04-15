@@ -28,7 +28,9 @@ const page = async ({ params }: { params: Promise<{ libraryId: string }> }) => {
       <ComponentList columns={columns} data={frontendComponents} />
       <div className="mt-12">
         <h1 className="font-semibold mb-4">Description:</h1>
-        <p className="bg-accent border rounded-md p-4 ">{libraryInfo.desc}</p>
+        <p className="bg-accent text-muted-foreground rounded-md p-2 ">
+          {libraryInfo.desc}
+        </p>
       </div>
     </main>
   );

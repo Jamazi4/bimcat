@@ -548,6 +548,31 @@ export const getUserLibrariesAction = async () => {
   }
 };
 
+export const getUserStateLibrariesAction = async () => {
+  try {
+    const { userId } = await auth();
+    if (!userId) return;
+    const dbUser = await prisma.user.findUnique({
+      where: {
+        clerkId: userId,
+      },
+      include: {
+        authoredLibraries: {
+          select: {
+            id: true,
+            name: true,
+            public: true,
+            Components: { select: { id: true, name: true, public: true } },
+          },
+        },
+      },
+    });
+    return dbUser;
+  } catch (error) {
+    renderError(error);
+  }
+};
+
 export const addComponentToLibraryAction = async (
   componentIds: string[],
   libraryId: string
@@ -570,9 +595,6 @@ export const addComponentToLibraryAction = async (
           connect: componentIds.map((id) => ({ id: id })),
         },
         updatedAt: new Date(),
-      },
-      include: {
-        Components: { select: { id: true } },
       },
     });
 

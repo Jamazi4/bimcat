@@ -15,8 +15,6 @@ const initialState: LibraryBrowserState = {
   selectedComponents: {},
 };
 
-//TODO: selection persists when I select in
-// component browser and go to libraries - route specific store maybe
 const libraryBrowserSlice = createSlice({
   name: "libraryBrowser",
   initialState,
