@@ -20,7 +20,7 @@ const page = async () => {
         <CreateLibraryButton />
       </div>
 
-      <Suspense key={1} fallback={<LibrariesFallback />}>
+      <Suspense fallback={<LibrariesFallback />}>
         <LibraryList />
       </Suspense>
     </main>

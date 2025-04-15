@@ -569,9 +569,14 @@ export const addComponentToLibraryAction = async (
         Components: {
           connect: componentIds.map((id) => ({ id: id })),
         },
+        updatedAt: new Date(),
+      },
+      include: {
+        Components: { select: { id: true } },
       },
     });
 
+    revalidatePath("/libraries");
     return {
       message: `Successfully added ${componentIds.length} component${
         componentIds.length > 1 ? "s" : ""
