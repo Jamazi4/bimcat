@@ -10,7 +10,14 @@ import {
   DialogDescription,
 } from "../ui/dialog";
 import { addComponentToLibraryAction } from "@/utils/actions";
-import { BookUp, Check, ChevronsUpDown } from "lucide-react";
+import {
+  BookUp,
+  Check,
+  ChevronsUpDown,
+  FolderDot,
+  AlertCircle,
+  Info,
+} from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
@@ -27,12 +34,10 @@ import { toast } from "sonner";
 import { AiOutlineReload } from "react-icons/ai";
 import NameList from "./NameList";
 import TooltipActionButton from "./TooltipActionButton";
-import { useSelector } from "react-redux";
-import { RootState } from "@/lib/store";
-
-import { AlertCircle } from "lucide-react";
-
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 
 const AddComponentToLibraryButton = ({
   components,
@@ -45,10 +50,12 @@ const AddComponentToLibraryButton = ({
   setSelection: Dispatch<SetStateAction<object>>;
   anyComponentPrivate: boolean;
 }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [libraryId, setLibraryId] = useState("");
   const [pending, setPending] = useState(false);
   const [displayAlert, setDisplayAlert] = useState(false);
+  const [displayInfo, setDisplayInfo] = useState(false);
 
   const componentIds = components.map((component) => Object.keys(component)[0]);
 
@@ -67,6 +74,7 @@ const AddComponentToLibraryButton = ({
         onOpenChange={() => {
           setDialogOpen(!dialogOpen);
           setDisplayAlert(false);
+          setDisplayInfo(false);
           setLibraryId("");
         }}
       >
@@ -82,10 +90,12 @@ const AddComponentToLibraryButton = ({
             anyComponentPrivate={anyComponentPrivate}
             setValue={setLibraryId}
             setDisplayAlert={setDisplayAlert}
+            setDisplayInfo={setDisplayInfo}
             value={libraryId}
             componentIds={componentIds}
           />
           {displayAlert && <PrivateComponentPublicLibraryAlert />}
+          {displayInfo && <ComponentAlreadyInLibraryInfo />}
           <DialogFooter>
             <Button
               onClick={async (e) => {
@@ -102,12 +112,14 @@ const AddComponentToLibraryButton = ({
                   toast(result.message);
                   setSelection([]);
                   setLibraryId("");
+                  setDisplayInfo(false);
                   setDisplayAlert(false);
                 } else {
                   toast("Something went wrong");
                 }
 
                 setPending(false);
+                dispatch(fetchUserLibraries());
               }}
               disabled={pending}
               className="w-30 mt-4"
@@ -131,11 +143,13 @@ const LibraryList = ({
   setValue,
   value,
   setDisplayAlert,
+  setDisplayInfo,
   componentIds,
   anyComponentPrivate,
 }: {
   setValue: Dispatch<SetStateAction<string>>;
   setDisplayAlert: Dispatch<SetStateAction<boolean>>;
+  setDisplayInfo: Dispatch<SetStateAction<boolean>>;
   value: string;
   componentIds: string[];
   anyComponentPrivate: boolean;
@@ -148,6 +162,19 @@ const LibraryList = ({
   };
 
   const userState = useSelector((state: RootState) => state.userSlice);
+
+  const librariesContaining = userState.libraries.map((library) => {
+    const componentIdsInside = library.components.map(
+      (component) => component.id
+    );
+    let found = false;
+    for (let id of componentIds) {
+      if (componentIdsInside.includes(id)) {
+        found = true;
+      }
+    }
+    if (found) return library.id;
+  });
 
   const libraries: libraryListPosition[] = userState.libraries.map((lib) => {
     return {
@@ -163,8 +190,11 @@ const LibraryList = ({
       return stateLib.name === currentValue;
     })?.public!;
 
-    setValue(selectedLibrary ? selectedLibrary.value : "");
+    const alreadyInside = librariesContaining.includes(selectedLibrary?.value);
+
+    setDisplayInfo(alreadyInside);
     setDisplayAlert(selectedLibraryPublic && anyComponentPrivate);
+    setValue(selectedLibrary ? selectedLibrary.value : "");
     setOpen(false);
   };
 
@@ -189,21 +219,26 @@ const LibraryList = ({
           <CommandList>
             <CommandEmpty>No library found.</CommandEmpty>
             <CommandGroup>
-              {libraries.map((library) => (
-                <CommandItem
-                  key={library.value}
-                  value={library.label}
-                  onSelect={(currentValue) => onSelect(currentValue)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === library.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {library.label}
-                </CommandItem>
-              ))}
+              {libraries.map((library) => {
+                const highlight = librariesContaining.includes(library.value);
+                return (
+                  <CommandItem
+                    className="w-90"
+                    key={library.value}
+                    value={library.label}
+                    onSelect={(currentValue) => onSelect(currentValue)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === library.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {library.label}
+                    {highlight && <FolderDot className="absolute right-2" />}
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>
@@ -221,6 +256,18 @@ const PrivateComponentPublicLibraryAlert = () => {
         One or more component is private, while the selected library is public.
         Continuing this action will cause the component to automatically switch
         to public. If this is not intended, close this window.
+      </AlertDescription>
+    </Alert>
+  );
+};
+
+const ComponentAlreadyInLibraryInfo = () => {
+  return (
+    <Alert className="text-constructive">
+      <Info className="h-4 w-4" />
+      <AlertTitle>Info</AlertTitle>
+      <AlertDescription className="text-constructive">
+        One or more component is already in selected library.
       </AlertDescription>
     </Alert>
   );

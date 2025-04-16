@@ -46,7 +46,10 @@ function ComponentPrivateToggle({
         destructive={false}
       />
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent
+          onInteractOutside={(e) => e.preventDefault()}
+          className="p-6"
+        >
           <DialogHeader>
             <DialogTitle>
               Toggle private for {components.length} component

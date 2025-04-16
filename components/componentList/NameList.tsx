@@ -6,10 +6,10 @@ const NameList = ({ components }: { components: selectedRow[] }) => {
       {components.map((component) => {
         return (
           <span
-            className="flex font-semibold mt-2 text-primary ml-4"
+            className="flex font-semibold mt-2 text-primary"
             key={Object.keys(component)[0]}
           >
-            {`   \u2022 ${Object.values(component)[0].name}`}
+            {`${Object.values(component)[0].name}`}
           </span>
         );
       })}
