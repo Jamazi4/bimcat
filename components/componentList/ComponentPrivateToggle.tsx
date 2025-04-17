@@ -17,6 +17,8 @@ import { AiOutlineReload } from "react-icons/ai";
 import { toast } from "sonner";
 import NameList from "./NameList";
 import TooltipActionButton from "./TooltipActionButton";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/store";
 
 function ComponentPrivateToggle({
   components,
@@ -27,6 +29,8 @@ function ComponentPrivateToggle({
   disabled: boolean;
   setSelection: Dispatch<SetStateAction<object>>;
 }) {
+  const userState = useSelector((state: RootState) => state.userSlice);
+
   const componentIds = components.map((component) => Object.keys(component)[0]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const togglePrivateActionWithId = toggleComponentPrivateAction.bind(

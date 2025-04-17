@@ -10,14 +10,7 @@ import {
   DialogDescription,
 } from "../ui/dialog";
 import { addComponentToLibraryAction } from "@/utils/actions";
-import {
-  BookUp,
-  Check,
-  ChevronsUpDown,
-  FolderDot,
-  AlertCircle,
-  Info,
-} from "lucide-react";
+import { BookUp, Check, ChevronsUpDown, FolderDot } from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
@@ -36,8 +29,9 @@ import NameList from "./NameList";
 import TooltipActionButton from "./TooltipActionButton";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
+import WarningMessage from "../global/WarningMessage";
+import InfoMessage from "../global/InfoMessage";
 
 const AddComponentToLibraryButton = ({
   components,
@@ -54,8 +48,14 @@ const AddComponentToLibraryButton = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [libraryId, setLibraryId] = useState("");
   const [pending, setPending] = useState(false);
+
   const [displayAlert, setDisplayAlert] = useState(false);
+  const alertMessage = `One or more component is private, while the selected library is public.
+        Continuing this action will cause the component to automatically switch
+        to public. If this is not intended, close this window.`;
+
   const [displayInfo, setDisplayInfo] = useState(false);
+  const infoMessage = `One or more component is already in selected library.`;
 
   const componentIds = components.map((component) => Object.keys(component)[0]);
 
@@ -94,8 +94,8 @@ const AddComponentToLibraryButton = ({
             value={libraryId}
             componentIds={componentIds}
           />
-          {displayAlert && <PrivateComponentPublicLibraryAlert />}
-          {displayInfo && <ComponentAlreadyInLibraryInfo />}
+          {displayAlert && <WarningMessage message={alertMessage} />}
+          {displayInfo && <InfoMessage message={infoMessage} />}
           <DialogFooter>
             <Button
               onClick={async (e) => {
@@ -244,31 +244,5 @@ const LibraryList = ({
         </Command>
       </PopoverContent>
     </Popover>
-  );
-};
-
-const PrivateComponentPublicLibraryAlert = () => {
-  return (
-    <Alert variant="destructive">
-      <AlertCircle className="h-4 w-4" />
-      <AlertTitle>Warning</AlertTitle>
-      <AlertDescription>
-        One or more component is private, while the selected library is public.
-        Continuing this action will cause the component to automatically switch
-        to public. If this is not intended, close this window.
-      </AlertDescription>
-    </Alert>
-  );
-};
-
-const ComponentAlreadyInLibraryInfo = () => {
-  return (
-    <Alert className="text-constructive">
-      <Info className="h-4 w-4" />
-      <AlertTitle>Info</AlertTitle>
-      <AlertDescription className="text-constructive">
-        One or more component is already in selected library.
-      </AlertDescription>
-    </Alert>
   );
 };
