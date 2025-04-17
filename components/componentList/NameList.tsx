@@ -1,13 +1,37 @@
 import { selectedRow } from "@/utils/types";
+import { cn } from "@/lib/utils";
 
-const NameList = ({ components }: { components: selectedRow[] }) => {
+const NameList = ({
+  components,
+  highlightDestructiveIds,
+  highlightedConstructiveIds,
+}: {
+  components: selectedRow[];
+  highlightDestructiveIds?: string[];
+  highlightedConstructiveIds?: string[];
+}) => {
   return (
     <span className="pt-4">
       {components.map((component) => {
+        const componentKey = Object.keys(component)[0];
+        const highlightDestructive =
+          highlightDestructiveIds?.includes(componentKey);
+        const highlightedConstructive =
+          highlightedConstructiveIds?.includes(componentKey);
+        console.log(highlightedConstructive);
+
+        const color = highlightDestructive
+          ? "text-destructive"
+          : "text-constructive";
+
+        const highlight = highlightDestructive || highlightedConstructive;
         return (
           <span
-            className="flex font-semibold mt-2 text-primary"
-            key={Object.keys(component)[0]}
+            className={cn(
+              "flex font-semibold mt-2 ",
+              highlight ? color : "text-primary"
+            )}
+            key={componentKey}
           >
             {`${Object.values(component)[0].name}`}
           </span>

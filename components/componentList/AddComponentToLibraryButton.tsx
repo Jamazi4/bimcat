@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
   DialogHeader,
   DialogFooter,
@@ -48,15 +48,35 @@ const AddComponentToLibraryButton = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [libraryId, setLibraryId] = useState("");
   const [pending, setPending] = useState(false);
+  const [highlightDestructiveIds, setHighlightDestructiveIds] = useState<
+    string[]
+  >([]);
+  const [highlightConstructiveIds, setHighlighConstructiveIds] = useState<
+    string[]
+  >([]);
 
   const [displayAlert, setDisplayAlert] = useState(false);
-  const alertMessage = `One or more component is private, while the selected library is public.
-        Continuing this action will cause the component to automatically switch
-        to public. If this is not intended, close this window.`;
+  const alertMessage = `Highlighted components are private, while the selected library is public.
+        Continuing this action will cause the components to automatically switch
+        to public.`;
 
   const [displayInfo, setDisplayInfo] = useState(false);
-  const infoMessage = `One or more component is already in selected library.`;
+  const infoMessage = `Highlighted components are already in selected library.`;
 
+  const privateComponentIds = components.reduce<string[]>((acc, component) => {
+    const isPublic = Object.values(component)[0].isPublic;
+    if (!isPublic) acc.push(Object.keys(component)[0]);
+    return acc;
+  }, []);
+
+  useEffect(() => {
+    setHighlightDestructiveIds(displayAlert ? privateComponentIds : []);
+    if (!displayInfo) {
+      setHighlighConstructiveIds([]);
+    }
+  }, [displayAlert, displayInfo]);
+
+  console.log(highlightDestructiveIds);
   const componentIds = components.map((component) => Object.keys(component)[0]);
 
   return (
@@ -83,10 +103,15 @@ const AddComponentToLibraryButton = ({
             <DialogTitle>Add to library.</DialogTitle>
             <DialogDescription>
               <span>Pick library for:</span>
-              <NameList components={components} />
+              <NameList
+                components={components}
+                highlightDestructiveIds={highlightDestructiveIds}
+                highlightedConstructiveIds={highlightConstructiveIds}
+              />
             </DialogDescription>
           </DialogHeader>
           <LibraryList
+            setHighlighConstructiveIds={setHighlighConstructiveIds}
             anyComponentPrivate={anyComponentPrivate}
             setValue={setLibraryId}
             setDisplayAlert={setDisplayAlert}
@@ -146,6 +171,7 @@ const LibraryList = ({
   setDisplayInfo,
   componentIds,
   anyComponentPrivate,
+  setHighlighConstructiveIds,
 }: {
   setValue: Dispatch<SetStateAction<string>>;
   setDisplayAlert: Dispatch<SetStateAction<boolean>>;
@@ -153,12 +179,15 @@ const LibraryList = ({
   value: string;
   componentIds: string[];
   anyComponentPrivate: boolean;
+  setHighlighConstructiveIds: Dispatch<SetStateAction<string[]>>;
 }) => {
   const [open, setOpen] = useState(false);
 
   type libraryListPosition = {
     value: string;
     label: string;
+    isPublic: boolean;
+    componentIds: string[];
   };
 
   const userState = useSelector((state: RootState) => state.userSlice);
@@ -180,20 +209,28 @@ const LibraryList = ({
     return {
       value: lib.id,
       label: lib.name,
+      isPublic: lib.public,
+      componentIds: lib.components.map((comp) => comp.id),
     };
   });
 
   const onSelect = (currentValue: string) => {
     const selectedLibrary = libraries.find((lib) => lib.label === currentValue);
 
-    const selectedLibraryPublic = userState.libraries.find((stateLib) => {
-      return stateLib.name === currentValue;
-    })?.public!;
+    const selectedLibraryPublic = selectedLibrary?.isPublic!;
+    const displayAlertFlag = selectedLibraryPublic && anyComponentPrivate;
 
     const alreadyInside = librariesContaining.includes(selectedLibrary?.value);
 
+    if (alreadyInside) {
+      if (!selectedLibrary) return;
+      setHighlighConstructiveIds(selectedLibrary?.componentIds);
+    } else {
+      setHighlighConstructiveIds([]);
+    }
+
     setDisplayInfo(alreadyInside);
-    setDisplayAlert(selectedLibraryPublic && anyComponentPrivate);
+    setDisplayAlert(displayAlertFlag);
     setValue(selectedLibrary ? selectedLibrary.value : "");
     setOpen(false);
   };
