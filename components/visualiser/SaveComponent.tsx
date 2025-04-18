@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getIfcDataById } from "@/utils/ifc/ifcjs";
 import { ComponentGeometry, Pset } from "@/utils/types";
 import { createComponentAction } from "@/utils/actions";
@@ -43,7 +43,11 @@ const SaveComponent = ({
     };
 
     loadData();
-  }, [open]);
+  }, [open, file, selected]);
+
+  const handleSuccess = useCallback(() => {
+    setOpen(false);
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -64,12 +68,7 @@ const SaveComponent = ({
             Please provide a name for the component.
           </DialogDescription>
         </DialogHeader>
-        <FormContainer
-          action={createComponentAction}
-          onSuccess={() => {
-            setOpen(false);
-          }}
-        >
+        <FormContainer action={createComponentAction} onSuccess={handleSuccess}>
           <Label htmlFor="name">
             <p className="text-sm text-secondary-foreground">Component Name</p>
           </Label>

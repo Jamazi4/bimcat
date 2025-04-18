@@ -12,12 +12,15 @@ import { useParams } from "next/navigation";
 import { addPsetAction } from "@/utils/actions";
 import FormContainer from "../global/FormContainer";
 import { useFormStatus } from "react-dom";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { AiOutlineReload } from "react-icons/ai";
 
 const AddPsetButton = () => {
   const { id } = useParams() || "";
   const [open, setOpen] = useState(false);
+  const handleSuccess = useCallback(() => {
+    setOpen(false);
+  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -31,12 +34,7 @@ const AddPsetButton = () => {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="bg-background w-100" align="center">
-        <FormContainer
-          action={addPsetAction}
-          onSuccess={() => {
-            setOpen(false);
-          }}
-        >
+        <FormContainer action={addPsetAction} onSuccess={handleSuccess}>
           <p>Creating new Pset, please enter name:</p>
           <div className="flex gap-2 mb-4 mt-4">
             <Input name="psetTitle" required={true} placeholder="Pset name" />

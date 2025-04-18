@@ -302,7 +302,8 @@ export const removePsetAction = async (prevState: any, formData: FormData) => {
     });
 
     revalidatePath(`/components/${componentId}`);
-    return { message: `successfully removed ${psetTitle}` };
+    const successMessage = `successfully removed ${psetTitle}`;
+    return { message: successMessage };
   } catch (error) {
     return renderError(error);
   }

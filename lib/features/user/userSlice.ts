@@ -45,7 +45,8 @@ export const fetchUserLibraries = createAsyncThunk(
       }));
 
       return librariesState;
-    } catch (err: any) {
+    } catch (err) {
+      console.log(err);
       return thunkAPI.rejectWithValue("Failed to fetch user libraries");
     }
   }

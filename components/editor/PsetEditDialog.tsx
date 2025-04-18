@@ -23,7 +23,7 @@ import { useParams } from "next/navigation";
 import FormContainer from "../global/FormContainer";
 import { Plus } from "lucide-react";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Input } from "../ui/input";
 import { useFormStatus } from "react-dom";
 import { AiOutlineReload } from "react-icons/ai";
@@ -58,6 +58,10 @@ function PsetEditDialog({
     });
   };
 
+  const handleSuccess = useCallback(() => {
+    setOpen(false);
+  }, []);
+
   return (
     <Dialog
       open={open}
@@ -76,10 +80,7 @@ function PsetEditDialog({
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] overflow-y-scroll max-h-screen">
-        <FormContainer
-          action={updatePsetsAction}
-          onSuccess={() => setOpen(false)}
-        >
+        <FormContainer action={updatePsetsAction} onSuccess={handleSuccess}>
           {/* Metadata for backend queries */}
 
           <input type="hidden" value={id} name="componentId" />

@@ -98,16 +98,23 @@ const Model = ({
       setIndexer(indexer);
       setFragments(model);
 
+      // Cleanup will refer to *this* instance
       return () => {
-        if (fragments) {
-          scene.remove(fragments);
-          fragments.dispose();
-        }
+        scene.remove(model);
+        model.dispose();
       };
     };
 
-    loadModel();
-  }, [file]);
+    let cleanup: (() => void) | undefined;
+
+    loadModel().then((clean) => {
+      cleanup = clean;
+    });
+
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [file, scene]);
 
   if (!fragments) return;
 

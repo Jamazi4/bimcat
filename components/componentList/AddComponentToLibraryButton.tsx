@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import {
   DialogHeader,
   DialogFooter,
@@ -63,18 +63,20 @@ const AddComponentToLibraryButton = ({
   const [displayInfo, setDisplayInfo] = useState(false);
   const infoMessage = `Highlighted components are already in selected library.`;
 
-  const privateComponentIds = components.reduce<string[]>((acc, component) => {
-    const isPublic = Object.values(component)[0].isPublic;
-    if (!isPublic) acc.push(Object.keys(component)[0]);
-    return acc;
-  }, []);
+  const privateComponentIds = useMemo(() => {
+    return components.reduce<string[]>((acc, component) => {
+      const isPublic = Object.values(component)[0].isPublic;
+      if (!isPublic) acc.push(Object.keys(component)[0]);
+      return acc;
+    }, []);
+  }, [components]);
 
   useEffect(() => {
     setHighlightDestructiveIds(displayAlert ? privateComponentIds : []);
     if (!displayInfo) {
       setHighlighConstructiveIds([]);
     }
-  }, [displayAlert, displayInfo]);
+  }, [displayAlert, displayInfo, privateComponentIds]);
 
   const componentIds = components.map((component) => Object.keys(component)[0]);
 
@@ -196,7 +198,7 @@ const LibraryList = ({
       (component) => component.id
     );
     let found = false;
-    for (let id of componentIds) {
+    for (const id of componentIds) {
       if (componentIdsInside.includes(id)) {
         found = true;
       }
@@ -214,9 +216,11 @@ const LibraryList = ({
   });
 
   const onSelect = (currentValue: string) => {
-    const selectedLibrary = libraries.find((lib) => lib.label === currentValue);
+    const selectedLibrary = libraries.find(
+      (lib) => lib.label === currentValue
+    )!;
 
-    const selectedLibraryPublic = selectedLibrary?.isPublic!;
+    const selectedLibraryPublic = selectedLibrary.isPublic!;
     const displayAlertFlag = selectedLibraryPublic && anyComponentPrivate;
 
     const alreadyInside = librariesContaining.includes(selectedLibrary?.value);

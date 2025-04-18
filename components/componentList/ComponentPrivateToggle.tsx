@@ -68,7 +68,7 @@ function ComponentPrivateToggle({
 
   useEffect(() => {
     setDisplayWarning(warningMessageOn);
-  }, [affectedPairs]);
+  }, [affectedPairs, warningMessageOn]);
 
   const componentIds = components.map((component) => Object.keys(component)[0]);
   const [dialogOpen, setDialogOpen] = useState(false);

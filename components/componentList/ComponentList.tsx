@@ -66,7 +66,7 @@ export function ComponentList<TData, TValue>({
     if (isInLibraries) {
       table.getColumn("private")?.toggleVisibility();
     }
-  }, []);
+  }, [table, isInLibraries]);
 
   useEffect(() => {
     const tempSelectedComponents: selectedRow[] = Object.entries(
@@ -88,7 +88,7 @@ export function ComponentList<TData, TValue>({
     });
 
     setActionableItems(tempSelectedComponents);
-  }, [localSelection]);
+  }, [localSelection, table]);
 
   useEffect(() => {
     setActionableItems([]);
