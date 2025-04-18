@@ -76,7 +76,6 @@ const AddComponentToLibraryButton = ({
     }
   }, [displayAlert, displayInfo]);
 
-  console.log(highlightDestructiveIds);
   const componentIds = components.map((component) => Object.keys(component)[0]);
 
   return (

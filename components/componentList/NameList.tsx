@@ -18,7 +18,6 @@ const NameList = ({
           highlightDestructiveIds?.includes(componentKey);
         const highlightedConstructive =
           highlightedConstructiveIds?.includes(componentKey);
-        console.log(highlightedConstructive);
 
         const color = highlightDestructive
           ? "text-destructive"

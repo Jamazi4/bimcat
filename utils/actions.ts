@@ -437,7 +437,13 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
 
     const components = await prisma.component.findMany({
       where: { id: { in: componentIds } },
-      select: { User: true, public: true, name: true, userId: true },
+      select: {
+        User: true,
+        public: true,
+        name: true,
+        userId: true,
+        libraries: { select: { id: true, public: true } },
+      },
     });
 
     const userIds = components.map((component) => component.userId);
@@ -446,15 +452,38 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
       throw new Error("Error deleting component(s) or unauthorized");
     }
 
-    const curPublic = components.map((component) => component.public);
+    const curPublics = components.map((component) => component.public);
+
+    const publicComponents = components.filter((component) => component.public);
+
+    let affectedLibraries =
+      publicComponents.length > 0
+        ? publicComponents.flatMap((component) => {
+            return component.libraries.filter((library) => library.public);
+          })
+        : [];
+
+    const affectedLibrariesUnique = Object.values(
+      affectedLibraries.reduce((acc, library) => {
+        acc[library.id] = library;
+        return acc;
+      }, {} as Record<string, (typeof affectedLibraries)[number]>)
+    );
 
     await Promise.all(
-      componentIds.map((id, i) =>
-        prisma.component.update({
+      componentIds.map((id, i) => {
+        return prisma.component.update({
           where: { id },
-          data: { public: !curPublic[i] },
-        })
-      )
+          data: {
+            public: !curPublics[i],
+            libraries: {
+              disconnect: affectedLibrariesUnique.map((lib) => ({
+                id: lib.id,
+              })),
+            },
+          },
+        });
+      })
     );
 
     revalidatePath(`/components/browse`);
