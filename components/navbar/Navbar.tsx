@@ -10,7 +10,7 @@ const Navbar = () => {
     <nav className=" mx-auto px-4 py-4 top-0 border-b bg-background h-[72px] fixed w-full z-10">
       <div className="flex justify-between  mx-auto items-center">
         {/* LOGO */}
-        <h1 className="font-black text-3xl text-primary hover:brightness-150">
+        <h1 className="font-black text-3xl text-primary hover:brightness-150 w-20">
           <Link href="/">
             <div className="flex flex-col gap-0 leading-none">
               <span className="font-extralight leading-4 tracking-[0.08em]">
@@ -23,7 +23,7 @@ const Navbar = () => {
 
         <NavbarMenu />
 
-        <div className="flex gap-2 justify-center items-center">
+        <div className="flex gap-2 justify-center items-center w-20">
           <ModeToggle />
           <SignedOut>
             <Button
