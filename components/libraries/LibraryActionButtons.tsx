@@ -1,7 +1,5 @@
 "use client";
 
-import { Eraser } from "lucide-react";
-import { Button } from "../ui/button";
 import { selectedRow } from "@/utils/types";
 import { Dispatch, SetStateAction } from "react";
 import RemoveFromLibraryActionButton from "./RemoveFromLibraryActionButton";

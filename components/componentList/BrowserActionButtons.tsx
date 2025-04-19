@@ -1,16 +1,8 @@
 "use client";
 
-import { Eraser } from "lucide-react";
-import { Button } from "../ui/button";
 import { Dispatch, SetStateAction } from "react";
 import RemoveComponentButton from "./RemoveComponentButton";
 import { selectedRow } from "@/utils/types";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
 import ComponentPrivateToggle from "./ComponentPrivateToggle";
 import AddComponentToLibraryButton from "./AddComponentToLibraryButton";
 import EreaseSelectionButton from "../global/EreaseSelectionButton";
