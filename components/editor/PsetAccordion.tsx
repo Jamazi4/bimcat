@@ -37,9 +37,7 @@ const PsetAccordion = ({
               })}
               {edit && (
                 <div className="ml-auto space-x-4">
-                  {/* Edit button */}
                   <PsetEditDialog content={pset.content} title={pset.title} />
-                  {/* Delete Button */}
                   <RemovePsetButton title={pset.title} />
                 </div>
               )}

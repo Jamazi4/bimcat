@@ -1,27 +1,31 @@
 "use client";
 
-import { BookX, Eraser } from "lucide-react";
+import { Eraser } from "lucide-react";
 import { Button } from "../ui/button";
-import { useDispatch } from "react-redux";
-import { clearLibrarySelection } from "@/lib/features/libraries/libraryBrowserSlice";
+import { selectedRow } from "@/utils/types";
+import { Dispatch, SetStateAction } from "react";
+import RemoveFromLibraryActionButton from "./RemoveFromLibraryActionButton";
+import EreaseSelectionButton from "../global/EreaseSelectionButton";
 
-const LibraryActionButtons = () => {
-  const dispatch = useDispatch();
+const LibraryActionButtons = ({
+  components,
+  setSelection,
+}: {
+  components: selectedRow[];
+  setSelection: Dispatch<SetStateAction<object>>;
+}) => {
+  const noSelected = components.length === 0;
   return (
     <div className="flex space-x-2">
       {" "}
-      <Button variant="outline">
-        <BookX />
-      </Button>
-      <Button
-        variant="outline"
-        className="text-destructive"
-        onClick={() => {
-          dispatch(clearLibrarySelection());
-        }}
-      >
-        <Eraser />
-      </Button>
+      <RemoveFromLibraryActionButton
+        components={components}
+        setSelection={setSelection}
+      />
+      <EreaseSelectionButton
+        setSelection={setSelection}
+        disabled={noSelected}
+      />
     </div>
   );
 };

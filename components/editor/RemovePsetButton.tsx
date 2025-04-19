@@ -16,15 +16,10 @@ import { removePsetAction } from "@/utils/actions";
 import { useParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { AiOutlineReload } from "react-icons/ai";
-import { useCallback, useState } from "react";
-
+import { useState } from "react";
 const RemovePsetButton = ({ title }: { title: string }) => {
   const [open, setOpen] = useState(false);
   const { id } = useParams();
-
-  const handleSuccess = useCallback(() => {
-    setOpen(false);
-  }, []);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -38,7 +33,7 @@ const RemovePsetButton = ({ title }: { title: string }) => {
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
-        <FormContainer action={removePsetAction} onSuccess={handleSuccess}>
+        <FormContainer action={removePsetAction}>
           <DialogHeader>
             <DialogTitle className="capitalize">Remove {title}?</DialogTitle>
             <DialogDescription>

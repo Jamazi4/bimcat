@@ -14,7 +14,6 @@ export default function FormContainer({
 }: {
   action: actionFunction;
   children: React.ReactNode;
-  onSubmitStart?: () => void;
   onSuccess?: () => void;
 }) {
   const [state, formAction] = useActionState(action, initialState);

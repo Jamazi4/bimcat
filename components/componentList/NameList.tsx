@@ -27,7 +27,7 @@ const NameList = ({
         return (
           <span
             className={cn(
-              "flex font-semibold mt-2 ",
+              "flex font-semibold mt-2",
               highlight ? color : "text-primary"
             )}
             key={componentKey}

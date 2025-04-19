@@ -13,6 +13,7 @@ import {
 } from "../ui/tooltip";
 import ComponentPrivateToggle from "./ComponentPrivateToggle";
 import AddComponentToLibraryButton from "./AddComponentToLibraryButton";
+import EreaseSelectionButton from "../global/EreaseSelectionButton";
 
 const BrowserActionButtons = ({
   components,
@@ -42,23 +43,10 @@ const BrowserActionButtons = ({
         disabled={noSelected || !onlyEditable}
         setSelection={setSelection}
       />
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              disabled={noSelected}
-              variant="ghost"
-              className="text-destructive"
-              onClick={() => {
-                setSelection([]);
-              }}
-            >
-              <Eraser />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Deselect</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <EreaseSelectionButton
+        setSelection={setSelection}
+        disabled={noSelected}
+      />
       <RemoveComponentButton
         components={components}
         disabled={noSelected || !onlyEditable}

@@ -44,7 +44,7 @@ export const getDbUser = async () => {
 const addEditableToComponent = async <T extends { userId: string }>(
   component: T
 ): Promise<T & { editable: boolean }> => {
-  const dbUser = await getDbUser();
+  const dbUser = await getDbUser(); //TODO: usually dbUser can already be passsed here
   const dbUserId = dbUser?.id;
 
   if (!component.userId)
@@ -259,6 +259,13 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
   }
 };
 
+export const mockRemovePsetAction = async (
+  prevstate: any,
+  formData: FormData
+) => {
+  return { message: "done lol" };
+};
+
 export const removePsetAction = async (prevState: any, formData: FormData) => {
   const componentId = formData.get("componentId") as string;
   const psetTitle = formData.get("psetTitle") as string;
@@ -302,8 +309,7 @@ export const removePsetAction = async (prevState: any, formData: FormData) => {
     });
 
     revalidatePath(`/components/${componentId}`);
-    const successMessage = `successfully removed ${psetTitle}`;
-    return { message: successMessage };
+    return { message: `successfully removed ${psetTitle}` };
   } catch (error) {
     return renderError(error);
   }
@@ -486,6 +492,30 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
         });
       })
     );
+
+    await Promise.all([
+      ...componentIds.map((id, i) =>
+        prisma.component.update({
+          where: { id },
+          data: {
+            public: !curPublics[i],
+            libraries: {
+              disconnect: affectedLibrariesUnique.map((lib) => ({
+                id: lib.id,
+              })),
+            },
+          },
+        })
+      ),
+      prisma.library.updateMany({
+        where: {
+          id: { in: affectedLibrariesUnique.map((lib) => lib.id) },
+        },
+        data: {
+          updatedAt: new Date(),
+        },
+      }),
+    ]);
 
     revalidatePath(`/components/browse`);
 
@@ -736,6 +766,41 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
       message: `Successfully changed ${library.name} to ${
         curPublic ? "private" : "public"
       }.`,
+    };
+  } catch (error) {
+    return renderError(error);
+  }
+};
+
+export const removeComponentFromLibraryAction = async (
+  componentIds: string[],
+  libraryId: string
+) => {
+  try {
+    const dbUser = await getDbUser();
+    const library = await prisma.library.findUnique({
+      where: { id: libraryId },
+    });
+
+    if (!library) throw new Error("Could not fetch library");
+    if (!(library.userId === dbUser?.id) || !dbUser)
+      throw new Error("Unauthorized");
+
+    await prisma.library.update({
+      where: {
+        id: libraryId,
+      },
+      data: {
+        updatedAt: new Date(),
+        Components: { disconnect: componentIds.map((id) => ({ id: id })) },
+      },
+    });
+
+    revalidatePath(`/libraries/${libraryId}`);
+    return {
+      message: `Removed ${componentIds.length} component${
+        componentIds.length > 1 ? "s" : ""
+      } from ${library.name}`,
     };
   } catch (error) {
     return renderError(error);
