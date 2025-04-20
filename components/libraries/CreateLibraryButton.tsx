@@ -17,12 +17,15 @@ import { Checkbox } from "../ui/checkbox";
 import SubmitButton from "../global/SubmitButton";
 import FormContainer from "../global/FormContainer";
 import { createLibraryAction } from "@/utils/actions";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { SignInButton, useUser } from "@clerk/nextjs";
 
 const CreateLibraryButton = () => {
   const { isSignedIn } = useUser();
   const [open, setOpen] = useState(false);
+  const onSuccess = useCallback(() => {
+    setOpen(false);
+  }, []);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -37,12 +40,7 @@ const CreateLibraryButton = () => {
             Provide a name and a short description for your new library.
           </DialogDescription>
         </DialogHeader>
-        <FormContainer
-          action={createLibraryAction}
-          onSuccess={() => {
-            setOpen(!open);
-          }}
-        >
+        <FormContainer action={createLibraryAction} onSuccess={onSuccess}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">

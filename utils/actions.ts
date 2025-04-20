@@ -759,9 +759,11 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
 
     const curPublic = library.public;
 
-    const privateComponents = library.Components.filter(
-      (component) => component.public === false
-    );
+    const privateComponents = library.Components.filter((component) => {
+      const privateFlag = component.public === false;
+      const authorized = component.userId === dbUser.id;
+      return privateFlag && authorized;
+    });
 
     if (privateComponents.length > 0 && !curPublic) {
       await prisma.component.updateMany({
@@ -789,9 +791,7 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
         : ""
     }.`;
 
-    return {
-      message: message,
-    };
+    return { message: message };
   } catch (error) {
     return renderError(error);
   }
