@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "../ui/dialog";
+import WarningMessage from "../global/WarningMessage";
 
 type LibraryMiniatureButtonProps = {
   libraryId: string;
@@ -21,6 +22,7 @@ type LibraryMiniatureButtonProps = {
   icon: React.ReactNode;
   destructive: boolean;
   tooltip: string;
+  warningMessage?: string;
 };
 const LibraryMiniatureButton = ({
   libraryId,
@@ -30,6 +32,7 @@ const LibraryMiniatureButton = ({
   icon,
   destructive,
   tooltip,
+  warningMessage,
 }: LibraryMiniatureButtonProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -68,6 +71,7 @@ const LibraryMiniatureButton = ({
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{message}</DialogDescription>
           </DialogHeader>
+          {warningMessage && <WarningMessage message={warningMessage} />}
           <DialogFooter>
             <Button
               onClick={handleRemove}

@@ -748,6 +748,9 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
     const dbUser = await getDbUser();
     const library = await prisma.library.findUnique({
       where: { id: libraryId },
+      include: {
+        Components: { select: { id: true, userId: true, public: true } },
+      },
     });
 
     if (!library) throw new Error("Could not fetch library");
@@ -755,6 +758,20 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
       throw new Error("Unauthorized");
 
     const curPublic = library.public;
+
+    const privateComponents = library.Components.filter(
+      (component) => component.public === false
+    );
+
+    if (privateComponents.length > 0 && !curPublic) {
+      await prisma.component.updateMany({
+        where: { id: { in: privateComponents.map((comp) => comp.id) } },
+        data: { public: true },
+      });
+    }
+
+    const displayWarning = !curPublic && privateComponents.length > 0;
+
     await prisma.library.update({
       where: { id: libraryId },
       data: { public: !curPublic },
@@ -762,10 +779,18 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
 
     revalidatePath("/libraries");
 
+    const message = `Successfully changed ${library.name} to ${
+      curPublic ? "private" : "public"
+    }${
+      displayWarning
+        ? ` and changed ${privateComponents.length} component${
+            privateComponents.length > 1 ? "s" : ""
+          } to public`
+        : ""
+    }.`;
+
     return {
-      message: `Successfully changed ${library.name} to ${
-        curPublic ? "private" : "public"
-      }.`,
+      message: message,
     };
   } catch (error) {
     return renderError(error);
