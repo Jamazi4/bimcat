@@ -17,7 +17,6 @@ export default function FormContainer({
   onSuccess?: () => void;
 }) {
   const [state, formAction] = useActionState(action, initialState);
-  console.log("useActionState state:", state); // Debug log
   useEffect(() => {
     if (state.message) {
       toast(state.message);

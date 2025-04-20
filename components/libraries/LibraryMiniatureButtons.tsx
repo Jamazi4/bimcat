@@ -6,6 +6,7 @@ import {
 } from "@/utils/actions";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
+import { useEffect, useState } from "react";
 
 const LibraryMinatureButtons = ({
   publicFlag,
@@ -16,6 +17,7 @@ const LibraryMinatureButtons = ({
   libraryId: string;
   libraryName: string;
 }) => {
+  const [displayWarning, setDisplayWarning] = useState(false);
   const userState = useSelector((state: RootState) => state.userSlice);
   const componentsInside = userState.libraries.filter(
     (library) => library.id === libraryId
@@ -25,11 +27,15 @@ const LibraryMinatureButtons = ({
     (component) => component.public === false
   );
 
-  const displayWarning =
-    publicFlag === false && privateComponentsInside?.length > 0;
+  useEffect(() => {
+    console.log("hello");
+    const warningFlag =
+      publicFlag === false && privateComponentsInside?.length > 0;
+    setDisplayWarning(warningFlag);
+  }, [privateComponentsInside]);
 
   const warningMessage = displayWarning
-    ? `${libraryName} contains public components(${privateComponentsInside.length}), making this library public will automatically change all contained components to public`
+    ? `${libraryName} contains private components(${privateComponentsInside.length}), making this library public will automatically change all contained components to public`
     : "";
 
   const removeTitle = `Remove ${libraryName}`;

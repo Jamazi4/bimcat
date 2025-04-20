@@ -26,12 +26,14 @@ const page = async ({ params }: { params: Promise<{ libraryId: string }> }) => {
         <h1 className="text-2xl font-bold my-6">{libraryInfo.libraryName}</h1>
       </div>
       <ComponentList columns={columns} data={frontendComponents} />
-      <div className="mt-12">
-        <h1 className="font-semibold mb-4">Description:</h1>
-        <p className="bg-accent text-muted-foreground rounded-md p-2 ">
-          {libraryInfo.desc}
-        </p>
-      </div>
+      {libraryInfo.desc && (
+        <div className="mt-12">
+          <h1 className="font-semibold mb-4">Description:</h1>
+          <p className="bg-accent text-muted-foreground rounded-md p-2 ">
+            {libraryInfo.desc}
+          </p>
+        </div>
+      )}
     </main>
   );
 };
