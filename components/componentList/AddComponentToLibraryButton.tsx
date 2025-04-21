@@ -80,6 +80,29 @@ const AddComponentToLibraryButton = ({
 
   const componentIds = components.map((component) => Object.keys(component)[0]);
 
+  const handleClick = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+    setDialogOpen(false);
+    setPending(true);
+
+    const result = await addComponentToLibraryAction(componentIds, libraryId);
+
+    if (result.message) {
+      toast(result.message);
+      setSelection([]);
+      setLibraryId("");
+      setDisplayInfo(false);
+      setDisplayAlert(false);
+    } else {
+      toast("Something went wrong");
+    }
+
+    dispatch(fetchUserLibraries());
+    setPending(false);
+  };
+
   return (
     <>
       <TooltipActionButton
@@ -124,28 +147,8 @@ const AddComponentToLibraryButton = ({
           {displayInfo && <InfoMessage message={infoMessage} />}
           <DialogFooter>
             <Button
-              onClick={async (e) => {
-                e.stopPropagation();
-                setDialogOpen(false);
-                setPending(true);
-
-                const result = await addComponentToLibraryAction(
-                  componentIds,
-                  libraryId
-                );
-
-                if (result.message) {
-                  toast(result.message);
-                  setSelection([]);
-                  setLibraryId("");
-                  setDisplayInfo(false);
-                  setDisplayAlert(false);
-                } else {
-                  toast("Something went wrong");
-                }
-
-                setPending(false);
-                dispatch(fetchUserLibraries());
+              onClick={(e) => {
+                handleClick(e);
               }}
               disabled={pending}
               className="w-30 mt-4"

@@ -19,12 +19,17 @@ import FormContainer from "../global/FormContainer";
 import { createLibraryAction } from "@/utils/actions";
 import { useCallback, useState } from "react";
 import { SignInButton, useUser } from "@clerk/nextjs";
+import { useDispatch } from "react-redux";
+import { fetchUserLibraries } from "@/lib/features/user/userSlice";
+import { AppDispatch } from "@/lib/store";
 
 const CreateLibraryButton = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const { isSignedIn } = useUser();
   const [open, setOpen] = useState(false);
   const onSuccess = useCallback(() => {
     setOpen(false);
+    dispatch(fetchUserLibraries());
   }, []);
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -17,9 +17,10 @@ import { AiOutlineReload } from "react-icons/ai";
 import { toast } from "sonner";
 import NameList from "./NameList";
 import TooltipActionButton from "./TooltipActionButton";
-import { useSelector } from "react-redux";
-import { RootState } from "@/lib/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store";
 import WarningMessage from "../global/WarningMessage";
+import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 
 function ComponentPrivateToggle({
   components,
@@ -31,6 +32,7 @@ function ComponentPrivateToggle({
   setSelection: Dispatch<SetStateAction<object>>;
 }) {
   const userState = useSelector((state: RootState) => state.userSlice);
+  const dispatch = useDispatch<AppDispatch>();
 
   const publicSelectedComponentIds = components.reduce<string[]>(
     (acc, component) => {
@@ -79,6 +81,25 @@ function ComponentPrivateToggle({
   );
   const [pending, setPending] = useState(false);
 
+  const handleClick = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+    setDialogOpen(false);
+    setPending(true);
+
+    const result = await togglePrivateActionWithId();
+
+    if (result.message) {
+      toast(result.message);
+      setSelection([]);
+    } else {
+      toast("Something went wrong");
+    }
+    dispatch(fetchUserLibraries());
+    setPending(false);
+  };
+
   return (
     <>
       <TooltipActionButton
@@ -115,21 +136,8 @@ function ComponentPrivateToggle({
           {displayWarning && <WarningMessage message={warningMessage} />}
           <DialogFooter>
             <Button
-              onClick={async (e) => {
-                e.stopPropagation();
-                setDialogOpen(false);
-                setPending(true);
-
-                const result = await togglePrivateActionWithId();
-
-                if (result.message) {
-                  toast(result.message);
-                  setSelection([]);
-                } else {
-                  toast("Something went wrong");
-                }
-
-                setPending(false);
+              onClick={(e) => {
+                handleClick(e);
               }}
               disabled={pending}
               className="w-30 mt-4"

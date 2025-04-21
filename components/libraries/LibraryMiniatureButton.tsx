@@ -13,6 +13,9 @@ import {
   DialogDescription,
 } from "../ui/dialog";
 import WarningMessage from "../global/WarningMessage";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/store";
+import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 
 type LibraryMiniatureButtonProps = {
   libraryId: string;
@@ -36,8 +39,9 @@ const LibraryMiniatureButton = ({
 }: LibraryMiniatureButtonProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
 
-  const handleRemove = async (
+  const handleAction = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.stopPropagation();
@@ -53,6 +57,7 @@ const LibraryMiniatureButton = ({
       toast("Something went wrong");
     }
 
+    dispatch(fetchUserLibraries());
     setPending(false);
   };
   return (
@@ -74,7 +79,7 @@ const LibraryMiniatureButton = ({
           {warningMessage && <WarningMessage message={warningMessage} />}
           <DialogFooter>
             <Button
-              onClick={handleRemove}
+              onClick={handleAction}
               disabled={pending}
               className="w-30 mt-4"
             >

@@ -16,6 +16,9 @@ import { selectedRow } from "@/utils/types";
 import { toast } from "sonner";
 import NameList from "./NameList";
 import TooltipActionButton from "./TooltipActionButton";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/store";
+import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 
 function RemoveComponentButton({
   components,
@@ -30,6 +33,27 @@ function RemoveComponentButton({
   const [dialogOpen, setDialogOpen] = useState(false);
   const removeActionWithId = deleteComponentAction.bind(null, componentIds);
   const [pending, setPending] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+
+  const handleClick = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+    setDialogOpen(false);
+    setPending(true);
+
+    const result = await removeActionWithId();
+
+    if (result.message) {
+      toast(result.message);
+      setSelection([]);
+    } else {
+      toast("Something went wrong");
+    }
+
+    dispatch(fetchUserLibraries());
+    setPending(false);
+  };
 
   return (
     <>
@@ -55,21 +79,8 @@ function RemoveComponentButton({
           </DialogHeader>
           <DialogFooter>
             <Button
-              onClick={async (e) => {
-                e.stopPropagation();
-                setDialogOpen(false);
-                setPending(true);
-
-                const result = await removeActionWithId();
-
-                if (result.message) {
-                  toast(result.message);
-                  setSelection([]);
-                } else {
-                  toast("Something went wrong");
-                }
-
-                setPending(false);
+              onClick={(e) => {
+                handleClick(e);
               }}
               disabled={pending}
               className="w-30 mt-4"
