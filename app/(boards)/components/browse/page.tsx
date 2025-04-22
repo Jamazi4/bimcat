@@ -11,20 +11,14 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Suspense } from "react";
 
-export default async function page({
-  searchParams,
-}: {
-  searchParams: Promise<{ myComponents: string; search: string }>;
-}) {
-  const params = await searchParams;
-
+export default function page() {
   return (
     <main className="w-full px-4 justify-center mx-auto">
       <BreadCrumbs />
       <h1 className="text-2xl font-bold my-6">Component browser</h1>
       <Filters />
       <Suspense fallback={<BrowserFallback />}>
-        <ComponentListWrapper params={params} />
+        <ComponentListWrapper />
       </Suspense>
     </main>
   );

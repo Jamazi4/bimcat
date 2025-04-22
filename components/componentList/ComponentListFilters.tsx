@@ -13,10 +13,7 @@ const Filters = () => {
   const [myComponents, setMyComponents] = useState(
     searchParams.get("myComponents") === "true"
   );
-
-  const [search, setSearch] = useState(
-    searchParams.get("search")?.toString() || ""
-  );
+  const [search, setSearch] = useState(searchParams.get("search") || "");
 
   const handleSearch = useDebouncedCallback((value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -36,6 +33,7 @@ const Filters = () => {
     } else {
       params.delete("myComponents");
     }
+
     replace(`/components/browse?${params.toString()}`);
   };
 
@@ -46,14 +44,14 @@ const Filters = () => {
           <Input
             name="search"
             type="search"
-            placeholder="search component"
+            placeholder="search by name or author"
             value={search}
             onChange={(e) => {
+              console.log("onchange fired");
               setSearch(e.target.value);
               handleSearch(e.target.value);
             }}
           />
-
           <div className="flex justify-center items-center mx-4">
             <Checkbox
               className="mx-2"

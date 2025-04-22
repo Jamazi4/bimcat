@@ -188,7 +188,12 @@ export const fetchAllComponents = async (params: searchParamsType) => {
 
     const componentsWithEditable = components.map((component) => {
       return {
-        ...component,
+        id: component.id,
+        name: component.name,
+        createdAt: component.createdAt,
+        updatedAt: component.updatedAt,
+        author: component.author,
+        public: component.public,
         editable: component.userId === dbUserId,
       };
     });
