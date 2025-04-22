@@ -112,20 +112,32 @@ export const columns: ColumnDef<ComponentRow>[] = [
   },
 
   {
+    accessorKey: "public",
     id: "private",
+    header: ({ column }) => {
+      return (
+        <div className="flex mx-auto justify-center">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Public
+            <ArrowUpDown />
+          </Button>
+        </div>
+      );
+    },
     cell: ({ row }) => {
       const component = row.original;
-      const className = "h-5 w-5";
-      return component.editable ? (
-        <div className="flex items-center justify-between">
+      const className = "h-5 w-5 mx-auto";
+      return (
+        <div className="flex">
           {component.public ? (
             <Eye className={className} />
           ) : (
             <EyeOff className={className} />
           )}
         </div>
-      ) : (
-        <></>
       );
     },
   },

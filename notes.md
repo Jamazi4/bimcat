@@ -10,8 +10,6 @@ also quantities
 - maybe differentiate between types of properties
 - don't allow to save empty pset
 
-- dodać teamsy
-
 current:
 
 1. components dropdown not in the middle
@@ -56,9 +54,6 @@ edge cases:
 
 - user already has library of that name
 - user already has component of that name(?)
-- switch library public if contains private components
-- add private component to public library
-- component already in library
 
 switch library private when it already has guests
 
@@ -67,12 +62,19 @@ if component is added to a library it has to persist in the exact state no matte
 ## Ultimate library/component rules
 
 1. You can create private or public component and toggle the private attribute at any time
+
    a. If you change the component to private - it will be removed from your public library if it's in any
+
 2. you can create private or public library and toggle the private attribute at any time
+
    a. If you change public library to private, all users that subscribed to the library will still be allowed to see it
+
    b. If you change private library to public - all private components inside (if any) will automatically become public(???)
+
 3. You can add both public (anybody's) and private (your own) components to your libraries
+
    a. If library is public, and you are adding your own private component - component will toggle to public(done).
+
    b. If you add someone elses component to your own library - it will create your own copy of that component, component will automatically have the same privacy setting as the library
 
 library name unique? component name unique?
@@ -83,6 +85,3 @@ the workflow of actions where modal is displayed until success vs modal closes a
 
 known issue: the last pset won't trigger toast on removal -
 instead of form do it as removeComponentButton but with optimistic ui update
-
-added remove component from library - now toggle library private that will switch
-all private to public if library is going public.

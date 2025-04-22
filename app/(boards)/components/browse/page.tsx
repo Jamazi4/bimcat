@@ -1,6 +1,6 @@
 import BrowserFallback from "@/components/componentList/BrowserFallback";
 import ComponentListWrapper from "@/components/componentList/ComponentListWrapper";
-import Filters from "@/components/componentList/Filters";
+import Filters from "@/components/componentList/ComponentListFilters";
 import {
   Breadcrumb,
   BreadcrumbItem,

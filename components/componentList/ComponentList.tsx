@@ -63,12 +63,6 @@ export function ComponentList<TData, TValue>({
   });
 
   useEffect(() => {
-    if (isInLibraries) {
-      table.getColumn("private")?.toggleVisibility();
-    }
-  }, [table, isInLibraries]);
-
-  useEffect(() => {
     const tempSelectedComponents: selectedRow[] = Object.entries(
       table.getSelectedRowModel().rows
     ).map((entry) => {
