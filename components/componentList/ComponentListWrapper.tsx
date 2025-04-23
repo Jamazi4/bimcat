@@ -5,28 +5,29 @@ import {
   ComponentRow,
 } from "@/components/componentList/ComponentListColumns";
 import { ComponentList } from "@/components/componentList/ComponentList";
-import { fetchAllComponents } from "@/utils/actions";
+import { cachedFetchAllComponents } from "@/utils/actions";
 import { useEffect, useState } from "react";
 import LoadingSpinner from "../global/LoadingSpinner";
 import { useSearchParams } from "next/navigation";
 
 export type searchParamsType = {
   myComponents: boolean;
-  search: string;
+  searchString: string;
 };
 
 export default function ComponentListWrapper() {
   const searchParams = useSearchParams();
   const [data, setData] = useState<ComponentRow[]>();
   const [pending, setPending] = useState(false);
-  const search = searchParams.get("search") || "";
+  const searchString = searchParams.get("search") || "";
   const myComponents = searchParams.get("myComponents") === "true";
-  const params = { search, myComponents };
+  const params = { searchString, myComponents };
 
   useEffect(() => {
     const getData = async () => {
       setPending(true);
-      const components = await fetchAllComponents(params);
+      // const components = await fetchAllComponents(params);
+      const components = await cachedFetchAllComponents(params);
 
       const mapped = components.map((component) => {
         return {
@@ -44,15 +45,13 @@ export default function ComponentListWrapper() {
     };
 
     getData();
-  }, [search, myComponents]);
+  }, [searchString, myComponents]);
 
   if (pending) return <LoadingSpinner />;
 
   if (!data && !pending)
     return (
-      <div className="text-secondary-foreground text-center">
-        Something went wrong
-      </div>
+      <div className="text-secondary-foreground text-center">Please wait.</div>
     );
 
   if (data && !data.length)

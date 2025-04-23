@@ -10,10 +10,13 @@ import { useDebouncedCallback } from "use-debounce";
 const Filters = () => {
   const { replace } = useRouter();
   const searchParams = useSearchParams();
+
   const [myComponents, setMyComponents] = useState(
     searchParams.get("myComponents") === "true"
   );
-  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [searchString, setSearchString] = useState(
+    searchParams.get("search") || ""
+  );
 
   const handleSearch = useDebouncedCallback((value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -33,7 +36,6 @@ const Filters = () => {
     } else {
       params.delete("myComponents");
     }
-
     replace(`/components/browse?${params.toString()}`);
   };
 
@@ -45,10 +47,10 @@ const Filters = () => {
             name="search"
             type="search"
             placeholder="search by name or author"
-            value={search}
+            value={searchString}
             onChange={(e) => {
               console.log("onchange fired");
-              setSearch(e.target.value);
+              setSearchString(e.target.value);
               handleSearch(e.target.value);
             }}
           />
@@ -56,7 +58,9 @@ const Filters = () => {
             <Checkbox
               className="mx-2"
               id="my"
-              onCheckedChange={handleSwitchMyComponents}
+              onCheckedChange={(checked: boolean) => {
+                handleSwitchMyComponents(checked);
+              }}
               checked={myComponents}
             />
             <Label htmlFor="my">Your components</Label>

@@ -12,30 +12,17 @@ also quantities
 
 current:
 
-1. components dropdown not in the middle
 2. when accessing component from library, change breadcrumbs somehow
-3. add spinner when component browser currently is searching
-4. locale date is wrong on prod
-5. loading tsx is spinning top left corner
-6. sonner styling for success and error (border color maybe) - link on upload - or uploading toast and success toast
-7. duplicated psets sometimes - also opens both
-
-now added /libraries/[libraryId]/[componentId], which is the same as components/browser/[id]. Need to send to correct link in ComponentList.tsx on handleRowClick
+3. locale date is wrong on prod
+4. sonner styling for success and error (border color maybe) - link on upload - or uploading toast and success toast
+5. duplicated psets sometimes - also opens both
 
 library browser
 
-- no private, but editable would be good - non-editable as button to create copy
 - search bar, make component copy
 - add users or share library via link, current users - on link click add user to
 - if private component added to public library - ask component toggle private
 - for entering library - 'private' doesn't matter for component
-
-libraries:
-
-- labels? also for components would be good
-- Your libraries checkbox
-- searchbar
-- either toggleprivate/delete or favorites
 
 on favorite - become guest user - for invitation to library auto fav, removing fav is going out of library. Owner can't add to fav
 

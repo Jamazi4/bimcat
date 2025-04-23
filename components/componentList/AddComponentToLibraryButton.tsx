@@ -41,7 +41,7 @@ const AddComponentToLibraryButton = ({
 }: {
   components: selectedRow[];
   disabled: boolean;
-  setSelection: Dispatch<SetStateAction<object>>;
+  setSelection?: Dispatch<SetStateAction<object>>;
   anyComponentPrivate: boolean;
 }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -91,7 +91,9 @@ const AddComponentToLibraryButton = ({
 
     if (result.message) {
       toast(result.message);
-      setSelection([]);
+      if (setSelection) {
+        setSelection([]);
+      }
       setLibraryId("");
       setDisplayInfo(false);
       setDisplayAlert(false);

@@ -9,7 +9,7 @@ import {
   componentWithGeometrySchema,
   PsetActionsComponentSchema,
 } from "./schemas";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { User } from "./types";
 import { searchParamsType } from "../components/componentList/ComponentListWrapper";
@@ -90,6 +90,7 @@ export const createComponentAction = async (
       },
     });
     revalidatePath(`/components`);
+    revalidateTag("allComponents");
     return { message: `Component ${name} created successfully!` };
   } catch (error) {
     return renderError(error);
@@ -146,7 +147,7 @@ export const fetchGeometryAction = async (id: string) => {
 };
 
 export const fetchAllComponents = async (params: searchParamsType) => {
-  const { myComponents, search } = params;
+  const { myComponents, searchString } = params;
   try {
     const dbUser = await getDbUser();
     const dbUserId = dbUser?.id;
@@ -161,13 +162,13 @@ export const fetchAllComponents = async (params: searchParamsType) => {
       whereCondition.OR = [{ public: true }, { userId: dbUserId }];
     }
 
-    if (search) {
+    if (searchString) {
       whereCondition.AND = [
         ...(whereCondition.AND || []),
         {
           OR: [
-            { name: { contains: search, mode: "insensitive" } },
-            { author: { contains: search, mode: "insensitive" } },
+            { name: { contains: searchString, mode: "insensitive" } },
+            { author: { contains: searchString, mode: "insensitive" } },
           ],
         },
       ];
@@ -203,6 +204,12 @@ export const fetchAllComponents = async (params: searchParamsType) => {
     throw new Error("Could not fetch components");
   }
 };
+
+export const cachedFetchAllComponents = unstable_cache(
+  async (params: searchParamsType) => fetchAllComponents(params),
+  [],
+  { tags: ["allComponents"] }
+);
 
 export const updatePsetsAction = async (prevState: any, formData: FormData) => {
   const componentId = formData.get("componentId") as string;
@@ -262,13 +269,6 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
   } catch (error) {
     return renderError(error);
   }
-};
-
-export const mockRemovePsetAction = async (
-  prevstate: any,
-  formData: FormData
-) => {
-  return { message: "done lol" };
 };
 
 export const removePsetAction = async (prevState: any, formData: FormData) => {
@@ -431,6 +431,7 @@ export const deleteComponentAction = async (componentIds: string[]) => {
       },
     });
 
+    revalidateTag("allComponents");
     revalidatePath(`/components/browse`);
 
     return {
@@ -522,6 +523,7 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
       }),
     ]);
 
+    revalidateTag("allComponents");
     revalidatePath(`/components/browse`);
 
     return {

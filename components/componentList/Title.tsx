@@ -1,19 +1,22 @@
+import { selectedRow } from "@/utils/types";
 import DownloadIfcButton from "../editor/DownloadIfcButton";
-import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
-import { Star } from "lucide-react";
+import AddComponentToLibraryButton from "./AddComponentToLibraryButton";
 
-const Title = ({ text }: { text: string }) => {
+const Title = ({ componentData }: { componentData: selectedRow }) => {
+  const id = Object.keys(componentData)[0];
+  const { name, isPublic } = componentData[id];
   return (
     <div className="my-6">
       <div className="flex justify-between">
-        <h1 className="font-bold text-xl text-primary">{text}</h1>
-        {/* Title buttons */}
+        <h1 className="font-bold text-xl text-primary">{name}</h1>
         <div className="space-x-4">
           <DownloadIfcButton />
-          <Button size="icon" variant="ghost" className="cursor-pointer">
-            <Star />
-          </Button>
+          <AddComponentToLibraryButton
+            components={[componentData]}
+            disabled={false}
+            anyComponentPrivate={!isPublic}
+          />
         </div>
       </div>
       <Separator className="mt-2" />

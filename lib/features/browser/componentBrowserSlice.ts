@@ -9,15 +9,18 @@ interface ComponentBrowserState {
 
 const initialState: ComponentBrowserState = {
   selectedComponents: [],
-  searchParams: { search: "", myComponents: false },
+  searchParams: { searchString: "", myComponents: false },
 };
 
 const componentBrowserSlice = createSlice({
   name: "componentBrowser",
   initialState,
   reducers: {
-    updateSearchParams: (state, action: PayloadAction<searchParamsType>) => {
-      state.searchParams = action.payload;
+    updateSearchString: (state, aciton: PayloadAction<string>) => {
+      state.searchParams.searchString = aciton.payload;
+    },
+    updateMyComponents: (state, aciton: PayloadAction<boolean>) => {
+      state.searchParams.myComponents = aciton.payload;
     },
     updateBrowserData: (state, action: PayloadAction<ComponentRow[]>) => {
       state.selectedComponents = action.payload;
@@ -28,6 +31,10 @@ const componentBrowserSlice = createSlice({
   },
 });
 
-export const { updateBrowserData, clearBrowserSelection, updateSearchParams } =
-  componentBrowserSlice.actions;
+export const {
+  updateBrowserData,
+  clearBrowserSelection,
+  updateMyComponents,
+  updateSearchString,
+} = componentBrowserSlice.actions;
 export default componentBrowserSlice.reducer;

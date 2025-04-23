@@ -2,14 +2,8 @@ import Renderer from "@/components/editor/Renderer";
 import Title from "@/components/componentList/Title";
 import { fetchSingleComponentAction } from "@/utils/actions";
 import PsetsList from "@/components/editor/PsetsList";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
+import ComponentContentBreadcrums from "./ComponentContentBreacrumbs";
+import { selectedRow } from "@/utils/types";
 
 const ComponentContent = async ({
   params,
@@ -22,11 +16,19 @@ const ComponentContent = async ({
 
   if (!component) return <p>Could not fetch component</p>;
 
+  const componentData: selectedRow = {
+    [component.id]: {
+      name: component.name,
+      isPublic: component.public,
+      editable: component.editable,
+    },
+  };
+
   if (!component.geometry) return <p>Could not fetch geometry</p>;
   return (
     <div>
-      <BreadCrumbs name={component.name} />
-      <Title text={component.name} />
+      <ComponentContentBreadcrums name={component.name} />
+      <Title componentData={componentData} />
       <div
         className="justify-center grid grid-cols-1 lg:grid-cols-6
    gap-4 sm:w-2/3 sm:mx-auto lg:w-full mx-auto"
@@ -49,27 +51,3 @@ const ComponentContent = async ({
   );
 };
 export default ComponentContent;
-
-const BreadCrumbs = ({ name }: { name: string }) => {
-  return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/">Home</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbLink>Components</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/components/browse">Browse</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbPage>{name}</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
-  );
-};
