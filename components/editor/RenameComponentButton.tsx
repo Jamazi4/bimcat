@@ -19,9 +19,10 @@ import { Input } from "../ui/input";
 import SubmitButton from "../global/SubmitButton";
 import { renameComponentAction } from "@/utils/actions/componentActions";
 
-const RenameComponentButton = () => {
+const RenameComponentButton = ({ curName }: { curName: string }) => {
   const { id } = useParams() || "";
   const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(curName);
   const handleSuccess = useCallback(() => {
     setOpen(false);
   }, []);
@@ -45,6 +46,8 @@ const RenameComponentButton = () => {
           <p>Enter new name</p>
           <div className="flex gap-2 mb-4 mt-4">
             <Input
+              onChange={(e) => setValue(e.target.value)}
+              value={value}
               name="componentName"
               required={true}
               placeholder="Component name"

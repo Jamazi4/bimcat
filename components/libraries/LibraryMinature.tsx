@@ -42,7 +42,7 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
   const charLimit = 140;
   return (
     <Card
-      className="cursor-pointer hover:border-primary h-48 gap-2 py-4 rounded-md transition-all bg-accent"
+      className="cursor-pointer hover:border-primary h-48 gap-2 py-4 rounded-md transition-all bg-background"
       onClick={() => {
         const isAnyDialogOpen = document.querySelector('[data-state="open"]');
         if (isAnyDialogOpen) return;

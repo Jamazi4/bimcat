@@ -11,8 +11,10 @@ const Title = ({ componentData }: { componentData: selectedRow }) => {
     <div className="my-6">
       <div className="flex justify-between">
         <div className="flex items-center space-x-2">
-          <h1 className="font-bold text-xl text-primary">{name}</h1>
-          {editable && <RenameComponentButton />}
+          <h1 className="font-bold text-xl text-primary whitespace-nowrap">
+            {name}
+          </h1>
+          {editable && <RenameComponentButton curName={name} />}
         </div>
         <div className="space-x-4">
           <DownloadIfcButton />
