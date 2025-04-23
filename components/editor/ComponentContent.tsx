@@ -1,5 +1,5 @@
 import Renderer from "@/components/editor/Renderer";
-import Title from "@/components/componentList/Title";
+import Title from "@/components/editor/Title";
 import { fetchSingleComponentAction } from "@/utils/actions/componentActions";
 import PsetsList from "@/components/editor/PsetsList";
 import ComponentContentBreadcrums from "./ComponentContentBreacrumbs";

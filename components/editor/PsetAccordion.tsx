@@ -25,16 +25,13 @@ const PsetAccordion = ({
               {pset.title}
             </AccordionTrigger>
             <AccordionContent className="rounded flex flex-col ">
-              {pset.content.map((entry, index) => {
-                const [[name, value]] = Object.entries(entry);
-                return (
-                  <PsetRow
-                    key={`${pset.title}${index}${name}`}
-                    name={name}
-                    value={value.toString()}
-                  />
-                );
-              })}
+              {pset.content.length > 0 ? (
+                <Attributes pset={pset} />
+              ) : (
+                <p className="text-secondary-foreground text-center">
+                  No attributes
+                </p>
+              )}
               {edit && (
                 <div className="ml-auto space-x-4">
                   <PsetEditDialog content={pset.content} title={pset.title} />
@@ -49,3 +46,16 @@ const PsetAccordion = ({
   );
 };
 export default PsetAccordion;
+
+const Attributes = ({ pset }: { pset: psetType }) => {
+  return pset.content.map((entry, index) => {
+    const [[name, value]] = Object.entries(entry);
+    return (
+      <PsetRow
+        key={`${pset.title}${index}${name}`}
+        name={name}
+        value={value.toString()}
+      />
+    );
+  });
+};

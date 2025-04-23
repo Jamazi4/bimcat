@@ -11,9 +11,8 @@ import { Button } from "../ui/button";
 import { useParams } from "next/navigation";
 import { addPsetAction } from "@/utils/actions/componentActions";
 import FormContainer from "../global/FormContainer";
-import { useFormStatus } from "react-dom";
 import { useCallback, useState } from "react";
-import { AiOutlineReload } from "react-icons/ai";
+import SubmitButton from "../global/SubmitButton";
 
 const AddPsetButton = () => {
   const { id } = useParams() || "";
@@ -40,20 +39,12 @@ const AddPsetButton = () => {
             <Input name="psetTitle" required={true} placeholder="Pset name" />
             <input type="hidden" name="componentId" value={id} />
           </div>
-          <SubmitButton />
+          <div className="flex justify-end">
+            <SubmitButton />
+          </div>
         </FormContainer>
       </PopoverContent>
     </Popover>
   );
 };
 export default AddPsetButton;
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button type="submit" className="w-full" disabled={pending}>
-      {pending ? <AiOutlineReload className="animate-spin" /> : "Add"}
-    </Button>
-  );
-}

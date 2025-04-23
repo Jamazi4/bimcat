@@ -356,7 +356,7 @@ export const deleteComponentAction = async (componentIds: string[]) => {
     const userIds = components.map((component) => component.userId);
 
     if (!components || !userIds.every((id) => id === dbUser?.id)) {
-      throw new Error("Error deleting component(s) or unauthorized");
+      throw new Error("Error deleting component(s) or unauthorized.");
     }
 
     const geometryIds = components.map((component) =>
@@ -488,6 +488,42 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
         components.length
       } component${components.length > 1 ? "s" : ""}.`,
     };
+  } catch (error) {
+    return renderError(error);
+  }
+};
+
+export const renameComponentAction = async (
+  prevState: any,
+  formData: FormData
+) => {
+  try {
+    const newName = formData.get("componentName") as string;
+    const componentId = formData.get("componentId") as string;
+
+    const component = await prisma.component.findUnique({
+      where: { id: componentId },
+      select: { id: true, name: true, userId: true },
+    });
+
+    const oldName = component?.name;
+
+    if (!component)
+      throw new Error("User has no rights to edit this component");
+
+    const componentWithEditable = await addEditableToComponent(component);
+
+    if (!componentWithEditable.editable) throw new Error("Unauthorized");
+
+    await prisma.component.update({
+      where: { id: componentId },
+      data: { name: newName, updatedAt: new Date() },
+    });
+
+    revalidatePath(`/components/browse`);
+    revalidatePath(`/components/browse/${componentId}`);
+
+    return { message: `Succesfully renamed ${oldName} to ${newName}` };
   } catch (error) {
     return renderError(error);
   }
