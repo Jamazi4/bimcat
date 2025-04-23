@@ -1,5 +1,6 @@
 import CreateLibraryButton from "@/components/libraries/CreateLibraryButton";
 import LibrariesFallback from "@/components/libraries/LibrariesFallback";
+import LibraryBrowserFilters from "@/components/libraries/LibraryBrowserFilters";
 import LibraryList from "@/components/libraries/LibraryList";
 import {
   Breadcrumb,
@@ -16,10 +17,10 @@ const page = async () => {
     <main className="w-full px-4 justify-center mx-auto ">
       <BreadCrumbs />
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold my-6">Libraries</h1>
+        <h1 className="text-2xl font-bold my-4">Libraries</h1>
         <CreateLibraryButton />
       </div>
-
+      <LibraryBrowserFilters />
       <Suspense fallback={<LibrariesFallback />}>
         <LibraryList />
       </Suspense>
