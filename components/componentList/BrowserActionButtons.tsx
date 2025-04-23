@@ -6,6 +6,7 @@ import { selectedRow } from "@/utils/types";
 import ComponentPrivateToggle from "./ComponentPrivateToggle";
 import AddComponentToLibraryButton from "./AddComponentToLibraryButton";
 import EreaseSelectionButton from "../global/EreaseSelectionButton";
+import CopyComponentButton from "./CopyComponentButton";
 
 const BrowserActionButtons = ({
   components,
@@ -15,9 +16,11 @@ const BrowserActionButtons = ({
   setSelection: Dispatch<SetStateAction<object>>;
 }) => {
   const noSelected = components.length === 0;
+  const oneSelected = components.length === 1;
   const onlyEditable = components.every(
     (component) => Object.values(component)[0].editable
   );
+
   const anyComponentPrivate = components.some((component) => {
     return Object.values(component)[0].isPublic === false;
   });
@@ -33,6 +36,11 @@ const BrowserActionButtons = ({
       <ComponentPrivateToggle
         components={components}
         disabled={noSelected || !onlyEditable}
+        setSelection={setSelection}
+      />
+      <CopyComponentButton
+        components={components}
+        disabled={!oneSelected}
         setSelection={setSelection}
       />
       <EreaseSelectionButton

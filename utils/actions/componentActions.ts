@@ -8,6 +8,8 @@ import {
   geometryArraySchema,
   componentWithGeometrySchema,
   PsetActionsComponentSchema,
+  PsetSchema,
+  PsetArraySchema,
 } from "../schemas";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { searchParamsType } from "../../components/componentList/ComponentListWrapper";
@@ -376,7 +378,6 @@ export const deleteComponentAction = async (componentIds: string[]) => {
         }
       }
     }
-    console.log("fired");
 
     await prisma.componentGeometry.deleteMany({
       where: { id: { in: geometriesToRemove } },
@@ -388,9 +389,7 @@ export const deleteComponentAction = async (componentIds: string[]) => {
       },
     });
 
-    revalidateTag("allComponents");
     revalidatePath(`/components/browse`);
-
     return {
       message: `Successfully removed ${components.length} component${
         components.length > 1 ? "s" : ""
@@ -524,6 +523,44 @@ export const renameComponentAction = async (
     revalidatePath(`/components/browse/${componentId}`);
 
     return { message: `Succesfully renamed ${oldName} to ${newName}` };
+  } catch (error) {
+    return renderError(error);
+  }
+};
+
+export const copyComponentAction = async (id: string, name: string) => {
+  try {
+    const oldComponent = await prisma.component.findUnique({
+      where: { id },
+      include: { geometry: { select: { id: true } } },
+    });
+
+    const dbUser = await getDbUser();
+    const author = `${dbUser?.firstName} ${dbUser?.secondName}`;
+
+    if (!dbUser) throw new Error("Unauthorized");
+    if (!oldComponent) throw new Error("Could not find original component");
+
+    const validatedPsets = validateWithZodSchema(
+      PsetArraySchema,
+      oldComponent.psets
+    );
+
+    await prisma.component.create({
+      data: {
+        userId: dbUser?.id,
+        name,
+        psets: validatedPsets,
+        author,
+        geometry: {
+          connect: oldComponent.geometry.map((geom) => ({ id: geom.id })),
+        },
+      },
+    });
+
+    revalidatePath(`/components/browse`);
+
+    return { message: `${name}` };
   } catch (error) {
     return renderError(error);
   }

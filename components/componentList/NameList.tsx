@@ -11,7 +11,7 @@ const NameList = ({
   highlightedConstructiveIds?: string[];
 }) => {
   return (
-    <span className="pt-4">
+    <span>
       {components.map((component) => {
         const componentKey = Object.keys(component)[0];
         const highlightDestructive =

@@ -31,6 +31,8 @@ export const PsetSchema = z.object({
   content: PsetContentSchema,
 });
 
+export const PsetArraySchema = z.array(PsetSchema);
+
 export type Pset = z.infer<typeof PsetSchema>;
 
 export type PsetContent = z.infer<typeof PsetContentSchema>;
