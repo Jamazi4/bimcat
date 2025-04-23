@@ -3,7 +3,7 @@ import LibraryMiniatureButton from "./LibraryMiniatureButton";
 import {
   deleteLibraryAction,
   libraryTogglePrivateAction,
-} from "@/utils/actions";
+} from "@/utils/actions/libraryActions";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
 import { useEffect, useState } from "react";

@@ -1,4 +1,4 @@
-import { fetchAllLibrariesAction } from "@/utils/actions";
+import { fetchAllLibrariesAction } from "@/utils/actions/libraryActions";
 import LibraryMinature from "./LibraryMinature";
 
 const LibraryList = async () => {

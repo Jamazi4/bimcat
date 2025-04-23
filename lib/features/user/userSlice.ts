@@ -1,4 +1,4 @@
-import { getUserStateLibrariesAction } from "@/utils/actions";
+import { getUserStateLibrariesAction } from "@/utils/actions/userActions";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type UserStateComponent = {

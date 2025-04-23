@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "../ui/dialog";
-import { addComponentToLibraryAction } from "@/utils/actions";
+import { addComponentToLibraryAction } from "@/utils/actions/libraryActions";
 import { BookUp, Check, ChevronsUpDown, FolderDot } from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";

@@ -4,7 +4,7 @@ import { DownloadIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { downloadIfcFile } from "@/utils/ifc/ifcFileBuilder";
 import { useParams } from "next/navigation";
-import { fetchSingleComponentAction } from "@/utils/actions";
+import { fetchSingleComponentAction } from "@/utils/actions/componentActions";
 import { useState } from "react";
 import { AiOutlineReload } from "react-icons/ai";
 

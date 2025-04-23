@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "../ui/dialog";
-import { deleteComponentAction } from "@/utils/actions";
+import { deleteComponentAction } from "@/utils/actions/componentActions";
 import { Trash } from "lucide-react";
 import { selectedRow } from "@/utils/types";
 import { toast } from "sonner";

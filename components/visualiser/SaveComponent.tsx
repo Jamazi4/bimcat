@@ -13,7 +13,7 @@ import { Label } from "../ui/label";
 import { useCallback, useEffect, useState } from "react";
 import { getIfcDataById } from "@/utils/ifc/ifcjs";
 import { ComponentGeometry, Pset } from "@/utils/types";
-import { createComponentAction } from "@/utils/actions";
+import { createComponentAction } from "@/utils/actions/componentActions";
 import FormContainer from "../global/FormContainer";
 import { Checkbox } from "../ui/checkbox";
 import { useFormStatus } from "react-dom";

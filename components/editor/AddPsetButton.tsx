@@ -9,7 +9,7 @@ import { Plus } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useParams } from "next/navigation";
-import { addPsetAction } from "@/utils/actions";
+import { addPsetAction } from "@/utils/actions/componentActions";
 import FormContainer from "../global/FormContainer";
 import { useFormStatus } from "react-dom";
 import { useCallback, useState } from "react";

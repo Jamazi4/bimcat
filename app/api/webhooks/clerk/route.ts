@@ -2,7 +2,7 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { User } from "@/utils/types";
-import { createUserAciton } from "@/utils/actions";
+import { createUserAciton } from "@/utils/actions/userActions";
 
 export async function POST(req: Request) {
   const SIGNING_SECRET = process.env.SIGNING_SECRET;

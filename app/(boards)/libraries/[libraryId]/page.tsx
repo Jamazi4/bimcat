@@ -1,4 +1,4 @@
-import { fetchLibraryComponents } from "@/utils/actions";
+import { fetchLibraryComponents } from "@/utils/actions/libraryActions";
 import { columns } from "@/components/componentList/ComponentListColumns";
 import { ComponentList } from "@/components/componentList/ComponentList";
 import {

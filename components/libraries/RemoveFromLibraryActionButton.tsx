@@ -13,7 +13,7 @@ import {
 } from "../ui/dialog";
 import NameList from "../componentList/NameList";
 import { toast } from "sonner";
-import { removeComponentFromLibraryAction } from "@/utils/actions";
+import { removeComponentFromLibraryAction } from "@/utils/actions/libraryActions";
 import { useParams } from "next/navigation";
 
 const RemoveFromLibraryActionButton = ({

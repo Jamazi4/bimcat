@@ -21,8 +21,6 @@ library browser
 
 - search bar, make component copy
 - add users or share library via link, current users - on link click add user to
-- if private component added to public library - ask component toggle private
-- for entering library - 'private' doesn't matter for component
 
 on favorite - become guest user - for invitation to library auto fav, removing fav is going out of library. Owner can't add to fav
 

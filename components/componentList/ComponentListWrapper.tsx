@@ -5,7 +5,7 @@ import {
   ComponentRow,
 } from "@/components/componentList/ComponentListColumns";
 import { ComponentList } from "@/components/componentList/ComponentList";
-import { cachedFetchAllComponents } from "@/utils/actions";
+import { cachedFetchAllComponents } from "@/utils/actions/componentActions";
 import { useEffect, useState } from "react";
 import LoadingSpinner from "../global/LoadingSpinner";
 import { useSearchParams } from "next/navigation";
@@ -26,7 +26,6 @@ export default function ComponentListWrapper() {
   useEffect(() => {
     const getData = async () => {
       setPending(true);
-      // const components = await fetchAllComponents(params);
       const components = await cachedFetchAllComponents(params);
 
       const mapped = components.map((component) => {

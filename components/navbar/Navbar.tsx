@@ -9,7 +9,6 @@ const Navbar = () => {
   return (
     <nav className=" mx-auto px-4 py-4 top-0 border-b bg-background h-[72px] fixed w-full z-10">
       <div className="flex justify-between  mx-auto items-center">
-        {/* LOGO */}
         <h1 className="font-black text-3xl text-primary hover:brightness-150 w-20">
           <Link href="/">
             <div className="flex flex-col gap-0 leading-none">
@@ -33,9 +32,6 @@ const Navbar = () => {
             >
               <SignInButton />
             </Button>
-            {/* <Button asChild>
-              <SignUpButton />
-            </Button> */}
           </SignedOut>
           <SignedIn>
             <div className="flex items-center">

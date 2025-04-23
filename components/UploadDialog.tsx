@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileUp } from "lucide-react";
-import { createComponentAction } from "@/utils/actions";
+import { createComponentAction } from "@/utils/actions/componentActions";
 
 import { useState } from "react";
 import { getIfcData } from "@/utils/ifc/ifcjs";

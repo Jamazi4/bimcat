@@ -18,7 +18,7 @@ import {
 import { Label } from "@/components/ui/label";
 import type { PsetContent } from "@/utils/types";
 import { Pencil } from "lucide-react";
-import { updatePsetsAction } from "@/utils/actions";
+import { updatePsetsAction } from "@/utils/actions/componentActions";
 import { useParams } from "next/navigation";
 import FormContainer from "../global/FormContainer";
 import { Plus } from "lucide-react";

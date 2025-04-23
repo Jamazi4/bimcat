@@ -1,6 +1,6 @@
 import Renderer from "@/components/editor/Renderer";
 import Title from "@/components/componentList/Title";
-import { fetchSingleComponentAction } from "@/utils/actions";
+import { fetchSingleComponentAction } from "@/utils/actions/componentActions";
 import PsetsList from "@/components/editor/PsetsList";
 import ComponentContentBreadcrums from "./ComponentContentBreacrumbs";
 import { selectedRow } from "@/utils/types";

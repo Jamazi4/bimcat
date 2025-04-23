@@ -1,6 +1,6 @@
 "use client";
 
-import { toggleComponentPrivateAction } from "@/utils/actions";
+import { toggleComponentPrivateAction } from "@/utils/actions/componentActions";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Eye } from "lucide-react";
 import { Button } from "../ui/button";

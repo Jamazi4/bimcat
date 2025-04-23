@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import FormContainer from "../global/FormContainer";
-import { removePsetAction } from "@/utils/actions";
+import { removePsetAction } from "@/utils/actions/componentActions";
 import { useParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { AiOutlineReload } from "react-icons/ai";

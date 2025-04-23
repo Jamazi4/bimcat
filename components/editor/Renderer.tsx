@@ -9,26 +9,17 @@ import * as THREE from "three";
 const Renderer = ({ geometry }: { geometry: ComponentGeometry[] }) => {
   const geometries = geometry.map((geom) => {
     const bufferGeometry = new THREE.BufferGeometry();
+
     const position = new Float32Array(geom.position);
     bufferGeometry.setAttribute(
       "position",
       new THREE.BufferAttribute(position, 3)
     );
+
     bufferGeometry.setIndex(geom.indices);
     bufferGeometry.computeVertexNormals();
     return bufferGeometry;
   });
-
-  // const bufferGeometry = useMemo(() => {
-  //   if (!geometry) return null;
-  //   const geo = new THREE.BufferGeometry();
-  //   const position = new Float32Array(geometry.position);
-
-  //   geo.setAttribute("position", new THREE.BufferAttribute(position, 3));
-  //   geo.setIndex(geometry.indices);
-  //   geo.computeVertexNormals();
-  //   return geo;
-  // }, [geometry]);
 
   return (
     <div className="bg-background border rounded w-full aspect-square">
@@ -61,15 +52,6 @@ const Renderer = ({ geometry }: { geometry: ComponentGeometry[] }) => {
               );
             })}
           </group>
-
-          {/* <>
-              <mesh geometry={bufferGeometry} scale={0.001}>
-                <meshStandardMaterial color="orange" />
-              </mesh>
-              <mesh geometry={bufferGeometry} scale={0.001}>
-                <meshStandardMaterial color="black" wireframe />
-              </mesh>
-            </> */}
         </Bounds>
 
         <OrbitControls enableZoom={true} />
