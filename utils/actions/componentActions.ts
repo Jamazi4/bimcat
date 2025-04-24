@@ -85,6 +85,9 @@ export const fetchSingleComponentAction = async (id: string) => {
 
     if (!component) throw new Error("No component with this id");
 
+    if (!component.public && component.userId !== dbUser?.id)
+      throw new Error("Unauthorized");
+
     const componentWithEditable = {
       ...component,
       editable: component.userId === dbUser?.id,
