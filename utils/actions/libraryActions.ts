@@ -168,7 +168,12 @@ export const fetchLibraryComponents = async (libraryId: string) => {
 
     const frontendComponents = library?.Components.map((component) => {
       return {
-        ...component,
+        id: component.id,
+        name: component.name,
+        createdAt: component.createdAt.toISOString(),
+        updatedAt: component.updatedAt.toISOString(),
+        author: component.author,
+        public: component.public,
         editable: component.userId === dbUser?.id,
       };
     });

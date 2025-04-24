@@ -34,7 +34,6 @@ function ComponentPrivateToggle({
 }) {
   const userState = useSelector((state: RootState) => state.userSlice);
   const dispatch = useDispatch<AppDispatch>();
-
   const params = useBrowserParams();
 
   const publicSelectedComponentIds = components.reduce<string[]>(

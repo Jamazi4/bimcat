@@ -163,6 +163,7 @@ export const fetchAllComponents = async (params: searchParamsType) => {
         userId: true,
         public: true,
       },
+      orderBy: { updatedAt: "desc" },
     });
 
     const componentsWithEditable = components.map((component) => {
@@ -563,7 +564,7 @@ export const copyComponentAction = async (id: string, name: string) => {
 
     revalidatePath(`/components/browse`);
 
-    return { message: `${name}` };
+    return { message: `Component ${name} created succesfully` };
   } catch (error) {
     return renderError(error);
   }

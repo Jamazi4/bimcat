@@ -37,6 +37,8 @@ import { AppDispatch, RootState } from "@/lib/store";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 import WarningMessage from "../global/WarningMessage";
 import InfoMessage from "../global/InfoMessage";
+import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
+import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
 
 const AddComponentToLibraryButton = ({
   components,
@@ -49,6 +51,7 @@ const AddComponentToLibraryButton = ({
   setSelection?: Dispatch<SetStateAction<object>>;
   anyComponentPrivate: boolean;
 }) => {
+  const params = useBrowserParams();
   const dispatch = useDispatch<AppDispatch>();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [libraryId, setLibraryId] = useState("");
@@ -105,7 +108,7 @@ const AddComponentToLibraryButton = ({
     } else {
       toast("Something went wrong");
     }
-
+    dispatch(fetchBrowserComponents(params));
     dispatch(fetchUserLibraries());
     setPending(false);
   };
