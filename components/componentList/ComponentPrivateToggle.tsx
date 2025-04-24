@@ -2,7 +2,7 @@
 
 import { toggleComponentPrivateAction } from "@/utils/actions/componentActions";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye, LoaderCircle } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   DialogHeader,
@@ -13,7 +13,6 @@ import {
   DialogDescription,
 } from "../ui/dialog";
 import { selectedRow } from "@/utils/types";
-import { AiOutlineReload } from "react-icons/ai";
 import { toast } from "sonner";
 import NameList from "./NameList";
 import TooltipActionButton from "./TooltipActionButton";
@@ -148,11 +147,7 @@ function ComponentPrivateToggle({
               disabled={pending}
               className="w-30 mt-4"
             >
-              {pending ? (
-                <AiOutlineReload className="animate-spin" />
-              ) : (
-                "Accept"
-              )}
+              {pending ? <LoaderCircle className="animate-spin" /> : "Accept"}
             </Button>
           </DialogFooter>
         </DialogContent>

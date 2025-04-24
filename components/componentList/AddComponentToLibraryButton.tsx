@@ -10,7 +10,13 @@ import {
   DialogDescription,
 } from "../ui/dialog";
 import { addComponentToLibraryAction } from "@/utils/actions/libraryActions";
-import { BookUp, Check, ChevronsUpDown, FolderDot } from "lucide-react";
+import {
+  BookUp,
+  Check,
+  ChevronsUpDown,
+  FolderDot,
+  LoaderCircle,
+} from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
@@ -24,7 +30,6 @@ import {
 import { cn } from "@/lib/utils";
 import { selectedRow } from "@/utils/types";
 import { toast } from "sonner";
-import { AiOutlineReload } from "react-icons/ai";
 import NameList from "./NameList";
 import TooltipActionButton from "./TooltipActionButton";
 import { useDispatch, useSelector } from "react-redux";
@@ -155,11 +160,7 @@ const AddComponentToLibraryButton = ({
               disabled={pending}
               className="w-30 mt-4"
             >
-              {pending ? (
-                <AiOutlineReload className="animate-spin" />
-              ) : (
-                "Accept"
-              )}
+              {pending ? <LoaderCircle className="animate-spin" /> : "Accept"}
             </Button>
           </DialogFooter>
         </DialogContent>

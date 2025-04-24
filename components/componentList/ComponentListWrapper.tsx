@@ -4,9 +4,9 @@ import { columns } from "@/components/componentList/ComponentListColumns";
 import { ComponentList } from "@/components/componentList/ComponentList";
 import { useEffect } from "react";
 import LoadingSpinner from "../global/LoadingSpinner";
-import { useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
+import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
 
 export type searchParamsType = {
   myComponents: boolean;
@@ -14,11 +14,7 @@ export type searchParamsType = {
 };
 
 export default function ComponentListWrapper() {
-  const searchParams = useSearchParams();
-  const searchString = searchParams.get("search") || "";
-  const myComponents = searchParams.get("myComponents") === "true";
-  const params = { searchString, myComponents };
-
+  const params = useBrowserParams();
   const dispatch = useAppDispatch();
 
   useEffect(() => {

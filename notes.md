@@ -1,25 +1,14 @@
 0. Layout - propsets size in creator
 1. PSETS - add support for bool values (frontend) - maybe differentiate between types of properties (backend) - don't allow to save empty pset
-2. LOADING FILES/COMPONENTS - fix component placement, maybe add modification option - rename component
+2. LOADING FILES/COMPONENTS - show link to component in toast on creation/copy
 3. Libraries - user assigned or public libraries of elements - private/public - owner functionality - add/remove users, add/remove components
 4. USERS - delete user
-5. General - add fallbacks and error screens - styling for mobile - navbar and data tables
 
-also quantities
+5. when accessing component from library, change breadcrumbs somehow
+6. locale date is wrong on prod
+7. sonner styling for success and error (border color maybe) - link on upload - or uploading toast and success toast
+8. duplicated psets sometimes - also opens both
 
-- maybe differentiate between types of properties
-- don't allow to save empty pset
-
-current:
-
-2. when accessing component from library, change breadcrumbs somehow
-3. locale date is wrong on prod
-4. sonner styling for success and error (border color maybe) - link on upload - or uploading toast and success toast
-5. duplicated psets sometimes - also opens both
-
-library browser
-
-- search bar, make component copy
 - add users or share library via link, current users - on link click add user to
 
 on favorite - become guest user - for invitation to library auto fav, removing fav is going out of library. Owner can't add to fav
@@ -71,4 +60,6 @@ the workflow of actions where modal is displayed until success vs modal closes a
 known issue: the last pset won't trigger toast on removal -
 instead of form do it as removeComponentButton but with optimistic ui update
 
-24.04.2025 - implemented copy component but because componentListWrapper is now a client component and preserves the data in useState - it doesn't revalidate. Maybe finally preserve the data in redux state and dispatch refresh action -
+23.04.2025 - implemented copy component but because componentListWrapper is now a client component and preserves the data in useState - it doesn't revalidate. Maybe finally preserve the data in redux state and dispatch refresh action -
+
+24.04.2025 - revalidation solved by retriggering async thunk as browser components now reside in redux state.

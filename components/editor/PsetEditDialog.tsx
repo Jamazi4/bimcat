@@ -25,8 +25,7 @@ import { Plus } from "lucide-react";
 import { X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Input } from "../ui/input";
-import { useFormStatus } from "react-dom";
-import { AiOutlineReload } from "react-icons/ai";
+import SubmitButton from "../global/SubmitButton";
 
 function PsetEditDialog({
   content,
@@ -81,8 +80,6 @@ function PsetEditDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] overflow-y-scroll max-h-screen">
         <FormContainer action={updatePsetsAction} onSuccess={handleSuccess}>
-          {/* Metadata for backend queries */}
-
           <input type="hidden" value={id} name="componentId" />
           <input type="hidden" value={title} name="psetTitle" />
           <DialogHeader>
@@ -93,8 +90,6 @@ function PsetEditDialog({
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {/* Map over content */}
-
             {curContent.map((entry, index) => {
               const name = Object.keys(entry)[0];
               const value = entry[name];
@@ -104,8 +99,6 @@ function PsetEditDialog({
                     <p className="text-sm text-secondary-foreground">{name}</p>
                   </Label>
                   <div className="flex gap-4">
-                    {/* Inputs */}
-
                     <div className="flex-grow">
                       <Input
                         id={name}
@@ -115,7 +108,6 @@ function PsetEditDialog({
                       />
                     </div>
 
-                    {/* Remove button */}
                     <Button
                       className="cursor-pointer text-destructive"
                       type="button"
@@ -131,8 +123,6 @@ function PsetEditDialog({
                 </div>
               );
             })}
-            {/* Add row */}
-
             <AddRow updateFunction={addPsetRow} />
           </div>
           <DialogFooter>
@@ -145,15 +135,6 @@ function PsetEditDialog({
 }
 
 export default PsetEditDialog;
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} className="w-30 cursor-pointer">
-      {pending ? <AiOutlineReload className="animate-spin" /> : "Save Changes"}
-    </Button>
-  );
-}
 
 const AddRow = ({
   updateFunction,

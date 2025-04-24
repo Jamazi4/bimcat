@@ -16,9 +16,7 @@ import { ComponentGeometry, Pset } from "@/utils/types";
 import { createComponentAction } from "@/utils/actions/componentActions";
 import FormContainer from "../global/FormContainer";
 import { Checkbox } from "../ui/checkbox";
-import { useFormStatus } from "react-dom";
-import { Button } from "../ui/button";
-import { AiOutlineReload } from "react-icons/ai";
+import SubmitButton from "../global/SubmitButton";
 
 const SaveComponent = ({
   selected,
@@ -30,7 +28,6 @@ const SaveComponent = ({
   const [open, setOpen] = useState(false);
   const [geometry, setGeometry] = useState<ComponentGeometry[] | null>(null);
   const [psets, setPsets] = useState<Pset[] | null>(null);
-  const [retrieved, setRetrieved] = useState(false);
 
   useEffect(() => {
     if (!open || !file || !selected) return;
@@ -39,7 +36,6 @@ const SaveComponent = ({
       const data = await getIfcDataById(file, selected);
       setGeometry(data.geometry);
       setPsets(data.psets);
-      setRetrieved(true);
     };
 
     loadData();
@@ -88,7 +84,7 @@ const SaveComponent = ({
             <input type="hidden" name="psets" value={JSON.stringify(psets)} />
           )}
           <DialogFooter>
-            <SubmitButton retrieved={retrieved} />
+            <SubmitButton />
           </DialogFooter>
         </FormContainer>
       </DialogContent>
@@ -96,20 +92,3 @@ const SaveComponent = ({
   );
 };
 export default SaveComponent;
-
-function SubmitButton({ retrieved }: { retrieved: boolean }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button
-      type="submit"
-      disabled={pending || !retrieved}
-      className="w-30 mt-4"
-    >
-      {pending || !retrieved ? (
-        <AiOutlineReload className="animate-spin" />
-      ) : (
-        "Accept"
-      )}
-    </Button>
-  );
-}

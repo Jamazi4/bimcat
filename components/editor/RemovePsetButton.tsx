@@ -14,12 +14,15 @@ import { X } from "lucide-react";
 import FormContainer from "../global/FormContainer";
 import { removePsetAction } from "@/utils/actions/componentActions";
 import { useParams } from "next/navigation";
-import { useFormStatus } from "react-dom";
-import { AiOutlineReload } from "react-icons/ai";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import SubmitButton from "../global/SubmitButton";
 const RemovePsetButton = ({ title }: { title: string }) => {
   const [open, setOpen] = useState(false);
   const { id } = useParams();
+
+  const handleSuccess = useCallback(() => {
+    setOpen(false);
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -33,7 +36,7 @@ const RemovePsetButton = ({ title }: { title: string }) => {
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
-        <FormContainer action={removePsetAction}>
+        <FormContainer action={removePsetAction} onSuccess={handleSuccess}>
           <DialogHeader>
             <DialogTitle className="capitalize">Remove {title}?</DialogTitle>
             <DialogDescription>
@@ -52,12 +55,3 @@ const RemovePsetButton = ({ title }: { title: string }) => {
   );
 };
 export default RemovePsetButton;
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} className="w-30 cursor-pointer">
-      {pending ? <AiOutlineReload className="animate-spin" /> : "Save Changes"}
-    </Button>
-  );
-}

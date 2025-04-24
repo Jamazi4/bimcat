@@ -20,8 +20,7 @@ import { getIfcData } from "@/utils/ifc/ifcjs";
 
 import type { ComponentGeometry, Pset } from "@/utils/types";
 import FormContainer from "./global/FormContainer";
-import { useFormStatus } from "react-dom";
-import { AiOutlineReload } from "react-icons/ai";
+import SubmitButton from "./global/SubmitButton";
 
 function UploadDialog() {
   const [file, setFile] = useState<File | null>(null);
@@ -117,12 +116,3 @@ function UploadDialog() {
   );
 }
 export default UploadDialog;
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} className="w-30">
-      {pending ? <AiOutlineReload className="animate-spin" /> : "Upload"}
-    </Button>
-  );
-}

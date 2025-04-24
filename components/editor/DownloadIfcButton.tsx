@@ -1,12 +1,11 @@
 "use client";
 
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, LoaderCircle } from "lucide-react";
 import { Button } from "../ui/button";
 import { downloadIfcFile } from "@/utils/ifc/ifcFileBuilder";
 import { useParams } from "next/navigation";
 import { fetchSingleComponentAction } from "@/utils/actions/componentActions";
 import { useState } from "react";
-import { AiOutlineReload } from "react-icons/ai";
 import {
   Tooltip,
   TooltipContent,
@@ -39,7 +38,7 @@ const DownloadIfcButton = () => {
             onClick={handleDownload}
           >
             {pending ? (
-              <AiOutlineReload className="animate-spin" />
+              <LoaderCircle className="animate-spin" />
             ) : (
               <DownloadIcon />
             )}

@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { Button } from "../ui/button";
-import { AiOutlineReload } from "react-icons/ai";
+import { LoaderCircle } from "lucide-react";
 
 type tooltipActionButtonProps = {
   action: Dispatch<SetStateAction<boolean>>;
@@ -42,7 +42,7 @@ const TooltipActionButton = ({
             }}
           >
             {pending ? (
-              <AiOutlineReload className="animate-spin w-10 h-10" />
+              <LoaderCircle className="animate-spin w-10 h-10" />
             ) : (
               icon
             )}
