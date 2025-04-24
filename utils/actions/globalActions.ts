@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/db";
 
-export const getDbUser = async () => {
+export const getDbUser = async (includeComponents?: boolean) => {
   try {
     const { userId } = await auth();
 
@@ -12,7 +12,7 @@ export const getDbUser = async () => {
     const dbUser = await prisma.user.findUnique({
       where: { clerkId },
       include: {
-        // Components: true,
+        Components: includeComponents,
         authoredLibraries: true,
         guestLibraries: true,
       },

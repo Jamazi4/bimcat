@@ -30,7 +30,7 @@ const BrowserActionButtons = ({
       <AddComponentToLibraryButton
         anyComponentPrivate={anyComponentPrivate}
         components={components}
-        disabled={noSelected}
+        disabled={noSelected || !onlyEditable}
         setSelection={setSelection}
       />
       <ComponentPrivateToggle
