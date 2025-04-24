@@ -9,8 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 export type ComponentRow = {
   id: string;
   name: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   author: string;
   editable: boolean;
   public: boolean;
@@ -59,7 +59,7 @@ export const columns: ColumnDef<ComponentRow>[] = [
     accessorKey: "createdAt",
     sortingFn: "datetime",
     cell: ({ row }) => {
-      const date = row.getValue("createdAt") as Date;
+      const date = new Date(row.getValue("createdAt"));
       const formatted = format(date, "dd-MM-yy HH:mm");
       return formatted;
     },
@@ -79,7 +79,7 @@ export const columns: ColumnDef<ComponentRow>[] = [
     accessorKey: "updatedAt",
     sortingFn: "datetime",
     cell: ({ row }) => {
-      const date = row.getValue("updatedAt") as Date;
+      const date = new Date(row.getValue("updatedAt"));
       const formatted = format(date, "dd-MM-yy HH:mm");
       return formatted;
     },

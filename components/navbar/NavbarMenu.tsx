@@ -28,7 +28,7 @@ export function NavbarMenu() {
         <NavigationMenuItem>
           <NavigationMenuTrigger>Components</NavigationMenuTrigger>
           <NavigationMenuContent className="flex-col">
-            <ul className="grid gap-3 p-0 w-[300px]">
+            <ul className="grid gap-3 p-0 mb-0.5 w-[300px]">
               <ListItem href="/componentPicker" title="Create">
                 Open your .ifc file to select components to add.
               </ListItem>
@@ -60,7 +60,7 @@ const ListItem = React.forwardRef<
         <a
           ref={ref}
           className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            "block select-none  rounded-md  leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
           )}
           {...props}

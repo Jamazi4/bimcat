@@ -70,3 +70,5 @@ the workflow of actions where modal is displayed until success vs modal closes a
 
 known issue: the last pset won't trigger toast on removal -
 instead of form do it as removeComponentButton but with optimistic ui update
+
+24.04.2025 - implemented copy component but because componentListWrapper is now a client component and preserves the data in useState - it doesn't revalidate. Maybe finally preserve the data in redux state and dispatch refresh action -

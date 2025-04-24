@@ -18,6 +18,8 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/store";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 import { Input } from "../ui/input";
+import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
+import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
 
 const CopyComponentButton = ({
   components,
@@ -32,6 +34,7 @@ const CopyComponentButton = ({
   const [pending, setPending] = useState(false);
   const [newName, setNewName] = useState("");
   const dispatch = useDispatch<AppDispatch>();
+  const params = useBrowserParams();
 
   const handleClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -50,6 +53,7 @@ const CopyComponentButton = ({
       toast("Something went wrong");
     }
 
+    dispatch(fetchBrowserComponents(params));
     dispatch(fetchUserLibraries());
     setPending(false);
   };

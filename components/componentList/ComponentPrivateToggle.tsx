@@ -21,6 +21,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store";
 import WarningMessage from "../global/WarningMessage";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
+import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
+import { useSearchParams } from "next/navigation";
+import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
 
 function ComponentPrivateToggle({
   components,
@@ -33,6 +36,8 @@ function ComponentPrivateToggle({
 }) {
   const userState = useSelector((state: RootState) => state.userSlice);
   const dispatch = useDispatch<AppDispatch>();
+
+  const params = useBrowserParams();
 
   const publicSelectedComponentIds = components.reduce<string[]>(
     (acc, component) => {
@@ -96,6 +101,7 @@ function ComponentPrivateToggle({
     } else {
       toast("Something went wrong");
     }
+    dispatch(fetchBrowserComponents(params));
     dispatch(fetchUserLibraries());
     setPending(false);
   };

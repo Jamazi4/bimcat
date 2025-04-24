@@ -19,6 +19,8 @@ import TooltipActionButton from "./TooltipActionButton";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/store";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
+import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
+import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
 
 function RemoveComponentButton({
   components,
@@ -34,6 +36,7 @@ function RemoveComponentButton({
   const removeActionWithId = deleteComponentAction.bind(null, componentIds);
   const [pending, setPending] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
+  const params = useBrowserParams();
 
   const handleClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -51,6 +54,7 @@ function RemoveComponentButton({
       toast("Something went wrong");
     }
 
+    dispatch(fetchBrowserComponents(params));
     dispatch(fetchUserLibraries());
     setPending(false);
   };

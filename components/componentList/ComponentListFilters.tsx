@@ -1,11 +1,13 @@
 "use client";
 
+import { useAppDispatch } from "@/lib/hooks";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
 
 const Filters = () => {
   const { replace } = useRouter();
@@ -18,6 +20,8 @@ const Filters = () => {
     searchParams.get("search") || ""
   );
 
+  const dispatch = useAppDispatch();
+
   const handleSearch = useDebouncedCallback((value: string) => {
     const params = new URLSearchParams(searchParams);
     if (value) {
@@ -25,6 +29,12 @@ const Filters = () => {
     } else {
       params.delete("search");
     }
+    dispatch(
+      fetchBrowserComponents({
+        searchString: params.get("search") || "",
+        myComponents: params.get("myComponent") === "true" || false,
+      })
+    );
     replace(`/components/browse?${params.toString()}`);
   }, 500);
 
@@ -36,6 +46,7 @@ const Filters = () => {
     } else {
       params.delete("myComponents");
     }
+
     replace(`/components/browse?${params.toString()}`);
   };
 
