@@ -139,10 +139,17 @@ export const fetchLibraryComponents = async (libraryId: string) => {
     const dbUser = await getDbUser();
     const library = await prisma.library.findUnique({
       where: { id: libraryId },
-      include: { Components: true },
+      include: { Components: true, guests: true },
     });
 
     if (!library) throw new Error("Could not fetch library");
+
+    const authorRequesting = library.userId === dbUser?.id;
+    const libraryPublic = library.public;
+    const userIsGuest = library.guests.some((guest) => guest.id === dbUser?.id);
+
+    if (!authorRequesting && !libraryPublic && !userIsGuest)
+      throw new Error("Unauthorized");
 
     const frontendComponents = library?.Components.map((component) => {
       return {
