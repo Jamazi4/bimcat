@@ -21,7 +21,6 @@ import { AppDispatch, RootState } from "@/lib/store";
 import WarningMessage from "../global/WarningMessage";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
-import { useSearchParams } from "next/navigation";
 import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
 
 function ComponentPrivateToggle({

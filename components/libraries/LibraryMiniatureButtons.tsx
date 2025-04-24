@@ -28,7 +28,6 @@ const LibraryMinatureButtons = ({
   );
 
   useEffect(() => {
-    console.log("hello");
     const warningFlag =
       publicFlag === false && privateComponentsInside?.length > 0;
     setDisplayWarning(warningFlag);

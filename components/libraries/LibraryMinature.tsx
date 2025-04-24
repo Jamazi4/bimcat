@@ -8,10 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { format } from "date-fns";
-import { Star } from "lucide-react";
-import { Button } from "../ui/button";
 import LibraryMinatureButtons from "./LibraryMiniatureButtons";
 import { useRouter } from "next/navigation";
+import LibraryFavoriteButton from "./LibraryFavoriteButton";
 
 type frontendLibrary = {
   libId: string;
@@ -24,6 +23,7 @@ type frontendLibrary = {
   numGuests: number;
   editable: boolean;
   publicFlag: boolean;
+  isGuest: boolean;
 };
 
 const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
@@ -59,16 +59,10 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
               libraryName={libName}
             />
           ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            >
-              <Star />
-            </Button>
+            <LibraryFavoriteButton
+              libraryId={libId}
+              isGuest={library.isGuest}
+            />
           )}
         </CardTitle>
       </CardHeader>

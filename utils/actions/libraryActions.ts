@@ -60,11 +60,13 @@ export const fetchAllLibrariesAction = async () => {
       });
 
       const editable = lib.userId === dbUser?.id;
+      const isGuest = lib.guests.some((guest) => guest.id === dbUser?.id);
 
       return {
         ...lib,
         author: authorWithoutClerkId,
         guests: guestsWithoutClerkId,
+        isGuest,
         editable,
       };
     });
@@ -288,6 +290,38 @@ export const removeComponentFromLibraryAction = async (
       message: `Removed ${componentIds.length} component${
         componentIds.length > 1 ? "s" : ""
       } from ${library.name}`,
+    };
+  } catch (error) {
+    return renderError(error);
+  }
+};
+
+export const toggleLibraryFavoritesAction = async (libraryId: string) => {
+  try {
+    const dbUser = await getDbUser();
+
+    if (!dbUser) throw new Error("Unauthorized");
+
+    const currentGuestLibrariesIds = dbUser.guestLibraries.map((lib) => lib.id);
+
+    const isFavorite = currentGuestLibrariesIds.some(
+      (curGuestId) => curGuestId === libraryId
+    );
+
+    const updateData = {
+      guestLibraries: {
+        [isFavorite ? "disconnect" : "connect"]: { id: libraryId },
+      },
+    };
+
+    await prisma.user.update({
+      where: { id: dbUser.id },
+      data: updateData,
+    });
+
+    revalidatePath("/libraries");
+    return {
+      message: `Library ${isFavorite ? "removed from" : "added to"} favorites.`,
     };
   } catch (error) {
     return renderError(error);

@@ -18,6 +18,7 @@ const LibraryList = async () => {
       numGuests: library.guests.length,
       editable: library.editable,
       publicFlag: library.public,
+      isGuest: library.isGuest,
     };
   });
 

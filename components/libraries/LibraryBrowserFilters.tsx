@@ -14,6 +14,9 @@ const LibraryBrowserFilters = () => {
   const [myComponents, setMyComponents] = useState(
     searchParams.get("myComponents") === "true"
   );
+  const [starred, setStarred] = useState(
+    searchParams.get("myComponents") === "true"
+  );
   const [searchString, setSearchString] = useState(
     searchParams.get("search") || ""
   );
@@ -62,7 +65,18 @@ const LibraryBrowserFilters = () => {
               }}
               checked={myComponents}
             />
-            <Label htmlFor="my">Your components</Label>
+            <Label htmlFor="my">Your libraries</Label>
+          </div>
+          <div className="flex justify-center items-center mx-4">
+            <Checkbox
+              className="mx-2"
+              id="starred"
+              onCheckedChange={(checked: boolean) => {
+                setStarred(checked);
+              }}
+              checked={starred}
+            />
+            <Label htmlFor="starred">Favorites</Label>
           </div>
         </div>
       </div>
