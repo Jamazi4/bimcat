@@ -1,17 +1,15 @@
-import { selectedRow } from "@/utils/types";
-import DownloadIfcButton from "./DownloadIfcButton";
+import { LibraryInfo } from "@/utils/types";
 import { Separator } from "../ui/separator";
-import AddComponentToLibraryButton from "../componentList/AddComponentToLibraryButton";
 import RenameButtonTitleBar, {
   RenameButtonProps,
 } from "../global/RenameButtonTitleBar";
-import { renameComponentAction } from "@/utils/actions/componentActions";
+import { renameLibraryAction } from "@/utils/actions/libraryActions";
+import DownloadIfcButton from "../editor/DownloadIfcButton";
 
-const Title = ({ componentData }: { componentData: selectedRow }) => {
-  const id = Object.keys(componentData)[0];
-  const { name, isPublic, editable } = componentData[id];
+const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
+  const { name, editable, public: isPublic } = libraryInfo;
   const renameButtonProps: RenameButtonProps = {
-    action: renameComponentAction,
+    action: renameLibraryAction,
     curName: name,
   };
   return (
@@ -25,15 +23,11 @@ const Title = ({ componentData }: { componentData: selectedRow }) => {
         </div>
         <div className="space-x-4">
           <DownloadIfcButton />
-          <AddComponentToLibraryButton
-            components={[componentData]}
-            disabled={false}
-            anyComponentPrivate={!isPublic}
-          />
+          {isPublic}
         </div>
       </div>
       <Separator className="mt-2" />
     </div>
   );
 };
-export default Title;
+export default LibraryTitle;

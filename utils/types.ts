@@ -47,3 +47,10 @@ export type selectedRow = Record<
   string,
   { name: string; editable: boolean; isPublic: boolean }
 >;
+
+export type LibraryInfo = {
+  name: string;
+  desc: string;
+  public: boolean;
+  editable: boolean;
+};

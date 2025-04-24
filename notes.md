@@ -90,8 +90,13 @@ library icon - composite library
 
 plan for all that:
 
-- don't allow adding someone elses component to your library
-- become guest of public libraries by clicking on a star
-- generate invitation link for private library -> become guest on enter
-- create composite library
-- merge libraries
+[x] don't allow adding someone elses component to your library
+[x] become guest of public libraries by clicking on a star
+
+- now doing download ifc button - refactor to always dwnld zip file
+- also finally fix breadcrumbs in library component
+- router.back() is a bad idea for breadcrumbs link
+
+[ ] generate invitation link for private library -> become guest on enter
+[ ] create composite library
+[ ] merge libraries

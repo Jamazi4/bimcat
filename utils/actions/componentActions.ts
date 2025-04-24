@@ -501,8 +501,8 @@ export const renameComponentAction = async (
   formData: FormData
 ) => {
   try {
-    const newName = formData.get("componentName") as string;
-    const componentId = formData.get("componentId") as string;
+    const newName = formData.get("newName") as string;
+    const componentId = formData.get("id") as string;
 
     const component = await prisma.component.findUnique({
       where: { id: componentId },
@@ -511,8 +511,7 @@ export const renameComponentAction = async (
 
     const oldName = component?.name;
 
-    if (!component)
-      throw new Error("User has no rights to edit this component");
+    if (!component) throw new Error("Component not found.");
 
     const componentWithEditable = await addEditableToComponent(component);
 

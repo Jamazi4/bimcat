@@ -14,16 +14,31 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import FormContainer from "../global/FormContainer";
+import FormContainer from "./FormContainer";
 import { Input } from "../ui/input";
-import SubmitButton from "../global/SubmitButton";
-import { renameComponentAction } from "@/utils/actions/componentActions";
+import SubmitButton from "./SubmitButton";
+import { useAppDispatch } from "@/lib/hooks";
+import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 
-const RenameComponentButton = ({ curName }: { curName: string }) => {
-  const { id } = useParams() || "";
+export type RenameButtonProps = {
+  action: (
+    prevState: null,
+    formData: FormData
+  ) => Promise<{
+    message: string;
+  }>;
+  curName: string;
+};
+
+const RenameButtonTitleBar = (props: RenameButtonProps) => {
+  const { action, curName } = props;
+  const params = useParams() || "";
+  const id = Object.values(params)[0];
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(curName);
+  const dispatch = useAppDispatch();
   const handleSuccess = useCallback(() => {
+    dispatch(fetchUserLibraries());
     setOpen(false);
   }, []);
   return (
@@ -42,17 +57,17 @@ const RenameComponentButton = ({ curName }: { curName: string }) => {
         </TooltipProvider>
       </PopoverTrigger>
       <PopoverContent className="bg-background w-100" align="center">
-        <FormContainer action={renameComponentAction} onSuccess={handleSuccess}>
+        <FormContainer action={action} onSuccess={handleSuccess}>
           <p>Enter new name</p>
           <div className="flex gap-2 mb-4 mt-4">
             <Input
               onChange={(e) => setValue(e.target.value)}
               value={value}
-              name="componentName"
+              name="newName"
               required={true}
               placeholder="Component name"
             />
-            <input type="hidden" name="componentId" value={id} />
+            <input type="hidden" name="id" value={id} />
           </div>
           <div className="flex justify-end">
             <SubmitButton />
@@ -62,4 +77,4 @@ const RenameComponentButton = ({ curName }: { curName: string }) => {
     </Popover>
   );
 };
-export default RenameComponentButton;
+export default RenameButtonTitleBar;

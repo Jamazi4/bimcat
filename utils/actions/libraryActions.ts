@@ -178,9 +178,13 @@ export const fetchLibraryComponents = async (libraryId: string) => {
       };
     });
 
+    const libraryEditable = library.userId === dbUser?.id;
+
     const libraryInfo = {
-      libraryName: library?.name,
+      name: library?.name,
       desc: library?.description,
+      editable: libraryEditable,
+      public: library.public,
     };
 
     return { libraryInfo, frontendComponents };
@@ -304,15 +308,12 @@ export const removeComponentFromLibraryAction = async (
 export const toggleLibraryFavoritesAction = async (libraryId: string) => {
   try {
     const dbUser = await getDbUser();
-
     if (!dbUser) throw new Error("Unauthorized");
-
     const currentGuestLibrariesIds = dbUser.guestLibraries.map((lib) => lib.id);
 
     const isFavorite = currentGuestLibrariesIds.some(
       (curGuestId) => curGuestId === libraryId
     );
-
     const updateData = {
       guestLibraries: {
         [isFavorite ? "disconnect" : "connect"]: { id: libraryId },
@@ -328,6 +329,47 @@ export const toggleLibraryFavoritesAction = async (libraryId: string) => {
     return {
       message: `Library ${isFavorite ? "removed from" : "added to"} favorites.`,
     };
+  } catch (error) {
+    return renderError(error);
+  }
+};
+
+export const renameLibraryAction = async (
+  prevState: any,
+  formData: FormData
+) => {
+  try {
+    const newName = formData.get("newName") as string;
+    const libraryId = formData.get("id") as string;
+
+    console.log(libraryId);
+    const library = await prisma.library.findUnique({
+      where: {
+        id: libraryId,
+      },
+      select: { id: true, name: true, userId: true },
+    });
+
+    if (!library) throw new Error("Library not found.");
+
+    const oldName = library.name;
+
+    const dbUser = await getDbUser();
+    const authoredLibrariesIds = dbUser?.authoredLibraries.map((lib) => lib.id);
+
+    const authorized = authoredLibrariesIds?.some((id) => id === libraryId);
+
+    if (!authorized) throw new Error("Unauthorized.");
+
+    await prisma.library.update({
+      where: { id: libraryId },
+      data: { name: newName, updatedAt: new Date() },
+    });
+
+    revalidatePath(`/libraries`);
+    revalidatePath(`/libraries/${libraryId}`);
+
+    return { message: `Succesfully renamed ${oldName} to ${newName}` };
   } catch (error) {
     return renderError(error);
   }

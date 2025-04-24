@@ -1,30 +1,28 @@
 import { fetchLibraryComponents } from "@/utils/actions/libraryActions";
 import { columns } from "@/components/componentList/ComponentListColumns";
 import { ComponentList } from "@/components/componentList/ComponentList";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import LibraryBreadCrumbs from "@/components/libraries/LibraryBreadCrumbs";
+import LibraryTitle from "@/components/libraries/LibraryTitle";
 
 const page = async ({ params }: { params: Promise<{ libraryId: string }> }) => {
   const { libraryId } = await params;
   const result = await fetchLibraryComponents(libraryId);
+
   if (result === undefined) return <div>Library does not exist</div>;
+
   const { libraryInfo, frontendComponents } = result;
+
   if (!libraryId) return <div>Library does not exist</div>;
 
   if (!frontendComponents) return <div>No components found.</div>;
 
   return (
     <main className="w-full px-4 justify-center mx-auto">
-      <BreadCrumbs name={libraryInfo.libraryName} />
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold my-6">{libraryInfo.libraryName}</h1>
-      </div>
+      <LibraryBreadCrumbs libraryName={libraryInfo.name} />
+      <LibraryTitle libraryInfo={libraryInfo} />
+      {/* <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold my-6">{libraryInfo.name}</h1>
+      </div> */}
       <ComponentList columns={columns} data={frontendComponents} />
       {libraryInfo.desc && (
         <div className="mt-12">
@@ -38,23 +36,3 @@ const page = async ({ params }: { params: Promise<{ libraryId: string }> }) => {
   );
 };
 export default page;
-
-const BreadCrumbs = ({ name }: { name: string }) => {
-  return (
-    <Breadcrumb className="border-accent">
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/">Home</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/libraries">Libraries</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbPage>{name}</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
-  );
-};
