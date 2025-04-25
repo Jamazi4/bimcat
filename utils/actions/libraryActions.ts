@@ -4,6 +4,7 @@ import { prisma } from "@/db";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getDbUser } from "./globalActions";
 import { renderError } from "../utilFunctions";
+import { componentWithGeometrySchema, validateWithZodSchema } from "../schemas";
 
 export const createLibraryAction = async (
   prevState: any,
@@ -152,6 +153,7 @@ export const addComponentToLibraryAction = async (
 export const fetchLibraryComponents = async (libraryId: string) => {
   try {
     const dbUser = await getDbUser();
+
     const library = await prisma.library.findUnique({
       where: { id: libraryId },
       include: { Components: true, guests: true },
@@ -162,9 +164,9 @@ export const fetchLibraryComponents = async (libraryId: string) => {
     const authorRequesting = library.userId === dbUser?.id;
     const libraryPublic = library.public;
     const userIsGuest = library.guests.some((guest) => guest.id === dbUser?.id);
+    const unauthorized = !authorRequesting && !libraryPublic && !userIsGuest;
 
-    if (!authorRequesting && !libraryPublic && !userIsGuest)
-      throw new Error("Unauthorized");
+    if (unauthorized) throw new Error("Unauthorized");
 
     const frontendComponents = library?.Components.map((component) => {
       return {
@@ -372,5 +374,40 @@ export const renameLibraryAction = async (
     return { message: `Succesfully renamed ${oldName} to ${newName}` };
   } catch (error) {
     return renderError(error);
+  }
+};
+
+export const fetchLibraryDownloadAction = async (libraryId: string) => {
+  try {
+    const dbUser = await getDbUser();
+
+    const authoredLibrariesIds =
+      dbUser?.authoredLibraries.map((lib) => lib.id) || [];
+    const guestLibrariesIds = dbUser?.guestLibraries.map((lib) => lib.id) || [];
+
+    const allLibraryIds = [...authoredLibrariesIds, ...guestLibrariesIds];
+    const hasRights = allLibraryIds.some((id) => id === libraryId);
+
+    const library = await prisma.library.findUnique({
+      where: { id: libraryId },
+      include: { Components: { include: { geometry: true } } },
+    });
+    if (!library) throw new Error("Could not find library");
+
+    const authorized = hasRights || library.public;
+
+    if (!authorized) throw new Error("Unauthorized");
+
+    const validatedComponents = library.Components.map((component) => {
+      const componentWithEditable = { ...component, editable: true };
+      return validateWithZodSchema(
+        componentWithGeometrySchema,
+        componentWithEditable
+      );
+    });
+
+    return { libraryName: library.name, validatedComponents };
+  } catch (error) {
+    console.log(error);
   }
 };

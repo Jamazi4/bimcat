@@ -15,7 +15,7 @@ import { Trash } from "lucide-react";
 import { selectedRow } from "@/utils/types";
 import { toast } from "sonner";
 import NameList from "./NameList";
-import TooltipActionButton from "./TooltipActionButton";
+import TooltipActionTriggerButton from "./TooltipActionTriggerButton";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/store";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
@@ -61,7 +61,7 @@ function RemoveComponentButton({
 
   return (
     <>
-      <TooltipActionButton
+      <TooltipActionTriggerButton
         action={setDialogOpen}
         disabled={disabled}
         pending={pending}

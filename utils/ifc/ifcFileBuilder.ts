@@ -2,9 +2,11 @@ import { type ComponentGeometry } from "../types";
 import { createGuid } from "../createGuid";
 import * as WEBIFC from "web-ifc";
 import { Pset } from "../types";
+import { IfcFileInfo } from "@/components/editor/DownloadIfcButton";
 
-export const downloadIfcFile = async (
-  geometry?: ComponentGeometry[],
+export const generateIfcFile = async (
+  geometry: ComponentGeometry[],
+  info: IfcFileInfo,
   psets?: Pset[]
 ) => {
   if (!geometry) throw new Error("Could not get the object geometry");
@@ -18,7 +20,7 @@ export const downloadIfcFile = async (
     schema: WEBIFC.Schemas.IFC4,
     name: "Model",
     description: ["ViewDefinition [IFC4Precast]"],
-    authors: ["Jakub Zimnoch"],
+    authors: [`${info.author}`],
     organizations: [""],
     authorization: "None",
   };
@@ -62,14 +64,6 @@ export const downloadIfcFile = async (
 
   const cartPoint = new WEBIFC.IFC4.IfcCartesianPoint(originCoords);
 
-  // const dirCoords = [
-  //   new WEBIFC.IFC4.IfcLengthMeasure(0.0),
-  //   new WEBIFC.IFC4.IfcLengthMeasure(0.0),
-  //   new WEBIFC.IFC4.IfcLengthMeasure(1.0),
-  // ];
-
-  // const dir = new WEBIFC.IFC4.IfcDirection(dirCoords);
-
   const axis = new WEBIFC.IFC4.IfcAxis2Placement3D(cartPoint, null, null);
 
   const geomContext = new WEBIFC.IFC4.IfcGeometricRepresentationContext(
@@ -107,7 +101,6 @@ export const downloadIfcFile = async (
   const facesets: WEBIFC.IFC4.IfcTriangulatedFaceSet[] = [];
 
   geometry.forEach((geom) => {
-    console.log("there is one geom");
     const convertedVertices: WEBIFC.IFC4.IfcLengthMeasure[][] = [];
     let curVert: WEBIFC.IFC4.IfcLengthMeasure[] = [];
     geom.position.forEach((val, index) => {
@@ -152,11 +145,18 @@ export const downloadIfcFile = async (
     new WEBIFC.IFC4.IfcLabel("Tessellation"),
     facesets
   );
-  console.log(shapereps.length);
+
+  const dirCoords = [
+    new WEBIFC.IFC4.IfcLengthMeasure(0.0),
+    new WEBIFC.IFC4.IfcLengthMeasure(-1.0),
+    new WEBIFC.IFC4.IfcLengthMeasure(0.0),
+  ];
+
+  const dir = new WEBIFC.IFC4.IfcDirection(dirCoords);
 
   const axis2Placement3d = new WEBIFC.IFC4.IfcAxis2Placement3D(
     cartPoint,
-    null,
+    dir,
     null
   );
 
@@ -273,12 +273,18 @@ export const downloadIfcFile = async (
 
   const bin = ifcApi.SaveModel(modelId);
 
-  const blob = new Blob([bin], { type: "application/octet-stream" });
+  return new Blob([bin], { type: "application/octet-stream" });
+};
 
+export const downloadFile = (
+  blob: Blob,
+  fileName: string,
+  fileExtension: string
+) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "model.ifc";
+  a.download = `${fileName}.${fileExtension}`;
   document.body.appendChild(a);
   a.click();
 

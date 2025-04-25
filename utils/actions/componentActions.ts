@@ -100,7 +100,7 @@ export const fetchSingleComponentAction = async (id: string) => {
 
     return validatedComponent;
   } catch (error) {
-    renderError(error);
+    console.log(error);
   }
 };
 

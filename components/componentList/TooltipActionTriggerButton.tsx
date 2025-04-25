@@ -8,7 +8,7 @@ import {
 import { Button } from "../ui/button";
 import { LoaderCircle } from "lucide-react";
 
-type tooltipActionButtonProps = {
+type tooltipActionTriggerButtonProps = {
   action: Dispatch<SetStateAction<boolean>>;
   disabled: boolean;
   pending: boolean;
@@ -17,14 +17,14 @@ type tooltipActionButtonProps = {
   destructive: boolean;
 };
 
-const TooltipActionButton = ({
+const tooltipActionTriggerButtonProps = ({
   action,
   disabled,
   pending,
   icon,
   tooltip,
   destructive,
-}: tooltipActionButtonProps) => {
+}: tooltipActionTriggerButtonProps) => {
   const className = `${destructive ? "text-destructive" : ""}`;
   return (
     <TooltipProvider>
@@ -53,4 +53,4 @@ const TooltipActionButton = ({
     </TooltipProvider>
   );
 };
-export default TooltipActionButton;
+export default tooltipActionTriggerButtonProps;

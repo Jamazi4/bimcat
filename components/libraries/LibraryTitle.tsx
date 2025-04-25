@@ -5,6 +5,7 @@ import RenameButtonTitleBar, {
 } from "../global/RenameButtonTitleBar";
 import { renameLibraryAction } from "@/utils/actions/libraryActions";
 import DownloadIfcButton from "../editor/DownloadIfcButton";
+import DownloadLibraryButton from "./DownloadLibraryButton";
 
 const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
   const { name, editable, public: isPublic } = libraryInfo;
@@ -22,7 +23,7 @@ const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
           {editable && <RenameButtonTitleBar {...renameButtonProps} />}
         </div>
         <div className="space-x-4">
-          <DownloadIfcButton />
+          <DownloadLibraryButton />
           {isPublic}
         </div>
       </div>

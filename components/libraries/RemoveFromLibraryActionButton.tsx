@@ -2,7 +2,7 @@ import { selectedRow } from "@/utils/types";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "../ui/button";
 import { BookX } from "lucide-react";
-import TooltipActionButton from "../componentList/TooltipActionButton";
+import TooltipActionTriggerButton from "../componentList/TooltipActionTriggerButton";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +32,7 @@ const RemoveFromLibraryActionButton = ({
 
   return (
     <>
-      <TooltipActionButton
+      <TooltipActionTriggerButton
         action={setDialogOpen}
         disabled={disabled}
         pending={pending}

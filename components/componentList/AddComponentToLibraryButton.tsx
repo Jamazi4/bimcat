@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
 import { selectedRow } from "@/utils/types";
 import { toast } from "sonner";
 import NameList from "./NameList";
-import TooltipActionButton from "./TooltipActionButton";
+import TooltipActionTriggerButton from "./TooltipActionTriggerButton";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
@@ -115,7 +115,7 @@ const AddComponentToLibraryButton = ({
 
   return (
     <>
-      <TooltipActionButton
+      <TooltipActionTriggerButton
         action={setDialogOpen}
         disabled={disabled}
         pending={pending}

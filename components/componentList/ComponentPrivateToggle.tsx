@@ -15,7 +15,7 @@ import {
 import { selectedRow } from "@/utils/types";
 import { toast } from "sonner";
 import NameList from "./NameList";
-import TooltipActionButton from "./TooltipActionButton";
+import TooltipActionTriggerButton from "./TooltipActionTriggerButton";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store";
 import WarningMessage from "../global/WarningMessage";
@@ -105,7 +105,7 @@ function ComponentPrivateToggle({
 
   return (
     <>
-      <TooltipActionButton
+      <TooltipActionTriggerButton
         action={setDialogOpen}
         disabled={disabled}
         pending={pending}

@@ -2,7 +2,7 @@
 
 import { DownloadIcon, LoaderCircle } from "lucide-react";
 import { Button } from "../ui/button";
-import { downloadIfcFile } from "@/utils/ifc/ifcFileBuilder";
+import { downloadFile, generateIfcFile } from "@/utils/ifc/ifcFileBuilder";
 import { useParams } from "next/navigation";
 import { fetchSingleComponentAction } from "@/utils/actions/componentActions";
 import { useState } from "react";
@@ -12,6 +12,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+
+export type IfcFileInfo = {
+  name: string;
+  author: string;
+};
 
 const DownloadIfcButton = () => {
   const params = useParams<{ id: string }>();
@@ -23,7 +28,12 @@ const DownloadIfcButton = () => {
     const component = await fetchSingleComponentAction(id);
     if (!component) return setPending(false);
     const { geometry, psets } = component;
-    await downloadIfcFile(geometry, psets);
+    const info: IfcFileInfo = {
+      name: component.name,
+      author: component.author,
+    };
+    const blob = await generateIfcFile(geometry, info, psets);
+    downloadFile(blob, info.name, "ifc");
     setPending(false);
   };
 

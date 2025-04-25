@@ -3,7 +3,7 @@
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
-import TooltipActionButton from "../componentList/TooltipActionButton";
+import TooltipActionTriggerButton from "../componentList/TooltipActionTriggerButton";
 import {
   DialogHeader,
   DialogFooter,
@@ -62,7 +62,7 @@ const LibraryMiniatureButton = ({
   };
   return (
     <>
-      <TooltipActionButton
+      <TooltipActionTriggerButton
         action={setDialogOpen}
         disabled={false}
         pending={pending}
