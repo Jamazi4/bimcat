@@ -38,10 +38,10 @@ export function ComponentList<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const searchParams = useSearchParams();
-
+  const pathname = usePathname();
   const router = useRouter();
 
-  const isInLibraries = usePathname().split("/")[1] === "libraries";
+  const isInLibraries = pathname.split("/")[1] === "libraries";
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localSelection, setLocalSelection] = useState({});
@@ -93,7 +93,12 @@ export function ComponentList<TData, TValue>({
     const isAnyDialogOpen = document.querySelector('[data-state="open"]');
     if (isAnyDialogOpen) return;
     const originalRow = row.original as ComponentRow;
-    router.push(`/components/${originalRow.id}`);
+    if (!isInLibraries) {
+      router.push(`/components/${originalRow.id}`);
+    } else {
+      const libraryId = pathname.split("/")[2];
+      router.push(`/libraries/${libraryId}/${originalRow.id}`);
+    }
   };
 
   return (

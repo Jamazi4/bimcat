@@ -22,7 +22,6 @@ export const fetchBrowserComponents = createAsyncThunk(
   "browserState/fetchBrowserComponents",
   async (params: searchParamsType, thunkAPI) => {
     try {
-      const state = thunkAPI.getState() as RootState;
       const components = await fetchAllComponents(params);
       const mapped: ComponentRow[] = components.map((component) => {
         return {
@@ -40,21 +39,21 @@ export const fetchBrowserComponents = createAsyncThunk(
       console.log(error);
       return thunkAPI.rejectWithValue("Failed to fetch browser components");
     }
-  },
-  {
-    condition: (params: searchParamsType, { getState }) => {
-      const state = getState() as RootState;
-      const currentParams = state.componentBrowser.searchParams;
-      console.log({
-        oldParams: currentParams,
-        incomingParams: params,
-      });
-      return !(
-        currentParams.searchString === params.searchString &&
-        currentParams.myComponents === params.myComponents
-      );
-    },
   }
+  // {
+  //   condition: (params: searchParamsType, { getState }) => {
+  //     const state = getState() as RootState;
+  //     const currentParams = state.componentBrowser.searchParams;
+  //     console.log({
+  //       oldParams: currentParams,
+  //       incomingParams: params,
+  //     });
+  //     return !(
+  //       currentParams.searchString === params.searchString &&
+  //       currentParams.myComponents === params.myComponents
+  //     );
+  //   },
+  // }
 );
 
 const componentBrowserSlice = createSlice({

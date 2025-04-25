@@ -8,7 +8,6 @@ import {
   geometryArraySchema,
   componentWithGeometrySchema,
   PsetActionsComponentSchema,
-  PsetSchema,
   PsetArraySchema,
 } from "../schemas";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";

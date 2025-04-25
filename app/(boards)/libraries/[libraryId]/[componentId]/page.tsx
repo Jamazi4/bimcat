@@ -1,12 +1,16 @@
-import ComponentContent from "@/components/editor/ComponentContent";
 import EditorFallback from "@/components/editor/EditorFallback";
+import LibraryComponentContent from "@/components/libraries/LibraryComponentContent";
 import { Suspense } from "react";
 
-const page = ({ params }: { params: Promise<{ id: string }> }) => {
+const page = ({
+  params,
+}: {
+  params: Promise<{ libraryId: string; componentId: string }>;
+}) => {
   return (
     <main className="w-full px-4 justify-center mx-auto">
       <Suspense key={1} fallback={<EditorFallback />}>
-        <ComponentContent params={params} />
+        <LibraryComponentContent params={params} />
       </Suspense>
     </main>
   );

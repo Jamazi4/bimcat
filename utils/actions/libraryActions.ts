@@ -6,6 +6,7 @@ import { getDbUser } from "./globalActions";
 import { renderError } from "../utilFunctions";
 import { componentWithGeometrySchema, validateWithZodSchema } from "../schemas";
 import { LibraryInfo } from "../types";
+import { fetchSingleComponentAction } from "./componentActions";
 
 export const createLibraryAction = async (
   prevState: any,
@@ -162,12 +163,14 @@ export const fetchLibraryComponents = async (libraryId: string) => {
 
     if (!library) throw new Error("Could not fetch library");
 
-    const authorRequesting = library.userId === dbUser?.id;
-    const libraryPublic = library.public;
-    const userIsGuest = library.guests.some((guest) => guest.id === dbUser?.id);
-    const unauthorized = !authorRequesting && !libraryPublic && !userIsGuest;
+    let hasRights = false;
+    if (dbUser) {
+      hasRights = authReadLibrary(dbUser, libraryId);
+    }
 
-    if (unauthorized) throw new Error("Unauthorized");
+    const authorized = hasRights || library.public;
+
+    if (!authorized) throw new Error("Unauthorized");
 
     const frontendComponents = library?.Components.map((component) => {
       return {
@@ -383,18 +386,16 @@ export const fetchLibraryDownloadAction = async (libraryId: string) => {
   try {
     const dbUser = await getDbUser();
 
-    const authoredLibrariesIds =
-      dbUser?.authoredLibraries.map((lib) => lib.id) || [];
-    const guestLibrariesIds = dbUser?.guestLibraries.map((lib) => lib.id) || [];
-
-    const allLibraryIds = [...authoredLibrariesIds, ...guestLibrariesIds];
-    const hasRights = allLibraryIds.some((id) => id === libraryId);
-
     const library = await prisma.library.findUnique({
       where: { id: libraryId },
       include: { Components: { include: { geometry: true } } },
     });
     if (!library) throw new Error("Could not find library");
+
+    let hasRights = false;
+    if (dbUser) {
+      hasRights = authReadLibrary(dbUser, libraryId);
+    }
 
     const authorized = hasRights || library.public;
 
@@ -409,6 +410,73 @@ export const fetchLibraryDownloadAction = async (libraryId: string) => {
     });
 
     return { libraryName: library.name, validatedComponents };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const authReadLibrary = <
+  T extends {
+    authoredLibraries: { id: string }[];
+    guestLibraries: { id: string }[];
+  }
+>(
+  dbUser: T,
+  libraryId: string
+) => {
+  const authoredLibrariesIds =
+    dbUser.authoredLibraries.map((lib) => lib.id) || [];
+  const guestLibrariesIds = dbUser.guestLibraries.map((lib) => lib.id) || [];
+  const allUserLibraryIds = [...authoredLibrariesIds, ...guestLibrariesIds];
+  const hasRights = allUserLibraryIds.some((id) => id === libraryId);
+  return hasRights;
+};
+
+export const fetchSingleLibraryComponentAction = async (
+  libraryId: string,
+  componentId: string
+) => {
+  try {
+    const dbUser = await getDbUser();
+
+    let hasRights = false;
+    if (dbUser) {
+      hasRights = authReadLibrary(dbUser, libraryId);
+    }
+
+    const library = await prisma.library.findUnique({
+      where: { id: libraryId },
+      include: { Components: { select: { id: true } } },
+    });
+    if (!library) throw new Error("Could not find library");
+
+    const authorized = hasRights || library.public;
+
+    if (!authorized) throw new Error("Unauthorized");
+
+    const componentInLibrary = library.Components.some(
+      (comp) => comp.id === componentId
+    );
+
+    if (!componentInLibrary) throw new Error("Component not in library");
+
+    const component = await prisma.component.findUnique({
+      where: { id: componentId },
+      include: { geometry: true },
+    });
+    if (!component) throw new Error("Could not find component");
+
+    const componentWithEditable = {
+      ...component,
+      editable: component?.userId === dbUser?.id,
+    };
+
+    const validatedComponent = validateWithZodSchema(
+      componentWithGeometrySchema,
+      componentWithEditable
+    );
+
+    return { libraryName: library.name, component: validatedComponent };
   } catch (error) {
     console.log(error);
   }
