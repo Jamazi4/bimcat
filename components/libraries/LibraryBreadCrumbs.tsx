@@ -1,4 +1,3 @@
-"use client";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,10 +6,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useRouter } from "next/navigation";
 
 const LibraryBreadCrumbs = ({ libraryName }: { libraryName: string }) => {
-  const router = useRouter();
   return (
     <Breadcrumb className="border-accent">
       <BreadcrumbList>
@@ -19,12 +16,7 @@ const LibraryBreadCrumbs = ({ libraryName }: { libraryName: string }) => {
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <button
-            onClick={() => router.back()}
-            className="text-sm text-muted-foreground hover:text-primary transition-all cursor-pointer"
-          >
-            Libraries
-          </button>
+          <BreadcrumbLink href="/libraries">Libraries</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>

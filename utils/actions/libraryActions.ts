@@ -5,6 +5,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getDbUser } from "./globalActions";
 import { renderError } from "../utilFunctions";
 import { componentWithGeometrySchema, validateWithZodSchema } from "../schemas";
+import { LibraryInfo } from "../types";
 
 export const createLibraryAction = async (
   prevState: any,
@@ -182,7 +183,8 @@ export const fetchLibraryComponents = async (libraryId: string) => {
 
     const libraryEditable = library.userId === dbUser?.id;
 
-    const libraryInfo = {
+    const libraryInfo: LibraryInfo = {
+      empty: library.Components.length === 0,
       name: library?.name,
       desc: library?.description,
       editable: libraryEditable,

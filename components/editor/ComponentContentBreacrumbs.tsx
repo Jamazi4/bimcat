@@ -24,12 +24,7 @@ const ComponentContentBreadcrums = ({ name }: { name: string }) => {
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <button
-            onClick={() => router.back()}
-            className="text-sm text-muted-foreground hover:text-primary transition-all cursor-pointer"
-          >
-            Browse
-          </button>
+          <BreadcrumbLink href="/components/browse">Browse</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>

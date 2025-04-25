@@ -49,6 +49,7 @@ export type selectedRow = Record<
 >;
 
 export type LibraryInfo = {
+  empty: boolean;
   name: string;
   desc: string;
   public: boolean;

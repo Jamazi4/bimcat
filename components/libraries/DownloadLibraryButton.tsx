@@ -20,7 +20,7 @@ export type IfcFileInfo = {
   author: string;
 };
 
-const DownloadLibraryButton = () => {
+const DownloadLibraryButton = ({ libraryEmpty }: { libraryEmpty: boolean }) => {
   const params = useParams<{ libraryId: string }>();
   const { libraryId } = params;
   const [pending, setPending] = useState(false);
@@ -57,11 +57,14 @@ const DownloadLibraryButton = () => {
     setPending(false);
   };
 
+  const disabled = pending || libraryEmpty;
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            disabled={disabled}
             size="icon"
             variant="ghost"
             className="cursor-pointer"

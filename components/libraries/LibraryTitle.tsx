@@ -7,7 +7,7 @@ import { renameLibraryAction } from "@/utils/actions/libraryActions";
 import DownloadLibraryButton from "./DownloadLibraryButton";
 
 const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
-  const { name, editable, public: isPublic } = libraryInfo;
+  const { name, editable, public: isPublic, empty } = libraryInfo;
   const renameButtonProps: RenameButtonProps = {
     action: renameLibraryAction,
     curName: name,
@@ -22,7 +22,7 @@ const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
           {editable && <RenameButtonTitleBar {...renameButtonProps} />}
         </div>
         <div className="space-x-4">
-          <DownloadLibraryButton />
+          <DownloadLibraryButton libraryEmpty={empty} />
           {isPublic}
         </div>
       </div>
