@@ -12,7 +12,7 @@ import {
 } from "../ui/dialog";
 import { deleteComponentAction } from "@/utils/actions/componentActions";
 import { Trash } from "lucide-react";
-import { selectedRow } from "@/utils/types";
+import { SelectedRow } from "@/utils/types";
 import { toast } from "sonner";
 import NameList from "./NameList";
 import TooltipActionTriggerButton from "./TooltipActionTriggerButton";
@@ -27,7 +27,7 @@ function RemoveComponentButton({
   disabled,
   setSelection,
 }: {
-  components: selectedRow[];
+  components: SelectedRow[];
   disabled: boolean;
   setSelection: Dispatch<SetStateAction<object>>;
 }) {

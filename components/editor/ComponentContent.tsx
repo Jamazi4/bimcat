@@ -3,7 +3,7 @@ import Title from "@/components/editor/Title";
 import { fetchSingleComponentAction } from "@/utils/actions/componentActions";
 import PsetsList from "@/components/editor/PsetsList";
 import ComponentContentBreadcrums from "./ComponentContentBreacrumbs";
-import { selectedRow } from "@/utils/types";
+import { SelectedRow } from "@/utils/types";
 
 const ComponentContent = async ({
   params,
@@ -16,7 +16,7 @@ const ComponentContent = async ({
 
   if (!component) return <p>Could not fetch component</p>;
 
-  const componentData: selectedRow = {
+  const componentData: SelectedRow = {
     [component.id]: {
       name: component.name,
       isPublic: component.public,

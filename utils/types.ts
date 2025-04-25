@@ -43,7 +43,7 @@ export interface Library {
   public: boolean;
 }
 
-export type selectedRow = Record<
+export type SelectedRow = Record<
   string,
   { name: string; editable: boolean; isPublic: boolean }
 >;

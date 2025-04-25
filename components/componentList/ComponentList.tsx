@@ -26,7 +26,7 @@ import { Button } from "../ui/button";
 import BrowserActionButtons from "./BrowserActionButtons";
 import { usePathname } from "next/navigation";
 import LibraryActionButtons from "../libraries/LibraryActionButtons";
-import { selectedRow } from "@/utils/types";
+import { SelectedRow } from "@/utils/types";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -45,7 +45,7 @@ export function ComponentList<TData, TValue>({
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localSelection, setLocalSelection] = useState({});
-  const [actionableItems, setActionableItems] = useState<selectedRow[]>([]);
+  const [actionableItems, setActionableItems] = useState<SelectedRow[]>([]);
 
   const table = useReactTable({
     data,
@@ -63,7 +63,7 @@ export function ComponentList<TData, TValue>({
   });
 
   useEffect(() => {
-    const tempSelectedComponents: selectedRow[] = Object.entries(
+    const tempSelectedComponents: SelectedRow[] = Object.entries(
       table.getSelectedRowModel().rows
     ).map((entry) => {
       const {

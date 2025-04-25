@@ -1,4 +1,4 @@
-import { selectedRow } from "@/utils/types";
+import { SelectedRow } from "@/utils/types";
 import { createSlice } from "@reduxjs/toolkit";
 
 export type selectedComponent = {
@@ -8,7 +8,7 @@ export type selectedComponent = {
 };
 
 interface LibraryBrowserState {
-  selectedComponents: selectedRow;
+  selectedComponents: SelectedRow;
 }
 
 const initialState: LibraryBrowserState = {

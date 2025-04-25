@@ -1,6 +1,6 @@
 "use client";
 
-import { selectedRow } from "@/utils/types";
+import { SelectedRow } from "@/utils/types";
 import { Dispatch, SetStateAction } from "react";
 import RemoveFromLibraryActionButton from "./RemoveFromLibraryActionButton";
 import EreaseSelectionButton from "../global/EreaseSelectionButton";
@@ -9,7 +9,7 @@ const LibraryActionButtons = ({
   components,
   setSelection,
 }: {
-  components: selectedRow[];
+  components: SelectedRow[];
   setSelection: Dispatch<SetStateAction<object>>;
 }) => {
   const noSelected = components.length === 0;

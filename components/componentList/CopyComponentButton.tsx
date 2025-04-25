@@ -10,7 +10,7 @@ import {
 } from "../ui/dialog";
 import { copyComponentAction } from "@/utils/actions/componentActions";
 import { Copy } from "lucide-react";
-import { selectedRow } from "@/utils/types";
+import { SelectedRow } from "@/utils/types";
 import { toast } from "sonner";
 import NameList from "./NameList";
 import TooltipActionTriggerButton from "./TooltipActionTriggerButton";
@@ -26,7 +26,7 @@ const CopyComponentButton = ({
   disabled,
   setSelection,
 }: {
-  components: selectedRow[];
+  components: SelectedRow[];
   disabled: boolean;
   setSelection: Dispatch<SetStateAction<object>>;
 }) => {

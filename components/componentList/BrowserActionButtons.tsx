@@ -2,7 +2,7 @@
 
 import { Dispatch, SetStateAction } from "react";
 import RemoveComponentButton from "./RemoveComponentButton";
-import { selectedRow } from "@/utils/types";
+import { SelectedRow } from "@/utils/types";
 import ComponentPrivateToggle from "./ComponentPrivateToggle";
 import AddComponentToLibraryButton from "./AddComponentToLibraryButton";
 import EreaseSelectionButton from "../global/EreaseSelectionButton";
@@ -12,7 +12,7 @@ const BrowserActionButtons = ({
   components,
   setSelection,
 }: {
-  components: selectedRow[];
+  components: SelectedRow[];
   setSelection: Dispatch<SetStateAction<object>>;
 }) => {
   const noSelected = components.length === 0;

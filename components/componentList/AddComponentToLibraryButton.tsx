@@ -28,7 +28,7 @@ import {
   CommandList,
 } from "../ui/command";
 import { cn } from "@/lib/utils";
-import { selectedRow } from "@/utils/types";
+import { SelectedRow } from "@/utils/types";
 import { toast } from "sonner";
 import NameList from "./NameList";
 import TooltipActionTriggerButton from "./TooltipActionTriggerButton";
@@ -46,7 +46,7 @@ const AddComponentToLibraryButton = ({
   setSelection,
   anyComponentPrivate,
 }: {
-  components: selectedRow[];
+  components: SelectedRow[];
   disabled: boolean;
   setSelection?: Dispatch<SetStateAction<object>>;
   anyComponentPrivate: boolean;

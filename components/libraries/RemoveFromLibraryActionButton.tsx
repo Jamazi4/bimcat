@@ -1,4 +1,4 @@
-import { selectedRow } from "@/utils/types";
+import { SelectedRow } from "@/utils/types";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "../ui/button";
 import { BookX } from "lucide-react";
@@ -20,7 +20,7 @@ const RemoveFromLibraryActionButton = ({
   components,
   setSelection,
 }: {
-  components: selectedRow[];
+  components: SelectedRow[];
   setSelection: Dispatch<SetStateAction<object>>;
 }) => {
   const { libraryId } = useParams<{ libraryId: string }>();

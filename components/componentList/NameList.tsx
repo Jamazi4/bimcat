@@ -1,4 +1,4 @@
-import { selectedRow } from "@/utils/types";
+import { SelectedRow } from "@/utils/types";
 import { cn } from "@/lib/utils";
 
 const NameList = ({
@@ -6,7 +6,7 @@ const NameList = ({
   highlightDestructiveIds,
   highlightedConstructiveIds,
 }: {
-  components: selectedRow[];
+  components: SelectedRow[];
   highlightDestructiveIds?: string[];
   highlightedConstructiveIds?: string[];
 }) => {

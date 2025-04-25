@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "../ui/dialog";
-import { selectedRow } from "@/utils/types";
+import { SelectedRow } from "@/utils/types";
 import { toast } from "sonner";
 import NameList from "./NameList";
 import TooltipActionTriggerButton from "./TooltipActionTriggerButton";
@@ -28,7 +28,7 @@ function ComponentPrivateToggle({
   disabled,
   setSelection,
 }: {
-  components: selectedRow[];
+  components: SelectedRow[];
   disabled: boolean;
   setSelection: Dispatch<SetStateAction<object>>;
 }) {
