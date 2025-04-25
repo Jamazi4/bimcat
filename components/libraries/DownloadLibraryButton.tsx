@@ -2,9 +2,8 @@
 
 import { DownloadIcon, LoaderCircle } from "lucide-react";
 import { Button } from "../ui/button";
-import { downloadFile, generateIfcFile } from "@/utils/ifc/ifcFileBuilder";
+import { generateIfcFile } from "@/utils/ifc/ifcFileBuilder";
 import { useParams } from "next/navigation";
-import { fetchSingleComponentAction } from "@/utils/actions/componentActions";
 import { useState } from "react";
 import {
   Tooltip,
@@ -12,11 +11,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import {
-  fetchLibraryComponents,
-  fetchLibraryDownloadAction,
-} from "@/utils/actions/libraryActions";
+import { fetchLibraryDownloadAction } from "@/utils/actions/libraryActions";
 import JSZip from "jszip";
+import { downloadFile } from "@/utils/utilFunctions";
 
 export type IfcFileInfo = {
   name: string;

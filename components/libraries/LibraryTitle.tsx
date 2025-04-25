@@ -4,7 +4,6 @@ import RenameButtonTitleBar, {
   RenameButtonProps,
 } from "../global/RenameButtonTitleBar";
 import { renameLibraryAction } from "@/utils/actions/libraryActions";
-import DownloadIfcButton from "../editor/DownloadIfcButton";
 import DownloadLibraryButton from "./DownloadLibraryButton";
 
 const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {

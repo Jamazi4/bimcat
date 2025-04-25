@@ -275,19 +275,3 @@ export const generateIfcFile = async (
 
   return new Blob([bin], { type: "application/octet-stream" });
 };
-
-export const downloadFile = (
-  blob: Blob,
-  fileName: string,
-  fileExtension: string
-) => {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${fileName}.${fileExtension}`;
-  document.body.appendChild(a);
-  a.click();
-
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-};
