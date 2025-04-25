@@ -1,6 +1,7 @@
 import { ComponentRow } from "@/components/componentList/ComponentListColumns";
-import { searchParamsType } from "@/components/componentList/ComponentListWrapper";
+import { RootState } from "@/lib/store";
 import { fetchAllComponents } from "@/utils/actions/componentActions";
+import { searchParamsType } from "@/utils/types";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface ComponentBrowserState {
@@ -21,6 +22,7 @@ export const fetchBrowserComponents = createAsyncThunk(
   "browserState/fetchBrowserComponents",
   async (params: searchParamsType, thunkAPI) => {
     try {
+      const state = thunkAPI.getState() as RootState;
       const components = await fetchAllComponents(params);
       const mapped: ComponentRow[] = components.map((component) => {
         return {
@@ -38,6 +40,20 @@ export const fetchBrowserComponents = createAsyncThunk(
       console.log(error);
       return thunkAPI.rejectWithValue("Failed to fetch browser components");
     }
+  },
+  {
+    condition: (params: searchParamsType, { getState }) => {
+      const state = getState() as RootState;
+      const currentParams = state.componentBrowser.searchParams;
+      console.log({
+        oldParams: currentParams,
+        incomingParams: params,
+      });
+      return !(
+        currentParams.searchString === params.searchString &&
+        currentParams.myComponents === params.myComponents
+      );
+    },
   }
 );
 
@@ -45,17 +61,11 @@ const componentBrowserSlice = createSlice({
   name: "componentBrowser",
   initialState,
   reducers: {
-    updateSearchString: (state, aciton: PayloadAction<string>) => {
-      state.searchParams.searchString = aciton.payload;
-    },
-    updateMyComponents: (state, aciton: PayloadAction<boolean>) => {
-      state.searchParams.myComponents = aciton.payload;
+    updateSearchParams: (state, action: PayloadAction<searchParamsType>) => {
+      state.searchParams = action.payload;
     },
     updateBrowserData: (state, action: PayloadAction<ComponentRow[]>) => {
       state.fetchedComponents = action.payload;
-    },
-    clearBrowserSelection: (state) => {
-      state.fetchedComponents = [];
     },
   },
   extraReducers: (builder) => {
@@ -64,13 +74,13 @@ const componentBrowserSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        fetchBrowserComponents.fulfilled,
-        (state, action: PayloadAction<ComponentRow[]>) => {
-          state.fetchedComponents = action.payload;
-          state.loading = false;
-        }
-      )
+      .addCase(fetchBrowserComponents.fulfilled, (state, action) => {
+        state.searchParams = action.meta.arg;
+        state.fetchedComponents = action.payload;
+        console.log("onextrareducer action meta", action.meta.arg);
+        console.log("onextrareducer searchparams", state.searchParams);
+        state.loading = false;
+      })
       .addCase(fetchBrowserComponents.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
@@ -78,10 +88,6 @@ const componentBrowserSlice = createSlice({
   },
 });
 
-export const {
-  updateBrowserData,
-  clearBrowserSelection,
-  updateMyComponents,
-  updateSearchString,
-} = componentBrowserSlice.actions;
+export const { updateBrowserData, updateSearchParams } =
+  componentBrowserSlice.actions;
 export default componentBrowserSlice.reducer;

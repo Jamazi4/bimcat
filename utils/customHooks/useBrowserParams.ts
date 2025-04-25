@@ -1,9 +1,14 @@
 import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+import { searchParamsType } from "../types";
 
-export const useBrowserParams = () => {
+export function useBrowserParams(): searchParamsType {
   const searchParams = useSearchParams();
-  const searchString = searchParams.get("search") || "";
-  const myComponents = searchParams.get("myComponents") === "true";
-  const params = { searchString, myComponents };
-  return params;
-};
+
+  return useMemo(() => {
+    const searchString = searchParams.get("search") || "";
+    const myComponents = searchParams.get("myComponents") === "true";
+
+    return { searchString, myComponents };
+  }, [searchParams]);
+}

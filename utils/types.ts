@@ -55,3 +55,8 @@ export type LibraryInfo = {
   public: boolean;
   editable: boolean;
 };
+
+export type searchParamsType = {
+  myComponents: boolean;
+  searchString: string;
+};

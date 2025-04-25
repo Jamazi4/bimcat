@@ -14,14 +14,15 @@ export type searchParamsType = {
 };
 
 export default function ComponentListWrapper() {
-  const params = useBrowserParams();
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    dispatch(fetchBrowserComponents(params));
-  }, [dispatch, params.searchString, params.myComponents]);
-
   const browserState = useAppSelector((state) => state.componentBrowser);
+  const params = useBrowserParams();
+
+  useEffect(() => {
+    console.log("useEffect params: ", params);
+    dispatch(fetchBrowserComponents(params));
+  }, [dispatch, params]);
 
   if (browserState.loading) return <LoadingSpinner />;
 
@@ -30,12 +31,17 @@ export default function ComponentListWrapper() {
       <div className="text-secondary-foreground text-center">Please wait.</div>
     );
 
-  if (browserState.fetchedComponents && !browserState.fetchedComponents.length)
+  if (
+    browserState.fetchedComponents &&
+    browserState.fetchedComponents.length === 0 &&
+    !browserState.loading
+  ) {
     return (
       <div className="text-secondary-foreground text-center">
         No components found.
       </div>
     );
+  }
 
   if (!browserState.fetchedComponents) return; //TODO: that's just wrong
 

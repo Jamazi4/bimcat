@@ -8,10 +8,18 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/lib/hooks";
 
 const ComponentContentBreadcrums = ({ name }: { name: string }) => {
-  const router = useRouter();
+  const searchParams = useAppSelector(
+    (state) => state.componentBrowser.searchParams
+  );
+  const query = new URLSearchParams({
+    myComponents: searchParams.myComponents.toString(),
+    search: searchParams.searchString,
+  });
+  const linkURL = `/components/browse?${query.toString()}`;
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -24,7 +32,7 @@ const ComponentContentBreadcrums = ({ name }: { name: string }) => {
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href="/components/browse">Browse</BreadcrumbLink>
+          <BreadcrumbLink href={linkURL}>Browse</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
