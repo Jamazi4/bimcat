@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -6,6 +8,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { usePathname } from "next/navigation";
 
 const LibraryComponentContentBreadcrumbs = ({
   libraryName,
@@ -14,6 +17,9 @@ const LibraryComponentContentBreadcrumbs = ({
   libraryName: string;
   componentName: string;
 }) => {
+  const pathname = usePathname();
+  const libraryId = pathname.split("/")[2];
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -22,11 +28,13 @@ const LibraryComponentContentBreadcrumbs = ({
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink>Libraries</BreadcrumbLink>
+          <BreadcrumbLink href="/libraries">Libraries</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink>{libraryName}</BreadcrumbLink>
+          <BreadcrumbLink href={`/libraries/${libraryId}`}>
+            {libraryName}
+          </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
