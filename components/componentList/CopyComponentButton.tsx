@@ -19,7 +19,7 @@ import { AppDispatch } from "@/lib/store";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 import { Input } from "../ui/input";
 import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
-import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const CopyComponentButton = ({
   components,
@@ -34,7 +34,20 @@ const CopyComponentButton = ({
   const [pending, setPending] = useState(false);
   const [newName, setNewName] = useState("");
   const dispatch = useDispatch<AppDispatch>();
-  const params = useBrowserParams();
+  const queryClient = useQueryClient();
+
+  const copyComponentMutation = useMutation({
+    mutationFn: ({
+      componentId,
+      newName,
+    }: {
+      componentId: string;
+      newName: string;
+    }) => {
+      return copyComponentAction(componentId, newName);
+    },
+    meta: { invalidates: ["componentBrowser"] },
+  });
 
   const handleClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -44,18 +57,26 @@ const CopyComponentButton = ({
     setPending(true);
 
     const componentId = Object.keys(components[0])[0];
-    const result = await copyComponentAction(componentId, newName);
 
-    if (result.message) {
-      toast(result.message);
-      setSelection([]);
-    } else {
-      toast("Something went wrong");
-    }
-
-    dispatch(fetchBrowserComponents(params));
-    dispatch(fetchUserLibraries());
-    setPending(false);
+    copyComponentMutation.mutate(
+      {
+        componentId,
+        newName,
+      },
+      {
+        onSuccess: (result) => {
+          toast(result.message);
+          setSelection([]);
+          dispatch(fetchUserLibraries());
+        },
+        onError: (error) => {
+          toast(error.message);
+        },
+        onSettled: () => {
+          setPending(false);
+        },
+      }
+    );
   };
   return (
     <>

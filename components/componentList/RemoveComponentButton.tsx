@@ -19,8 +19,7 @@ import TooltipActionTriggerButton from "./TooltipActionTriggerButton";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/store";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
-import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
-import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
+import { useMutation } from "@tanstack/react-query";
 
 function RemoveComponentButton({
   components,
@@ -33,10 +32,15 @@ function RemoveComponentButton({
 }) {
   const componentIds = components.map((component) => Object.keys(component)[0]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const removeActionWithId = deleteComponentAction.bind(null, componentIds);
   const [pending, setPending] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-  const params = useBrowserParams();
+
+  const deleteComponentMutation = useMutation({
+    mutationFn: (componentIds: string[]) => {
+      return deleteComponentAction(componentIds);
+    },
+    meta: { invalidates: ["componentBrowser"] },
+  });
 
   const handleClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -45,18 +49,19 @@ function RemoveComponentButton({
     setDialogOpen(false);
     setPending(true);
 
-    const result = await removeActionWithId();
-
-    if (result.message) {
-      toast(result.message);
-      setSelection([]);
-    } else {
-      toast("Something went wrong");
-    }
-
-    dispatch(fetchBrowserComponents(params));
-    dispatch(fetchUserLibraries());
-    setPending(false);
+    deleteComponentMutation.mutate(componentIds, {
+      onSuccess: (result) => {
+        toast(result.message);
+        setSelection([]);
+        dispatch(fetchUserLibraries());
+      },
+      onError: (error) => {
+        toast(error.message);
+      },
+      onSettled: () => {
+        setPending(false);
+      },
+    });
   };
 
   return (

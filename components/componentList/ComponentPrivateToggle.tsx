@@ -20,8 +20,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store";
 import WarningMessage from "../global/WarningMessage";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
-import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
 import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function ComponentPrivateToggle({
   components,
@@ -34,7 +34,7 @@ function ComponentPrivateToggle({
 }) {
   const userState = useSelector((state: RootState) => state.userSlice);
   const dispatch = useDispatch<AppDispatch>();
-  const params = useBrowserParams();
+  const queryClient = useQueryClient();
 
   const publicSelectedComponentIds = components.reduce<string[]>(
     (acc, component) => {
@@ -75,13 +75,16 @@ function ComponentPrivateToggle({
   }, [affectedPairs, warningMessageOn]);
 
   const componentIds = components.map((component) => Object.keys(component)[0]);
-  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const togglePrivateActionWithId = toggleComponentPrivateAction.bind(
-    null,
-    componentIds
-  );
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [pending, setPending] = useState(false);
+
+  const toggleComponentPrivateMutation = useMutation({
+    mutationFn: (componentIds: string[]) => {
+      return toggleComponentPrivateAction(componentIds);
+    },
+    meta: { invalidates: ["componentBrowser"] },
+  });
 
   const handleClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -90,17 +93,19 @@ function ComponentPrivateToggle({
     setDialogOpen(false);
     setPending(true);
 
-    const result = await togglePrivateActionWithId();
-
-    if (result.message) {
-      toast(result.message);
-      setSelection([]);
-    } else {
-      toast("Something went wrong");
-    }
-    dispatch(fetchBrowserComponents(params));
-    dispatch(fetchUserLibraries());
-    setPending(false);
+    toggleComponentPrivateMutation.mutate(componentIds, {
+      onSuccess: (result) => {
+        toast(result.message);
+        setSelection([]);
+        dispatch(fetchUserLibraries());
+      },
+      onError: (error) => {
+        toast(error.message);
+      },
+      onSettled: () => {
+        setPending(false);
+      },
+    });
   };
 
   return (

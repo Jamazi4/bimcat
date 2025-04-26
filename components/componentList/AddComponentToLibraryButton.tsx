@@ -37,8 +37,7 @@ import { AppDispatch, RootState } from "@/lib/store";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 import WarningMessage from "../global/WarningMessage";
 import InfoMessage from "../global/InfoMessage";
-import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
-import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const AddComponentToLibraryButton = ({
   components,
@@ -51,7 +50,7 @@ const AddComponentToLibraryButton = ({
   setSelection?: Dispatch<SetStateAction<object>>;
   anyComponentPrivate: boolean;
 }) => {
-  const params = useBrowserParams();
+  const queryClient = useQueryClient();
   const dispatch = useDispatch<AppDispatch>();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [libraryId, setLibraryId] = useState("");
@@ -88,6 +87,19 @@ const AddComponentToLibraryButton = ({
 
   const componentIds = components.map((component) => Object.keys(component)[0]);
 
+  const addComponentToLibraryMutation = useMutation({
+    mutationFn: ({
+      componentIds,
+      libraryId,
+    }: {
+      componentIds: string[];
+      libraryId: string;
+    }) => {
+      return addComponentToLibraryAction(componentIds, libraryId);
+    },
+    meta: { invalidates: ["componentBrowser"] },
+  });
+
   const handleClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -95,22 +107,28 @@ const AddComponentToLibraryButton = ({
     setDialogOpen(false);
     setPending(true);
 
-    const result = await addComponentToLibraryAction(componentIds, libraryId);
-
-    if (result.message) {
-      toast(result.message);
-      if (setSelection) {
-        setSelection([]);
+    addComponentToLibraryMutation.mutate(
+      { componentIds, libraryId },
+      {
+        onSuccess: (result) => {
+          toast(result.message);
+          if (setSelection) {
+            setSelection([]);
+          }
+          setLibraryId("");
+          setDisplayInfo(false);
+          setDisplayAlert(false);
+          dispatch(fetchUserLibraries());
+          queryClient.invalidateQueries({ queryKey: ["componentBrowser"] });
+        },
+        onError: (error) => {
+          toast(error.message);
+        },
+        onSettled: () => {
+          setPending(false);
+        },
       }
-      setLibraryId("");
-      setDisplayInfo(false);
-      setDisplayAlert(false);
-    } else {
-      toast("Something went wrong");
-    }
-    dispatch(fetchBrowserComponents(params));
-    dispatch(fetchUserLibraries());
-    setPending(false);
+    );
   };
 
   return (

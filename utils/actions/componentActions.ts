@@ -169,8 +169,8 @@ export const fetchAllComponents = async (params: searchParamsType) => {
       return {
         id: component.id,
         name: component.name,
-        createdAt: component.createdAt,
-        updatedAt: component.updatedAt,
+        createdAt: component.createdAt.toISOString(),
+        updatedAt: component.updatedAt.toISOString(),
         author: component.author,
         public: component.public,
         editable: component.userId === dbUserId,

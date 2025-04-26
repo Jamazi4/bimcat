@@ -2,11 +2,12 @@
 
 import { columns } from "@/components/componentList/ComponentListColumns";
 import { ComponentList } from "@/components/componentList/ComponentList";
-import { useEffect } from "react";
 import LoadingSpinner from "../global/LoadingSpinner";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchBrowserComponents } from "@/lib/features/browser/componentBrowserSlice";
+import { useAppDispatch } from "@/lib/hooks";
+import { updateSearchParams } from "@/lib/features/browser/componentBrowserSlice";
 import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAllComponents } from "@/utils/actions/componentActions";
 
 export type searchParamsType = {
   myComponents: boolean;
@@ -15,27 +16,28 @@ export type searchParamsType = {
 
 export default function ComponentListWrapper() {
   const dispatch = useAppDispatch();
-
-  const browserState = useAppSelector((state) => state.componentBrowser);
   const params = useBrowserParams();
 
-  useEffect(() => {
-    console.log("useEffect params: ", params);
-    dispatch(fetchBrowserComponents(params));
-  }, [dispatch, params]);
+  dispatch(updateSearchParams(params));
 
-  if (browserState.loading) return <LoadingSpinner />;
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["componentBrowser", params],
+    queryFn: async () => {
+      console.log(params);
+      return fetchAllComponents(params);
+    },
+  });
 
-  if (!browserState.fetchedComponents && !browserState.loading)
+  if (isPending) return <LoadingSpinner />;
+
+  if (isError)
     return (
-      <div className="text-secondary-foreground text-center">Please wait.</div>
+      <div className="text-secondary-foreground text-center">
+        {error.message}
+      </div>
     );
 
-  if (
-    browserState.fetchedComponents &&
-    browserState.fetchedComponents.length === 0 &&
-    !browserState.loading
-  ) {
+  if (data && data.length === 0 && !isPending) {
     return (
       <div className="text-secondary-foreground text-center">
         No components found.
@@ -43,9 +45,5 @@ export default function ComponentListWrapper() {
     );
   }
 
-  if (!browserState.fetchedComponents) return; //TODO: that's just wrong
-
-  return (
-    <ComponentList columns={columns} data={browserState.fetchedComponents} />
-  );
+  return <ComponentList columns={columns} data={data} />;
 }
