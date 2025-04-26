@@ -16,6 +16,7 @@ import WarningMessage from "../global/WarningMessage";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/store";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
+import { useMutation } from "@tanstack/react-query";
 
 type LibraryMiniatureButtonProps = {
   libraryId: string;
@@ -41,6 +42,13 @@ const LibraryMiniatureButton = ({
   const [pending, setPending] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
 
+  const mutation = useMutation({
+    mutationFn: (libraryId: string) => {
+      return action(libraryId);
+    },
+    meta: { invalidates: ["libraryBrowser"] },
+  });
+
   const handleAction = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -49,16 +57,18 @@ const LibraryMiniatureButton = ({
     setDialogOpen(false);
     setPending(true);
 
-    const result = await action(libraryId);
-
-    if (result.message) {
-      toast(result.message);
-    } else {
-      toast("Something went wrong");
-    }
-
-    dispatch(fetchUserLibraries());
-    setPending(false);
+    mutation.mutate(libraryId, {
+      onSuccess: (result) => {
+        toast(result.message);
+        dispatch(fetchUserLibraries());
+      },
+      onError: (error) => {
+        toast(error.message);
+      },
+      onSettled: () => {
+        setPending(false);
+      },
+    });
   };
   return (
     <>

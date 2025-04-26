@@ -20,8 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store";
 import WarningMessage from "../global/WarningMessage";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
-import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 function ComponentPrivateToggle({
   components,
@@ -34,7 +33,6 @@ function ComponentPrivateToggle({
 }) {
   const userState = useSelector((state: RootState) => state.userSlice);
   const dispatch = useDispatch<AppDispatch>();
-  const queryClient = useQueryClient();
 
   const publicSelectedComponentIds = components.reduce<string[]>(
     (acc, component) => {

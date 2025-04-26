@@ -22,14 +22,18 @@ import { SignInButton, useUser } from "@clerk/nextjs";
 import { useDispatch } from "react-redux";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 import { AppDispatch } from "@/lib/store";
+import { useQueryClient } from "@tanstack/react-query";
 
 const CreateLibraryButton = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { isSignedIn } = useUser();
   const [open, setOpen] = useState(false);
-  const onSuccess = useCallback(() => {
+  const queryClient = useQueryClient();
+  const onSuccess = useCallback(async () => {
     setOpen(false);
     dispatch(fetchUserLibraries());
+    await queryClient.invalidateQueries({ queryKey: ["libraryBrowser"] });
+    await queryClient.refetchQueries({ queryKey: ["libraryBrowser"] });
   }, []);
   return (
     <Dialog open={open} onOpenChange={setOpen}>

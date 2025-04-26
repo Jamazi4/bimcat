@@ -13,12 +13,12 @@ import { useRouter } from "next/navigation";
 import LibraryFavoriteButton from "./LibraryFavoriteButton";
 
 type frontendLibrary = {
-  libId: string;
-  libName: string;
+  id: string;
+  name: string;
   description: string;
-  libAuthor: string;
-  createdAt: Date;
-  updatedAt: Date;
+  author: string;
+  createdAt: string;
+  updatedAt: string;
   numComponents: number;
   numGuests: number;
   editable: boolean;
@@ -29,12 +29,12 @@ type frontendLibrary = {
 const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
   const router = useRouter();
   const {
-    libId,
-    libName,
+    id,
+    name,
     description,
     createdAt,
     updatedAt,
-    libAuthor,
+    author,
     numComponents,
     publicFlag,
     editable,
@@ -46,23 +46,20 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
       onClick={() => {
         const isAnyDialogOpen = document.querySelector('[data-state="open"]');
         if (isAnyDialogOpen) return;
-        router.push(`/libraries/${libId}`);
+        router.push(`/libraries/${id}`);
       }}
     >
       <CardHeader>
         <CardTitle className="h-12 flex justify-between text-lg pb-2 items-center">
-          {libName}
+          {name}
           {editable ? (
             <LibraryMinatureButtons
               publicFlag={publicFlag}
-              libraryId={libId}
-              libraryName={libName}
+              libraryId={id}
+              libraryName={name}
             />
           ) : (
-            <LibraryFavoriteButton
-              libraryId={libId}
-              isGuest={library.isGuest}
-            />
+            <LibraryFavoriteButton libraryId={id} isGuest={library.isGuest} />
           )}
         </CardTitle>
       </CardHeader>
@@ -77,7 +74,7 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
           <p>Updated: {format(updatedAt, "dd-MM-yy HH:mm")}</p>
         </div>
         <div className="align-text-bottom ">
-          <p>{`Owner: ${libAuthor}`}</p>
+          <p>{`Owner: ${author}`}</p>
           <p>{`Components: ${numComponents}`}</p>
         </div>
       </CardFooter>

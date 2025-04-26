@@ -8,9 +8,6 @@ import { makeStore, AppStore } from "../lib/store";
 import { useRef } from "react";
 import { Provider } from "react-redux";
 import {
-  useQuery,
-  useMutation,
-  useQueryClient,
   QueryClient,
   QueryClientProvider,
   MutationCache,

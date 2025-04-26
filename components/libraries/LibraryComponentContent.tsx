@@ -3,7 +3,6 @@ import Title from "@/components/editor/Title";
 import PsetsList from "@/components/editor/PsetsList";
 import { SelectedRow } from "@/utils/types";
 import { fetchSingleLibraryComponentAction } from "@/utils/actions/libraryActions";
-import ComponentContentBreadcrums from "../editor/ComponentContentBreacrumbs";
 import LibraryComponentContentBreadcrumbs from "./LibraryComponentContentBreadcrumbs";
 
 const LibraryComponentContent = async ({

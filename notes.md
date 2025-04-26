@@ -94,9 +94,18 @@ plan for all that:
 [x] become guest of public libraries by clicking on a star
 
 [x] now doing download ifc button - refactor to always dwnld zip file
-[ ] also finally fix breadcrumbs in library component
-[ ] router.back() is a bad idea for breadcrumbs link
+[x] also finally fix breadcrumbs in library component
+[x] router.back() is a bad idea for breadcrumbs link
+
+// now the editing pset doesn't work in [libraryId]/[componentId] cant
+component with this id - then filters in libraries
 
 [ ] generate invitation link for private library -> become guest on enter
 [ ] create composite library
 [ ] merge libraries
+
+!
+tanstack query has meta that invalidates queries and it auto refetches.
+In forms however I'm not using mutations so I have to do it manually, but
+for some reason invalidateQueries works only as await and followed by
+refetchQueries!

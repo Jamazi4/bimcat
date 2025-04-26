@@ -6,6 +6,15 @@ import { useState } from "react";
 import { toggleLibraryFavoritesAction } from "@/utils/actions/libraryActions";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { useAppDispatch } from "@/lib/hooks";
+import { fetchUserLibraries } from "@/lib/features/user/userSlice";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 const LibraryFavoriteButton = ({
   libraryId,
@@ -16,6 +25,14 @@ const LibraryFavoriteButton = ({
 }) => {
   const [pending, setPending] = useState(false);
   const icon = isGuest ? <FaStar /> : <FaRegStar />;
+  const dispatch = useAppDispatch();
+  const toggleLibraryFavoritesMutation = useMutation({
+    mutationFn: (libraryId: string) => {
+      return toggleLibraryFavoritesAction(libraryId);
+    },
+    meta: { invalidates: ["libraryBrowser"] },
+  });
+
   const handleClick = async (
     e: React.MouseEvent<HTMLButtonElement | MouseEvent>
   ) => {
@@ -23,25 +40,42 @@ const LibraryFavoriteButton = ({
     e.stopPropagation();
 
     setPending(true);
-    const result = await toggleLibraryFavoritesAction(libraryId);
-
-    if (result.message) {
-      toast(result.message);
-    } else {
-      toast("Something went wrong");
-    }
-    setPending(false);
+    toggleLibraryFavoritesMutation.mutate(libraryId, {
+      onSuccess: (result) => {
+        toast(result.message);
+        dispatch(fetchUserLibraries());
+      },
+      onError: (error) => {
+        toast(error.message);
+      },
+      onSettled: () => {
+        setPending(false);
+      },
+    });
   };
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={handleClick}
-      disabled={pending}
-    >
-      {pending ? <LoaderCircle className="animate-spin w-10 h-10" /> : icon}
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleClick}
+            disabled={pending}
+          >
+            {pending ? (
+              <LoaderCircle className="animate-spin w-10 h-10" />
+            ) : (
+              icon
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {isGuest ? "Remove from faves" : "Add to faves"}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 export default LibraryFavoriteButton;

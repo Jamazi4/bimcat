@@ -40,8 +40,8 @@ export const fetchAllLibrariesAction = async () => {
     const dbUser = await getDbUser();
     const libraries = await prisma.library.findMany({
       include: {
-        guests: true,
-        author: true,
+        guests: { select: { id: true, firstName: true, secondName: true } },
+        author: { select: { id: true, firstName: true, secondName: true } },
         Components: { select: { id: true } },
       },
       where: {
@@ -54,23 +54,22 @@ export const fetchAllLibrariesAction = async () => {
       orderBy: { createdAt: "asc" },
     });
 
-    const frontEndLibraries = libraries.map((lib) => {
-      const { clerkId, ...authorWithoutClerkId } = lib.author;
-
-      const guestsWithoutClerkId = lib.guests.map((guest) => {
-        const { clerkId, ...restOfGuest } = guest;
-        return restOfGuest;
-      });
-
-      const editable = lib.userId === dbUser?.id;
-      const isGuest = lib.guests.some((guest) => guest.id === dbUser?.id);
+    const frontEndLibraries = libraries.map((library) => {
+      const isEditable = library.userId === dbUser?.id;
+      const isGuest = library.guests.some((guest) => guest.id === dbUser?.id);
 
       return {
-        ...lib,
-        author: authorWithoutClerkId,
-        guests: guestsWithoutClerkId,
+        id: library.id,
+        name: library.name,
+        description: library.description,
+        author: `${library.author.firstName} ${library.author.secondName}`,
+        createdAt: library.createdAt.toISOString(),
+        updatedAt: library.updatedAt.toISOString(),
+        numComponents: library.Components.length,
+        numGuests: library.guests.length,
+        editable: isEditable,
+        publicFlag: library.public,
         isGuest,
-        editable,
       };
     });
 
