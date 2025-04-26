@@ -18,7 +18,8 @@ import { useCallback, useState } from "react";
 import SubmitButton from "../global/SubmitButton";
 const RemovePsetButton = ({ title }: { title: string }) => {
   const [open, setOpen] = useState(false);
-  const { id } = useParams();
+  const params = useParams();
+  const componentId = params["id"] ?? params["componentId"];
 
   const handleSuccess = useCallback(() => {
     setOpen(false);
@@ -45,7 +46,7 @@ const RemovePsetButton = ({ title }: { title: string }) => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <input type="hidden" value={id} name="componentId" />
+            <input type="hidden" value={componentId} name="componentId" />
             <input type="hidden" value={title} name="psetTitle" />
             <SubmitButton />
           </DialogFooter>

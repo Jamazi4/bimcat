@@ -1,6 +1,6 @@
 import type { Pset as psetType } from "@/utils/schemas";
 import PsetRow from "./PsetRow";
-import PsetEditDialog from "./PsetEditDialog";
+import EditPsetButton from "./EditPsetButton";
 import {
   Accordion,
   AccordionContent,
@@ -34,7 +34,7 @@ const PsetAccordion = ({
               )}
               {edit && (
                 <div className="ml-auto space-x-4">
-                  <PsetEditDialog content={pset.content} title={pset.title} />
+                  <EditPsetButton content={pset.content} title={pset.title} />
                   <RemovePsetButton title={pset.title} />
                 </div>
               )}

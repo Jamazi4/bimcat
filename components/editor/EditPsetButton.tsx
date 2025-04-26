@@ -27,14 +27,15 @@ import { useCallback, useState } from "react";
 import { Input } from "../ui/input";
 import SubmitButton from "../global/SubmitButton";
 
-function PsetEditDialog({
+function EditPsetButton({
   content,
   title,
 }: {
   content: PsetContent[];
   title: string;
 }) {
-  const { id } = useParams();
+  const params = useParams();
+  const componentId = params["id"] ?? params["componentId"];
 
   const [curContent, setCurContent] = useState(content);
   const [open, setOpen] = useState(false);
@@ -80,7 +81,7 @@ function PsetEditDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] overflow-y-scroll max-h-screen">
         <FormContainer action={updatePsetsAction} onSuccess={handleSuccess}>
-          <input type="hidden" value={id} name="componentId" />
+          <input type="hidden" value={componentId} name="componentId" />
           <input type="hidden" value={title} name="psetTitle" />
           <DialogHeader>
             <DialogTitle className="capitalize">Editing {title}</DialogTitle>
@@ -134,7 +135,7 @@ function PsetEditDialog({
   );
 }
 
-export default PsetEditDialog;
+export default EditPsetButton;
 
 const AddRow = ({
   updateFunction,

@@ -15,7 +15,8 @@ import { useCallback, useState } from "react";
 import SubmitButton from "../global/SubmitButton";
 
 const AddPsetButton = () => {
-  const { id } = useParams() || "";
+  const params = useParams() || "";
+  const componentId = params["id"] ?? params["componentId"];
   const [open, setOpen] = useState(false);
   const handleSuccess = useCallback(() => {
     setOpen(false);
@@ -37,7 +38,7 @@ const AddPsetButton = () => {
           <p>Creating new Pset, please enter name:</p>
           <div className="flex gap-2 mb-4 mt-4">
             <Input name="psetTitle" required={true} placeholder="Pset name" />
-            <input type="hidden" name="componentId" value={id} />
+            <input type="hidden" name="componentId" value={componentId} />
           </div>
           <div className="flex justify-end">
             <SubmitButton />

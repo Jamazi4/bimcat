@@ -15,7 +15,7 @@ export default function page() {
   return (
     <main className="w-full px-4 justify-center mx-auto">
       <BreadCrumbs />
-      <h1 className="text-2xl font-bold my-6">Component browser</h1>
+      <h1 className="text-2xl font-bold my-6">Component Browser</h1>
       <Filters />
       <Suspense fallback={<BrowserFallback />}>
         <ComponentListWrapper />
