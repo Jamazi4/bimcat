@@ -18,7 +18,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/store";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 import { Input } from "../ui/input";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 const CopyComponentButton = ({
   components,
