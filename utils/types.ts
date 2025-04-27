@@ -56,7 +56,13 @@ export type LibraryInfo = {
   editable: boolean;
 };
 
-export type searchParamsType = {
+export type BrowserSearchParamsType = {
   myComponents: boolean;
+  searchString: string;
+};
+
+export type LibrariesSearchParamsType = {
+  myLibraries: boolean;
+  favorites: boolean;
   searchString: string;
 };

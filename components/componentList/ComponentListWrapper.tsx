@@ -4,27 +4,25 @@ import { columns } from "@/components/componentList/ComponentListColumns";
 import { ComponentList } from "@/components/componentList/ComponentList";
 import LoadingSpinner from "../global/LoadingSpinner";
 import { useAppDispatch } from "@/lib/hooks";
-import { updateSearchParams } from "@/lib/features/browser/componentBrowserSlice";
+import { updateBrowserSearchParams } from "@/lib/features/browser/componentBrowserSlice";
 import { useBrowserParams } from "@/utils/customHooks/useBrowserParams";
 import { useQuery } from "@tanstack/react-query";
-import { fetchAllComponents } from "@/utils/actions/componentActions";
-
-export type searchParamsType = {
-  myComponents: boolean;
-  searchString: string;
-};
+import { fetchAllComponentsAction } from "@/utils/actions/componentActions";
+import { useEffect } from "react";
 
 export default function ComponentListWrapper() {
   const dispatch = useAppDispatch();
   const params = useBrowserParams();
 
-  dispatch(updateSearchParams(params));
+  useEffect(() => {
+    dispatch(updateBrowserSearchParams(params));
+  }, [params, dispatch]);
 
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["componentBrowser", params],
     queryFn: async () => {
       console.log(params);
-      return fetchAllComponents(params);
+      return fetchAllComponentsAction(params);
     },
   });
 

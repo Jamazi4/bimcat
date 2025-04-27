@@ -11,9 +11,9 @@ import {
   PsetArraySchema,
 } from "../schemas";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
-import { searchParamsType } from "../../components/componentList/ComponentListWrapper";
 import { getDbUser } from "./globalActions";
 import { renderError } from "../utilFunctions";
+import { BrowserSearchParamsType } from "../types";
 
 const addEditableToComponent = async <T extends { userId: string }>(
   component: T
@@ -123,7 +123,9 @@ export const fetchGeometryAction = async (id: string) => {
   }
 };
 
-export const fetchAllComponents = async (params: searchParamsType) => {
+export const fetchAllComponentsAction = async (
+  params: BrowserSearchParamsType
+) => {
   const { myComponents, searchString } = params;
   try {
     const dbUser = await getDbUser();
@@ -184,7 +186,7 @@ export const fetchAllComponents = async (params: searchParamsType) => {
 };
 
 export const cachedFetchAllComponents = unstable_cache(
-  async (params: searchParamsType) => fetchAllComponents(params),
+  async (params: BrowserSearchParamsType) => fetchAllComponentsAction(params),
   [],
   { tags: ["allComponents"] }
 );

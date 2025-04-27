@@ -8,6 +8,8 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { useAppSelector } from "@/lib/hooks";
+import { useLibrariesParams } from "@/utils/customHooks/useLibrariesParams";
 import { usePathname } from "next/navigation";
 
 const LibraryComponentContentBreadcrumbs = ({
@@ -19,6 +21,16 @@ const LibraryComponentContentBreadcrumbs = ({
 }) => {
   const pathname = usePathname();
   const libraryId = pathname.split("/")[2];
+  const searchParams = useAppSelector(
+    (state) => state.libraryBrowser.searchParams
+  );
+  const query = new URLSearchParams({
+    myLibraries: searchParams.myLibraries.toString(),
+    favorites: searchParams.favorites.toString(),
+    search: searchParams.searchString,
+  });
+
+  const linkURL = `/libraries?${query}`;
 
   return (
     <Breadcrumb>
@@ -28,7 +40,7 @@ const LibraryComponentContentBreadcrumbs = ({
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href="/libraries">Libraries</BreadcrumbLink>
+          <BreadcrumbLink href={linkURL}>Libraries</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>

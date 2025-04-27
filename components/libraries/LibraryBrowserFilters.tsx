@@ -11,11 +11,11 @@ const LibraryBrowserFilters = () => {
   const { replace } = useRouter();
   const searchParams = useSearchParams();
 
-  const [myComponents, setMyComponents] = useState(
-    searchParams.get("myComponents") === "true"
+  const [myLibraries, setMyLibraries] = useState(
+    searchParams.get("myLibraries") === "true"
   );
-  const [starred, setStarred] = useState(
-    searchParams.get("myComponents") === "true"
+  const [favorites, setFavorites] = useState(
+    searchParams.get("favorites") === "true"
   );
   const [searchString, setSearchString] = useState(
     searchParams.get("search") || ""
@@ -32,27 +32,33 @@ const LibraryBrowserFilters = () => {
   }, 500);
 
   const handleSwitchMyComponents = (checked: boolean) => {
-    setMyComponents(checked);
+    setMyLibraries(checked);
+    if (checked === true && favorites === true) {
+      handleSwitchfavorites(checked);
+    }
     const params = new URLSearchParams(searchParams);
     if (checked) {
-      params.set("myComponents", "true");
+      params.set("myLibraries", "true");
     } else {
-      params.delete("myComponents");
+      params.delete("myLibraries");
     }
     replace(`/libraries?${params.toString()}`);
   };
 
-  const handleSwitchStarred = (checked: boolean) => {
-    setStarred(checked)
+  const handleSwitchfavorites = (checked: boolean) => {
+    setFavorites(checked);
+    if (checked === true && myLibraries === true) {
+      handleSwitchMyComponents(checked);
+    }
     const params = new URLSearchParams(searchParams);
     if (checked) {
-      params.set("starred", "true");
+      params.set("favorites", "true");
     } else {
-      params.delete("starred");
+      params.delete("favorites");
     }
 
     replace(`/libraries?${params.toString()}`);
-  }
+  };
   return (
     <div className="mb-4">
       <div>
@@ -60,7 +66,7 @@ const LibraryBrowserFilters = () => {
           <Input
             name="search"
             type="search"
-            placeholder="search by name or author"
+            placeholder="search by name, author or description"
             value={searchString}
             onChange={(e) => {
               console.log("onchange fired");
@@ -75,20 +81,20 @@ const LibraryBrowserFilters = () => {
               onCheckedChange={(checked: boolean) => {
                 handleSwitchMyComponents(checked);
               }}
-              checked={myComponents}
+              checked={myLibraries}
             />
             <Label htmlFor="my">Your libraries</Label>
           </div>
           <div className="flex justify-center items-center mx-4">
             <Checkbox
               className="mx-2"
-              id="starred"
+              id="favorites"
               onCheckedChange={(checked: boolean) => {
-                handleSwitchStarred(checked)
+                handleSwitchfavorites(checked);
               }}
-              checked={starred}
+              checked={favorites}
             />
-            <Label htmlFor="starred">Favorites</Label>
+            <Label htmlFor="favorites">Favorites</Label>
           </div>
         </div>
       </div>

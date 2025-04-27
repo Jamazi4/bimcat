@@ -1,12 +1,11 @@
 "use server";
 
 import { prisma } from "@/db";
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { getDbUser } from "./globalActions";
 import { renderError } from "../utilFunctions";
 import { componentWithGeometrySchema, validateWithZodSchema } from "../schemas";
-import { LibraryInfo } from "../types";
-import { fetchSingleComponentAction } from "./componentActions";
+import { LibrariesSearchParamsType, LibraryInfo } from "../types";
 
 export const createLibraryAction = async (
   prevState: any,
@@ -35,22 +34,55 @@ export const createLibraryAction = async (
   }
 };
 
-export const fetchAllLibrariesAction = async () => {
+export const fetchAllLibrariesAction = async (
+  params: LibrariesSearchParamsType
+) => {
+  const { searchString, myLibraries, favorites } = params;
   try {
     const dbUser = await getDbUser();
+    const dbUserId = dbUser?.id;
+
+    const whereCondition: any = {};
+
+    if (!dbUserId) {
+      whereCondition.public = true;
+    } else if (myLibraries) {
+      whereCondition.userId = dbUserId;
+    } else if (favorites) {
+      whereCondition.guests = { some: { id: dbUser?.id } };
+    } else {
+      whereCondition.OR = [{ public: true }, { userId: dbUserId }];
+    }
+
+    if (searchString) {
+      whereCondition.AND = [
+        ...(whereCondition.AND || []),
+        {
+          OR: [
+            { name: { contains: searchString, mode: "insensitive" } },
+            { description: { contains: searchString, mode: "insensitive" } },
+            {
+              author: {
+                firstName: { contains: searchString, mode: "insensitive" },
+              },
+            },
+            {
+              author: {
+                secondName: { contains: searchString, mode: "insensitive" },
+              },
+            },
+          ],
+        },
+      ];
+    }
+
     const libraries = await prisma.library.findMany({
       include: {
         guests: { select: { id: true, firstName: true, secondName: true } },
         author: { select: { id: true, firstName: true, secondName: true } },
         Components: { select: { id: true } },
       },
-      where: {
-        OR: [
-          { public: true },
-          { userId: dbUser?.id },
-          { guests: { some: { id: dbUser?.id } } },
-        ],
-      },
+      where: whereCondition,
       orderBy: { createdAt: "asc" },
     });
 

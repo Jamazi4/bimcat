@@ -1,5 +1,5 @@
-import { SelectedRow } from "@/utils/types";
-import { createSlice } from "@reduxjs/toolkit";
+import { LibrariesSearchParamsType } from "@/utils/types";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type selectedComponent = {
   id: string;
@@ -8,26 +8,25 @@ export type selectedComponent = {
 };
 
 interface LibraryBrowserState {
-  selectedComponents: SelectedRow;
+  searchParams: LibrariesSearchParamsType;
 }
 
 const initialState: LibraryBrowserState = {
-  selectedComponents: {},
+  searchParams: { searchString: "", myLibraries: false, favorites: false },
 };
 
 const libraryBrowserSlice = createSlice({
   name: "libraryBrowser",
   initialState,
   reducers: {
-    updateLibrarySelection: (state, action) => {
-      state.selectedComponents = action.payload;
-    },
-    clearLibrarySelection: (state) => {
-      state.selectedComponents = {};
+    updateLibrarySearchParams: (
+      state,
+      action: PayloadAction<LibrariesSearchParamsType>
+    ) => {
+      state.searchParams = action.payload;
     },
   },
 });
 
-export const { updateLibrarySelection, clearLibrarySelection } =
-  libraryBrowserSlice.actions;
+export const { updateLibrarySearchParams } = libraryBrowserSlice.actions;
 export default libraryBrowserSlice.reducer;
