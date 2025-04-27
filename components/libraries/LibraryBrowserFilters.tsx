@@ -41,6 +41,18 @@ const LibraryBrowserFilters = () => {
     }
     replace(`/libraries?${params.toString()}`);
   };
+
+  const handleSwitchStarred = (checked: boolean) => {
+    setStarred(checked)
+    const params = new URLSearchParams(searchParams);
+    if (checked) {
+      params.set("starred", "true");
+    } else {
+      params.delete("starred");
+    }
+
+    replace(`/libraries?${params.toString()}`);
+  }
   return (
     <div className="mb-4">
       <div>
@@ -72,7 +84,7 @@ const LibraryBrowserFilters = () => {
               className="mx-2"
               id="starred"
               onCheckedChange={(checked: boolean) => {
-                setStarred(checked);
+                handleSwitchStarred(checked)
               }}
               checked={starred}
             />
