@@ -76,7 +76,7 @@ export const fetchSingleComponentAction = async (id: string) => {
     const dbUser = await getDbUser();
 
     const component = await prisma.component.findUnique({
-      where: { id: id },
+      where: { id },
       include: {
         geometry: true,
       },

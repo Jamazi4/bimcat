@@ -20,8 +20,11 @@ export type IfcFileInfo = {
 };
 
 const DownloadIfcButton = () => {
-  const params = useParams<{ id: string }>();
-  const { id } = params;
+  const params = useParams<
+    { id: string } | { libraryId: string; componentId: string }
+  >();
+  const id = "id" in params ? params.id : params.componentId;
+  //TODO: handle id more gracefully depending on pathname or pass it
   const [pending, setPending] = useState(false);
 
   const handleDownload = async () => {
