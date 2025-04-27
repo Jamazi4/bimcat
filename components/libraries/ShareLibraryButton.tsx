@@ -2,7 +2,7 @@
 
 import { Copy, LoaderCircle, Share2 } from "lucide-react";
 import TooltipActionTriggerButton from "../componentList/TooltipActionTriggerButton";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   DialogHeader,
@@ -20,11 +20,11 @@ import { toast } from "sonner";
 
 const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
   const basePath = window.location.origin + "/libraries/share";
-  const isShared = sharedId !== "";
   const { libraryId } = useParams();
   const [shareUrl, setShareUrl] = useState(
     sharedId ? `${basePath}/${sharedId}` : ""
   );
+  const [isShared, setIsShared] = useState(!!sharedId);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -48,6 +48,7 @@ const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
     shareLibraryMutation.mutate(libraryId, {
       onSuccess: (result) => {
         setShareUrl(`${basePath}/${result}`);
+        setIsShared(true);
         toast("Generated private share link.");
       },
       onError: (error) => {
@@ -101,7 +102,9 @@ const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
 
           <DialogFooter>
             {isShared ? (
-              <Button variant="destructive">Disable Link</Button>
+              <Button variant="destructive" className="w-30 mt-4">
+                Disable Link
+              </Button>
             ) : (
               <Button
                 onClick={(e) => {

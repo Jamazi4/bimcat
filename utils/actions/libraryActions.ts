@@ -544,6 +544,6 @@ export const generateLibraryShareIdAction = async (libraryId: string) => {
 
     return sharedId;
   } catch (error) {
-    return "Could not generate the share link.";
+    throw error;
   }
 };
