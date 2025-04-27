@@ -38,7 +38,7 @@ const CreateLibraryButton = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="cursor-pointer">
+        <Button variant="default" className="cursor-pointer m-0">
           Create
         </Button>
       </DialogTrigger>

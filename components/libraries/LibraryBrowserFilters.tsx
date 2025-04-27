@@ -42,7 +42,7 @@ const LibraryBrowserFilters = () => {
     replace(`/libraries?${params.toString()}`);
   };
   return (
-    <div className="my-4">
+    <div className="mb-4">
       <div>
         <div className="flex">
           <Input
