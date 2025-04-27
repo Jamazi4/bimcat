@@ -13,41 +13,31 @@ import {
   DialogDescription,
 } from "../ui/dialog";
 import { Button } from "../ui/button";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { Input } from "../ui/input";
 import { useMutation } from "@tanstack/react-query";
 import { generateLibraryShareIdAction } from "@/utils/actions/libraryActions";
 import { toast } from "sonner";
-import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 
 const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
-  const basePath = window.location.origin + "/share";
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const basePath = window.location.origin + "/libraries/share";
+  const isShared = sharedId !== "";
+  const { libraryId } = useParams();
   const [shareUrl, setShareUrl] = useState(
     sharedId ? `${basePath}/${sharedId}` : ""
   );
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [pending, setPending] = useState(false);
 
   const shareLibraryMutation = useMutation({
     mutationFn: (libraryId: string) => {
       return generateLibraryShareIdAction(libraryId);
     },
   });
-  const curLibrary = useAppSelector((state) => state.userSlice).libraries.find(
-    (lib) => lib.id === libraryId
-  );
-
-  const { libraryId } = useParams();
-  const dispatch = useAppDispatch();
 
   if (typeof libraryId !== "string") {
     return <div>Invalid library ID</div>;
   }
-
-  if (!curLibrary) return <div>Library does not exist</div>;
-
-  const { isShared } = curLibrary;
 
   const handleClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -58,8 +48,6 @@ const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
     shareLibraryMutation.mutate(libraryId, {
       onSuccess: (result) => {
         setShareUrl(`${basePath}/${result}`);
-        dispatch(fetchUserLibraries());
-
         toast("Generated private share link.");
       },
       onError: (error) => {

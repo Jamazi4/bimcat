@@ -131,3 +131,14 @@ if user clicks on shared link and:
 - b. is logged in:
 
   - I proceed normally
+
+    27.04.2025 - Share link mutates library by adding a sharedId. It is then
+    displayed on frontend and available to copy. Now work on the route, consider
+    not leaking libraryId in the link (currently route is inside [libraryId] -
+    change that). And add user to the guests when they enter. Tidy up what's saved
+
+    library privateToggle removes shared link
+
+    now I need to implement disable link functionality
+
+    and then resolve library on share link

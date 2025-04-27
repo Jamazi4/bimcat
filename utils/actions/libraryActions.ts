@@ -267,6 +267,7 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
     });
 
     if (!library) throw new Error("Could not fetch library");
+
     if (!(library.userId === dbUser?.id) || !dbUser)
       throw new Error("Unauthorized");
 
@@ -289,7 +290,7 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
 
     await prisma.library.update({
       where: { id: libraryId },
-      data: { public: !curPublic },
+      data: { public: !curPublic, sharedId: null },
     });
 
     revalidatePath("/libraries");

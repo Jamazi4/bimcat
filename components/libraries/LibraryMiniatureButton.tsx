@@ -26,7 +26,7 @@ type LibraryMiniatureButtonProps = {
   icon: React.ReactNode;
   destructive: boolean;
   tooltip: string;
-  warningMessage?: string;
+  warningMessages?: string[];
 };
 const LibraryMiniatureButton = ({
   libraryId,
@@ -36,7 +36,7 @@ const LibraryMiniatureButton = ({
   icon,
   destructive,
   tooltip,
-  warningMessage,
+  warningMessages,
 }: LibraryMiniatureButtonProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -86,7 +86,10 @@ const LibraryMiniatureButton = ({
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{message}</DialogDescription>
           </DialogHeader>
-          {warningMessage && <WarningMessage message={warningMessage} />}
+          {warningMessages &&
+            warningMessages.map((message, id) => {
+              return <WarningMessage key={id} message={message} />;
+            })}
           <DialogFooter>
             <Button
               onClick={handleAction}

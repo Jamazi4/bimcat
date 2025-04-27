@@ -6,7 +6,6 @@ import {
 } from "@/utils/actions/libraryActions";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
-import { useEffect, useState } from "react";
 
 const LibraryMinatureButtons = ({
   publicFlag,
@@ -17,25 +16,30 @@ const LibraryMinatureButtons = ({
   libraryId: string;
   libraryName: string;
 }) => {
-  const [displayWarning, setDisplayWarning] = useState(false);
   const userState = useSelector((state: RootState) => state.userSlice);
-  const componentsInside = userState.libraries.filter(
+  const currentLibrary = userState.libraries.find(
     (library) => library.id === libraryId
-  )[0]?.components;
+  );
+  if (!currentLibrary) return <div>Library does not exist</div>;
 
-  const privateComponentsInside = componentsInside?.filter(
+  const privateComponentsInside = currentLibrary.components.filter(
     (component) => component.public === false
   );
+  const warningPrivateComponents =
+    publicFlag === false && privateComponentsInside?.length > 0;
 
-  useEffect(() => {
-    const warningFlag =
-      publicFlag === false && privateComponentsInside?.length > 0;
-    setDisplayWarning(warningFlag);
-  }, [privateComponentsInside]);
+  const warningMessagePrivateComponents = `${libraryName} contains private components(${privateComponentsInside.length}), making this library public will automatically change all contained components to public`;
 
-  const warningMessage = displayWarning
-    ? `${libraryName} contains private components(${privateComponentsInside.length}), making this library public will automatically change all contained components to public`
-    : "";
+  const warningMessageLibraryShared = `This action will deactivate private share link for ${libraryName}.`;
+
+  const warningMessages = [];
+
+  if (warningPrivateComponents) {
+    warningMessages.push(warningMessagePrivateComponents);
+  }
+  if (currentLibrary.isShared) {
+    warningMessages.push(warningMessageLibraryShared);
+  }
 
   const removeTitle = `Remove ${libraryName}`;
   const togglePrivateTitle = `Toggle private for ${libraryName}`;
@@ -45,7 +49,7 @@ const LibraryMinatureButtons = ({
   return (
     <div className="pt-0 mt-0">
       <LibraryMiniatureButton
-        warningMessage={warningMessage}
+        warningMessages={warningMessages}
         libraryId={libraryId}
         title={togglePrivateTitle}
         message={togglePrivateMessage}
