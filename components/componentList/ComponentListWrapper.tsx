@@ -21,7 +21,6 @@ export default function ComponentListWrapper() {
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["componentBrowser", params],
     queryFn: async () => {
-      console.log(params);
       return fetchAllComponentsAction(params);
     },
   });

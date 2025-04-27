@@ -1,0 +1,138 @@
+"use client";
+
+import { Copy, LoaderCircle, Share2 } from "lucide-react";
+import TooltipActionTriggerButton from "../componentList/TooltipActionTriggerButton";
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import {
+  DialogHeader,
+  DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { Input } from "../ui/input";
+import { useMutation } from "@tanstack/react-query";
+import { generateLibraryShareIdAction } from "@/utils/actions/libraryActions";
+import { toast } from "sonner";
+import { fetchUserLibraries } from "@/lib/features/user/userSlice";
+
+const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
+  const basePath = window.location.origin + "/share";
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [shareUrl, setShareUrl] = useState(
+    sharedId ? `${basePath}/${sharedId}` : ""
+  );
+
+  const shareLibraryMutation = useMutation({
+    mutationFn: (libraryId: string) => {
+      return generateLibraryShareIdAction(libraryId);
+    },
+  });
+  const curLibrary = useAppSelector((state) => state.userSlice).libraries.find(
+    (lib) => lib.id === libraryId
+  );
+
+  const { libraryId } = useParams();
+  const dispatch = useAppDispatch();
+
+  if (typeof libraryId !== "string") {
+    return <div>Invalid library ID</div>;
+  }
+
+  if (!curLibrary) return <div>Library does not exist</div>;
+
+  const { isShared } = curLibrary;
+
+  const handleClick = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+    setPending(true);
+
+    shareLibraryMutation.mutate(libraryId, {
+      onSuccess: (result) => {
+        setShareUrl(`${basePath}/${result}`);
+        dispatch(fetchUserLibraries());
+
+        toast("Generated private share link.");
+      },
+      onError: (error) => {
+        toast(error.message);
+      },
+      onSettled: () => {
+        setPending(false);
+      },
+    });
+  };
+
+  return (
+    <>
+      <TooltipActionTriggerButton
+        action={setDialogOpen}
+        disabled={false}
+        pending={false}
+        icon={<Share2 />}
+        tooltip="Share Library"
+        destructive={false}
+      />
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={() => {
+          setDialogOpen(!dialogOpen);
+        }}
+      >
+        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle>Share Library.</DialogTitle>
+            <DialogDescription>
+              <span>
+                {isShared ? "Copy the link below" : "Generate a new link"}
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex">
+            <Input className="rounded-r-none" value={shareUrl} readOnly></Input>
+            <Button
+              variant="outline"
+              className="rounded-l-none"
+              disabled={!isShared}
+              onClick={() => {
+                navigator.clipboard.writeText(shareUrl);
+                toast("Link copied to clipboard!");
+              }}
+            >
+              <Copy />
+            </Button>
+          </div>
+
+          <DialogFooter>
+            {isShared ? (
+              <Button variant="destructive">Disable Link</Button>
+            ) : (
+              <Button
+                onClick={(e) => {
+                  handleClick(e);
+                }}
+                disabled={pending}
+                className="w-30 mt-4"
+              >
+                {pending ? (
+                  <LoaderCircle className="animate-spin" />
+                ) : (
+                  "Generate"
+                )}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+export default ShareLibraryButton;

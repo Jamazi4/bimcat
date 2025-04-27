@@ -46,7 +46,7 @@ function ComponentPrivateToggle({
   );
 
   const affectedPairs = userState.libraries.flatMap((library) => {
-    if (!library.public) return [];
+    if (!library.isPublic) return [];
 
     return library.components
       .filter((component) => publicSelectedComponentIds.includes(component.id))

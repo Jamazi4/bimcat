@@ -109,3 +109,25 @@ tanstack query has meta that invalidates queries and it auto refetches.
 In forms however I'm not using mutations so I have to do it manually, but
 for some reason invalidateQueries works only as await and followed by
 refetchQueries!
+
+generating the library share link:
+
+- user clicks share
+- I do mutation on library - generating a new shareId
+- I add new path like /libraries/share/[shareId]
+- on this route I automatically do another mutation on library - get userDb
+  and add their id to the library guests and redirect user to library page
+- user is a guest, library appears in their browser
+- author can disable sharing link - will be able to check users
+
+if user clicks on shared link and:
+
+- a. is not logged in:
+
+  - but has an account - logs in, I proceed
+  - doesn't have an account - I need to create dbUser and then add them
+    (problem here? it might take time before account gets created)
+
+- b. is logged in:
+
+  - I proceed normally

@@ -9,7 +9,6 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { useAppSelector } from "@/lib/hooks";
-import { useLibrariesParams } from "@/utils/customHooks/useLibrariesParams";
 import { usePathname } from "next/navigation";
 
 const LibraryComponentContentBreadcrumbs = ({

@@ -46,6 +46,7 @@ model Library {
   userId      String
   guests      User[]      @relation("LibraryGuests")
   public      Boolean     @default(true)
+  sharedId    String?
 }
 
 model User {

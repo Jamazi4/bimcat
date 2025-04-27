@@ -52,8 +52,9 @@ export type LibraryInfo = {
   empty: boolean;
   name: string;
   desc: string;
-  public: boolean;
-  editable: boolean;
+  sharedId: string;
+  isPublic: boolean;
+  isEditable: boolean;
 };
 
 export type BrowserSearchParamsType = {

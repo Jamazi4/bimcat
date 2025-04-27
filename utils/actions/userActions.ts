@@ -25,6 +25,7 @@ export const getUserStateLibrariesAction = async () => {
   try {
     const { userId } = await auth();
     if (!userId) return;
+
     const dbUser = await prisma.user.findUnique({
       where: {
         clerkId: userId,
@@ -35,12 +36,29 @@ export const getUserStateLibrariesAction = async () => {
             id: true,
             name: true,
             public: true,
+            sharedId: true,
             Components: { select: { id: true, name: true, public: true } },
+            userId: true,
           },
         },
       },
     });
-    return dbUser;
+    if (!dbUser) return;
+
+    const { authoredLibraries, ...rest } = dbUser;
+    const frontendLibraries = authoredLibraries.map((lib) => {
+      return {
+        id: lib.id,
+        name: lib.name,
+        isPublic: lib.public,
+        isShared: !!lib.sharedId,
+        isEditable: userId === lib.userId,
+        components: lib.Components,
+      };
+    });
+    const frontendDbUser = { ...dbUser, authoredLibraries: frontendLibraries };
+
+    return frontendDbUser;
   } catch (error) {
     renderError(error);
   }

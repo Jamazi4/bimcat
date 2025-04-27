@@ -6,6 +6,7 @@ import { getDbUser } from "./globalActions";
 import { renderError } from "../utilFunctions";
 import { componentWithGeometrySchema, validateWithZodSchema } from "../schemas";
 import { LibrariesSearchParamsType, LibraryInfo } from "../types";
+import { v4 as uuidv4 } from "uuid";
 
 export const createLibraryAction = async (
   prevState: any,
@@ -221,8 +222,9 @@ export const fetchLibraryComponents = async (libraryId: string) => {
       empty: library.Components.length === 0,
       name: library?.name,
       desc: library?.description,
-      editable: libraryEditable,
-      public: library.public,
+      isEditable: libraryEditable,
+      sharedId: library.sharedId || "",
+      isPublic: library.public,
     };
 
     return { libraryInfo, frontendComponents };
@@ -434,6 +436,8 @@ export const fetchLibraryDownloadAction = async (libraryId: string) => {
 
     const validatedComponents = library.Components.map((component) => {
       const componentWithEditable = { ...component, editable: true };
+      //just to shut zod up                         ^^^^^^^^
+
       return validateWithZodSchema(
         componentWithGeometrySchema,
         componentWithEditable
@@ -510,5 +514,35 @@ export const fetchSingleLibraryComponentAction = async (
     return { libraryName: library.name, component: validatedComponent };
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const generateLibraryShareIdAction = async (libraryId: string) => {
+  try {
+    const dbUser = await getDbUser();
+
+    if (!dbUser) throw new Error("Could not find user");
+
+    const targetLibrary = dbUser?.authoredLibraries.find(
+      (lib) => lib.id === libraryId
+    );
+
+    if (!targetLibrary) throw new Error("Could not find library");
+    if (targetLibrary.sharedId) throw new Error("Already shared");
+
+    const authorized = targetLibrary.userId === dbUser.id;
+
+    if (!authorized) throw new Error("Unauthorized");
+
+    const sharedId = uuidv4();
+
+    await prisma.library.update({
+      where: { id: libraryId },
+      data: { sharedId },
+    });
+
+    return sharedId;
+  } catch (error) {
+    return "Could not generate the share link.";
   }
 };

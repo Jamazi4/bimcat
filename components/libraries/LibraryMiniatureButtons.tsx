@@ -52,7 +52,7 @@ const LibraryMinatureButtons = ({
         action={libraryTogglePrivateAction}
         icon={publicFlag ? <Eye /> : <EyeClosed />}
         destructive={false}
-        tooltip={publicFlag ? "Make private" : "Make public"}
+        tooltip={publicFlag ? "Make Private" : "Make Public"}
       />
 
       <LibraryMiniatureButton

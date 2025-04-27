@@ -72,7 +72,7 @@ const LibraryFavoriteButton = ({
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          {isGuest ? "Remove from faves" : "Add to faves"}
+          {isGuest ? "Remove From Faves" : "Add To Faves"}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

@@ -5,13 +5,15 @@ import RenameButtonTitleBar, {
 } from "../global/RenameButtonTitleBar";
 import { renameLibraryAction } from "@/utils/actions/libraryActions";
 import DownloadLibraryButton from "./DownloadLibraryButton";
+import ShareLibraryButton from "./ShareLibraryButton";
 
 const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
-  const { name, editable, public: isPublic, empty } = libraryInfo;
+  const { name, isEditable, isPublic, empty, sharedId } = libraryInfo;
   const renameButtonProps: RenameButtonProps = {
     action: renameLibraryAction,
     curName: name,
   };
+
   return (
     <div className="my-6">
       <div className="flex justify-between">
@@ -19,11 +21,14 @@ const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
           <h1 className="font-bold text-xl text-primary whitespace-nowrap">
             {name}
           </h1>
-          {editable && <RenameButtonTitleBar {...renameButtonProps} />}
+          {isEditable && <RenameButtonTitleBar {...renameButtonProps} />}
         </div>
-        <div className="space-x-4">
+        <div className="flex space-x-4">
           <DownloadLibraryButton libraryEmpty={empty} />
-          {isPublic}
+
+          {!isPublic && isEditable && (
+            <ShareLibraryButton sharedId={sharedId} />
+          )}
         </div>
       </div>
       <Separator className="mt-2" />

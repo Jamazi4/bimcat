@@ -10,7 +10,9 @@ type UserStateComponent = {
 type UserStateLibrary = {
   id: string;
   name: string;
-  public: boolean;
+  isPublic: boolean;
+  isShared: boolean;
+  isEditable: boolean;
   components: UserStateComponent[];
 };
 
@@ -33,11 +35,13 @@ export const fetchUserLibraries = createAsyncThunk(
       const dbUser = await getUserStateLibrariesAction();
       if (!dbUser) return [];
 
-      const librariesState = dbUser.authoredLibraries.map((lib) => ({
+      const librariesState = dbUser.authoredLibraries?.map((lib) => ({
         id: lib.id,
         name: lib.name,
-        public: lib.public,
-        components: lib.Components.map((component) => ({
+        isPublic: lib.isPublic,
+        isShared: lib.isShared,
+        isEditable: lib.isEditable,
+        components: lib.components.map((component) => ({
           id: component.id,
           name: component.name,
           public: component.public,

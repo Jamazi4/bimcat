@@ -138,7 +138,7 @@ const AddComponentToLibraryButton = ({
         disabled={disabled}
         pending={pending}
         icon={<BookUp />}
-        tooltip="Add to library"
+        tooltip="Add to Library"
         destructive={false}
       />
       <Dialog
@@ -152,7 +152,7 @@ const AddComponentToLibraryButton = ({
       >
         <DialogContent onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle>Add to library.</DialogTitle>
+            <DialogTitle>Add to Library.</DialogTitle>
             <DialogDescription>
               <span>Pick library for:</span>
               <NameList
@@ -237,7 +237,7 @@ const LibraryList = ({
     return {
       value: lib.id,
       label: lib.name,
-      isPublic: lib.public,
+      isPublic: lib.isPublic,
       componentIds: lib.components.map((comp) => comp.id),
     };
   });
