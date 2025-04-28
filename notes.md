@@ -1,3 +1,7 @@
+# DEVLOG
+
+## GENERAL TODO
+
 0. Layout - propsets size in creator
 1. PSETS - add support for bool values (frontend) - maybe differentiate
    between types of properties (backend) - don't allow to save empty pset
@@ -36,7 +40,7 @@ edge cases:
      library will still be allowed to see it
 
    - If you change private library to public - all private components inside
-     (if any) will automatically become public(???)
+     (if any) will automatically become public
 
 3. You can add both public and private components to your libraries, but only
    the ones you authored
@@ -44,32 +48,37 @@ edge cases:
    - If library is public, and you are adding your own private component -
      component will toggle to public(done).
 
-   - If you add someone elses component to your own library - it will create
-     your own copy of that component, component will automatically have the
-     same privacy setting as the library
+   - If you want to have someone elses component in your own library, you can
+     copy this component and provide your own name, then add normally
 
-fuck i need organizations(?)
+4. You can share your private library by generating a private share link
+
+   - You can disable the link at any time, and manage all subscribed users list
+
+   - If the Library is switched to public when it already has link generated,
+     it will automatically disable this link
+
+## KNOWN ISSUES
+
+- the last pset won't trigger toast on removal -
+  instead of form do it as removeComponentButton but with optimistic ui update
+
+- When library filters are applied, and user goes into [libraryId] and then
+  in [componentId], then goes back to [libraryId], the filters in /libraries
+  are lost.
+
+## WORKAROUNDS/ISSUES
+
+tanstack query has meta that invalidates queries and it auto refetches.
+In forms however I'm not using mutations so I have to do it manually, but
+for some reason invalidateQueries works only as await and followed by
+refetchQueries!
 
 the workflow of actions where modal is displayed until success vs modal closes
 and original button spins can be useful when I want to allow user to redo
 something if action fail, for example name already taken or pset already exists
 
-known issue: the last pset won't trigger toast on removal -
-instead of form do it as removeComponentButton but with optimistic ui update
-
-23.04.2025 - implemented copy component but because componentListWrapper
-is now a client component and preserves the data in useState - it doesn't
-revalidate. Maybe finally preserve the data in redux state and dispatch
-refresh action -
-
-24.04.2025 - revalidation solved by retriggering async thunk as browser
-components now reside in redux state.
-
-sharing library through a link - when user logs in under this link - they
-will be assigned as guest.
-
-Users can create their own private libraries of their own private components
-and then share their libraries so another user can merge the libraries
+## COMPOSITE LIBRARIES
 
 You can only merge libraries that are shared with you, or are public
 
@@ -97,28 +106,9 @@ plan for all that:
 [x] also finally fix breadcrumbs in library component
 [x] router.back() is a bad idea for breadcrumbs link
 
-// now the editing pset doesn't work in [libraryId]/[componentId] cant
-component with this id - then filters in libraries
-
 [ ] generate invitation link for private library -> become guest on enter
 [ ] create composite library
 [ ] merge libraries
-
-!
-tanstack query has meta that invalidates queries and it auto refetches.
-In forms however I'm not using mutations so I have to do it manually, but
-for some reason invalidateQueries works only as await and followed by
-refetchQueries!
-
-generating the library share link:
-
-- user clicks share
-- I do mutation on library - generating a new shareId
-- I add new path like /libraries/share/[shareId]
-- on this route I automatically do another mutation on library - get userDb
-  and add their id to the library guests and redirect user to library page
-- user is a guest, library appears in their browser
-- author can disable sharing link - will be able to check users
 
 if user clicks on shared link and:
 
@@ -132,15 +122,37 @@ if user clicks on shared link and:
 
   - I proceed normally
 
-    27.04.2025 - Share link mutates library by adding a sharedId. It is then
-    displayed on frontend and available to copy. Now work on the route, consider
-    not leaking libraryId in the link (currently route is inside [libraryId] -
-    change that). And add user to the guests when they enter. Tidy up what's saved
+- user clicks share
+- I do mutation on library - generating a new shareId
+- I add new path like /libraries/share/[shareId]
+- on this route I automatically do another mutation on library - get userDb
+  and add their id to the library guests and redirect user to library page
+- user is a guest, library appears in their browser
+- author can disable sharing link - will be able to check users
 
-    library privateToggle removes shared link
+## DIARY
 
-    now I need to implement disable link functionality
+23.04.2025 - implemented copy component but because componentListWrapper
+is now a client component and preserves the data in useState - it doesn't
+revalidate. Maybe finally preserve the data in redux state and dispatch
+refresh action -
 
-    and then resolve library on share link
+24.04.2025 - revalidation solved by retriggering async thunk as browser
+components now reside in redux state.
 
-    noticed that searchparams do not persist if i go back gradually
+generating the library share link:
+
+--27.04.2025--
+Share link mutates library by adding a sharedId. It is then
+displayed on frontend and available to copy. Now work on the route, consider
+not leaking libraryId in the link (currently route is inside [libraryId] -
+change that). And add user to the guests when they enter. Tidy up what's saved
+
+library privateToggle removes shared link
+
+now I need to implement disable link functionality
+
+and then resolve library on share link
+
+--28.04.2025--
+disable link works now.

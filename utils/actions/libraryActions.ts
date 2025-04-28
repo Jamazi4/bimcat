@@ -539,7 +539,7 @@ const authShareActions = async (libraryId: string) => {
 
 export const shareLibraryAction = async (libraryId: string) => {
   try {
-    const { authorized, alreadyShared } = await authShareActions(libraryId);
+    const { alreadyShared } = await authShareActions(libraryId);
 
     if (alreadyShared) throw new Error("Already shared");
     const sharedId = uuidv4();

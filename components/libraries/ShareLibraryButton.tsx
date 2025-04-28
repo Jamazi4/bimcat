@@ -2,7 +2,7 @@
 
 import { Copy, LoaderCircle, Share2 } from "lucide-react";
 import TooltipActionTriggerButton from "../componentList/TooltipActionTriggerButton";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import {
   DialogHeader,
@@ -22,13 +22,7 @@ import {
 import { toast } from "sonner";
 
 const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
-  const [basePath, setBasePath] = useState("");
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setBasePath(window.location.origin + "/libraries/share");
-    }
-  }, []);
-
+  const basePath = window.location.origin + "/libraries/share";
   const { libraryId } = useParams();
   const [shareUrl, setShareUrl] = useState(
     sharedId ? `${basePath}/${sharedId}` : ""
