@@ -142,3 +142,5 @@ if user clicks on shared link and:
     now I need to implement disable link functionality
 
     and then resolve library on share link
+
+    noticed that searchparams do not persist if i go back gradually

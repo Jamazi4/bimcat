@@ -518,23 +518,30 @@ export const fetchSingleLibraryComponentAction = async (
   }
 };
 
-export const generateLibraryShareIdAction = async (libraryId: string) => {
+const authShareActions = async (libraryId: string) => {
+  const dbUser = await getDbUser();
+
+  if (!dbUser) throw new Error("Could not find user");
+
+  const targetLibrary = dbUser.authoredLibraries.find(
+    (lib) => lib.id === libraryId
+  );
+
+  if (!targetLibrary) throw new Error("Could not find library");
+  const alreadyShared = targetLibrary.sharedId !== null;
+
+  const authorized = targetLibrary.userId === dbUser.id;
+
+  if (!authorized) throw new Error("Unauthorized");
+
+  return { authorized, alreadyShared };
+};
+
+export const shareLibraryAction = async (libraryId: string) => {
   try {
-    const dbUser = await getDbUser();
+    const { authorized, alreadyShared } = await authShareActions(libraryId);
 
-    if (!dbUser) throw new Error("Could not find user");
-
-    const targetLibrary = dbUser?.authoredLibraries.find(
-      (lib) => lib.id === libraryId
-    );
-
-    if (!targetLibrary) throw new Error("Could not find library");
-    if (targetLibrary.sharedId) throw new Error("Already shared");
-
-    const authorized = targetLibrary.userId === dbUser.id;
-
-    if (!authorized) throw new Error("Unauthorized");
-
+    if (alreadyShared) throw new Error("Already shared");
     const sharedId = uuidv4();
 
     await prisma.library.update({
@@ -543,6 +550,20 @@ export const generateLibraryShareIdAction = async (libraryId: string) => {
     });
 
     return sharedId;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const disableShareLibraryAction = async (libraryId: string) => {
+  try {
+    const { authorized, alreadyShared } = await authShareActions(libraryId);
+
+    const targetLibrary = await prisma.library.update({
+      where: { id: libraryId },
+      data: { sharedId: null },
+    });
+    return { message: `Share link for ${targetLibrary.name} disabled.` };
   } catch (error) {
     throw error;
   }

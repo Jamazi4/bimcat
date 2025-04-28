@@ -20,15 +20,14 @@ const LibraryComponentContentBreadcrumbs = ({
 }) => {
   const pathname = usePathname();
   const libraryId = pathname.split("/")[2];
-  const searchParams = useAppSelector(
+  const stateSearchParams = useAppSelector(
     (state) => state.libraryBrowser.searchParams
   );
   const query = new URLSearchParams({
-    myLibraries: searchParams.myLibraries.toString(),
-    favorites: searchParams.favorites.toString(),
-    search: searchParams.searchString,
+    myLibraries: stateSearchParams.myLibraries.toString(),
+    favorites: stateSearchParams.favorites.toString(),
+    search: stateSearchParams.searchString,
   });
-
   const linkURL = `/libraries?${query}`;
 
   return (
@@ -44,6 +43,7 @@ const LibraryComponentContentBreadcrumbs = ({
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           <BreadcrumbLink href={`/libraries/${libraryId}`}>
+            {/* //TODO: this breaks searchparams persistence */}
             {libraryName}
           </BreadcrumbLink>
         </BreadcrumbItem>

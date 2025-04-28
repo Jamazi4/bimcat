@@ -11,14 +11,13 @@ import {
 import { useAppSelector } from "@/lib/hooks";
 
 const LibraryBreadCrumbs = ({ libraryName }: { libraryName: string }) => {
-  const searchParams = useAppSelector(
+  const stateSearchParams = useAppSelector(
     (state) => state.libraryBrowser.searchParams
   );
-
   const query = new URLSearchParams({
-    myLibraries: searchParams.myLibraries.toString(),
-    search: searchParams.searchString,
-    favorites: searchParams.favorites.toString(),
+    myLibraries: stateSearchParams.myLibraries.toString(),
+    search: stateSearchParams.searchString,
+    favorites: stateSearchParams.favorites.toString(),
   });
 
   const linkURL = `/libraries?${query}`;

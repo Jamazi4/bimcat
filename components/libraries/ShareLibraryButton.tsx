@@ -15,11 +15,20 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useMutation } from "@tanstack/react-query";
-import { generateLibraryShareIdAction } from "@/utils/actions/libraryActions";
+import {
+  disableShareLibraryAction,
+  shareLibraryAction,
+} from "@/utils/actions/libraryActions";
 import { toast } from "sonner";
 
 const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
-  const basePath = window.location.origin + "/libraries/share";
+  const [basePath, setBasePath] = useState("");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setBasePath(window.location.origin + "/libraries/share");
+    }
+  }, []);
+
   const { libraryId } = useParams();
   const [shareUrl, setShareUrl] = useState(
     sharedId ? `${basePath}/${sharedId}` : ""
@@ -27,11 +36,16 @@ const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
   const [isShared, setIsShared] = useState(!!sharedId);
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [pending, setPending] = useState(false);
 
   const shareLibraryMutation = useMutation({
     mutationFn: (libraryId: string) => {
-      return generateLibraryShareIdAction(libraryId);
+      return shareLibraryAction(libraryId);
+    },
+  });
+
+  const disableShareLibraryMutation = useMutation({
+    mutationFn: (libraryId: string) => {
+      return disableShareLibraryAction(libraryId);
     },
   });
 
@@ -39,11 +53,13 @@ const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
     return <div>Invalid library ID</div>;
   }
 
-  const handleClick = async (
+  const pending =
+    shareLibraryMutation.isPending || disableShareLibraryMutation.isPending;
+
+  const handleGenerate = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.stopPropagation();
-    setPending(true);
 
     shareLibraryMutation.mutate(libraryId, {
       onSuccess: (result) => {
@@ -54,9 +70,25 @@ const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
       onError: (error) => {
         toast(error.message);
       },
-      onSettled: () => {
-        setPending(false);
+      onSettled: () => {},
+    });
+  };
+
+  const handleDisable = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+
+    disableShareLibraryMutation.mutate(libraryId, {
+      onSuccess: (result) => {
+        setShareUrl("");
+        setIsShared(false);
+        toast(result.message);
       },
+      onError: (error) => {
+        toast(error.message);
+      },
+      onSettled: () => {},
     });
   };
 
@@ -76,7 +108,10 @@ const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
           setDialogOpen(!dialogOpen);
         }}
       >
-        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>Share Library.</DialogTitle>
             <DialogDescription>
@@ -102,16 +137,28 @@ const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
 
           <DialogFooter>
             {isShared ? (
-              <Button variant="destructive" className="w-30 mt-4">
-                Disable Link
+              <Button
+                disabled={pending}
+                variant="destructive"
+                className="w-30 mt-4"
+                onClick={(e) => {
+                  handleDisable(e);
+                }}
+              >
+                {pending ? (
+                  <LoaderCircle className="animate-spin" />
+                ) : (
+                  "Disable Link"
+                )}
               </Button>
             ) : (
               <Button
                 onClick={(e) => {
-                  handleClick(e);
+                  handleGenerate(e);
                 }}
                 disabled={pending}
                 className="w-30 mt-4"
+                autoFocus
               >
                 {pending ? (
                   <LoaderCircle className="animate-spin" />

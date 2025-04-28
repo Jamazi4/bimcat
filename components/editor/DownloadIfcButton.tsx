@@ -25,6 +25,7 @@ const DownloadIfcButton = () => {
   >();
   const id = "id" in params ? params.id : params.componentId;
   //TODO: handle id more gracefully depending on pathname or pass it
+
   const [pending, setPending] = useState(false);
 
   const handleDownload = async () => {
