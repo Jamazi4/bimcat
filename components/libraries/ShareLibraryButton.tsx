@@ -23,6 +23,8 @@ import { toast } from "sonner";
 
 const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
   const basePath = window.location.origin + "/libraries/share";
+  //TODO: might break, move window statement to useEffect for example
+
   const { libraryId } = useParams();
   const [shareUrl, setShareUrl] = useState(
     sharedId ? `${basePath}/${sharedId}` : ""
@@ -64,7 +66,6 @@ const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
       onError: (error) => {
         toast(error.message);
       },
-      onSettled: () => {},
     });
   };
 

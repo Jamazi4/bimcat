@@ -52,7 +52,11 @@ export const fetchAllLibrariesAction = async (
     } else if (favorites) {
       whereCondition.guests = { some: { id: dbUser?.id } };
     } else {
-      whereCondition.OR = [{ public: true }, { userId: dbUserId }];
+      whereCondition.OR = [
+        { public: true },
+        { userId: dbUserId },
+        { guests: { some: { id: dbUserId } } },
+      ];
     }
 
     if (searchString) {
@@ -527,12 +531,12 @@ const authShareActions = async (libraryId: string) => {
     (lib) => lib.id === libraryId
   );
 
-  if (!targetLibrary) throw new Error("Could not find library");
+  if (!targetLibrary) throw new Error("Could not find library.");
   const alreadyShared = targetLibrary.sharedId !== null;
 
   const authorized = targetLibrary.userId === dbUser.id;
 
-  if (!authorized) throw new Error("Unauthorized");
+  if (!authorized) throw new Error("Unauthorized.");
 
   return { authorized, alreadyShared };
 };
@@ -541,7 +545,7 @@ export const shareLibraryAction = async (libraryId: string) => {
   try {
     const { alreadyShared } = await authShareActions(libraryId);
 
-    if (alreadyShared) throw new Error("Already shared");
+    if (alreadyShared) throw new Error("Already shared.");
     const sharedId = uuidv4();
 
     await prisma.library.update({
@@ -559,6 +563,8 @@ export const disableShareLibraryAction = async (libraryId: string) => {
   try {
     const { authorized, alreadyShared } = await authShareActions(libraryId);
 
+    if (!alreadyShared) throw new Error("Library is not shared.");
+
     const targetLibrary = await prisma.library.update({
       where: { id: libraryId },
       data: { sharedId: null },
@@ -568,3 +574,36 @@ export const disableShareLibraryAction = async (libraryId: string) => {
     throw error;
   }
 };
+
+export const giveAccessToLibraryAction = async (sharedId: string) => {
+  try {
+    const dbUser = await getDbUser();
+
+    if (!dbUser) throw new Error("Could not find user");
+
+    const isYourOwn = dbUser.authoredLibraries.some(
+      (lib) => lib.sharedId === sharedId
+    );
+
+    if (isYourOwn)
+      throw new Error("Can not become a guest of your own library.");
+
+    const sharedLibraryId = await prisma.library.findFirst({
+      where: { sharedId },
+      select: { id: true },
+    });
+
+    if (!sharedLibraryId) throw new Error("Library is not shared");
+
+    await prisma.user.update({
+      where: { id: dbUser.id },
+      data: { guestLibraries: { connect: { id: sharedLibraryId.id } } },
+    });
+
+    return sharedLibraryId.id;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//http://localhost:3000/libraries/share/32058847-8fa8-4673-a463-21b569351a4f
