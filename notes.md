@@ -162,4 +162,4 @@ is not logged in and logs in. Had to modify fetchAllLibraries to include guest
 to check:
 
 - if I need to update redux state
-- if it will work on account creation (might be to quick)
+- if it will work on account creation (might be too quick)
