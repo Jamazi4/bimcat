@@ -155,4 +155,11 @@ now I need to implement disable link functionality
 and then resolve library on share link
 
 --28.04.2025--
-disable link works now.
+disable link works now. You can now share libraries - there's redirection or
+login. Works as expected. Checked if user is added, if user can unsubscribe or
+is not logged in and logs in. Had to modify fetchAllLibraries to include guest
+
+to check:
+
+- if I need to update redux state
+- if it will work on account creation (might be to quick)
