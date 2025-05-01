@@ -5,12 +5,17 @@ import { revalidatePath } from "next/cache";
 import { getDbUser } from "./globalActions";
 import { renderError } from "../utilFunctions";
 import { componentWithGeometrySchema, validateWithZodSchema } from "../schemas";
-import { LibrariesSearchParamsType, LibraryInfo } from "../types";
+import {
+  LibrariesSearchParamsType,
+  LibraryInfo,
+  ShareLibraryErrors,
+} from "../types";
 import { v4 as uuidv4 } from "uuid";
+import { Prisma } from "@prisma/client";
 
 export const createLibraryAction = async (
-  prevState: any,
-  formData: FormData
+  _prevState: unknown,
+  formData: FormData,
 ) => {
   const libraryName = formData.get("name") as string;
   const libraryDesc = formData.get("description") as string;
@@ -36,15 +41,14 @@ export const createLibraryAction = async (
 };
 
 export const fetchAllLibrariesAction = async (
-  params: LibrariesSearchParamsType
+  params: LibrariesSearchParamsType,
 ) => {
   const { searchString, myLibraries, favorites } = params;
   try {
     const dbUser = await getDbUser();
     const dbUserId = dbUser?.id;
 
-    const whereCondition: any = {};
-
+    const whereCondition: Prisma.LibraryWhereInput = {};
     if (!dbUserId) {
       whereCondition.public = true;
     } else if (myLibraries) {
@@ -60,8 +64,14 @@ export const fetchAllLibrariesAction = async (
     }
 
     if (searchString) {
+      const existingAnd = Array.isArray(whereCondition.AND)
+        ? whereCondition.AND
+        : whereCondition.AND
+          ? [whereCondition.AND]
+          : [];
+
       whereCondition.AND = [
-        ...(whereCondition.AND || []),
+        ...existingAnd,
         {
           OR: [
             { name: { contains: searchString, mode: "insensitive" } },
@@ -118,7 +128,7 @@ export const fetchAllLibrariesAction = async (
 
 export const addComponentToLibraryAction = async (
   componentIds: string[],
-  libraryId: string
+  libraryId: string,
 ) => {
   try {
     const dbUser = await getDbUser(true);
@@ -127,7 +137,7 @@ export const addComponentToLibraryAction = async (
 
     const onlyAuthoredComponents = componentIds.every((selectedId) => {
       return dbUserComponentIds?.some(
-        (dbUserCompId) => dbUserCompId === selectedId
+        (dbUserCompId) => dbUserCompId === selectedId,
       );
     });
 
@@ -139,7 +149,7 @@ export const addComponentToLibraryAction = async (
 
     if (!allowed)
       throw new Error(
-        "User not authorized to modify this library or component."
+        "User not authorized to modify this library or component.",
       );
 
     const library = await prisma.library.update({
@@ -161,7 +171,7 @@ export const addComponentToLibraryAction = async (
         select: { public: true, id: true },
       });
       const privateComponents = components.filter(
-        (component) => !component.public
+        (component) => !component.public,
       );
 
       if (privateComponents.length > 0) {
@@ -317,7 +327,7 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
 
 export const removeComponentFromLibraryAction = async (
   componentIds: string[],
-  libraryId: string
+  libraryId: string,
 ) => {
   try {
     const dbUser = await getDbUser();
@@ -357,7 +367,7 @@ export const toggleLibraryFavoritesAction = async (libraryId: string) => {
     const currentGuestLibrariesIds = dbUser.guestLibraries.map((lib) => lib.id);
 
     const isFavorite = currentGuestLibrariesIds.some(
-      (curGuestId) => curGuestId === libraryId
+      (curGuestId) => curGuestId === libraryId,
     );
     const updateData = {
       guestLibraries: {
@@ -380,8 +390,8 @@ export const toggleLibraryFavoritesAction = async (libraryId: string) => {
 };
 
 export const renameLibraryAction = async (
-  prevState: any,
-  formData: FormData
+  _prevState: unknown,
+  formData: FormData,
 ) => {
   try {
     const newName = formData.get("newName") as string;
@@ -445,7 +455,7 @@ export const fetchLibraryDownloadAction = async (libraryId: string) => {
 
       return validateWithZodSchema(
         componentWithGeometrySchema,
-        componentWithEditable
+        componentWithEditable,
       );
     });
 
@@ -459,10 +469,10 @@ const authReadLibrary = <
   T extends {
     authoredLibraries: { id: string }[];
     guestLibraries: { id: string }[];
-  }
+  },
 >(
   dbUser: T,
-  libraryId: string
+  libraryId: string,
 ) => {
   const authoredLibrariesIds =
     dbUser.authoredLibraries.map((lib) => lib.id) || [];
@@ -474,7 +484,7 @@ const authReadLibrary = <
 
 export const fetchSingleLibraryComponentAction = async (
   libraryId: string,
-  componentId: string
+  componentId: string,
 ) => {
   try {
     const dbUser = await getDbUser();
@@ -495,7 +505,7 @@ export const fetchSingleLibraryComponentAction = async (
     if (!authorized) throw new Error("Unauthorized");
 
     const componentInLibrary = library.Components.some(
-      (comp) => comp.id === componentId
+      (comp) => comp.id === componentId,
     );
 
     if (!componentInLibrary) throw new Error("Component not in library");
@@ -513,7 +523,7 @@ export const fetchSingleLibraryComponentAction = async (
 
     const validatedComponent = validateWithZodSchema(
       componentWithGeometrySchema,
-      componentWithEditable
+      componentWithEditable,
     );
 
     return { libraryName: library.name, component: validatedComponent };
@@ -528,7 +538,7 @@ const authShareActions = async (libraryId: string) => {
   if (!dbUser) throw new Error("Could not find user");
 
   const targetLibrary = dbUser.authoredLibraries.find(
-    (lib) => lib.id === libraryId
+    (lib) => lib.id === libraryId,
   );
 
   if (!targetLibrary) throw new Error("Could not find library.");
@@ -561,9 +571,9 @@ export const shareLibraryAction = async (libraryId: string) => {
 
 export const disableShareLibraryAction = async (libraryId: string) => {
   try {
-    const { authorized, alreadyShared } = await authShareActions(libraryId);
+    const { alreadyShared } = await authShareActions(libraryId);
 
-    if (!alreadyShared) throw new Error("Library is not shared.");
+    if (!alreadyShared) throw new Error(ShareLibraryErrors.NotShared);
 
     const targetLibrary = await prisma.library.update({
       where: { id: libraryId },
@@ -579,21 +589,20 @@ export const giveAccessToLibraryAction = async (sharedId: string) => {
   try {
     const dbUser = await getDbUser();
 
-    if (!dbUser) throw new Error("Could not find user");
+    if (!dbUser) throw new Error(ShareLibraryErrors.UserNotFound);
 
     const isYourOwn = dbUser.authoredLibraries.some(
-      (lib) => lib.sharedId === sharedId
+      (lib) => lib.sharedId === sharedId,
     );
 
-    if (isYourOwn)
-      throw new Error("Can not become a guest of your own library.");
+    if (isYourOwn) throw new Error(ShareLibraryErrors.OwnLibrary);
 
     const sharedLibraryId = await prisma.library.findFirst({
       where: { sharedId },
       select: { id: true },
     });
 
-    if (!sharedLibraryId) throw new Error("Library is not shared");
+    if (!sharedLibraryId) throw new Error(ShareLibraryErrors.NotShared);
 
     await prisma.user.update({
       where: { id: dbUser.id },
@@ -605,5 +614,3 @@ export const giveAccessToLibraryAction = async (sharedId: string) => {
     throw error;
   }
 };
-
-//http://localhost:3000/libraries/share/32058847-8fa8-4673-a463-21b569351a4f

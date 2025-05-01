@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { giveAccessToLibraryAction } from "@/utils/actions/libraryActions";
+import { ShareLibraryErrors } from "@/utils/types";
 import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
 import { useMutation } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
@@ -54,20 +55,35 @@ const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
       return giveAccessToLibraryAction(sharedId);
     },
   });
-
+  const { mutate } = giveAccessToLibraryMutation;
   useEffect(() => {
-    giveAccessToLibraryMutation.mutate(sharedId, {
+    mutate(sharedId, {
       onSuccess: (result) => {
         toast("Library shared succesfully.");
-        console.log(result);
         router.replace(`/libraries/${result}`);
       },
       onError: (error) => {
         setFailed(true);
-        toast(error.message);
+        switch (error.message) {
+          case ShareLibraryErrors.OwnLibrary:
+            toast(ShareLibraryErrors.OwnLibrary);
+            break;
+          case ShareLibraryErrors.UserNotFound:
+            toast(ShareLibraryErrors.UserNotFound);
+            break;
+          case ShareLibraryErrors.Unauthorized:
+            toast(ShareLibraryErrors.UserNotFound);
+            break;
+          case ShareLibraryErrors.NotShared:
+            toast(ShareLibraryErrors.NotShared);
+            break;
+          case ShareLibraryErrors.AlreadyShared:
+            toast(ShareLibraryErrors.AlreadyShared);
+            break;
+        }
       },
     });
-  }, []);
+  }, [mutate, sharedId, router]);
 
   return (
     <>

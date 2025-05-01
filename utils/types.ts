@@ -16,7 +16,7 @@ export type ComponentGeometry = {
 
 export type actionFunction = (
   prevState: any,
-  formData: FormData
+  formData: FormData,
 ) => Promise<{ message: string }>;
 
 export interface User {
@@ -67,3 +67,11 @@ export type LibrariesSearchParamsType = {
   favorites: boolean;
   searchString: string;
 };
+
+export enum ShareLibraryErrors {
+  UserNotFound = "Could not find user.",
+  OwnLibrary = "Can not become a guest of your own library.",
+  NotShared = "Library is not shared.",
+  AlreadyShared = "Library is already shared.",
+  Unauthorized = "Unauthorized.",
+}
