@@ -6,6 +6,8 @@ import RenameButtonTitleBar, {
   RenameButtonProps,
 } from "../global/RenameButtonTitleBar";
 import { renameComponentAction } from "@/utils/actions/componentActions";
+import ComponentPrivateToggle from "../componentList/ComponentPrivateToggle";
+import { Eye, EyeClosed } from "lucide-react";
 
 const Title = ({ componentData }: { componentData: SelectedRow }) => {
   const id = Object.keys(componentData)[0];
@@ -14,6 +16,7 @@ const Title = ({ componentData }: { componentData: SelectedRow }) => {
     action: renameComponentAction,
     curName: name,
   };
+  const icon = isPublic ? <Eye /> : <EyeClosed />;
   const shortLength = 60;
   return (
     <div className="my-6">
@@ -28,11 +31,20 @@ const Title = ({ componentData }: { componentData: SelectedRow }) => {
         </div>
         <div className="space-x-4">
           <DownloadIfcButton />
-          <AddComponentToLibraryButton
-            components={[componentData]}
-            disabled={false}
-            anyComponentPrivate={!isPublic}
-          />
+          {editable && (
+            <>
+              <AddComponentToLibraryButton
+                components={[componentData]}
+                disabled={false}
+                anyComponentPrivate={!isPublic}
+              />
+              <ComponentPrivateToggle
+                components={[componentData]}
+                disabled={false}
+                icon={icon}
+              />
+            </>
+          )}
         </div>
       </div>
       <Separator className="mt-2" />

@@ -67,7 +67,7 @@ const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
         setFailed(true);
         switch (error.message) {
           case ShareLibraryErrors.OwnLibrary:
-            toast(`${ShareLibraryErrors.OwnLibrary}, addMessage`);
+            toast(`${ShareLibraryErrors.OwnLibrary}, ${addMessage}`);
             break;
           case ShareLibraryErrors.UserNotFound:
             toast(ShareLibraryErrors.UserNotFound);
@@ -79,7 +79,7 @@ const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
             toast(ShareLibraryErrors.NotShared);
             break;
           case ShareLibraryErrors.AlreadyShared:
-            toast(`${ShareLibraryErrors.AlreadyShared}, addMessage`);
+            toast(`${ShareLibraryErrors.AlreadyShared}, ${addMessage}`);
             break;
         }
       },

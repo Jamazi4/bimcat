@@ -26,10 +26,12 @@ function ComponentPrivateToggle({
   components,
   disabled,
   setSelection,
+  icon,
 }: {
   components: SelectedRow[];
   disabled: boolean;
-  setSelection: Dispatch<SetStateAction<object>>;
+  setSelection?: Dispatch<SetStateAction<object>>;
+  icon?: React.ReactNode;
 }) {
   const userState = useSelector((state: RootState) => state.userSlice);
   const dispatch = useDispatch<AppDispatch>();
@@ -42,7 +44,7 @@ function ComponentPrivateToggle({
       }
       return acc;
     },
-    []
+    [],
   );
 
   const affectedPairs = userState.libraries.flatMap((library) => {
@@ -63,7 +65,7 @@ function ComponentPrivateToggle({
   const affectedComponentIds = affectedPairs.map((pair) => pair.componentId);
 
   const warningMessage = `Private components can not be inside public libraries. Continuing this action will remove highlighted components from following libraries: ${affectedLibraryNames.map(
-    (libName) => ` ${libName}`
+    (libName) => ` ${libName}`,
   )}.`;
   const warningMessageOn = affectedPairs.length > 0;
   const [displayWarning, setDisplayWarning] = useState(false);
@@ -85,7 +87,7 @@ function ComponentPrivateToggle({
   });
 
   const handleClick = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.stopPropagation();
     setDialogOpen(false);
@@ -94,7 +96,9 @@ function ComponentPrivateToggle({
     toggleComponentPrivateMutation.mutate(componentIds, {
       onSuccess: (result) => {
         toast(result.message);
-        setSelection([]);
+        if (setSelection) {
+          setSelection([]);
+        }
         dispatch(fetchUserLibraries());
       },
       onError: (error) => {
@@ -105,14 +109,14 @@ function ComponentPrivateToggle({
       },
     });
   };
-
+  const buttonIcon = icon || <Eye />;
   return (
     <>
       <TooltipActionTriggerButton
         action={setDialogOpen}
         disabled={disabled}
         pending={pending}
-        icon={<Eye />}
+        icon={buttonIcon}
         tooltip="Toggle Private"
         destructive={false}
       />

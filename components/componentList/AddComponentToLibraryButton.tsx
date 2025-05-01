@@ -1,6 +1,12 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   DialogHeader,
   DialogFooter,
@@ -84,10 +90,7 @@ const AddComponentToLibraryButton = ({
     },
     meta: { invalidates: ["componentBrowser"] },
   });
-
-  const handleClick = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
+  const handleAdd = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setDialogOpen(false);
     setPending(true);
@@ -161,7 +164,7 @@ const AddComponentToLibraryButton = ({
           <DialogFooter>
             <Button
               onClick={(e) => {
-                handleClick(e);
+                handleAdd(e);
               }}
               disabled={pending}
               className="w-30 mt-4"

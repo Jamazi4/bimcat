@@ -14,6 +14,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getDbUser } from "./globalActions";
 import { renderError } from "../utilFunctions";
 import { BrowserSearchParamsType } from "../types";
+import { Prisma } from "@prisma/client";
 
 const addEditableToComponent = async <T extends { userId: string }>(
   component: T,
@@ -33,7 +34,7 @@ const addEditableToComponent = async <T extends { userId: string }>(
 };
 
 export const createComponentAction = async (
-  _prevState: any,
+  _prevState: unknown,
   formData: FormData,
 ) => {
   const name = formData.get("name") as string;
@@ -131,7 +132,7 @@ export const fetchAllComponentsAction = async (
     const dbUser = await getDbUser();
     const dbUserId = dbUser?.id;
 
-    const whereCondition: any = {};
+    const whereCondition: Prisma.ComponentWhereInput = {};
 
     if (!dbUserId) {
       whereCondition.public = true;
@@ -142,8 +143,14 @@ export const fetchAllComponentsAction = async (
     }
 
     if (searchString) {
+      const existingAnd = Array.isArray(whereCondition.AND)
+        ? whereCondition.AND
+        : whereCondition.AND
+          ? [whereCondition.AND]
+          : [];
+
       whereCondition.AND = [
-        ...(whereCondition.AND || []),
+        ...existingAnd,
         {
           OR: [
             { name: { contains: searchString, mode: "insensitive" } },
@@ -181,7 +188,7 @@ export const fetchAllComponentsAction = async (
 
     return componentsWithEditable;
   } catch (error) {
-    throw new Error("Could not fetch components");
+    throw error;
   }
 };
 
@@ -192,7 +199,7 @@ export const cachedFetchAllComponents = unstable_cache(
 );
 
 export const updatePsetsAction = async (
-  _prevState: any,
+  _prevState: unknown,
   formData: FormData,
 ) => {
   const componentId = formData.get("componentId") as string;
@@ -254,7 +261,10 @@ export const updatePsetsAction = async (
   }
 };
 
-export const removePsetAction = async (_prevState: any, formData: FormData) => {
+export const removePsetAction = async (
+  _prevState: unknown,
+  formData: FormData,
+) => {
   const componentId = formData.get("componentId") as string;
   const psetTitle = formData.get("psetTitle") as string;
 
@@ -303,7 +313,10 @@ export const removePsetAction = async (_prevState: any, formData: FormData) => {
   }
 };
 
-export const addPsetAction = async (_prevState: any, formData: FormData) => {
+export const addPsetAction = async (
+  _prevState: unknown,
+  formData: FormData,
+) => {
   const componentId = formData.get("componentId") as string;
   const psetTitle = formData.get("psetTitle") as string;
 
@@ -504,7 +517,7 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
 };
 
 export const renameComponentAction = async (
-  _prevState: any,
+  _prevState: unknown,
   formData: FormData,
 ) => {
   try {
