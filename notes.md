@@ -7,16 +7,12 @@
    between types of properties (backend) - don't allow to save empty pset
 2. LOADING FILES/COMPONENTS - show link to component in toast on creation/copy
 3. Libraries - user assigned or public libraries of elements - private/public
-
-- owner functionality - add/remove users, add/remove components
-
 4. USERS - delete user
 5. when accessing component from library, change breadcrumbs somehow
 6. locale date is wrong on prod
 7. sonner styling for success and error (border color maybe) - link on upload
-
-- or uploading toast and success toast
-
+   - or uploading toast and success toast
+   - owner functionality - add/remove users, add/remove components
 8. duplicated psets sometimes - also opens both
 
 edge cases:
@@ -106,7 +102,7 @@ plan for all that:
 [x] also finally fix breadcrumbs in library component
 [x] router.back() is a bad idea for breadcrumbs link
 
-[ ] generate invitation link for private library -> become guest on enter
+[x] generate invitation link for private library -> become guest on enter
 [ ] create composite library
 [ ] merge libraries
 

@@ -11,6 +11,8 @@ import { format } from "date-fns";
 import LibraryMinatureButtons from "./LibraryMiniatureButtons";
 import { useRouter } from "next/navigation";
 import LibraryFavoriteButton from "./LibraryFavoriteButton";
+import { Eye, EyeClosed } from "lucide-react";
+import { Button } from "../ui/button";
 
 type frontendLibrary = {
   id: string;
@@ -40,6 +42,7 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
     editable,
   } = library;
   const charLimit = 140;
+
   return (
     <Card
       className="cursor-pointer hover:border-primary h-48 gap-2 py-4 rounded-md transition-all bg-background"
@@ -59,7 +62,10 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
               libraryName={name}
             />
           ) : (
-            <LibraryFavoriteButton libraryId={id} isGuest={library.isGuest} />
+            <div className="flex">
+              <EyeIcon publicFlag={publicFlag} />
+              <LibraryFavoriteButton libraryId={id} isGuest={library.isGuest} />
+            </div>
           )}
         </CardTitle>
       </CardHeader>
@@ -82,3 +88,11 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
   );
 };
 export default LibraryMinature;
+
+const EyeIcon = ({ publicFlag }: { publicFlag: boolean }) => {
+  return (
+    <Button variant={"ghost"} disabled>
+      {publicFlag ? <Eye /> : <EyeClosed />}
+    </Button>
+  );
+};

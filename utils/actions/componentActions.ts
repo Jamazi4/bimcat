@@ -33,7 +33,7 @@ const addEditableToComponent = async <T extends { userId: string }>(
 };
 
 export const createComponentAction = async (
-  prevState: any,
+  _prevState: any,
   formData: FormData
 ) => {
   const name = formData.get("name") as string;
@@ -191,7 +191,7 @@ export const cachedFetchAllComponents = unstable_cache(
   { tags: ["allComponents"] }
 );
 
-export const updatePsetsAction = async (prevState: any, formData: FormData) => {
+export const updatePsetsAction = async (_prevState: any, formData: FormData) => {
   const componentId = formData.get("componentId") as string;
   const psetTitle = formData.get("psetTitle") as string;
   const keysToRemove = ["componentId", "psetTitle"];
@@ -251,7 +251,7 @@ export const updatePsetsAction = async (prevState: any, formData: FormData) => {
   }
 };
 
-export const removePsetAction = async (prevState: any, formData: FormData) => {
+export const removePsetAction = async (_prevState: any, formData: FormData) => {
   const componentId = formData.get("componentId") as string;
   const psetTitle = formData.get("psetTitle") as string;
 
@@ -300,7 +300,7 @@ export const removePsetAction = async (prevState: any, formData: FormData) => {
   }
 };
 
-export const addPsetAction = async (prevState: any, formData: FormData) => {
+export const addPsetAction = async (_prevState: any, formData: FormData) => {
   const componentId = formData.get("componentId") as string;
   const psetTitle = formData.get("psetTitle") as string;
 
@@ -396,9 +396,8 @@ export const deleteComponentAction = async (componentIds: string[]) => {
 
     revalidatePath(`/components/browse`);
     return {
-      message: `Successfully removed ${components.length} component${
-        components.length > 1 ? "s" : ""
-      }.`,
+      message: `Successfully removed ${components.length} component${components.length > 1 ? "s" : ""
+        }.`,
     };
   } catch (error) {
     return renderError(error);
@@ -430,11 +429,11 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
 
     const publicComponents = components.filter((component) => component.public);
 
-    let affectedLibraries =
+    const affectedLibraries =
       publicComponents.length > 0
         ? publicComponents.flatMap((component) => {
-            return component.libraries.filter((library) => library.public);
-          })
+          return component.libraries.filter((library) => library.public);
+        })
         : [];
 
     const affectedLibrariesUnique = Object.values(
@@ -488,9 +487,8 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
     revalidatePath(`/components/browse`);
 
     return {
-      message: `Successfully toggled private for ${
-        components.length
-      } component${components.length > 1 ? "s" : ""}.`,
+      message: `Successfully toggled private for ${components.length
+        } component${components.length > 1 ? "s" : ""}.`,
     };
   } catch (error) {
     return renderError(error);
@@ -498,7 +496,7 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
 };
 
 export const renameComponentAction = async (
-  prevState: any,
+  _prevState: any,
   formData: FormData
 ) => {
   try {
