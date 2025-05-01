@@ -56,6 +56,7 @@ const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
     },
   });
   const { mutate } = giveAccessToLibraryMutation;
+  const addMessage = "Access the library from Libraries tab.";
   useEffect(() => {
     mutate(sharedId, {
       onSuccess: (result) => {
@@ -66,19 +67,19 @@ const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
         setFailed(true);
         switch (error.message) {
           case ShareLibraryErrors.OwnLibrary:
-            toast(ShareLibraryErrors.OwnLibrary);
+            toast(`${ShareLibraryErrors.OwnLibrary}, addMessage`);
             break;
           case ShareLibraryErrors.UserNotFound:
             toast(ShareLibraryErrors.UserNotFound);
             break;
           case ShareLibraryErrors.Unauthorized:
-            toast(ShareLibraryErrors.UserNotFound);
+            toast(ShareLibraryErrors.Unauthorized);
             break;
           case ShareLibraryErrors.NotShared:
             toast(ShareLibraryErrors.NotShared);
             break;
           case ShareLibraryErrors.AlreadyShared:
-            toast(ShareLibraryErrors.AlreadyShared);
+            toast(`${ShareLibraryErrors.AlreadyShared}, addMessage`);
             break;
         }
       },
