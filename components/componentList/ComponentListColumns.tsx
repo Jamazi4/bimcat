@@ -54,6 +54,13 @@ export const columns: ColumnDef<ComponentRow>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => {
+      const name = row.original.name;
+      const shortLength = 60;
+      return name.length > shortLength
+        ? `${name.slice(0, shortLength)}...`
+        : name;
+    },
   },
   {
     accessorKey: "createdAt",

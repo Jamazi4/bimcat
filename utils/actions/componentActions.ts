@@ -16,7 +16,7 @@ import { renderError } from "../utilFunctions";
 import { BrowserSearchParamsType } from "../types";
 
 const addEditableToComponent = async <T extends { userId: string }>(
-  component: T
+  component: T,
 ): Promise<T & { editable: boolean }> => {
   const dbUser = await getDbUser(); //TODO: usually dbUser can already be passsed here
   const dbUserId = dbUser?.id;
@@ -34,7 +34,7 @@ const addEditableToComponent = async <T extends { userId: string }>(
 
 export const createComponentAction = async (
   _prevState: any,
-  formData: FormData
+  formData: FormData,
 ) => {
   const name = formData.get("name") as string;
   const geometry = formData.get("geometry") as string;
@@ -43,7 +43,7 @@ export const createComponentAction = async (
 
   const parsedGeometry = validateWithZodSchema(
     geometryArraySchema,
-    JSON.parse(geometry)
+    JSON.parse(geometry),
   );
   const parsedPsets = JSON.parse(psets);
 
@@ -94,7 +94,7 @@ export const fetchSingleComponentAction = async (id: string) => {
 
     const validatedComponent = validateWithZodSchema(
       componentWithGeometrySchema,
-      componentWithEditable
+      componentWithEditable,
     );
 
     return validatedComponent;
@@ -124,7 +124,7 @@ export const fetchGeometryAction = async (id: string) => {
 };
 
 export const fetchAllComponentsAction = async (
-  params: BrowserSearchParamsType
+  params: BrowserSearchParamsType,
 ) => {
   const { myComponents, searchString } = params;
   try {
@@ -188,15 +188,18 @@ export const fetchAllComponentsAction = async (
 export const cachedFetchAllComponents = unstable_cache(
   async (params: BrowserSearchParamsType) => fetchAllComponentsAction(params),
   [],
-  { tags: ["allComponents"] }
+  { tags: ["allComponents"] },
 );
 
-export const updatePsetsAction = async (_prevState: any, formData: FormData) => {
+export const updatePsetsAction = async (
+  _prevState: any,
+  formData: FormData,
+) => {
   const componentId = formData.get("componentId") as string;
   const psetTitle = formData.get("psetTitle") as string;
   const keysToRemove = ["componentId", "psetTitle"];
   const newPsetData = Object.fromEntries(
-    formData.entries().filter(([key]) => !keysToRemove.includes(key))
+    formData.entries().filter(([key]) => !keysToRemove.includes(key)),
   );
 
   try {
@@ -219,7 +222,7 @@ export const updatePsetsAction = async (_prevState: any, formData: FormData) => 
 
     const validatedComponent = validateWithZodSchema(
       PsetActionsComponentSchema,
-      componentWithEditable
+      componentWithEditable,
     );
 
     if (!validatedComponent.psets) throw new Error("No psets in component");
@@ -275,13 +278,13 @@ export const removePsetAction = async (_prevState: any, formData: FormData) => {
 
     const validatedComponent = validateWithZodSchema(
       PsetActionsComponentSchema,
-      componentWithEditable
+      componentWithEditable,
     );
 
     if (!validatedComponent.psets) throw new Error("No psets in component");
 
     const newPsets: Pset[] = validatedComponent.psets.filter(
-      (pset) => pset.title !== psetTitle
+      (pset) => pset.title !== psetTitle,
     );
 
     await prisma.component.update({
@@ -324,7 +327,7 @@ export const addPsetAction = async (_prevState: any, formData: FormData) => {
 
     const validatedComponent = validateWithZodSchema(
       PsetActionsComponentSchema,
-      componentWithEditable
+      componentWithEditable,
     );
 
     if (!component.psets) throw new Error("No psets in component");
@@ -367,7 +370,7 @@ export const deleteComponentAction = async (componentIds: string[]) => {
     }
 
     const geometryIds = components.map((component) =>
-      component.geometry.map((g) => g.id)
+      component.geometry.map((g) => g.id),
     );
 
     const geometriesToRemove = [];
@@ -396,8 +399,9 @@ export const deleteComponentAction = async (componentIds: string[]) => {
 
     revalidatePath(`/components/browse`);
     return {
-      message: `Successfully removed ${components.length} component${components.length > 1 ? "s" : ""
-        }.`,
+      message: `Successfully removed ${components.length} component${
+        components.length > 1 ? "s" : ""
+      }.`,
     };
   } catch (error) {
     return renderError(error);
@@ -432,15 +436,18 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
     const affectedLibraries =
       publicComponents.length > 0
         ? publicComponents.flatMap((component) => {
-          return component.libraries.filter((library) => library.public);
-        })
+            return component.libraries.filter((library) => library.public);
+          })
         : [];
 
     const affectedLibrariesUnique = Object.values(
-      affectedLibraries.reduce((acc, library) => {
-        acc[library.id] = library;
-        return acc;
-      }, {} as Record<string, (typeof affectedLibraries)[number]>)
+      affectedLibraries.reduce(
+        (acc, library) => {
+          acc[library.id] = library;
+          return acc;
+        },
+        {} as Record<string, (typeof affectedLibraries)[number]>,
+      ),
     );
 
     await Promise.all(
@@ -456,7 +463,7 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
             },
           },
         });
-      })
+      }),
     );
 
     await Promise.all([
@@ -471,7 +478,7 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
               })),
             },
           },
-        })
+        }),
       ),
       prisma.library.updateMany({
         where: {
@@ -487,8 +494,9 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
     revalidatePath(`/components/browse`);
 
     return {
-      message: `Successfully toggled private for ${components.length
-        } component${components.length > 1 ? "s" : ""}.`,
+      message: `Successfully toggled private for ${
+        components.length
+      } component${components.length > 1 ? "s" : ""}.`,
     };
   } catch (error) {
     return renderError(error);
@@ -497,7 +505,7 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
 
 export const renameComponentAction = async (
   _prevState: any,
-  formData: FormData
+  formData: FormData,
 ) => {
   try {
     const newName = formData.get("newName") as string;
@@ -545,7 +553,7 @@ export const copyComponentAction = async (id: string, name: string) => {
 
     const validatedPsets = validateWithZodSchema(
       PsetArraySchema,
-      oldComponent.psets
+      oldComponent.psets,
     );
 
     await prisma.component.create({

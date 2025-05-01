@@ -14,12 +14,15 @@ const Title = ({ componentData }: { componentData: SelectedRow }) => {
     action: renameComponentAction,
     curName: name,
   };
+  const shortLength = 60;
   return (
     <div className="my-6">
       <div className="flex justify-between">
         <div className="flex items-center space-x-2">
           <h1 className="font-bold text-xl text-primary whitespace-nowrap">
-            {name}
+            {name.length > shortLength
+              ? `${name.slice(0, shortLength)}...`
+              : name}
           </h1>
           {editable && <RenameButtonTitleBar {...renameButtonProps} />}
         </div>
