@@ -163,7 +163,8 @@ to check:
 --01.05.2025--
 Fixed sharing a little bit, plans before implementing composite libraries:
 
-- in componentContent allow change private
-- in libraryActionButtons do the same as browserActionbuttons, just switch
-  the add to remove and add option in copy to include in cur lib
-- deleting user
+[x] in componentContent allow change private
+[ ] deleting user
+[ ] user list in shared library so owner can remove them
+[ ] split search to author, user and desc in library and componentbrowser,
+maybe add searching by psets too

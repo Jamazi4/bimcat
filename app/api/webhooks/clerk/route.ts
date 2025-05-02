@@ -2,14 +2,14 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { User } from "@/utils/types";
-import { createUserAciton } from "@/utils/actions/userActions";
+import { createUserAciton, dleteUserAction } from "@/utils/actions/userActions";
 
 export async function POST(req: Request) {
   const SIGNING_SECRET = process.env.SIGNING_SECRET;
 
   if (!SIGNING_SECRET) {
     throw new Error(
-      "Error: Please add SIGNING_SECRET from Clerk Dashboard to .env or .env"
+      "Error: Please add SIGNING_SECRET from Clerk Dashboard to .env or .env",
     );
   }
 
@@ -52,16 +52,21 @@ export async function POST(req: Request) {
   // Do something with payload
   // For this guide, log payload to console
 
-  if (evt.type !== "user.created" || !evt.data.first_name)
-    throw new Error("User creation: Incomplete data or wrong event type");
-
-  const user: Partial<User> = {
-    clerkId: evt.data.id,
-    firstName: evt.data.first_name,
-    secondName: evt.data.last_name,
-  };
-
-  await createUserAciton(user);
-
+  // if (evt.type !== "user.created" || !evt.data.first_name) {
+  //   throw new Error("User creation: Incomplete data or wrong event type");
+  // }
+  if (evt.type === "user.created" && evt.data.first_name) {
+    const user: Partial<User> = {
+      clerkId: evt.data.id,
+      firstName: evt.data.first_name,
+      secondName: evt.data.last_name,
+    };
+    await createUserAciton(user);
+  } else if (evt.type === "user.deleted" && evt.data.id) {
+    await dleteUserAction(evt.data.id);
+    console.log("Revieved hook user deleted");
+  } else {
+    throw new Error("User action failed");
+  }
   return new Response("Webhook received", { status: 200 });
 }
