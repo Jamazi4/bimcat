@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { giveAccessToLibraryAction } from "@/utils/actions/libraryActions";
-import { ShareLibraryErrors } from "@/utils/types";
+import { LibraryErrors } from "@/utils/types";
 import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
 import { useMutation } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
@@ -66,20 +66,20 @@ const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
       onError: (error) => {
         setFailed(true);
         switch (error.message) {
-          case ShareLibraryErrors.OwnLibrary:
-            toast(`${ShareLibraryErrors.OwnLibrary}, ${addMessage}`);
+          case LibraryErrors.OwnLibrary:
+            toast(`${LibraryErrors.OwnLibrary}, ${addMessage}`);
             break;
-          case ShareLibraryErrors.UserNotFound:
-            toast(ShareLibraryErrors.UserNotFound);
+          case LibraryErrors.UserNotFound:
+            toast(LibraryErrors.UserNotFound);
             break;
-          case ShareLibraryErrors.Unauthorized:
-            toast(ShareLibraryErrors.Unauthorized);
+          case LibraryErrors.Unauthorized:
+            toast(LibraryErrors.Unauthorized);
             break;
-          case ShareLibraryErrors.NotShared:
-            toast(ShareLibraryErrors.NotShared);
+          case LibraryErrors.NotShared:
+            toast(LibraryErrors.NotShared);
             break;
-          case ShareLibraryErrors.AlreadyShared:
-            toast(`${ShareLibraryErrors.AlreadyShared}, ${addMessage}`);
+          case LibraryErrors.AlreadyShared:
+            toast(`${LibraryErrors.AlreadyShared}, ${addMessage}`);
             break;
         }
       },

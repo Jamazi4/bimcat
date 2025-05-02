@@ -66,7 +66,6 @@ export const getUserStateLibrariesAction = async () => {
 
 export const dleteUserAction = async (clerkId: string) => {
   try {
-    console.log("Hellodelete");
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.findUnique({
         where: { clerkId },

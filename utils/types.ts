@@ -6,7 +6,7 @@ export type Pset = {
 };
 
 export type PsetContent = {
-  [attribute: string]: any;
+  [attribute: string]: unknown;
 };
 
 export type ComponentGeometry = {
@@ -15,7 +15,7 @@ export type ComponentGeometry = {
 };
 
 export type actionFunction = (
-  prevState: any,
+  prevState: unknown,
   formData: FormData,
 ) => Promise<{ message: string }>;
 
@@ -55,6 +55,7 @@ export type LibraryInfo = {
   sharedId: string;
   isPublic: boolean;
   isEditable: boolean;
+  guests: { name: string; id: string }[];
 };
 
 export type BrowserSearchParamsType = {
@@ -68,10 +69,11 @@ export type LibrariesSearchParamsType = {
   searchString: string;
 };
 
-export enum ShareLibraryErrors {
+export enum LibraryErrors {
   UserNotFound = "Could not find user.",
   OwnLibrary = "Can not become a guest of your own library.",
   NotShared = "Library is not shared.",
   AlreadyShared = "Library is already shared.",
   Unauthorized = "Unauthorized.",
+  LibraryNotFound = "Could not find library.",
 }

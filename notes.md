@@ -164,7 +164,13 @@ to check:
 Fixed sharing a little bit, plans before implementing composite libraries:
 
 [x] in componentContent allow change private
-[ ] deleting user
+[x] deleting user
 [ ] user list in shared library so owner can remove them
 [ ] split search to author, user and desc in library and componentbrowser,
 maybe add searching by psets too
+
+--02.05-2025--
+Current task: -[ ] user list in shared library so owner can remove them
+Notes:
+Implementing guest list as a button on title that will display dialog
+check what do I do with guests on private status change

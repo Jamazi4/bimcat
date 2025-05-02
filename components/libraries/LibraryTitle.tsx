@@ -6,9 +6,10 @@ import RenameButtonTitleBar, {
 import { renameLibraryAction } from "@/utils/actions/libraryActions";
 import DownloadLibraryButton from "./DownloadLibraryButton";
 import ShareLibraryButton from "./ShareLibraryButton";
+import ManageGuestsButton from "./ManageGuestsButton";
 
 const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
-  const { name, isEditable, isPublic, empty, sharedId } = libraryInfo;
+  const { name, isEditable, isPublic, empty, sharedId, guests } = libraryInfo;
   const renameButtonProps: RenameButtonProps = {
     action: renameLibraryAction,
     curName: name,
@@ -25,9 +26,11 @@ const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
         </div>
         <div className="flex space-x-4">
           <DownloadLibraryButton libraryEmpty={empty} />
-
           {!isPublic && isEditable && (
-            <ShareLibraryButton sharedId={sharedId} />
+            <>
+              <ShareLibraryButton sharedId={sharedId} />
+              <ManageGuestsButton guests={guests} />
+            </>
           )}
         </div>
       </div>

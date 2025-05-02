@@ -8,7 +8,7 @@ import { componentWithGeometrySchema, validateWithZodSchema } from "../schemas";
 import {
   LibrariesSearchParamsType,
   LibraryInfo,
-  ShareLibraryErrors,
+  LibraryErrors,
 } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import { Prisma } from "@prisma/client";
@@ -218,6 +218,9 @@ export const fetchLibraryComponents = async (libraryId: string) => {
 
     if (!authorized) throw new Error("Unauthorized");
 
+    const frontendGuests = library.guests.map((guest) => {
+      return { name: `${guest.firstName} ${guest.secondName}`, id: guest.id };
+    });
     const frontendComponents = library?.Components.map((component) => {
       return {
         id: component.id,
@@ -239,6 +242,7 @@ export const fetchLibraryComponents = async (libraryId: string) => {
       isEditable: libraryEditable,
       sharedId: library.sharedId || "",
       isPublic: library.public,
+      guests: frontendGuests,
     };
 
     return { libraryInfo, frontendComponents };
@@ -573,7 +577,7 @@ export const disableShareLibraryAction = async (libraryId: string) => {
   try {
     const { alreadyShared } = await authShareActions(libraryId);
 
-    if (!alreadyShared) throw new Error(ShareLibraryErrors.NotShared);
+    if (!alreadyShared) throw new Error(LibraryErrors.NotShared);
 
     const targetLibrary = await prisma.library.update({
       where: { id: libraryId },
@@ -589,20 +593,20 @@ export const giveAccessToLibraryAction = async (sharedId: string) => {
   try {
     const dbUser = await getDbUser();
 
-    if (!dbUser) throw new Error(ShareLibraryErrors.UserNotFound);
+    if (!dbUser) throw new Error(LibraryErrors.UserNotFound);
 
     const isYourOwn = dbUser.authoredLibraries.some(
       (lib) => lib.sharedId === sharedId,
     );
 
-    if (isYourOwn) throw new Error(ShareLibraryErrors.OwnLibrary);
+    if (isYourOwn) throw new Error(LibraryErrors.OwnLibrary);
 
     const sharedLibraryId = await prisma.library.findFirst({
       where: { sharedId },
       select: { id: true },
     });
 
-    if (!sharedLibraryId) throw new Error(ShareLibraryErrors.NotShared);
+    if (!sharedLibraryId) throw new Error(LibraryErrors.NotShared);
 
     await prisma.user.update({
       where: { id: dbUser.id },
@@ -612,5 +616,36 @@ export const giveAccessToLibraryAction = async (sharedId: string) => {
     return sharedLibraryId.id;
   } catch (error) {
     throw error;
+  }
+};
+
+export const removeGuestAction = async (libraryId: string, userId: string) => {
+  try {
+    const dbUser = await getDbUser();
+
+    if (!dbUser) throw new Error(LibraryErrors.UserNotFound);
+
+    const hasRights = dbUser.authoredLibraries.some(
+      (lib) => lib.userId === dbUser.id,
+    );
+
+    if (!hasRights) throw new Error(LibraryErrors.Unauthorized);
+    const library = await prisma.library.findUnique({
+      where: { id: libraryId },
+      include: { guests: true },
+    });
+
+    if (!library) throw new Error(LibraryErrors.LibraryNotFound);
+
+    const userIsGuest = library.guests.some((guest) => guest.id === userId);
+    if (!userIsGuest) throw new Error(LibraryErrors.UserNotFound);
+
+    await prisma.library.update({
+      where: { id: libraryId },
+      data: { guests: { disconnect: { id: userId } } },
+    });
+    revalidatePath(`/libraries/${libraryId}`);
+  } catch (error) {
+    return renderError(error);
   }
 };
