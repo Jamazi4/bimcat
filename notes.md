@@ -1,5 +1,7 @@
 # DEVLOG
 
+- not forget - to debug clerk webhooks run 'ngrok http 3000'
+
 ## GENERAL TODO
 
 0. Layout - propsets size in creator
@@ -53,6 +55,26 @@ edge cases:
 
    - If the Library is switched to public when it already has link generated,
      it will automatically disable this link
+
+   - When Library is public and already have guests, the guests will stay even
+     if you change the library to private, then however you'll be able to remove
+     them
+
+5. You can create private or public Composite Library but can not toggle the
+   private attribute after the creation
+
+   - You can share the composite private library just as your normal private libraries
+
+   - if the composite library is public, you can merge any public library,
+     if it's either your own or you have added it to the favorites.
+
+   - if the composite library is private, you can only merge private libraries,
+     it they are either yours or have been shared with you and you're still their
+     guest
+
+   - When you merge someone else's private library, their author will
+     automatically become a guest of your composite library. Removing them from
+     the guests will result in removing their libraries from your composite library.
 
 ## KNOWN ISSUES
 
@@ -165,7 +187,7 @@ Fixed sharing a little bit, plans before implementing composite libraries:
 
 [x] in componentContent allow change private
 [x] deleting user
-[ ] user list in shared library so owner can remove them
+[x] user list in shared library so owner can remove them
 [ ] split search to author, user and desc in library and componentbrowser,
 maybe add searching by psets too
 

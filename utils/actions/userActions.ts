@@ -85,10 +85,6 @@ export const dleteUserAction = async (clerkId: string) => {
         component.geometry.forEach((geom) => geometryIdsToCheck.add(geom.id));
       });
 
-      await tx.library.deleteMany({
-        where: { userId },
-      });
-
       const libraries = await tx.library.findMany({
         where: {
           guests: {
@@ -110,10 +106,6 @@ export const dleteUserAction = async (clerkId: string) => {
           },
         });
       }
-
-      await tx.component.deleteMany({
-        where: { userId },
-      });
 
       for (const geomId of geometryIdsToCheck) {
         const count = await tx.component.count({

@@ -29,33 +29,51 @@ model Component {
   libraries Library[]           @relation("ComponentToLibrary")
   createdAt DateTime            @default(now())
   updatedAt DateTime            @updatedAt
-  User      User?               @relation(fields: [userId], references: [id])
+  User      User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   author    String
   public    Boolean             @default(true)
 }
 
 model Library {
-  id          String      @id @default(uuid())
-  name        String
-  description String
-  Components  Component[] @relation("ComponentToLibrary")
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  author      User        @relation("AuthorOfLibrary", fields: [userId], references: [id])
-  userId      String
-  guests      User[]      @relation("LibraryGuests")
-  public      Boolean     @default(true)
-  sharedId    String?
+  id                 String             @id @default(uuid())
+  name               String
+  description        String
+  Components         Component[]        @relation("ComponentToLibrary")
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  author             User               @relation("AuthorOfLibrary", fields: [userId], references: [id], onDelete: Cascade)
+  userId             String
+  guests             User[]             @relation("LibraryGuests")
+  public             Boolean            @default(true)
+  sharedId           String?
+  CompositeLibraries CompositeLibrary[] @relation("CompositeLibrary")
 }
 
 model User {
-  id                String      @id @default(uuid())
-  clerkId           String      @unique
-  firstName         String
-  secondName        String?
-  premium           Boolean     @default(false)
-  authoredLibraries Library[]   @relation("AuthorOfLibrary")
-  guestLibraries    Library[]   @relation("LibraryGuests")
-  Components        Component[]
+  id         String  @id @default(uuid())
+  clerkId    String  @unique
+  firstName  String
+  secondName String?
+  premium    Boolean @default(false)
+
+  authoredLibraries Library[] @relation("AuthorOfLibrary")
+  guestLibraries    Library[] @relation("LibraryGuests")
+
+  Components Component[]
+
+  guestCompositeLibraries    CompositeLibrary[] @relation("CompositeLibraryGuests")
+  authoredCompositeLibraries CompositeLibrary[] @relation("AuthorOfCompositeLibrary")
+}
+
+model CompositeLibrary {
+  id          String    @id @default(uuid())
+  name        String
+  description String
+  Libraries   Library[] @relation("CompositeLibrary")
+  guests      User[]    @relation("CompositeLibraryGuests")
+  author      User      @relation("AuthorOfCompositeLibrary", fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  public      Boolean
+  sharedId    String?
 }
