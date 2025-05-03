@@ -12,10 +12,10 @@ const Filters = () => {
   const searchParams = useSearchParams();
 
   const [myComponents, setMyComponents] = useState(
-    searchParams.get("myComponents") === "true"
+    searchParams.get("myComponents") === "true",
   );
   const [searchString, setSearchString] = useState(
-    searchParams.get("search") || ""
+    searchParams.get("search") || "",
   );
 
   const handleSearch = useDebouncedCallback((value: string) => {
@@ -49,7 +49,6 @@ const Filters = () => {
             placeholder="search by name or author"
             value={searchString}
             onChange={(e) => {
-              console.log("onchange fired");
               handleSearch(e.target.value);
               setSearchString(e.target.value);
             }}

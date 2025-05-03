@@ -79,7 +79,7 @@ export const fetchAllLibrariesAction = async (
     }
     if (searchDescription) {
       andConditions.push({
-        description: { contains: searchName, mode: "insensitive" },
+        description: { contains: searchDescription, mode: "insensitive" },
       });
     }
     if (searchAuthor) {

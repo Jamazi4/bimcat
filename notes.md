@@ -196,3 +196,11 @@ Current task: -[ ] user list in shared library so owner can remove them
 Notes:
 Implementing guest list as a button on title that will display dialog
 check what do I do with guests on private status change
+
+--03.05-2025--
+Current task - split search params as you did in the browser
+Coming next: start implementation of composite libraries or maybe pagination in
+libraries, and also limiting the number of fetched components in browser/libs?
+I already did some composite libraries progress - added prisma model and came
+up with the rules for that, also implemented more advanced filters for library
+browser

@@ -1,13 +1,12 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Input } from "../ui/input";
 import { useReducer } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { Label } from "../ui/label";
-import { Checkbox } from "../ui/checkbox";
 import { useLibrariesParams } from "@/utils/customHooks/useLibrariesParams";
 import { LibrariesSearchParamsType } from "@/utils/types";
+import LabeledFilterInput from "../global/LabeledFilterInput";
+import LabeledFilterCheckbox from "../global/LabeledFilterCheckbox";
 
 const LibraryBrowserFilters = () => {
   const { replace } = useRouter();
@@ -62,7 +61,7 @@ const LibraryBrowserFilters = () => {
     500,
   );
 
-  const handleSwitch = (key: "myLibraries" | "favorites", value: boolean) => {
+  const handleSwitch = (key: string, value: boolean) => {
     dispatch({
       type: key === "myLibraries" ? "SET_MY_LIBRARIES" : "SET_FAVORITES",
       payload: value,
@@ -83,109 +82,81 @@ const LibraryBrowserFilters = () => {
     replace(`/libraries?${params.toString()}`);
   };
 
-  const inputClassname = "hover:border-muted-foreground transition-all";
-  const labelClassname = "text-muted-foreground mb-1 mx-3";
-
   return (
     <div className="space-y-4 pb-4">
       <div className="grid grid-cols-2 space-x-2">
         {/* first row seach bars */}
-        <div>
-          <Label className={labelClassname}>name</Label>
-          <Input
-            className={inputClassname}
-            name="searchName"
-            type="search"
-            placeholder="library name"
-            value={state.searchName}
-            onChange={(e) => {
-              handleSearch("searchName", e.target.value);
-              dispatch({ type: "SET_SEARCH_NAME", payload: e.target.value });
-            }}
-          />
-        </div>
 
-        <div>
-          <Label className={labelClassname}>author</Label>
-          <Input
-            className={inputClassname}
-            name="searchAuthor"
-            type="search"
-            placeholder="library author"
-            value={state.searchAuthor}
-            onChange={(e) => {
-              handleSearch("searchAuthor", e.target.value);
-              dispatch({ type: "SET_SEARCH_AUTHOR", payload: e.target.value });
-            }}
-          />
-        </div>
+        <LabeledFilterInput
+          placeholder="library name"
+          htmlId="searchName"
+          inputValue={state.searchName}
+          labelContent="name"
+          onChange={(e) => {
+            handleSearch("searchName", e.target.value);
+            dispatch({
+              type: "SET_SEARCH_NAME",
+              payload: e.target.value,
+            });
+          }}
+        />
+        <LabeledFilterInput
+          placeholder="library author"
+          htmlId="searchAuthor"
+          inputValue={state.searchAuthor}
+          labelContent="author"
+          onChange={(e) => {
+            handleSearch("searchAuthor", e.target.value);
+            dispatch({
+              type: "SET_SEARCH_AUTHOR",
+              payload: e.target.value,
+            });
+          }}
+        />
       </div>
 
       {/* second row search bars */}
       <div className="grid grid-cols-2 space-x-2">
-        <div>
-          <Label className={labelClassname}>description</Label>
-          <Input
-            className={inputClassname}
-            name="searchDescription"
-            type="search"
-            placeholder="library description"
-            value={state.searchDescription}
-            onChange={(e) => {
-              handleSearch("searchDescription", e.target.value);
-              dispatch({
-                type: "SET_SEARCH_DESCRIPTION",
-                payload: e.target.value,
-              });
-            }}
-          />
-        </div>
-
-        <div>
-          <Label className={labelClassname}>component</Label>
-          <Input
-            className={inputClassname}
-            name="searchComponents"
-            type="search"
-            placeholder="component names"
-            value={state.searchComponents}
-            onChange={(e) => {
-              handleSearch("searchComponents", e.target.value);
-              dispatch({
-                type: "SET_SEARCH_COMPONENTS",
-                payload: e.target.value,
-              });
-            }}
-          />
-        </div>
+        <LabeledFilterInput
+          placeholder="library description"
+          htmlId="searchDescription"
+          inputValue={state.searchDescription}
+          labelContent="description"
+          onChange={(e) => {
+            handleSearch("searchDescription", e.target.value);
+            dispatch({
+              type: "SET_SEARCH_DESCRIPTION",
+              payload: e.target.value,
+            });
+          }}
+        />
+        <LabeledFilterInput
+          placeholder="component names"
+          htmlId="searchComponents"
+          inputValue={state.searchComponents}
+          labelContent="component"
+          onChange={(e) => {
+            handleSearch("searchComponents", e.target.value);
+            dispatch({
+              type: "SET_SEARCH_COMPONENTS",
+              payload: e.target.value,
+            });
+          }}
+        />
       </div>
 
       {/* checkboxes */}
       <div className="justify-end flex">
-        <div className="flex justify-center items-center mx-4">
-          <Checkbox
-            className="mx-2"
-            id="myLibraries"
-            onCheckedChange={(checked: boolean) => {
-              handleSwitch("myLibraries", checked);
-            }}
-          />
-          <Label htmlFor="my">Your libraries</Label>
-        </div>
-        <div className="flex justify-center items-center mx-4 space-x-2">
-          <Checkbox
-            className="mx-2"
-            id="favorites"
-            onCheckedChange={(checked: boolean) => {
-              handleSwitch("favorites", checked);
-            }}
-          />
-          <Label htmlFor="favorites">Favorites</Label>
-        </div>
-        <div className="flex justify-center items-center mx-4 space-x-2">
-          <Checkbox className="mx-2" id="Composite" disabled />
-          <Label htmlFor="Composite">Composite</Label>
-        </div>
+        <LabeledFilterCheckbox
+          switchFunc={handleSwitch}
+          htmlId="myLibraries"
+          labelContent="Your Libraries"
+        />
+        <LabeledFilterCheckbox
+          switchFunc={handleSwitch}
+          htmlId="favorites"
+          labelContent="Favorites"
+        />
       </div>
     </div>
   );
