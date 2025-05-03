@@ -1,3 +1,5 @@
+import { LibrariesSearchParamsType } from "./types";
+
 export const renderError = (error: unknown): { message: string } => {
   console.log(error);
   return {
@@ -8,7 +10,7 @@ export const renderError = (error: unknown): { message: string } => {
 export const downloadFile = (
   blob: Blob,
   fileName: string,
-  fileExtension: string
+  fileExtension: string,
 ) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -19,4 +21,19 @@ export const downloadFile = (
 
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+};
+
+export const formatLibraryParams = (params: LibrariesSearchParamsType) => {
+  const urlParams = new URLSearchParams(
+    Object.entries(params).reduce(
+      (acc, [key, value]) => {
+        if (value !== undefined && value !== "") {
+          acc[key] = value.toString();
+        }
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+  );
+  return urlParams;
 };

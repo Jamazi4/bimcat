@@ -12,7 +12,14 @@ interface LibraryBrowserState {
 }
 
 const initialState: LibraryBrowserState = {
-  searchParams: { searchString: "", myLibraries: false, favorites: false },
+  searchParams: {
+    searchName: "",
+    searchAuthor: "",
+    searchDescription: "",
+    searchComponents: "",
+    myLibraries: false,
+    favorites: false,
+  },
 };
 
 const libraryBrowserSlice = createSlice({
@@ -21,7 +28,7 @@ const libraryBrowserSlice = createSlice({
   reducers: {
     updateLibrarySearchParams: (
       state,
-      action: PayloadAction<LibrariesSearchParamsType>
+      action: PayloadAction<LibrariesSearchParamsType>,
     ) => {
       state.searchParams = action.payload;
     },

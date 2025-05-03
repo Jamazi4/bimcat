@@ -43,7 +43,14 @@ export const createLibraryAction = async (
 export const fetchAllLibrariesAction = async (
   params: LibrariesSearchParamsType,
 ) => {
-  const { searchString, myLibraries, favorites } = params;
+  const {
+    searchName,
+    searchDescription,
+    searchAuthor,
+    searchComponents,
+    myLibraries,
+    favorites,
+  } = params;
   try {
     const dbUser = await getDbUser();
     const dbUserId = dbUser?.id;
@@ -63,32 +70,45 @@ export const fetchAllLibrariesAction = async (
       ];
     }
 
-    if (searchString) {
-      const existingAnd = Array.isArray(whereCondition.AND)
-        ? whereCondition.AND
-        : whereCondition.AND
-          ? [whereCondition.AND]
-          : [];
+    const andConditions: Prisma.LibraryWhereInput[] = [];
 
-      whereCondition.AND = [
-        ...existingAnd,
-        {
-          OR: [
-            { name: { contains: searchString, mode: "insensitive" } },
-            { description: { contains: searchString, mode: "insensitive" } },
-            {
-              author: {
-                firstName: { contains: searchString, mode: "insensitive" },
-              },
+    if (searchName) {
+      andConditions.push({
+        name: { contains: searchName, mode: "insensitive" },
+      });
+    }
+    if (searchDescription) {
+      andConditions.push({
+        description: { contains: searchName, mode: "insensitive" },
+      });
+    }
+    if (searchAuthor) {
+      andConditions.push({
+        OR: [
+          {
+            author: {
+              firstName: { contains: searchAuthor, mode: "insensitive" },
             },
-            {
-              author: {
-                secondName: { contains: searchString, mode: "insensitive" },
-              },
+          },
+          {
+            author: {
+              secondName: { contains: searchAuthor, mode: "insensitive" },
             },
-          ],
+          },
+        ],
+      });
+    }
+
+    if (searchComponents) {
+      andConditions.push({
+        Components: {
+          some: { name: { contains: searchComponents, mode: "insensitive" } },
         },
-      ];
+      });
+    }
+
+    if (andConditions.length > 0) {
+      whereCondition.AND = andConditions;
     }
 
     const libraries = await prisma.library.findMany({

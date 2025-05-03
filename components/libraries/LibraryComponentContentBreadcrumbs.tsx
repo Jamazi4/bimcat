@@ -9,6 +9,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { useAppSelector } from "@/lib/hooks";
+import { formatLibraryParams } from "@/utils/utilFunctions";
 import { usePathname } from "next/navigation";
 
 const LibraryComponentContentBreadcrumbs = ({
@@ -21,13 +22,11 @@ const LibraryComponentContentBreadcrumbs = ({
   const pathname = usePathname();
   const libraryId = pathname.split("/")[2];
   const stateSearchParams = useAppSelector(
-    (state) => state.libraryBrowser.searchParams
+    (state) => state.libraryBrowser.searchParams,
   );
-  const query = new URLSearchParams({
-    myLibraries: stateSearchParams.myLibraries.toString(),
-    favorites: stateSearchParams.favorites.toString(),
-    search: stateSearchParams.searchString,
-  });
+
+  const query = formatLibraryParams(stateSearchParams);
+
   const linkURL = `/libraries?${query}`;
 
   return (

@@ -66,7 +66,10 @@ export type BrowserSearchParamsType = {
 export type LibrariesSearchParamsType = {
   myLibraries: boolean;
   favorites: boolean;
-  searchString: string;
+  searchName: string;
+  searchAuthor: string;
+  searchDescription: string;
+  searchComponents: string;
 };
 
 export enum LibraryErrors {
