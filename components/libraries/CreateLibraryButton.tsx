@@ -29,12 +29,15 @@ const CreateLibraryButton = () => {
   const { isSignedIn } = useUser();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+
   const onSuccess = useCallback(async () => {
     setOpen(false);
     dispatch(fetchUserLibraries());
     await queryClient.invalidateQueries({ queryKey: ["libraryBrowser"] });
     await queryClient.refetchQueries({ queryKey: ["libraryBrowser"] });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -67,11 +70,19 @@ const CreateLibraryButton = () => {
                 className="col-span-4"
               />
             </div>
-            <div className="flex space-x-2">
-              <Checkbox name="makePrivate" id="makePrivate" />
-              <Label htmlFor="makePrivate" className="text-right">
-                Make private
-              </Label>
+            <div className="flex space-x-6 justify-end">
+              <div className="flex space-x-2">
+                <Checkbox name="makePrivate" id="makePrivate" />
+                <Label htmlFor="makePrivate" className="text-right">
+                  Make private
+                </Label>
+              </div>
+              <div className="flex space-x-2">
+                <Checkbox name="composite" id="composite" />
+                <Label htmlFor="composite" className="composite">
+                  Composite
+                </Label>
+              </div>
             </div>
           </div>
           <DialogFooter>

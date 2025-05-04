@@ -20,21 +20,30 @@ export const createLibraryAction = async (
   const libraryName = formData.get("name") as string;
   const libraryDesc = formData.get("description") as string;
   const makePrivate = formData.get("makePrivate") === "on";
+  const composite = formData.get("composite") === "on";
   try {
     const dbUser = await getDbUser();
 
     if (!dbUser) throw new Error("You must be logged in to create a library");
 
-    await prisma.library.create({
-      data: {
-        name: libraryName,
-        description: libraryDesc,
-        userId: dbUser.id,
-        public: !makePrivate,
-      },
-    });
+    const data = {
+      name: libraryName,
+      description: libraryDesc,
+      userId: dbUser.id,
+      public: !makePrivate,
+      updatedAt: new Date(),
+    };
+
+    if (composite) {
+      await prisma.compositeLibrary.create({ data });
+    } else {
+      await prisma.library.create({ data });
+    }
+
     revalidatePath("/libraries");
-    return { message: `Library ${libraryName} succesfully created!` };
+    return {
+      message: `${composite ? "Composite " : ""}Library ${libraryName} succesfully created!`,
+    };
   } catch (error) {
     return renderError(error);
   }

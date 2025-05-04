@@ -219,4 +219,5 @@ components which is more than enough. Libraries will also stay as just a long
 scroll
 
 starting with composite lib
-or maybe first filters in library components
+or maybe first filters in library components - I dont think they make a lot of
+sense in the end.
