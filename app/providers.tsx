@@ -22,15 +22,19 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
     storeRef.current = makeStore();
   }
 
-  const queryClient = new QueryClient({
-    mutationCache: new MutationCache({
-      onSuccess: async (_data, _variables, _context, mutation) => {
-        if (mutation.meta?.invalidates) {
-          await queryClient.invalidateQueries(mutation.meta.invalidates);
-        }
-      },
+  const queryClientRef = useRef<QueryClient>(
+    new QueryClient({
+      mutationCache: new MutationCache({
+        onSuccess: async (_data, _variables, _context, mutation) => {
+          if (mutation.meta?.invalidates) {
+            await queryClientRef.current.invalidateQueries(
+              mutation.meta.invalidates,
+            );
+          }
+        },
+      }),
     }),
-  });
+  );
 
   return (
     <>
@@ -53,7 +57,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
         disableTransitionOnChange
       >
         <Provider store={storeRef.current}>
-          <QueryClientProvider client={queryClient}>
+          <QueryClientProvider client={queryClientRef.current}>
             {children}
           </QueryClientProvider>
         </Provider>

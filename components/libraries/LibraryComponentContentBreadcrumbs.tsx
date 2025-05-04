@@ -4,12 +4,12 @@ import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { useAppSelector } from "@/lib/hooks";
 import { searchParamsToQuery } from "@/utils/utilFunctions";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LibraryComponentContentBreadcrumbs = ({
@@ -22,7 +22,7 @@ const LibraryComponentContentBreadcrumbs = ({
   const pathname = usePathname();
   const libraryId = pathname.split("/")[2];
   const stateSearchParams = useAppSelector(
-    (state) => state.libraryBrowser.searchParams,
+    (state) => state.libraryBrowser.librarySliceSearchParams,
   );
 
   const query = searchParamsToQuery(stateSearchParams);
@@ -33,18 +33,15 @@ const LibraryComponentContentBreadcrumbs = ({
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          <Link href="/">Home</Link>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href={linkURL}>Libraries</BreadcrumbLink>
+          <Link href={linkURL}>Libraries</Link>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href={`/libraries/${libraryId}`}>
-            {/* //TODO: this breaks searchparams persistence */}
-            {libraryName}
-          </BreadcrumbLink>
+          <Link href={`/libraries/${libraryId}`}>{libraryName}</Link>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>

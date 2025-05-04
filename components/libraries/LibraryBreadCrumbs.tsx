@@ -3,17 +3,17 @@
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useAppSelector } from "@/lib/hooks";
 import { searchParamsToQuery } from "@/utils/utilFunctions";
+import Link from "next/link";
 
 const LibraryBreadCrumbs = ({ libraryName }: { libraryName: string }) => {
   const stateSearchParams = useAppSelector(
-    (state) => state.libraryBrowser.searchParams,
+    (state) => state.libraryBrowser.librarySliceSearchParams,
   );
 
   const query = searchParamsToQuery(stateSearchParams);
@@ -24,11 +24,11 @@ const LibraryBreadCrumbs = ({ libraryName }: { libraryName: string }) => {
     <Breadcrumb className="border-accent">
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          <Link href="/">Home</Link>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href={linkURL}>Libraries</BreadcrumbLink>
+          <Link href={linkURL}>Libraries</Link>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>

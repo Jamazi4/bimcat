@@ -35,6 +35,8 @@ const CreateLibraryButton = () => {
     dispatch(fetchUserLibraries());
     await queryClient.invalidateQueries({ queryKey: ["libraryBrowser"] });
     await queryClient.refetchQueries({ queryKey: ["libraryBrowser"] });
+    // TODO: instead of this rather use useMutation
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -8,11 +8,11 @@ export type selectedComponent = {
 };
 
 interface LibraryBrowserState {
-  searchParams: LibrariesSearchParamsType;
+  librarySliceSearchParams: LibrariesSearchParamsType;
 }
 
 const initialState: LibraryBrowserState = {
-  searchParams: {
+  librarySliceSearchParams: {
     searchName: "",
     searchAuthor: "",
     searchDescription: "",
@@ -30,7 +30,7 @@ const libraryBrowserSlice = createSlice({
       state,
       action: PayloadAction<LibrariesSearchParamsType>,
     ) => {
-      state.searchParams = action.payload;
+      state.librarySliceSearchParams = action.payload;
     },
   },
 });

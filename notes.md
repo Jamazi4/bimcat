@@ -221,3 +221,5 @@ scroll
 starting with composite lib
 or maybe first filters in library components - I dont think they make a lot of
 sense in the end.
+
+PERSISTING PARAMS FINALLY -NEVER USE BREADCRUMB LINKS - USE NEXT LINKS
