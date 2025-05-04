@@ -16,6 +16,7 @@
    - or uploading toast and success toast
    - owner functionality - add/remove users, add/remove components
 8. duplicated psets sometimes - also opens both
+9. Write guides and usage, explain filters (don't forget 04.05.2025 key: val)
 
 edge cases:
 
@@ -204,3 +205,10 @@ libraries, and also limiting the number of fetched components in browser/libs?
 I already did some composite libraries progress - added prisma model and came
 up with the rules for that, also implemented more advanced filters for library
 browser
+
+--04.05.2025--
+Current task: implementing psetcontent filter
+
+above is implemented. !Reminder to myself to include in guides that searching
+for pset content works like [key]: [value] so for example I can do
+pset content: stage: A, where space after : is necessary

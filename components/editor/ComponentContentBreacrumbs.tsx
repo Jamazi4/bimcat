@@ -12,11 +12,14 @@ import { useAppSelector } from "@/lib/hooks";
 
 const ComponentContentBreadcrums = ({ name }: { name: string }) => {
   const searchParams = useAppSelector(
-    (state) => state.componentBrowser.searchParams
+    (state) => state.componentBrowser.searchParams,
   );
   const query = new URLSearchParams({
     myComponents: searchParams.myComponents.toString(),
-    search: searchParams.searchString,
+    searchName: searchParams.searchName,
+    searchAuthor: searchParams.searchAuthor,
+    searchPsetContent: searchParams.searchPsetContent,
+    searchPsetTitle: searchParams.searchPsetTitle,
   });
   const linkURL = `/components/browse?${query.toString()}`;
 

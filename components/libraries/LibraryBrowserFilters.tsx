@@ -148,11 +148,13 @@ const LibraryBrowserFilters = () => {
       {/* checkboxes */}
       <div className="justify-end flex">
         <LabeledFilterCheckbox
+          checked={state.myLibraries}
           switchFunc={handleSwitch}
           htmlId="myLibraries"
           labelContent="Your Libraries"
         />
         <LabeledFilterCheckbox
+          checked={state.favorites}
           switchFunc={handleSwitch}
           htmlId="favorites"
           labelContent="Favorites"

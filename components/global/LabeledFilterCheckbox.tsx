@@ -5,10 +5,12 @@ const LabeledFilterCheckbox = ({
   switchFunc,
   htmlId,
   labelContent,
+  checked,
 }: {
   switchFunc: (key: string, value: boolean) => void;
   htmlId: string;
   labelContent: string;
+  checked: boolean;
 }) => {
   const checkLabelClassname =
     "text-muted-foreground  transition-all group-hover:text-foreground";
@@ -16,6 +18,7 @@ const LabeledFilterCheckbox = ({
   return (
     <div className="group flex justify-center items-center mx-4">
       <Checkbox
+        checked={checked}
         className={checkboxClassname}
         id={htmlId}
         onCheckedChange={(checked: boolean) => {

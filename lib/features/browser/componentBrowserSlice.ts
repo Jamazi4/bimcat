@@ -6,7 +6,13 @@ interface ComponentBrowserState {
 }
 
 const initialState: ComponentBrowserState = {
-  searchParams: { searchString: "", myComponents: false },
+  searchParams: {
+    searchName: "",
+    searchAuthor: "",
+    searchPsetContent: "",
+    searchPsetTitle: "",
+    myComponents: false,
+  },
 };
 
 const componentBrowserSlice = createSlice({
@@ -15,7 +21,7 @@ const componentBrowserSlice = createSlice({
   reducers: {
     updateBrowserSearchParams: (
       state,
-      action: PayloadAction<BrowserSearchParamsType>
+      action: PayloadAction<BrowserSearchParamsType>,
     ) => {
       state.searchParams = action.payload;
     },

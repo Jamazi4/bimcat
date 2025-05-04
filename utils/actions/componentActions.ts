@@ -9,6 +9,8 @@ import {
   componentWithGeometrySchema,
   PsetActionsComponentSchema,
   PsetArraySchema,
+  componentArraySchema,
+  PsetContentSchemaType,
 } from "../schemas";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getDbUser } from "./globalActions";
@@ -127,7 +129,13 @@ export const fetchGeometryAction = async (id: string) => {
 export const fetchAllComponentsAction = async (
   params: BrowserSearchParamsType,
 ) => {
-  const { myComponents, searchString } = params;
+  const {
+    myComponents,
+    searchAuthor,
+    searchName,
+    searchPsetContent,
+    searchPsetTitle,
+  } = params;
   try {
     const dbUser = await getDbUser();
     const dbUserId = dbUser?.id;
@@ -142,22 +150,21 @@ export const fetchAllComponentsAction = async (
       whereCondition.OR = [{ public: true }, { userId: dbUserId }];
     }
 
-    if (searchString) {
-      const existingAnd = Array.isArray(whereCondition.AND)
-        ? whereCondition.AND
-        : whereCondition.AND
-          ? [whereCondition.AND]
-          : [];
+    const andConditions: Prisma.ComponentWhereInput[] = [];
 
-      whereCondition.AND = [
-        ...existingAnd,
-        {
-          OR: [
-            { name: { contains: searchString, mode: "insensitive" } },
-            { author: { contains: searchString, mode: "insensitive" } },
-          ],
-        },
-      ];
+    if (searchName) {
+      andConditions.push({
+        name: { contains: searchName, mode: "insensitive" },
+      });
+    }
+    if (searchAuthor) {
+      andConditions.push({
+        author: { contains: searchAuthor, mode: "insensitive" },
+      });
+    }
+
+    if (andConditions.length > 0) {
+      whereCondition.AND = andConditions;
     }
 
     const components = await prisma.component.findMany({
@@ -170,11 +177,51 @@ export const fetchAllComponentsAction = async (
         author: true,
         userId: true,
         public: true,
+        psets: true,
       },
       orderBy: { updatedAt: "desc" },
     });
 
-    const componentsWithEditable = components.map((component) => {
+    const validatedComponents = validateWithZodSchema(
+      componentArraySchema,
+      components,
+    );
+
+    let filteredComponents = validatedComponents;
+
+    const searchInsensitive = (searchString: string, searchIn: string) => {
+      return new RegExp(searchString, "i").test(searchIn);
+    };
+
+    const psetContentToString = (psetContent: PsetContentSchemaType) => {
+      return psetContent
+        .map((content) =>
+          Object.entries(content)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(" "),
+        )
+        .join(" ");
+    };
+
+    if (searchPsetTitle) {
+      filteredComponents = filteredComponents.filter((comp) =>
+        comp.psets?.some((pset) =>
+          searchInsensitive(searchPsetTitle, pset.title),
+        ),
+      );
+    }
+
+    if (searchPsetContent) {
+      filteredComponents = filteredComponents.filter((comp) => {
+        return comp.psets?.some((pset) => {
+          const contentString = psetContentToString(pset.content);
+          const found = searchInsensitive(searchPsetContent, contentString);
+          return found;
+        });
+      });
+    }
+
+    const componentsWithEditable = filteredComponents.map((component) => {
       return {
         id: component.id,
         name: component.name,

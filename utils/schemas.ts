@@ -1,9 +1,8 @@
-import { boolean, z, ZodSchema } from "zod";
-import { Library, User } from "./types";
+import { z, ZodSchema } from "zod";
 
 export function validateWithZodSchema<T>(
   schema: ZodSchema<T>,
-  data: unknown
+  data: unknown,
 ): T {
   const result = schema.safeParse(data);
   if (!result.success) {
@@ -21,11 +20,11 @@ export const geometrySchema = z.object({
 export const geometryArraySchema = z.array(geometrySchema);
 
 export const PsetAttributeSchema = z.record(
-  z.union([z.string(), z.boolean(), z.number()])
+  z.union([z.string(), z.boolean(), z.number()]),
 );
 
 export const PsetContentSchema = z.array(PsetAttributeSchema);
-
+export type PsetContentSchemaType = z.infer<typeof PsetContentSchema>;
 export const PsetSchema = z.object({
   title: z.string(),
   content: PsetContentSchema,
@@ -46,10 +45,11 @@ export const componentSchema = z.object({
   userId: z.string(),
   author: z.string(),
   public: z.boolean(),
-  editable: z.boolean(),
   //editable is not stored in db, but assigned
   //on backend depending on the user
 });
+
+export const componentArraySchema = z.array(componentSchema);
 
 export const componentWithGeometrySchema = z.object({
   id: z.string(),
@@ -62,54 +62,6 @@ export const componentWithGeometrySchema = z.object({
   author: z.string(),
   public: z.boolean(),
   editable: z.boolean(),
-});
-
-export type ComponentSchemaType = z.infer<typeof componentSchema>;
-export type ComponentWithGeometrySchemaType = z.infer<
-  typeof componentWithGeometrySchema
->;
-
-export const componentsArraySchema = z.array(componentSchema);
-
-export const userSchema: z.ZodType<User> = z.lazy(
-  (): z.ZodType<User> =>
-    z.object({
-      id: z.string(),
-      clerkId: z.string(),
-      email: z.string(),
-      firstName: z.string(),
-      secondName: z.string().nullable(),
-      authoredLibraries: z.array(librarySchema),
-      guestLibraries: z.array(librarySchema),
-      Components: z.array(componentSchema),
-      premium: z.boolean(),
-    })
-);
-
-export type userSchemaType = z.infer<typeof userSchema>;
-
-export const librarySchema: z.ZodType<Library> = z.lazy(
-  (): z.ZodType<Library> =>
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      description: z.string(),
-      components: z.array(componentSchema).optional(),
-      createdAt: z.date(),
-      updatedAt: z.date(),
-      author: userSchema,
-      userId: z.string().nullable(),
-      guests: z.array(userSchema),
-      public: z.boolean(),
-    })
-);
-
-export type librarySchemaType = z.infer<typeof librarySchema>;
-
-export const editPsetSchema = z.object({
-  componentId: z.string().uuid(),
-  psetTitle: z.string(),
-  psets: z.record(z.union([z.string(), z.number(), z.boolean()])),
 });
 
 export const PsetActionsComponentSchema = z.object({
