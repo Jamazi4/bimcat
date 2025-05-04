@@ -7,7 +7,7 @@ import { IfcFileInfo } from "@/components/editor/DownloadIfcButton";
 export const generateIfcFile = async (
   geometry: ComponentGeometry[],
   info: IfcFileInfo,
-  psets?: Pset[]
+  psets?: Pset[],
 ) => {
   if (!geometry) throw new Error("Could not get the object geometry");
   if (!psets) throw new Error("Could not get the object psets");
@@ -72,7 +72,7 @@ export const generateIfcFile = async (
     new WEBIFC.IFC4.IfcDimensionCount(3),
     null,
     axis,
-    null
+    null,
   );
 
   // prettier-ignore
@@ -94,10 +94,10 @@ export const generateIfcFile = async (
     null,
     null,
     [geomContext],
-    unitAssignment
+    unitAssignment,
   );
 
-  const shapereps: WEBIFC.IFC4.IfcShapeRepresentation[] = [];
+  // const shapereps: WEBIFC.IFC4.IfcShapeRepresentation[] = [];
   const facesets: WEBIFC.IFC4.IfcTriangulatedFaceSet[] = [];
 
   geometry.forEach((geom) => {
@@ -113,7 +113,7 @@ export const generateIfcFile = async (
     });
 
     const cartesianPointList = new WEBIFC.IFC4.IfcCartesianPointList3D(
-      convertedVertices // verts here
+      convertedVertices, // verts here
     );
 
     const convertedFaces: WEBIFC.IFC4.IfcPositiveInteger[][] = [];
@@ -133,7 +133,7 @@ export const generateIfcFile = async (
       null,
       new WEBIFC.IFC4.IfcBoolean(true),
       convertedFaces, // faces here
-      null
+      null,
     );
 
     facesets.push(triangulatedFaceset);
@@ -143,7 +143,7 @@ export const generateIfcFile = async (
     geomSubcontext,
     new WEBIFC.IFC4.IfcLabel("Body"),
     new WEBIFC.IFC4.IfcLabel("Tessellation"),
-    facesets
+    facesets,
   );
 
   const dirCoords = [
@@ -157,18 +157,18 @@ export const generateIfcFile = async (
   const axis2Placement3d = new WEBIFC.IFC4.IfcAxis2Placement3D(
     cartPoint,
     dir,
-    null
+    null,
   );
 
   const localPlacement = new WEBIFC.IFC4.IfcLocalPlacement(
     null,
-    axis2Placement3d
+    axis2Placement3d,
   );
 
   const productDefinitionShape = new WEBIFC.IFC4.IfcProductDefinitionShape(
     null,
     null,
-    [shapeRepresentation]
+    [shapeRepresentation],
   );
 
   const buildingElementProxy = new WEBIFC.IFC4.IfcBuildingElementProxy(
@@ -180,7 +180,7 @@ export const generateIfcFile = async (
     localPlacement,
     productDefinitionShape,
     null,
-    null
+    null,
   );
 
   const building = new WEBIFC.IFC4.IfcBuilding(
@@ -195,7 +195,7 @@ export const generateIfcFile = async (
     null,
     null,
     null,
-    null
+    null,
   );
 
   const relContainedInSpatialStructure =
@@ -205,7 +205,7 @@ export const generateIfcFile = async (
       null,
       null,
       [buildingElementProxy],
-      building
+      building,
     );
 
   const relAggregates = new WEBIFC.IFC4.IfcRelAggregates(
@@ -214,7 +214,7 @@ export const generateIfcFile = async (
     null,
     null,
     proj,
-    [building]
+    [building],
   );
 
   // ifcApi.WriteLine(modelId, org);
@@ -242,8 +242,8 @@ export const generateIfcFile = async (
         const propertySingleValue = new WEBIFC.IFC4.IfcPropertySingleValue(
           new WEBIFC.IFC4.IfcIdentifier(key),
           null,
-          new WEBIFC.IFC4.IfcIdentifier(value),
-          null
+          new WEBIFC.IFC4.IfcIdentifier(value as string),
+          null,
         );
         ifcApi.WriteLine(modelId, propertySingleValue);
         propertiesArray.push(propertySingleValue);
@@ -255,7 +255,7 @@ export const generateIfcFile = async (
       null,
       new WEBIFC.IFC4.IfcIdentifier(title),
       null,
-      propertiesArray
+      propertiesArray,
     );
 
     ifcApi.WriteLine(modelId, propertySet);
@@ -266,7 +266,7 @@ export const generateIfcFile = async (
       null,
       null,
       [buildingElementProxy],
-      propertySet
+      propertySet,
     );
     ifcApi.WriteLine(modelId, relDefinesByProperties);
   });

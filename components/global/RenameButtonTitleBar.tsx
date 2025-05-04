@@ -40,6 +40,8 @@ const RenameButtonTitleBar = (props: RenameButtonProps) => {
   const handleSuccess = useCallback(() => {
     dispatch(fetchUserLibraries());
     setOpen(false);
+    // TODO: solve with mutation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <Popover open={open} onOpenChange={setOpen}>
