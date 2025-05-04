@@ -9,14 +9,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useAppSelector } from "@/lib/hooks";
-import { formatLibraryParams } from "@/utils/utilFunctions";
+import { searchParamsToQuery } from "@/utils/utilFunctions";
 
 const LibraryBreadCrumbs = ({ libraryName }: { libraryName: string }) => {
   const stateSearchParams = useAppSelector(
     (state) => state.libraryBrowser.searchParams,
   );
 
-  const query = formatLibraryParams(stateSearchParams);
+  const query = searchParamsToQuery(stateSearchParams);
 
   const linkURL = `/libraries?${query}`;
 

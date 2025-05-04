@@ -180,6 +180,7 @@ export const fetchAllComponentsAction = async (
         psets: true,
       },
       orderBy: { updatedAt: "desc" },
+      take: 10,
     });
 
     const validatedComponents = validateWithZodSchema(

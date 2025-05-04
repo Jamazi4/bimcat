@@ -212,3 +212,5 @@ Current task: implementing psetcontent filter
 above is implemented. !Reminder to myself to include in guides that searching
 for pset content works like [key]: [value] so for example I can do
 pset content: stage: A, where space after : is necessary
+
+currently I want to implement server side pagination - combine with frontend?

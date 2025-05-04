@@ -9,7 +9,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { useAppSelector } from "@/lib/hooks";
-import { formatLibraryParams } from "@/utils/utilFunctions";
+import { searchParamsToQuery } from "@/utils/utilFunctions";
 import { usePathname } from "next/navigation";
 
 const LibraryComponentContentBreadcrumbs = ({
@@ -25,7 +25,7 @@ const LibraryComponentContentBreadcrumbs = ({
     (state) => state.libraryBrowser.searchParams,
   );
 
-  const query = formatLibraryParams(stateSearchParams);
+  const query = searchParamsToQuery(stateSearchParams);
 
   const linkURL = `/libraries?${query}`;
 

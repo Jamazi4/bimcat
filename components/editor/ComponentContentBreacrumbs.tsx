@@ -9,18 +9,13 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { useAppSelector } from "@/lib/hooks";
+import { searchParamsToQuery } from "@/utils/utilFunctions";
 
 const ComponentContentBreadcrums = ({ name }: { name: string }) => {
   const searchParams = useAppSelector(
     (state) => state.componentBrowser.searchParams,
   );
-  const query = new URLSearchParams({
-    myComponents: searchParams.myComponents.toString(),
-    searchName: searchParams.searchName,
-    searchAuthor: searchParams.searchAuthor,
-    searchPsetContent: searchParams.searchPsetContent,
-    searchPsetTitle: searchParams.searchPsetTitle,
-  });
+  const query = searchParamsToQuery(searchParams);
   const linkURL = `/components/browse?${query.toString()}`;
 
   return (

@@ -1,5 +1,3 @@
-import { LibrariesSearchParamsType } from "./types";
-
 export const renderError = (error: unknown): { message: string } => {
   console.log(error);
   return {
@@ -23,7 +21,9 @@ export const downloadFile = (
   URL.revokeObjectURL(url);
 };
 
-export const formatLibraryParams = (params: LibrariesSearchParamsType) => {
+export const searchParamsToQuery = (
+  params: Record<string, string | boolean>,
+) => {
   const urlParams = new URLSearchParams(
     Object.entries(params).reduce(
       (acc, [key, value]) => {
