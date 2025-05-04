@@ -1,6 +1,7 @@
 import * as OBC from "@thatopen/components";
 import { FragmentMesh, FragmentsGroup } from "@thatopen/fragments";
-import { ComponentGeometry, Pset } from "../types";
+import { ComponentGeometry } from "../types";
+import { Pset } from "@/utils/schemas";
 import * as THREE from "three";
 
 /**
@@ -28,7 +29,7 @@ const getIfcModel = async (file: File, loader: OBC.IfcLoader) => {
 //DELETE THIS
 export const getIfcPsets = async (
   model: FragmentsGroup,
-  indexer: OBC.IfcRelationsIndexer
+  indexer: OBC.IfcRelationsIndexer,
 ) => {
   const firstElement = model.children[0] as FragmentMesh;
   const ids = firstElement.fragment.ids;
@@ -42,7 +43,7 @@ export const getIfcPsets = async (
     const psetsExpressIds = indexer.getEntityRelations(
       model,
       firstId,
-      "IsDefinedBy"
+      "IsDefinedBy",
     );
 
     for (const expressID of psetsExpressIds) {
@@ -66,7 +67,7 @@ export const getIfcPsets = async (
               const propValue = prop["NominalValue"]?.value ?? " ";
               curPset.content.push({ [propName]: propValue });
             }
-          }
+          },
         );
         psets.push(curPset);
       }
@@ -110,8 +111,8 @@ export const getIfcDataById = async (file: File, id: number) => {
               ? unitValue.Prefix.value === "MILLI"
               : true;
         }
-      }
-    )
+      },
+    ),
   );
 
   await indexer.process(model);
@@ -125,7 +126,7 @@ export const getIfcDataById = async (file: File, id: number) => {
 export const getIfcGeometryById = async (
   model: FragmentsGroup,
   id: number,
-  isMili: boolean
+  isMili: boolean,
 ) => {
   const elements = model.items.filter((item) => {
     const itemId = item.ids.values().next().value;
@@ -158,7 +159,7 @@ export const getIfcGeometryById = async (
   const centerMatrix = new THREE.Matrix4().makeTranslation(
     -center.x,
     -center.y,
-    -center.z
+    -center.z,
   );
   elements.forEach((element) => {
     element.mesh.geometry.applyMatrix4(centerMatrix);
@@ -169,7 +170,7 @@ export const getIfcGeometryById = async (
   elements.forEach((element) => {
     const bufferGeom = element.mesh.geometry;
 
-    let positionArray = Array.from(bufferGeom.attributes.position.array);
+    const positionArray = Array.from(bufferGeom.attributes.position.array);
     const indicesArray = Array.from(bufferGeom.index.array);
 
     geometry.push({
@@ -186,7 +187,7 @@ export const getIfcGeometryById = async (
 export const getIfcPsetsById = async (
   model: FragmentsGroup,
   indexer: OBC.IfcRelationsIndexer,
-  id: number
+  id: number,
 ) => {
   const psets: Pset[] = [];
 
@@ -212,7 +213,7 @@ export const getIfcPsetsById = async (
             const propValue = prop["NominalValue"]?.value ?? " ";
             curPset.content.push({ [propName]: propValue });
           }
-        }
+        },
       );
       psets.push(curPset);
     }

@@ -8,7 +8,7 @@ import * as THREE from "three";
 import * as OBC from "@thatopen/components";
 import { FragmentsGroup } from "@thatopen/fragments";
 import { type IfcRelationsIndexer } from "@thatopen/components";
-import type { Pset } from "@/utils/types";
+import type { Pset } from "@/utils/schemas";
 import { getIfcPsetsById } from "@/utils/ifc/ifcjs";
 import PsetAccordion from "@/components/editor/PsetAccordion";
 import MeshItem from "@/components/visualiser/MeshItem";
@@ -120,7 +120,7 @@ const Model = ({
 
   const retrievePsets = async (id: number) => {
     if (!indexer) return;
-    let psets = [];
+    let psets: Pset[] = [];
     psets = await getIfcPsetsById(fragments, indexer, id); //granted that the indexer already processed the model
     setDisplayPsets(psets);
   };
