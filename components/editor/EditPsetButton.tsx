@@ -93,7 +93,7 @@ function EditPsetButton({
           <div className="grid gap-4 py-4">
             {curContent.map((entry, index) => {
               const name = Object.keys(entry)[0];
-              const value = entry[name];
+              const value = entry[name] as string;
               return (
                 <div className="items-center gap-4" key={index}>
                   <Label htmlFor={name} className="mb-2">
