@@ -10,11 +10,14 @@ import {
   PsetActionsComponentSchema,
   PsetArraySchema,
   componentArraySchema,
-  PsetContentSchemaType,
 } from "../schemas";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getDbUser } from "./globalActions";
-import { renderError } from "../utilFunctions";
+import {
+  psetContentToString,
+  renderError,
+  searchInsensitive,
+} from "../utilFunctions";
 import { BrowserSearchParamsType } from "../types";
 import { Prisma } from "@prisma/client";
 
@@ -180,7 +183,6 @@ export const fetchAllComponentsAction = async (
         psets: true,
       },
       orderBy: { updatedAt: "desc" },
-      take: 10,
     });
 
     const validatedComponents = validateWithZodSchema(
@@ -189,20 +191,6 @@ export const fetchAllComponentsAction = async (
     );
 
     let filteredComponents = validatedComponents;
-
-    const searchInsensitive = (searchString: string, searchIn: string) => {
-      return new RegExp(searchString, "i").test(searchIn);
-    };
-
-    const psetContentToString = (psetContent: PsetContentSchemaType) => {
-      return psetContent
-        .map((content) =>
-          Object.entries(content)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(" "),
-        )
-        .join(" ");
-    };
 
     if (searchPsetTitle) {
       filteredComponents = filteredComponents.filter((comp) =>

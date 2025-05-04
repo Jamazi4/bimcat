@@ -1,3 +1,5 @@
+import { PsetContentSchemaType } from "./schemas";
+
 export const renderError = (error: unknown): { message: string } => {
   console.log(error);
   return {
@@ -36,4 +38,18 @@ export const searchParamsToQuery = (
     ),
   );
   return urlParams;
+};
+
+export const searchInsensitive = (searchString: string, searchIn: string) => {
+  return new RegExp(searchString, "i").test(searchIn);
+};
+
+export const psetContentToString = (psetContent: PsetContentSchemaType) => {
+  return psetContent
+    .map((content) =>
+      Object.entries(content)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(" "),
+    )
+    .join(" ");
 };

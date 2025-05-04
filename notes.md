@@ -189,7 +189,7 @@ Fixed sharing a little bit, plans before implementing composite libraries:
 [x] in componentContent allow change private
 [x] deleting user
 [x] user list in shared library so owner can remove them
-[ ] split search to author, user and desc in library and componentbrowser,
+[x] split search to author, user and desc in library and componentbrowser,
 maybe add searching by psets too
 
 --02.05-2025--
@@ -214,3 +214,8 @@ for pset content works like [key]: [value] so for example I can do
 pset content: stage: A, where space after : is necessary
 
 currently I want to implement server side pagination - combine with frontend?
+I don't think I need a server-side pagination now. I can handle maybe a thousand
+components which is more than enough. Libraries will also stay as just a long
+scroll
+
+starting with composite lib
