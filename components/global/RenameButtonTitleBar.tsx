@@ -22,8 +22,8 @@ import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 
 export type RenameButtonProps = {
   action: (
-    prevState: null,
-    formData: FormData
+    prevState: unknown,
+    formData: FormData,
   ) => Promise<{
     message: string;
   }>;
