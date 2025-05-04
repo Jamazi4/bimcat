@@ -1,3 +1,5 @@
+"use client";
+
 import { fetchLibraryComponents } from "@/utils/actions/libraryActions";
 import { columns } from "@/components/componentList/ComponentListColumns";
 import { ComponentList } from "@/components/componentList/ComponentList";
@@ -5,16 +7,26 @@ import LibraryBreadCrumbs from "@/components/libraries/LibraryBreadCrumbs";
 import LibraryTitle from "@/components/libraries/LibraryTitle";
 import { Suspense } from "react";
 import BrowserFallback from "@/components/componentList/BrowserFallback";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import LoadingSpinner from "@/components/global/LoadingSpinner";
 
-const page = async ({ params }: { params: Promise<{ libraryId: string }> }) => {
-  const { libraryId } = await params;
-  const result = await fetchLibraryComponents(libraryId);
+const Page = () => {
+  const { libraryId } = useParams<{ libraryId: string }>();
 
-  if (result === undefined) return <div>Library does not exist</div>;
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["libraryComponents", libraryId],
+    queryFn: async () => {
+      return fetchLibraryComponents(libraryId);
+    },
+  });
 
-  const { libraryInfo, frontendComponents } = result;
+  if (isPending) return <LoadingSpinner />;
+  if (data === undefined) return <div>Library does not exist</div>;
 
-  if (!libraryId) return <div>Library does not exist</div>;
+  const { libraryInfo, frontendComponents } = data;
+
+  if (isError) return <div>{error.message}</div>;
 
   if (!frontendComponents) return <div>No components found.</div>;
 
@@ -36,4 +48,4 @@ const page = async ({ params }: { params: Promise<{ libraryId: string }> }) => {
     </main>
   );
 };
-export default page;
+export default Page;

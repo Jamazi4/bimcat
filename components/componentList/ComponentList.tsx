@@ -54,6 +54,11 @@ export function ComponentList<TData, TValue>({
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onRowSelectionChange: setLocalSelection,
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
     getRowId: (data) => (data as ComponentRow).id,
     state: {
       sorting,
@@ -64,7 +69,7 @@ export function ComponentList<TData, TValue>({
 
   useEffect(() => {
     const tempSelectedComponents: SelectedRow[] = Object.entries(
-      table.getSelectedRowModel().rows
+      table.getSelectedRowModel().rows,
     ).map((entry) => {
       const {
         id,
@@ -114,7 +119,7 @@ export function ComponentList<TData, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 );
@@ -151,7 +156,7 @@ export function ComponentList<TData, TValue>({
           )}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-between space-x-2 py-4">
+      <div className="grid items-center grid-cols-3 w-full space-x-2 py-4">
         <div className="text-sm text-muted-foreground space-x-2">
           {isInLibraries ? (
             <LibraryActionButtons
@@ -166,12 +171,12 @@ export function ComponentList<TData, TValue>({
           )}
         </div>
 
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-center">
           Selected {Object.keys(localSelection).length} /{" "}
           {table.getFilteredRowModel().rows.length}
         </p>
 
-        <div className="space-x-2">
+        <div className="space-x-2 items-end justify-end text-end">
           <Button
             variant="outline"
             size="sm"
