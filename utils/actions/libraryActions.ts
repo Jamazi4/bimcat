@@ -56,7 +56,7 @@ export const fetchAllLibrariesAction = async (
     searchName,
     searchDescription,
     searchAuthor,
-    searchComponents,
+    searchContent: searchContent,
     myLibraries,
     favorites,
   } = params;
@@ -64,7 +64,9 @@ export const fetchAllLibrariesAction = async (
     const dbUser = await getDbUser();
     const dbUserId = dbUser?.id;
 
-    const whereCondition: Prisma.LibraryWhereInput = {};
+    const whereCondition:
+      | Prisma.LibraryWhereInput
+      | Prisma.CompositeLibraryWhereInput = {};
     if (!dbUserId) {
       whereCondition.public = true;
     } else if (myLibraries) {
@@ -79,20 +81,25 @@ export const fetchAllLibrariesAction = async (
       ];
     }
 
-    const andConditions: Prisma.LibraryWhereInput[] = [];
+    const libraryAndConditions: Prisma.LibraryWhereInput[] = [];
+    const compositeAndConditions: Prisma.CompositeLibraryWhereInput[] = [];
 
     if (searchName) {
-      andConditions.push({
-        name: { contains: searchName, mode: "insensitive" },
-      });
+      const query = { name: { contains: searchName, mode: "insensitive" } };
+      libraryAndConditions.push(query as Prisma.LibraryWhereInput);
+      compositeAndConditions.push(query as Prisma.CompositeLibraryWhereInput);
     }
+
     if (searchDescription) {
-      andConditions.push({
+      const query = {
         description: { contains: searchDescription, mode: "insensitive" },
-      });
+      };
+      libraryAndConditions.push(query as Prisma.LibraryWhereInput);
+      compositeAndConditions.push(query as Prisma.CompositeLibraryWhereInput);
     }
+
     if (searchAuthor) {
-      andConditions.push({
+      const query = {
         OR: [
           {
             author: {
@@ -105,19 +112,26 @@ export const fetchAllLibrariesAction = async (
             },
           },
         ],
-      });
+      };
+      libraryAndConditions.push(query as Prisma.LibraryWhereInput);
+      compositeAndConditions.push(query as Prisma.CompositeLibraryWhereInput);
     }
 
-    if (searchComponents) {
-      andConditions.push({
+    if (searchContent) {
+      compositeAndConditions.push({
+        Libraries: {
+          some: { name: { contains: searchContent, mode: "insensitive" } },
+        },
+      });
+      libraryAndConditions.push({
         Components: {
-          some: { name: { contains: searchComponents, mode: "insensitive" } },
+          some: { name: { contains: searchContent, mode: "insensitive" } },
         },
       });
     }
 
-    if (andConditions.length > 0) {
-      whereCondition.AND = andConditions;
+    if (libraryAndConditions.length > 0) {
+      whereCondition.AND = libraryAndConditions;
     }
 
     const libraries = await prisma.library.findMany({
@@ -126,28 +140,49 @@ export const fetchAllLibrariesAction = async (
         author: { select: { id: true, firstName: true, secondName: true } },
         Components: { select: { id: true } },
       },
-      where: whereCondition,
-      orderBy: { createdAt: "asc" },
+      where: whereCondition as Prisma.LibraryWhereInput,
+      orderBy: { updatedAt: "asc" },
     });
 
-    const frontEndLibraries = libraries.map((library) => {
-      const isEditable = library.userId === dbUser?.id;
-      const isGuest = library.guests.some((guest) => guest.id === dbUser?.id);
+    whereCondition.AND = [];
 
-      return {
-        id: library.id,
-        name: library.name,
-        description: library.description,
-        author: `${library.author.firstName} ${library.author.secondName}`,
-        createdAt: library.createdAt.toISOString(),
-        updatedAt: library.updatedAt.toISOString(),
-        numComponents: library.Components.length,
-        numGuests: library.guests.length,
-        editable: isEditable,
-        publicFlag: library.public,
-        isGuest,
-      };
+    if (compositeAndConditions.length > 0) {
+      whereCondition.AND = compositeAndConditions;
+    }
+    const compositeLibraries = await prisma.compositeLibrary.findMany({
+      include: {
+        guests: { select: { id: true, firstName: true, secondName: true } },
+        author: { select: { id: true, firstName: true, secondName: true } },
+        Libraries: { select: { id: true } },
+      },
+      where: whereCondition as Prisma.CompositeLibraryWhereInput,
+      orderBy: { updatedAt: "asc" },
     });
+
+    const frontEndLibraries = [...compositeLibraries, ...libraries].map(
+      (library) => {
+        const isEditable = library.userId === dbUser?.id;
+        const isGuest = library.guests.some((guest) => guest.id === dbUser?.id);
+        const isComposite = "Libraries" in library;
+        const numElements = isComposite
+          ? library.Libraries.length
+          : library.Components.length;
+        return {
+          id: library.id,
+          name: library.name,
+          description: library.description,
+          author: `${library.author.firstName} ${library.author.secondName}`,
+          createdAt: library.createdAt.toISOString(),
+          updatedAt: library.updatedAt.toISOString(),
+          numElements: numElements,
+          numGuests: library.guests.length,
+          editable: isEditable,
+          publicFlag: library.public,
+          isGuest,
+          isComposite,
+        };
+      },
+    );
 
     return frontEndLibraries;
   } catch (error) {

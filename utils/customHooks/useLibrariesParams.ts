@@ -8,7 +8,7 @@ export function useLibrariesParams(): LibrariesSearchParamsType {
   return useMemo(() => {
     const searchName = searchParams.get("searchName") || "";
     const searchAuthor = searchParams.get("searchAuthor") || "";
-    const searchComponents = searchParams.get("searchComponents") || "";
+    const searchContent = searchParams.get("searchContent") || "";
     const searchDescription = searchParams.get("searchDescription") || "";
     const myLibraries = searchParams.get("myLibraries") === "true";
     const favorites = searchParams.get("favorites") === "true";
@@ -17,7 +17,7 @@ export function useLibrariesParams(): LibrariesSearchParamsType {
       searchName,
       searchAuthor,
       searchDescription,
-      searchComponents,
+      searchContent,
       myLibraries,
       favorites,
     };

@@ -70,9 +70,9 @@ model CompositeLibrary {
   id          String    @id @default(uuid())
   name        String
   description String
+  Libraries   Library[] @relation("CompositeLibrary")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  Libraries   Library[] @relation("CompositeLibrary")
   guests      User[]    @relation("CompositeLibraryGuests")
   author      User      @relation("AuthorOfCompositeLibrary", fields: [userId], references: [id], onDelete: Cascade)
   userId      String

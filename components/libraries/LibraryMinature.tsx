@@ -11,22 +11,9 @@ import { format } from "date-fns";
 import LibraryMinatureButtons from "./LibraryMiniatureButtons";
 import { useRouter } from "next/navigation";
 import LibraryFavoriteButton from "./LibraryFavoriteButton";
-import { Eye, EyeClosed } from "lucide-react";
+import { Crown, Eye, EyeClosed } from "lucide-react";
 import { Button } from "../ui/button";
-
-type frontendLibrary = {
-  id: string;
-  name: string;
-  description: string;
-  author: string;
-  createdAt: string;
-  updatedAt: string;
-  numComponents: number;
-  numGuests: number;
-  editable: boolean;
-  publicFlag: boolean;
-  isGuest: boolean;
-};
+import { frontendLibrary } from "@/utils/types";
 
 const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
   const router = useRouter();
@@ -37,9 +24,10 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
     createdAt,
     updatedAt,
     author,
-    numComponents,
+    numElements,
     publicFlag,
     editable,
+    isComposite,
   } = library;
   const charLimit = 140;
 
@@ -54,8 +42,13 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
     >
       <CardHeader>
         <CardTitle className="h-12 flex justify-between text-lg pb-2 items-center">
-          {name}
-          {editable ? (
+          <div className="flex">
+            {isComposite && <Crown className="mr-2" />}
+            {name}
+          </div>
+
+          {/* TODO: handle this for composite libraries   */}
+          {editable && !isComposite ? (
             <LibraryMinatureButtons
               publicFlag={publicFlag}
               libraryId={id}
@@ -81,7 +74,8 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
         </div>
         <div className="align-text-bottom ">
           <p>{`Owner: ${author}`}</p>
-          <p>{`Components: ${numComponents}`}</p>
+
+          <p>{`${isComposite ? "Libraries" : "Components"}: ${numElements}`}</p>
         </div>
       </CardFooter>
     </Card>

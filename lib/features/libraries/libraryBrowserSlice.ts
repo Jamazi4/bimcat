@@ -16,7 +16,7 @@ const initialState: LibraryBrowserState = {
     searchName: "",
     searchAuthor: "",
     searchDescription: "",
-    searchComponents: "",
+    searchContent: "",
     myLibraries: false,
     favorites: false,
   },

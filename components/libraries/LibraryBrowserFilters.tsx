@@ -34,7 +34,7 @@ const LibraryBrowserFilters = () => {
       case "SET_SEARCH_DESCRIPTION":
         return { ...state, searchDescription: action.payload };
       case "SET_SEARCH_COMPONENTS":
-        return { ...state, searchComponents: action.payload };
+        return { ...state, searchContent: action.payload };
       default:
         return state;
     }
@@ -45,7 +45,7 @@ const LibraryBrowserFilters = () => {
     searchName: initialParams.searchName,
     searchAuthor: initialParams.searchAuthor,
     searchDescription: initialParams.searchDescription,
-    searchComponents: initialParams.searchComponents,
+    searchContent: initialParams.searchContent,
   });
 
   const handleSearch = useDebouncedCallback(
@@ -132,11 +132,11 @@ const LibraryBrowserFilters = () => {
         />
         <LabeledFilterInput
           placeholder="component names"
-          htmlId="searchComponents"
-          inputValue={state.searchComponents}
+          htmlId="searchContent"
+          inputValue={state.searchContent}
           labelContent="component"
           onChange={(e) => {
-            handleSearch("searchComponents", e.target.value);
+            handleSearch("searchContent", e.target.value);
             dispatch({
               type: "SET_SEARCH_COMPONENTS",
               payload: e.target.value,

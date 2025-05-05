@@ -18,12 +18,13 @@ const LibraryMinatureButtons = ({
 }) => {
   const userState = useSelector((state: RootState) => state.userSlice);
   const currentLibrary = userState.libraries.find(
-    (library) => library.id === libraryId
+    (library) => library.id === libraryId,
   );
+
   if (!currentLibrary) return <div>Library does not exist</div>;
 
   const privateComponentsInside = currentLibrary.components.filter(
-    (component) => component.public === false
+    (component) => component.public === false,
   );
   const warningPrivateComponents =
     publicFlag === false && privateComponentsInside?.length > 0;

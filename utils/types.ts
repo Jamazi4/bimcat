@@ -66,7 +66,7 @@ export type LibrariesSearchParamsType = {
   searchName: string;
   searchAuthor: string;
   searchDescription: string;
-  searchComponents: string;
+  searchContent: string;
 };
 
 export enum LibraryErrors {
@@ -77,3 +77,18 @@ export enum LibraryErrors {
   Unauthorized = "Unauthorized.",
   LibraryNotFound = "Could not find library.",
 }
+
+export type frontendLibrary = {
+  id: string;
+  name: string;
+  description: string;
+  author: string;
+  createdAt: string;
+  updatedAt: string;
+  numElements: number;
+  numGuests: number;
+  editable: boolean;
+  publicFlag: boolean;
+  isGuest: boolean;
+  isComposite: boolean;
+};
