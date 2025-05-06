@@ -6,15 +6,18 @@ import {
 } from "@/utils/actions/libraryActions";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
+import PrivateIcon from "../global/PrivateIcon";
 
 const LibraryMinatureButtons = ({
   publicFlag,
   libraryId,
   libraryName,
+  isComposite,
 }: {
   publicFlag: boolean;
   libraryId: string;
   libraryName: string;
+  isComposite: boolean;
 }) => {
   const userState = useSelector((state: RootState) => state.userSlice);
   const currentLibrary = userState.libraries.find(
@@ -23,13 +26,13 @@ const LibraryMinatureButtons = ({
 
   if (!currentLibrary) return <div>Library does not exist</div>;
 
-  const privateComponentsInside = currentLibrary.components.filter(
-    (component) => component.public === false,
+  const privateContentInside = currentLibrary.content.filter(
+    (content) => content.public === false,
   );
   const warningPrivateComponents =
-    publicFlag === false && privateComponentsInside?.length > 0;
+    publicFlag === false && privateContentInside?.length > 0;
 
-  const warningMessagePrivateComponents = `${libraryName} contains private components(${privateComponentsInside.length}), making this library public will automatically change all contained components to public`;
+  const warningMessagePrivateComponents = `${libraryName} contains private components(${privateContentInside.length}), making this library public will automatically change all contained components to public`;
 
   const warningMessageLibraryShared = `This action will deactivate private share link for ${libraryName}.`;
 
@@ -42,6 +45,9 @@ const LibraryMinatureButtons = ({
     warningMessages.push(warningMessageLibraryShared);
   }
 
+  const toggleAction = libraryTogglePrivateAction.bind(null, libraryId);
+  const deleteAction = deleteLibraryAction.bind(null, libraryId, isComposite);
+
   const removeTitle = `Remove ${libraryName}`;
   const togglePrivateTitle = `Toggle private for ${libraryName}`;
   const removeMessage = `You are about to remove ${libraryName}, there is no undo.`;
@@ -49,22 +55,25 @@ const LibraryMinatureButtons = ({
 
   return (
     <div className="pt-0 mt-0">
-      <LibraryMiniatureButton
-        warningMessages={warningMessages}
-        libraryId={libraryId}
-        title={togglePrivateTitle}
-        message={togglePrivateMessage}
-        action={libraryTogglePrivateAction}
-        icon={publicFlag ? <Eye /> : <EyeClosed />}
-        destructive={false}
-        tooltip={publicFlag ? "Make Private" : "Make Public"}
-      />
-
+      {!isComposite ? (
+        <LibraryMiniatureButton
+          warningMessages={warningMessages}
+          libraryId={libraryId}
+          title={togglePrivateTitle}
+          message={togglePrivateMessage}
+          action={toggleAction}
+          icon={publicFlag ? <Eye /> : <EyeClosed />}
+          destructive={false}
+          tooltip={publicFlag ? "Make Private" : "Make Public"}
+        />
+      ) : (
+        <PrivateIcon publicFlag={publicFlag} />
+      )}
       <LibraryMiniatureButton
         libraryId={libraryId}
         title={removeTitle}
         message={removeMessage}
-        action={deleteLibraryAction}
+        action={deleteAction}
         icon={<Trash />}
         destructive={true}
         tooltip="Remove"

@@ -11,9 +11,9 @@ import { format } from "date-fns";
 import LibraryMinatureButtons from "./LibraryMiniatureButtons";
 import { useRouter } from "next/navigation";
 import LibraryFavoriteButton from "./LibraryFavoriteButton";
-import { Crown, Eye, EyeClosed } from "lucide-react";
-import { Button } from "../ui/button";
+import { Book, SquareLibrary } from "lucide-react";
 import { frontendLibrary } from "@/utils/types";
+import PrivateIcon from "../global/PrivateIcon";
 
 const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
   const router = useRouter();
@@ -33,7 +33,7 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
 
   return (
     <Card
-      className="cursor-pointer hover:border-primary h-48 gap-2 py-4 rounded-md transition-all bg-background"
+      className={`cursor-pointer hover:border-primary h-48 gap-2 py-4 rounded-md transition-all bg-${editable ? "accent" : "background"}`}
       onClick={() => {
         const isAnyDialogOpen = document.querySelector('[data-state="open"]');
         if (isAnyDialogOpen) return;
@@ -43,20 +43,25 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
       <CardHeader>
         <CardTitle className="h-12 flex justify-between text-lg pb-2 items-center">
           <div className="flex">
-            {isComposite && <Crown className="mr-2" />}
+            {isComposite ? (
+              <SquareLibrary className="mr-2" />
+            ) : (
+              <Book className="mr-2" />
+            )}
             {name}
           </div>
 
           {/* TODO: handle this for composite libraries   */}
-          {editable && !isComposite ? (
+          {editable ? (
             <LibraryMinatureButtons
+              isComposite={isComposite}
               publicFlag={publicFlag}
               libraryId={id}
               libraryName={name}
             />
           ) : (
             <div className="flex">
-              <EyeIcon publicFlag={publicFlag} />
+              <PrivateIcon publicFlag={publicFlag} />
               <LibraryFavoriteButton libraryId={id} isGuest={library.isGuest} />
             </div>
           )}
@@ -73,7 +78,9 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
           <p>Updated: {format(updatedAt, "dd-MM-yy HH:mm")}</p>
         </div>
         <div className="align-text-bottom ">
-          <p>{`Owner: ${author}`}</p>
+          <p
+            className={`${editable ? "text-primary" : "text-secondary-foreground"}`}
+          >{`Owner: ${author}`}</p>
 
           <p>{`${isComposite ? "Libraries" : "Components"}: ${numElements}`}</p>
         </div>
@@ -82,11 +89,3 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
   );
 };
 export default LibraryMinature;
-
-const EyeIcon = ({ publicFlag }: { publicFlag: boolean }) => {
-  return (
-    <Button variant={"ghost"} disabled>
-      {publicFlag ? <Eye /> : <EyeClosed />}
-    </Button>
-  );
-};

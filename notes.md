@@ -61,21 +61,24 @@ edge cases:
      if you change the library to private, then however you'll be able to remove
      them
 
-5. You can create private or public Composite Library but can not toggle the
-   private attribute after the creation
+5. You can create private or public Composite Library
 
-   - You can share the composite private library just as your normal private libraries
+   - After creation of the composite library you can not change it's privacy,
+     as you don't necessarily own the content.
+
+   - You can share the composite private library just as your normal private
+     libraries
 
    - if the composite library is public, you can merge any public library,
-     if it's either your own or you have added it to the favorites.
+     that's either your own or you have added it to favorites.
 
-   - if the composite library is private, you can only merge private libraries,
-     it they are either yours or have been shared with you and you're still their
-     guest
+   - if the composite library is private, you can merge private or public
+     libraries, it they are either yours or have been shared with you and
+     you're still their guest
 
-   - When you merge someone else's private library, their author will
-     automatically become a guest of your composite library. Removing them from
-     the guests will result in removing their libraries from your composite library.
+   - There is a chance that a public library that's in your composite library
+     will become private. In this case it will still be in your composite library
+     until the owner removes you from the guests.
 
 ## KNOWN ISSUES
 
@@ -105,7 +108,7 @@ when a user merges your library with their own, you automatically become a
 guest of this library.
 
 a Composite Library will just keep references to all the libraries and track
-changes all the changes. It will have one owner that can include or remove
+all the changes. It will have one owner that can include or remove
 sub-libraries from it.
 
 Composite library will have different views, history log, they can be public
@@ -223,3 +226,16 @@ or maybe first filters in library components - I dont think they make a lot of
 sense in the end.
 
 PERSISTING PARAMS FINALLY -NEVER USE BREADCRUMB LINKS - USE NEXT LINKS
+
+--06.05.2025--
+yesterday I implemented creating and fetching composite libraries. Now I will work
+on that further - first by creating more specific conditions on libraryminitature
+and then finally CompositeLibraryView
+The things I for sure still need to do:
+
+    - composite check in filters for libraries
+    - will probably need to add starred to state
+
+Today implemented old functionality but now with displaying composite libraries
+along normal ones, and updated state so that both are inside. Added visual
+guidance to show user which libraries are composite or which are their own ones

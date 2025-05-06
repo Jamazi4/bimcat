@@ -315,18 +315,34 @@ export const fetchLibraryComponents = async (libraryId: string) => {
   }
 };
 
-export const deleteLibraryAction = async (libraryId: string) => {
+export const deleteLibraryAction = async (
+  libraryId: string,
+  isComposite: boolean,
+) => {
   try {
     const dbUser = await getDbUser();
-    const library = await prisma.library.findUnique({
-      where: { id: libraryId },
-    });
+    let library: { name?: string; userId?: string } | null = null;
+    if (isComposite) {
+      library = await prisma.compositeLibrary.findUnique({
+        where: { id: libraryId },
+        select: { name: true, userId: true },
+      });
+    } else {
+      library = await prisma.library.findUnique({
+        where: { id: libraryId },
+        select: { name: true, userId: true },
+      });
+    }
 
     if (!library) throw new Error("Could not fetch library");
-    if (!(library.userId === dbUser?.id) || !dbUser)
+    if (library.userId !== dbUser?.id || !dbUser)
       throw new Error("Unauthorized");
 
-    await prisma.library.delete({ where: { id: libraryId } });
+    if (isComposite) {
+      await prisma.compositeLibrary.delete({ where: { id: libraryId } });
+    } else {
+      await prisma.library.delete({ where: { id: libraryId } });
+    }
 
     revalidatePath("/libraries");
 
@@ -341,6 +357,7 @@ export const deleteLibraryAction = async (libraryId: string) => {
 export const libraryTogglePrivateAction = async (libraryId: string) => {
   try {
     const dbUser = await getDbUser();
+
     const library = await prisma.library.findUnique({
       where: { id: libraryId },
       include: {
@@ -350,7 +367,7 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
 
     if (!library) throw new Error("Could not fetch library");
 
-    if (!(library.userId === dbUser?.id) || !dbUser)
+    if (library.userId !== dbUser?.id || !dbUser)
       throw new Error("Unauthorized");
 
     const curPublic = library.public;

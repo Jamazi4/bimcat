@@ -131,10 +131,10 @@ const LibraryBrowserFilters = () => {
           }}
         />
         <LabeledFilterInput
-          placeholder="component names"
+          placeholder="Contained library or component"
           htmlId="searchContent"
           inputValue={state.searchContent}
-          labelContent="component"
+          labelContent="content"
           onChange={(e) => {
             handleSearch("searchContent", e.target.value);
             dispatch({

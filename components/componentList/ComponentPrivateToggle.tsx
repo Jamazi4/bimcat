@@ -49,13 +49,13 @@ function ComponentPrivateToggle({
 
   const affectedPairs = userState.libraries.flatMap((library) => {
     if (!library.isPublic) return [];
-
-    return library.components
-      .filter((component) => publicSelectedComponentIds.includes(component.id))
-      .map((component) => ({
+    if (library.isComposite) return [];
+    return library.content
+      .filter((cont) => publicSelectedComponentIds.includes(cont.id))
+      .map((cont) => ({
         library,
-        componentId: component.id,
-        componentName: component.name,
+        componentId: cont.id,
+        componentName: cont.name,
       }));
   });
 

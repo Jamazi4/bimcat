@@ -1,7 +1,7 @@
 import { getUserStateLibrariesAction } from "@/utils/actions/userActions";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-type UserStateComponent = {
+type UserStateContent = {
   id: string;
   name: string;
   public: boolean;
@@ -13,7 +13,8 @@ type UserStateLibrary = {
   isPublic: boolean;
   isShared: boolean;
   isEditable: boolean;
-  components: UserStateComponent[];
+  isComposite: boolean;
+  content: UserStateContent[];
 };
 
 export type UserState = {
@@ -35,16 +36,17 @@ export const fetchUserLibraries = createAsyncThunk(
       const dbUser = await getUserStateLibrariesAction();
       if (!dbUser) return [];
 
-      const librariesState = dbUser.authoredLibraries?.map((lib) => ({
+      const librariesState = dbUser.frontendLibraries?.map((lib) => ({
         id: lib.id,
         name: lib.name,
         isPublic: lib.isPublic,
         isShared: lib.isShared,
         isEditable: lib.isEditable,
-        components: lib.components.map((component) => ({
-          id: component.id,
-          name: component.name,
-          public: component.public,
+        isComposite: lib.isComposite,
+        content: lib.content.map((cont) => ({
+          id: cont.id,
+          name: cont.name,
+          public: cont.public,
         })),
       }));
 
@@ -53,7 +55,7 @@ export const fetchUserLibraries = createAsyncThunk(
       console.log(err);
       return thunkAPI.rejectWithValue("Failed to fetch user libraries");
     }
-  }
+  },
 );
 
 const userSlice = createSlice({
@@ -62,7 +64,7 @@ const userSlice = createSlice({
   reducers: {
     updateLibraries: (
       state,
-      action: PayloadAction<{ libraries: UserStateLibrary[] }>
+      action: PayloadAction<{ libraries: UserStateLibrary[] }>,
     ) => {
       console.log("hello from userSlice");
       state.libraries = action.payload.libraries;
@@ -79,7 +81,7 @@ const userSlice = createSlice({
         (state, action: PayloadAction<UserStateLibrary[]>) => {
           state.libraries = action.payload;
           state.loading = false;
-        }
+        },
       )
       .addCase(fetchUserLibraries.rejected, (state, action) => {
         state.loading = false;

@@ -31,6 +31,16 @@ export const getUserStateLibrariesAction = async () => {
         clerkId: userId,
       },
       include: {
+        authoredCompositeLibraries: {
+          select: {
+            id: true,
+            name: true,
+            public: true,
+            sharedId: true,
+            Libraries: { select: { id: true, name: true, public: true } },
+            userId: true,
+          },
+        },
         authoredLibraries: {
           select: {
             id: true,
@@ -43,20 +53,26 @@ export const getUserStateLibrariesAction = async () => {
         },
       },
     });
-    if (!dbUser) return;
 
-    const { authoredLibraries } = dbUser;
-    const frontendLibraries = authoredLibraries.map((lib) => {
+    if (!dbUser) return;
+    const { authoredLibraries, authoredCompositeLibraries } = dbUser;
+
+    const frontendLibraries = [
+      ...authoredLibraries,
+      ...authoredCompositeLibraries,
+    ].map((lib) => {
+      const isComposite = "Libraries" in lib;
       return {
         id: lib.id,
         name: lib.name,
         isPublic: lib.public,
         isShared: !!lib.sharedId,
         isEditable: userId === lib.userId,
-        components: lib.Components,
+        isComposite,
+        content: isComposite ? lib.Libraries : lib.Components,
       };
     });
-    const frontendDbUser = { ...dbUser, authoredLibraries: frontendLibraries };
+    const frontendDbUser = { ...dbUser, frontendLibraries };
 
     return frontendDbUser;
   } catch (error) {

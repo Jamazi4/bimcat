@@ -42,26 +42,28 @@ const DialogLibraryList = ({
   const userState = useSelector((state: RootState) => state.userSlice);
 
   const librariesContaining = userState.libraries.map((library) => {
-    const componentIdsInside = library.components.map(
-      (component) => component.id,
-    );
-    let found = false;
-    for (const id of componentIds) {
-      if (componentIdsInside.includes(id)) {
-        found = true;
+    const componentIdsInside = library.content.map((component) => component.id);
+    if (!library.isComposite) {
+      let found = false;
+      for (const id of componentIds) {
+        if (componentIdsInside.includes(id)) {
+          found = true;
+        }
       }
+      if (found) return library.id;
     }
-    if (found) return library.id;
   });
 
-  const libraries: libraryListPosition[] = userState.libraries.map((lib) => {
-    return {
-      value: lib.id,
-      label: lib.name,
-      isPublic: lib.isPublic,
-      componentIds: lib.components.map((comp) => comp.id),
-    };
-  });
+  const libraries: libraryListPosition[] = userState.libraries
+    .filter((lib) => !lib.isComposite)
+    .map((lib) => {
+      return {
+        value: lib.id,
+        label: lib.name,
+        isPublic: lib.isPublic,
+        componentIds: lib.content.map((comp) => comp.id),
+      };
+    });
 
   const onSelect = (currentValue: string) => {
     const selectedLibrary = libraries.find(
