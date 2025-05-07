@@ -15,6 +15,9 @@ import NameList from "../componentList/NameList";
 import { toast } from "sonner";
 import { removeComponentFromLibraryAction } from "@/utils/actions/libraryActions";
 import { useParams } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { useAppDispatch } from "@/lib/hooks";
+import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 
 const RemoveFromLibraryActionButton = ({
   components,
@@ -24,6 +27,20 @@ const RemoveFromLibraryActionButton = ({
   setSelection: Dispatch<SetStateAction<object>>;
 }) => {
   const { libraryId } = useParams<{ libraryId: string }>();
+
+  const dispatch = useAppDispatch();
+  const removeMutation = useMutation({
+    mutationFn: ({
+      componentIds,
+      libraryId,
+    }: {
+      componentIds: string[];
+      libraryId: string;
+    }) => {
+      return removeComponentFromLibraryAction(componentIds, libraryId);
+    },
+    meta: { invalidates: ["libraryComponents"] },
+  });
 
   const componentIds = components.map((component) => Object.keys(component)[0]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -59,19 +76,22 @@ const RemoveFromLibraryActionButton = ({
                 setDialogOpen(false);
                 setPending(true);
 
-                const result = await removeComponentFromLibraryAction(
-                  componentIds,
-                  libraryId
+                removeMutation.mutate(
+                  { componentIds, libraryId },
+                  {
+                    onSuccess: (result) => {
+                      toast(result.message);
+                      setSelection([]);
+                      dispatch(fetchUserLibraries());
+                    },
+                    onError: (error) => {
+                      toast(error.message);
+                    },
+                    onSettled: () => {
+                      setPending(false);
+                    },
+                  },
                 );
-
-                if (result.message) {
-                  toast(result.message);
-                  setSelection([]);
-                } else {
-                  toast("Something went wrong");
-                }
-
-                setPending(false);
               }}
               disabled={pending}
               className="w-30 mt-4"
