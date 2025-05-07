@@ -19,6 +19,7 @@ const initialState: LibraryBrowserState = {
     searchContent: "",
     myLibraries: false,
     favorites: false,
+    composite: false,
   },
 };
 

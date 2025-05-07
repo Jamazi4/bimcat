@@ -31,7 +31,7 @@ const LibraryList = () => {
   if (data && data.length === 0 && !isPending) {
     return (
       <div className="text-secondary-foreground text-center">
-        No components found.
+        No libraries found.
       </div>
     );
   }

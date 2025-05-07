@@ -37,7 +37,11 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
       onClick={() => {
         const isAnyDialogOpen = document.querySelector('[data-state="open"]');
         if (isAnyDialogOpen) return;
-        router.push(`/libraries/${id}`);
+        if (isComposite) {
+          router.push(`/libraries/composite/${id}`);
+        } else {
+          router.push(`/libraries/${id}`);
+        }
       }}
     >
       <CardHeader>

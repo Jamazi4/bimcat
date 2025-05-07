@@ -239,3 +239,13 @@ The things I for sure still need to do:
 Today implemented old functionality but now with displaying composite libraries
 along normal ones, and updated state so that both are inside. Added visual
 guidance to show user which libraries are composite or which are their own ones
+
+--07.05.2025--
+Composite check filter added - plan for tomorrow is to add displaying of
+component list in composite library but actually with split for different libraries
+
+maybe will need to add another rote /libraries/composite/[libraryId]
+so I will be able to:
+
+- use a different function for fetching a library content and also have a custom
+  page and not one where everything is dependent on isComposite boolean.
