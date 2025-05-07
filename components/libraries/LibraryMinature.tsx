@@ -51,7 +51,6 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
             {name}
           </div>
 
-          {/* TODO: handle this for composite libraries   */}
           {editable ? (
             <LibraryMinatureButtons
               isComposite={isComposite}
@@ -62,7 +61,11 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
           ) : (
             <div className="flex">
               <PrivateIcon publicFlag={publicFlag} />
-              <LibraryFavoriteButton libraryId={id} isGuest={library.isGuest} />
+              <LibraryFavoriteButton
+                isComposite={isComposite}
+                libraryId={id}
+                isGuest={library.isGuest}
+              />
             </div>
           )}
         </CardTitle>

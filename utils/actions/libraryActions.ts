@@ -454,11 +454,22 @@ export const removeComponentFromLibraryAction = async (
   }
 };
 
-export const toggleLibraryFavoritesAction = async (libraryId: string) => {
+export const toggleLibraryFavoritesAction = async (
+  libraryId: string,
+  isComposite: boolean,
+) => {
   try {
     const dbUser = await getDbUser();
     if (!dbUser) throw new Error("Unauthorized");
-    const currentGuestLibrariesIds = dbUser.guestLibraries.map((lib) => lib.id);
+
+    let currentGuestLibrariesIds: string[] = [];
+    if (isComposite) {
+      currentGuestLibrariesIds = dbUser.guestCompositeLibraries.map(
+        (lib) => lib.id,
+      );
+    } else {
+      currentGuestLibrariesIds = dbUser.guestLibraries.map((lib) => lib.id);
+    }
 
     const isAuthor = dbUser.authoredLibraries.some(
       (lib) => lib.id === libraryId,
@@ -470,11 +481,17 @@ export const toggleLibraryFavoritesAction = async (libraryId: string) => {
       (curGuestId) => curGuestId === libraryId,
     );
 
-    const updateData = {
-      guestLibraries: {
-        [isFavorite ? "disconnect" : "connect"]: { id: libraryId },
-      },
-    };
+    const updateData = isComposite
+      ? {
+          guestCompositeLibraries: {
+            [isFavorite ? "disconnect" : "connect"]: { id: libraryId },
+          },
+        }
+      : {
+          guestLibraries: {
+            [isFavorite ? "disconnect" : "connect"]: { id: libraryId },
+          },
+        };
 
     await prisma.user.update({
       where: { id: dbUser.id },

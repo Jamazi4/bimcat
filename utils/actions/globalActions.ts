@@ -15,10 +15,11 @@ export const getDbUser = async (includeComponents?: boolean) => {
         Components: includeComponents,
         authoredLibraries: true,
         guestLibraries: true,
+        guestCompositeLibraries: true,
       },
     });
     return dbUser;
   } catch (error) {
-    console.log("No user in db for this clerkId");
+    console.log(error);
   }
 };

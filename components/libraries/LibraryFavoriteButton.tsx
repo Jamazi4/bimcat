@@ -19,22 +19,24 @@ import {
 const LibraryFavoriteButton = ({
   libraryId,
   isGuest,
+  isComposite,
 }: {
   libraryId: string;
   isGuest: boolean;
+  isComposite: boolean;
 }) => {
   const [pending, setPending] = useState(false);
   const icon = isGuest ? <FaStar /> : <FaRegStar />;
   const dispatch = useAppDispatch();
   const toggleLibraryFavoritesMutation = useMutation({
     mutationFn: (libraryId: string) => {
-      return toggleLibraryFavoritesAction(libraryId);
+      return toggleLibraryFavoritesAction(libraryId, isComposite);
     },
     meta: { invalidates: ["libraryBrowser"] },
   });
 
   const handleClick = async (
-    e: React.MouseEvent<HTMLButtonElement | MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement | MouseEvent>,
   ) => {
     e.preventDefault();
     e.stopPropagation();
