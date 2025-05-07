@@ -63,6 +63,7 @@ export type BrowserSearchParamsType = {
 export type LibrariesSearchParamsType = {
   myLibraries: boolean;
   favorites: boolean;
+  composite: boolean;
   searchName: string;
   searchAuthor: string;
   searchDescription: string;

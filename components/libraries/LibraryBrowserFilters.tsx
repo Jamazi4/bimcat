@@ -16,6 +16,7 @@ const LibraryBrowserFilters = () => {
   type Action =
     | { type: "SET_MY_LIBRARIES"; payload: boolean }
     | { type: "SET_FAVORITES"; payload: boolean }
+    | { type: "SET_COMPOSITE"; payload: boolean }
     | { type: "SET_SEARCH_NAME"; payload: string }
     | { type: "SET_SEARCH_AUTHOR"; payload: string }
     | { type: "SET_SEARCH_DESCRIPTION"; payload: string }
@@ -27,6 +28,8 @@ const LibraryBrowserFilters = () => {
         return { ...state, myLibraries: action.payload };
       case "SET_FAVORITES":
         return { ...state, favorites: action.payload };
+      case "SET_COMPOSITE":
+        return { ...state, composite: action.payload };
       case "SET_SEARCH_NAME":
         return { ...state, searchName: action.payload };
       case "SET_SEARCH_AUTHOR":
@@ -42,6 +45,7 @@ const LibraryBrowserFilters = () => {
   const [state, dispatch] = useReducer(reducer, {
     myLibraries: initialParams.myLibraries,
     favorites: initialParams.favorites,
+    composite: initialParams.composite,
     searchName: initialParams.searchName,
     searchAuthor: initialParams.searchAuthor,
     searchDescription: initialParams.searchDescription,
@@ -62,18 +66,30 @@ const LibraryBrowserFilters = () => {
   );
 
   const handleSwitch = (key: string, value: boolean) => {
+    let type: "SET_MY_LIBRARIES" | "SET_FAVORITES" | "SET_COMPOSITE";
+
+    if (key === "myLibraries") {
+      type = "SET_MY_LIBRARIES";
+    } else if (key === "favorites") {
+      type = "SET_FAVORITES";
+    } else {
+      type = "SET_COMPOSITE";
+    }
     dispatch({
-      type: key === "myLibraries" ? "SET_MY_LIBRARIES" : "SET_FAVORITES",
+      type,
       payload: value,
     });
 
+    const params = new URLSearchParams(searchParams);
+
     if (value && key === "myLibraries" && state.favorites) {
       dispatch({ type: "SET_FAVORITES", payload: false });
+      params.delete("favorites");
     } else if (value && key === "favorites" && state.myLibraries) {
-      dispatch({ type: "SET_MY_LIBRARIES", payload: true });
+      dispatch({ type: "SET_MY_LIBRARIES", payload: false });
+      params.delete("myLibraries");
     }
 
-    const params = new URLSearchParams(searchParams);
     if (value) {
       params.set(key, "true");
     } else {
@@ -158,6 +174,13 @@ const LibraryBrowserFilters = () => {
           switchFunc={handleSwitch}
           htmlId="favorites"
           labelContent="Favorites"
+        />
+
+        <LabeledFilterCheckbox
+          checked={state.composite}
+          switchFunc={handleSwitch}
+          htmlId="composite"
+          labelContent="Composite"
         />
       </div>
     </div>

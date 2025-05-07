@@ -12,6 +12,7 @@ export function useLibrariesParams(): LibrariesSearchParamsType {
     const searchDescription = searchParams.get("searchDescription") || "";
     const myLibraries = searchParams.get("myLibraries") === "true";
     const favorites = searchParams.get("favorites") === "true";
+    const composite = searchParams.get("composite") === "true";
 
     return {
       searchName,
@@ -20,6 +21,7 @@ export function useLibrariesParams(): LibrariesSearchParamsType {
       searchContent,
       myLibraries,
       favorites,
+      composite,
     };
   }, [searchParams]);
 }

@@ -59,6 +59,7 @@ export const fetchAllLibrariesAction = async (
     searchContent: searchContent,
     myLibraries,
     favorites,
+    composite,
   } = params;
   try {
     const dbUser = await getDbUser();
@@ -134,21 +135,29 @@ export const fetchAllLibrariesAction = async (
       whereCondition.AND = libraryAndConditions;
     }
 
-    const libraries = await prisma.library.findMany({
-      include: {
-        guests: { select: { id: true, firstName: true, secondName: true } },
-        author: { select: { id: true, firstName: true, secondName: true } },
-        Components: { select: { id: true } },
-      },
-      where: whereCondition as Prisma.LibraryWhereInput,
-      orderBy: { updatedAt: "asc" },
-    });
+    const libraryPayload = {
+      guests: { select: { id: true, firstName: true, secondName: true } },
+      author: { select: { id: true, firstName: true, secondName: true } },
+      Components: { select: { id: true } },
+    };
 
+    let libraries: Prisma.LibraryGetPayload<{
+      include: typeof libraryPayload;
+    }>[] = [];
+
+    if (!composite) {
+      libraries = await prisma.library.findMany({
+        include: libraryPayload,
+        where: whereCondition as Prisma.LibraryWhereInput,
+        orderBy: { updatedAt: "asc" },
+      });
+    }
     whereCondition.AND = [];
 
     if (compositeAndConditions.length > 0) {
       whereCondition.AND = compositeAndConditions;
     }
+
     const compositeLibraries = await prisma.compositeLibrary.findMany({
       include: {
         guests: { select: { id: true, firstName: true, secondName: true } },
@@ -451,9 +460,16 @@ export const toggleLibraryFavoritesAction = async (libraryId: string) => {
     if (!dbUser) throw new Error("Unauthorized");
     const currentGuestLibrariesIds = dbUser.guestLibraries.map((lib) => lib.id);
 
+    const isAuthor = dbUser.authoredLibraries.some(
+      (lib) => lib.id === libraryId,
+    );
+
+    if (isAuthor) throw new Error("Can not add your own library to favorites");
+
     const isFavorite = currentGuestLibrariesIds.some(
       (curGuestId) => curGuestId === libraryId,
     );
+
     const updateData = {
       guestLibraries: {
         [isFavorite ? "disconnect" : "connect"]: { id: libraryId },

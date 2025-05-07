@@ -48,7 +48,7 @@ const CopyComponentButton = ({
   });
 
   const handleClick = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.stopPropagation();
     setDialogOpen(false);
@@ -73,7 +73,7 @@ const CopyComponentButton = ({
         onSettled: () => {
           setPending(false);
         },
-      }
+      },
     );
   };
   return (
