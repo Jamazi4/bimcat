@@ -231,6 +231,7 @@ persisting params finally -never use breadcrumb links - use next links
 yesterday I implemented creating and fetching composite libraries. Now I will work
 on that further - first by creating more specific conditions on
 libraryminitature
+
 and then finally CompositeLibraryView
 The things I for sure still need to do:
 

@@ -71,7 +71,7 @@ const RemoveFromLibraryActionButton = ({
           </DialogHeader>
           <DialogFooter>
             <Button
-              onClick={async (e) => {
+              onClick={(e) => {
                 e.stopPropagation();
                 setDialogOpen(false);
                 setPending(true);

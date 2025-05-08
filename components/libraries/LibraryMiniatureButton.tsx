@@ -49,9 +49,7 @@ const LibraryMiniatureButton = ({
     meta: { invalidates: ["libraryBrowser"] },
   });
 
-  const handleAction = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
+  const handleAction = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
     e.preventDefault();
     setDialogOpen(false);

@@ -35,9 +35,7 @@ const LibraryFavoriteButton = ({
     meta: { invalidates: ["libraryBrowser"] },
   });
 
-  const handleClick = async (
-    e: React.MouseEvent<HTMLButtonElement | MouseEvent>,
-  ) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement | MouseEvent>) => {
     e.preventDefault();
     e.stopPropagation();
 

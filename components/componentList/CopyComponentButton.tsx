@@ -47,9 +47,7 @@ const CopyComponentButton = ({
     meta: { invalidates: ["componentBrowser"] },
   });
 
-  const handleClick = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
     setDialogOpen(false);
     setPending(true);
