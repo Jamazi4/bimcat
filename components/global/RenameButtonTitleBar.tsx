@@ -1,8 +1,8 @@
 "use client";
 
-import { Pencil } from "lucide-react";
+import { LoaderCircle, Pencil } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -14,11 +14,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import FormContainer from "./FormContainer";
 import { Input } from "../ui/input";
-import SubmitButton from "./SubmitButton";
 import { useAppDispatch } from "@/lib/hooks";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
+import { useMutation } from "@tanstack/react-query";
+import { renameLibraryAction } from "@/utils/actions/libraryActions";
+import { Button } from "../ui/button";
+import { toast } from "sonner";
 
 export type RenameButtonProps = {
   action: (
@@ -30,19 +32,47 @@ export type RenameButtonProps = {
   curName: string;
 };
 
-const RenameButtonTitleBar = (props: RenameButtonProps) => {
-  const { action, curName } = props;
+const RenameButtonTitleBar = ({ curName }: { curName: string }) => {
   const params = useParams() || "";
-  const id = Object.values(params)[0];
+  const id = Object.values(params)[0] as string;
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(curName);
+  const [pending, setPending] = useState(false);
+  const [libraryName, setLibraryName] = useState(curName);
   const dispatch = useAppDispatch();
-  const handleSuccess = useCallback(() => {
-    dispatch(fetchUserLibraries());
-    setOpen(false);
-    // TODO: solve with mutation
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const renameMutation = useMutation({
+    mutationFn: ({
+      libraryId,
+      newName,
+    }: {
+      libraryId: string;
+      newName: string;
+    }) => {
+      return renameLibraryAction(libraryId, newName);
+    },
+    meta: { invalidates: ["libraryComponents"] },
+  });
+
+  const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setPending(true);
+
+    renameMutation.mutate(
+      { libraryId: id, newName: libraryName },
+      {
+        onSuccess: (result) => {
+          toast(result.message);
+        },
+        onError: (error) => {
+          toast(error.message);
+        },
+        onSettled: () => {
+          setPending(false);
+          dispatch(fetchUserLibraries());
+          setOpen(false);
+        },
+      },
+    );
+  };
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="flex w-full  ">
@@ -59,22 +89,26 @@ const RenameButtonTitleBar = (props: RenameButtonProps) => {
         </TooltipProvider>
       </PopoverTrigger>
       <PopoverContent className="bg-background w-100" align="center">
-        <FormContainer action={action} onSuccess={handleSuccess}>
-          <p>Enter new name</p>
-          <div className="flex gap-2 mb-4 mt-4">
-            <Input
-              onChange={(e) => setValue(e.target.value)}
-              value={value}
-              name="newName"
-              required={true}
-              placeholder="Component name"
-            />
-            <input type="hidden" name="id" value={id} />
-          </div>
-          <div className="flex justify-end">
-            <SubmitButton />
-          </div>
-        </FormContainer>
+        <p>Enter new name</p>
+        <div className="flex gap-2 mb-4 mt-4">
+          <Input
+            onChange={(e) => setLibraryName(e.target.value)}
+            value={libraryName}
+            required={true}
+          />
+          <input type="hidden" name="id" value={id} />
+        </div>
+        <div className="flex justify-end">
+          <Button
+            onClick={(e) => {
+              handleEdit(e);
+            }}
+            disabled={pending}
+            className="w-30 mt-4"
+          >
+            {pending ? <LoaderCircle className="animate-spin" /> : "Accept"}
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );

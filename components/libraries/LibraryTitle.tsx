@@ -1,19 +1,12 @@
 import { LibraryInfo } from "@/utils/types";
 import { Separator } from "../ui/separator";
-import RenameButtonTitleBar, {
-  RenameButtonProps,
-} from "../global/RenameButtonTitleBar";
-import { renameLibraryAction } from "@/utils/actions/libraryActions";
+import RenameButtonTitleBar from "../global/RenameButtonTitleBar";
 import DownloadLibraryButton from "./DownloadLibraryButton";
 import ShareLibraryButton from "./ShareLibraryButton";
 import ManageGuestsButton from "./ManageGuestsButton";
 
 const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
   const { name, isEditable, isPublic, empty, sharedId, guests } = libraryInfo;
-  const renameButtonProps: RenameButtonProps = {
-    action: renameLibraryAction,
-    curName: name,
-  };
 
   return (
     <div className="my-6">
@@ -22,7 +15,7 @@ const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
           <h1 className="font-bold text-xl text-primary whitespace-nowrap">
             {name}
           </h1>
-          {isEditable && <RenameButtonTitleBar {...renameButtonProps} />}
+          {isEditable && <RenameButtonTitleBar curName={name} />}
         </div>
         <div className="flex space-x-4">
           <DownloadLibraryButton libraryEmpty={empty} />

@@ -90,7 +90,7 @@ const AddComponentToLibraryButton = ({
     },
     meta: { invalidates: ["componentBrowser"] },
   });
-  const handleAdd = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setDialogOpen(false);
     setPending(true);

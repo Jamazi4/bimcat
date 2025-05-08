@@ -10,6 +10,7 @@ import BrowserFallback from "@/components/componentList/BrowserFallback";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import LoadingSpinner from "@/components/global/LoadingSpinner";
+import LibraryDescription from "@/components/libraries/LibraryDescription";
 
 const Page = () => {
   const { libraryId } = useParams<{ libraryId: string }>();
@@ -37,12 +38,7 @@ const Page = () => {
       <Suspense fallback={<BrowserFallback />}>
         <ComponentList columns={columns} data={frontendComponents} />
         {libraryInfo.desc && (
-          <div className="mt-12">
-            <h1 className="font-semibold mb-4">Description:</h1>
-            <p className="bg-accent text-muted-foreground rounded-md p-2 ">
-              {libraryInfo.desc}
-            </p>
-          </div>
+          <LibraryDescription libraryId={libraryId} libraryInfo={libraryInfo} />
         )}
       </Suspense>
     </main>

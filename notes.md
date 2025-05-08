@@ -225,11 +225,12 @@ starting with composite lib
 or maybe first filters in library components - I dont think they make a lot of
 sense in the end.
 
-PERSISTING PARAMS FINALLY -NEVER USE BREADCRUMB LINKS - USE NEXT LINKS
+persisting params finally -never use breadcrumb links - use next links
 
 --06.05.2025--
 yesterday I implemented creating and fetching composite libraries. Now I will work
-on that further - first by creating more specific conditions on libraryminitature
+on that further - first by creating more specific conditions on
+libraryminitature
 and then finally CompositeLibraryView
 The things I for sure still need to do:
 
@@ -249,3 +250,8 @@ so I will be able to:
 
 - use a different function for fetching a library content and also have a custom
   page and not one where everything is dependent on isComposite boolean.
+- also add option to modify library description
+
+--08.05-2025--
+Noticed that I do handling function inside which I perform mutations as async
+functions, they dont have to be async.

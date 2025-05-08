@@ -508,14 +508,10 @@ export const toggleLibraryFavoritesAction = async (
 };
 
 export const renameLibraryAction = async (
-  _prevState: unknown,
-  formData: FormData,
+  libraryId: string,
+  newName: string,
 ) => {
   try {
-    const newName = formData.get("newName") as string;
-    const libraryId = formData.get("id") as string;
-
-    console.log(libraryId);
     const library = await prisma.library.findUnique({
       where: {
         id: libraryId,
@@ -544,7 +540,7 @@ export const renameLibraryAction = async (
 
     return { message: `Succesfully renamed ${oldName} to ${newName}` };
   } catch (error) {
-    return renderError(error);
+    throw error;
   }
 };
 
@@ -761,5 +757,28 @@ export const removeGuestAction = async (libraryId: string, userId: string) => {
     revalidatePath(`/libraries/${libraryId}`);
   } catch (error) {
     return renderError(error);
+  }
+};
+
+export const editLibraryDescriptionAction = async (
+  libraryId: string,
+  newDescription: string,
+) => {
+  try {
+    const dbUser = await getDbUser();
+    const authorized = dbUser?.authoredLibraries.some(
+      (lib) => lib.id === libraryId,
+    );
+
+    if (!authorized) throw new Error("Unauthorized");
+
+    const library = await prisma.library.update({
+      where: { id: libraryId },
+      data: { description: newDescription },
+    });
+    revalidatePath(`/libraries/${libraryId}`);
+    return { message: `Description for ${library.name} succesfully changed.` };
+  } catch (error) {
+    throw error;
   }
 };
