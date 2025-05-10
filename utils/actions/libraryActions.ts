@@ -782,15 +782,39 @@ export const editLibraryDescriptionAction = async (
     throw error;
   }
 };
-//
-// export const fetchCompositeLibrary = async (libraryId) => {
-//   try {
-//     const dbUser = await getDbUser();
-//   } catch (error) {
-//     throw error;
-//   }
-// };
-//
+
+export const fetchCompositeLibraryAction = async (
+  compositeLibraryId: string,
+) => {
+  try {
+    const dbUser = await getDbUser();
+
+    const isAuthor = dbUser?.authoredCompositeLibraries.some(
+      (lib) => lib.id === compositeLibraryId,
+    );
+    const isGuest = dbUser?.guestCompositeLibraries.some(
+      (lib) => lib.id === compositeLibraryId,
+    );
+
+    const isPublic = await prisma.compositeLibrary.findUnique({
+      where: { id: compositeLibraryId },
+      select: { public: true },
+    });
+
+    const authorized = isAuthor || isGuest || isPublic?.public;
+
+    if (!authorized) throw new Error("Unauthorized");
+
+    const compositeLibrary = await prisma.compositeLibrary.findUnique({
+      where: { id: compositeLibraryId },
+      include: { Libraries: { include: { Components: true } } },
+    });
+    return compositeLibrary;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const mergeLibraryAction = async (
   compositeLibraryId: string,
   libraryId: string,

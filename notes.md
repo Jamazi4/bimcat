@@ -47,7 +47,7 @@ edge cases:
    - If library is public, and you are adding your own private component -
      component will toggle to public(done).
 
-   - If you want to have someone elses component in your own library, you can
+   - If you want to have someone else's component in your own library, you can
      copy this component and provide your own name, then add normally
 
 4. You can share your private library by generating a private share link
@@ -164,7 +164,8 @@ components now reside in redux state.
 
 generating the library share link:
 
---27.04.2025--
+### --27.04.2025--
+
 Share link mutates library by adding a sharedId. It is then
 displayed on frontend and available to copy. Now work on the route, consider
 not leaking libraryId in the link (currently route is inside [libraryId] -
@@ -176,7 +177,8 @@ now I need to implement disable link functionality
 
 and then resolve library on share link
 
---28.04.2025--
+### --28.04.2025--
+
 disable link works now. You can now share libraries - there's redirection or
 login. Works as expected. Checked if user is added, if user can unsubscribe or
 is not logged in and logs in. Had to modify fetchAllLibraries to include guest
@@ -186,7 +188,8 @@ to check:
 - if I need to update redux state
 - if it will work on account creation (might be too quick)
 
---01.05.2025--
+### --01.05.2025--
+
 Fixed sharing a little bit, plans before implementing composite libraries:
 
 [x] in componentContent allow change private
@@ -195,13 +198,15 @@ Fixed sharing a little bit, plans before implementing composite libraries:
 [x] split search to author, user and desc in library and componentbrowser,
 maybe add searching by psets too
 
---02.05-2025--
+### --02.05-2025--
+
 Current task: -[ ] user list in shared library so owner can remove them
 Notes:
 Implementing guest list as a button on title that will display dialog
 check what do I do with guests on private status change
 
---03.05-2025--
+### --03.05-2025--
+
 Current task - split search params as you did in the browser
 Coming next: start implementation of composite libraries or maybe pagination in
 libraries, and also limiting the number of fetched components in browser/libs?
@@ -209,7 +214,8 @@ I already did some composite libraries progress - added prisma model and came
 up with the rules for that, also implemented more advanced filters for library
 browser
 
---04.05.2025--
+### --04.05.2025--
+
 Current task: implementing psetcontent filter
 
 above is implemented. !Reminder to myself to include in guides that searching
@@ -227,7 +233,8 @@ sense in the end.
 
 persisting params finally -never use breadcrumb links - use next links
 
---06.05.2025--
+### --06.05.2025--
+
 yesterday I implemented creating and fetching composite libraries. Now I will work
 on that further - first by creating more specific conditions on
 libraryminitature
@@ -242,7 +249,8 @@ Today implemented old functionality but now with displaying composite libraries
 along normal ones, and updated state so that both are inside. Added visual
 guidance to show user which libraries are composite or which are their own ones
 
---07.05.2025--
+### --07.05.2025--
+
 Composite check filter added - plan for tomorrow is to add displaying of
 component list in composite library but actually with split for different libraries
 
@@ -253,7 +261,8 @@ so I will be able to:
   page and not one where everything is dependent on isComposite boolean.
 - also add option to modify library description
 
---08.05-2025--
+### --08.05-2025--
+
 Noticed that I do handling function inside which I perform mutations as async
 functions, they dont have to be async.
 
@@ -266,7 +275,8 @@ MergeLibraryButton is in progress, DialogLibraryList as an example.
 today added guestlibraries to userslice and isFavorite flag to all entries
 there
 
---09.05.2025--
+### --09.05.2025--
+
 Now merge dialog displays correct libraries that you can select. Next mark the
 ones that are already merged, also consider reusing libraryList from
 addComponentToLibraryButton's libraryList.
@@ -274,3 +284,14 @@ addComponentToLibraryButton's libraryList.
 then follow with actually merging the libraries and as stated above, display
 nested list -> then implement history log which is already started in prisma
 schema but it hasn't been neither generated nor pushed.
+
+### --10.05.2025--
+
+Implemented merging functionality
+
+- Note to self - support searching for components of nested libraries when
+  filtering by content in library browser.
+- another note to self - if you have a library that's private and you remove
+  someone from its guests, I need to iterate over the guests authored composite
+  libraries and potentially remove the library that you have just been thrown
+  out from.

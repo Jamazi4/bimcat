@@ -38,7 +38,7 @@ export const columns: ColumnDef<ComponentRow>[] = [
       />
     ),
     enableSorting: false,
-    enableHiding: false,
+    enableHiding: true,
   },
   {
     accessorKey: "name",

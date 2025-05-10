@@ -23,6 +23,7 @@ const Page = () => {
   });
 
   if (isPending) return <LoadingSpinner />;
+
   if (data === undefined) return <div>Library does not exist</div>;
 
   const { libraryInfo, frontendComponents } = data;

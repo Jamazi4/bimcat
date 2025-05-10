@@ -1,7 +1,7 @@
 "use client";
 
 import { Dispatch, SetStateAction, useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,9 +10,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
+} from "@/components/ui/dialog";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Check, ChevronsUpDown, FolderDot, LoaderCircle } from "lucide-react";
 import {
   Command,
@@ -21,14 +25,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "../ui/command";
+} from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { mergeLibraryAction } from "@/utils/actions/libraryActions";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
-import InfoMessage from "../global/InfoMessage";
+import InfoMessage from "@/components/global/InfoMessage";
 
 const MergeLibraryButton = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
