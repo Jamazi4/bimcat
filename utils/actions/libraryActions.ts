@@ -807,7 +807,15 @@ export const fetchCompositeLibraryAction = async (
 
     const compositeLibrary = await prisma.compositeLibrary.findUnique({
       where: { id: compositeLibraryId },
-      include: { Libraries: { include: { Components: true } } },
+      include: {
+        guests: { select: { firstName: true, secondName: true, id: true } },
+        Libraries: {
+          include: {
+            Components: true,
+            author: { select: { id: true, firstName: true, secondName: true } },
+          },
+        },
+      },
     });
     return compositeLibrary;
   } catch (error) {
@@ -853,6 +861,8 @@ export const mergeLibraryAction = async (
       where: { id: compositeLibraryId },
       data: { Libraries: { connect: { id: libraryId } } },
     });
+
+    revalidatePath(`/libraries/composite/${compositeLibraryId}`);
     return {
       message: `Library ${libraryName} succesfully merged into ${compositeLibrary.name}`,
     };

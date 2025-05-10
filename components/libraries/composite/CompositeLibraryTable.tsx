@@ -46,9 +46,13 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <TableRow key={headerGroup.id} className="border">
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} colSpan={header.colSpan}>
+                <TableHead
+                  className="bg-background font-bold"
+                  key={header.id}
+                  colSpan={header.colSpan}
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
