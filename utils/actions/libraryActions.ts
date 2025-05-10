@@ -20,7 +20,7 @@ export const createLibraryAction = async (
   const libraryName = formData.get("name") as string;
   const libraryDesc = formData.get("description") as string;
   const makePrivate = formData.get("makePrivate") === "on";
-  const composite = formData.get("composite") === "on";
+  const composite = formData.get("createComposite") === "on";
   try {
     const dbUser = await getDbUser();
 
@@ -778,6 +778,60 @@ export const editLibraryDescriptionAction = async (
     });
     revalidatePath(`/libraries/${libraryId}`);
     return { message: `Description for ${library.name} succesfully changed.` };
+  } catch (error) {
+    throw error;
+  }
+};
+//
+// export const fetchCompositeLibrary = async (libraryId) => {
+//   try {
+//     const dbUser = await getDbUser();
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+//
+export const mergeLibraryAction = async (
+  compositeLibraryId: string,
+  libraryId: string,
+) => {
+  try {
+    const dbUser = await getDbUser();
+
+    if (!dbUser) throw new Error("You must be logged in to create a library");
+
+    const isCompositeAuthor = dbUser.authoredCompositeLibraries.some(
+      (lib) => lib.id === compositeLibraryId,
+    );
+
+    let libraryName = "";
+    const canAccessGuest = dbUser.guestLibraries.some((lib) => {
+      if (lib.id === libraryId) {
+        libraryName = lib.name;
+        return true;
+      }
+      return false;
+    });
+
+    const canAccessOwn = dbUser.authoredLibraries.some((lib) => {
+      if (lib.id === libraryId) {
+        libraryName = lib.name;
+        return true;
+      }
+      return false;
+    });
+
+    const canAccess = canAccessGuest || canAccessOwn;
+
+    if (!isCompositeAuthor || !canAccess) throw new Error("Unauthorized.");
+
+    const compositeLibrary = await prisma.compositeLibrary.update({
+      where: { id: compositeLibraryId },
+      data: { Libraries: { connect: { id: libraryId } } },
+    });
+    return {
+      message: `Library ${libraryName} succesfully merged into ${compositeLibrary.name}`,
+    };
   } catch (error) {
     throw error;
   }

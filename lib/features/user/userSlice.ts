@@ -14,6 +14,7 @@ type UserStateLibrary = {
   isShared: boolean;
   isEditable: boolean;
   isComposite: boolean;
+  isFavorite: boolean;
   content: UserStateContent[];
 };
 
@@ -43,6 +44,7 @@ export const fetchUserLibraries = createAsyncThunk(
         isShared: lib.isShared,
         isEditable: lib.isEditable,
         isComposite: lib.isComposite,
+        isFavorite: lib.isFavorite,
         content: lib.content.map((cont) => ({
           id: cont.id,
           name: cont.name,
@@ -66,7 +68,6 @@ const userSlice = createSlice({
       state,
       action: PayloadAction<{ libraries: UserStateLibrary[] }>,
     ) => {
-      console.log("hello from userSlice");
       state.libraries = action.payload.libraries;
     },
   },

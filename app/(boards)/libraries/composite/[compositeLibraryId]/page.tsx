@@ -1,5 +1,11 @@
+import MergeLibraryButton from "@/components/libraries/MergeLibraryButton";
+
 const page = () => {
-  return <div>Work in progress</div>;
+  return (
+    <div>
+      <MergeLibraryButton />
+    </div>
+  );
 };
 
 export default page;

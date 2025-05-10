@@ -79,3 +79,16 @@ model CompositeLibrary {
   public      Boolean
   sharedId    String?
 }
+
+model HistoryEntry {
+  id           String      @id @default(uuid())
+  createdAt    DateTime    @default(now())
+  actionName   String
+  HistoryLog   HistoryLog? @relation(fields: [historyLogId], references: [id])
+  historyLogId String?
+}
+
+model HistoryLog {
+  id      String         @id @default(uuid())
+  entries HistoryEntry[]
+}

@@ -51,24 +51,38 @@ export const getUserStateLibrariesAction = async () => {
             userId: true,
           },
         },
+        guestLibraries: {
+          select: {
+            id: true,
+            name: true,
+            public: true,
+            sharedId: true,
+            Components: { select: { id: true, name: true, public: true } },
+            userId: true,
+          },
+        },
       },
     });
 
     if (!dbUser) return;
-    const { authoredLibraries, authoredCompositeLibraries } = dbUser;
+    const { authoredLibraries, authoredCompositeLibraries, guestLibraries } =
+      dbUser;
 
     const frontendLibraries = [
       ...authoredLibraries,
       ...authoredCompositeLibraries,
+      ...guestLibraries,
     ].map((lib) => {
       const isComposite = "Libraries" in lib;
+      const isFavorite = guestLibraries.some((glib) => glib.id === lib.id);
       return {
         id: lib.id,
         name: lib.name,
         isPublic: lib.public,
         isShared: !!lib.sharedId,
-        isEditable: userId === lib.userId,
+        isEditable: dbUser.id === lib.userId,
         isComposite,
+        isFavorite,
         content: isComposite ? lib.Libraries : lib.Components,
       };
     });

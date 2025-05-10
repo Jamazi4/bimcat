@@ -256,3 +256,21 @@ so I will be able to:
 --08.05-2025--
 Noticed that I do handling function inside which I perform mutations as async
 functions, they dont have to be async.
+
+first add merge functionality, then on a merged library build nested table
+as here
+[https://v0.dev/chat/tanstack-table-example-TRRDufWJo0h]
+
+MergeLibraryButton is in progress, DialogLibraryList as an example.
+
+today added guestlibraries to userslice and isFavorite flag to all entries
+there
+
+--09.05.2025--
+Now merge dialog displays correct libraries that you can select. Next mark the
+ones that are already merged, also consider reusing libraryList from
+addComponentToLibraryButton's libraryList.
+
+then follow with actually merging the libraries and as stated above, display
+nested list -> then implement history log which is already started in prisma
+schema but it hasn't been neither generated nor pushed.

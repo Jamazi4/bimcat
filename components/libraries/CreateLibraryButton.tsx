@@ -80,8 +80,8 @@ const CreateLibraryButton = () => {
                 </Label>
               </div>
               <div className="flex space-x-2">
-                <Checkbox name="composite" id="composite" />
-                <Label htmlFor="composite" className="composite">
+                <Checkbox name="createComposite" id="createComposite" />
+                <Label htmlFor="createComposite" className="createComposite">
                   Composite
                 </Label>
               </div>

@@ -16,6 +16,7 @@ export const getDbUser = async (includeComponents?: boolean) => {
         authoredLibraries: true,
         guestLibraries: true,
         guestCompositeLibraries: true,
+        authoredCompositeLibraries: true,
       },
     });
     return dbUser;
