@@ -254,7 +254,7 @@ guidance to show user which libraries are composite or which are their own ones
 Composite check filter added - plan for tomorrow is to add displaying of
 component list in composite library but actually with split for different libraries
 
-maybe will need to add another rote /libraries/composite/[libraryId]
+maybe will need to add another rote /libraries/composite/libraryId
 so I will be able to:
 
 - use a different function for fetching a library content and also have a custom
@@ -268,7 +268,6 @@ functions, they dont have to be async.
 
 first add merge functionality, then on a merged library build nested table
 as here
-[https://v0.dev/chat/tanstack-table-example-TRRDufWJo0h]
 
 MergeLibraryButton is in progress, DialogLibraryList as an example.
 
@@ -312,10 +311,10 @@ also it's redundant to display author of a component in a library
 above is done along with some cosmetics, now thinking about paths, maybe include
 catchall route at libraries to display component from library?
 no, in order to keep a clean route path I will do that as a separate route
-/libraries/composite/[compositeLibraryId]/[componentId] and just reuse the
+/libraries/composite/compositeLibraryId/componentId and just reuse the
 viewer.
-that doesn't make any sense, instead I think it needs both [componentId] but
-nested in [libraryId]
+that doesn't make any sense, instead I think it needs both componentId but
+nested in libraryId
 
 [ ]sort out the navigation to library and/or component from composite
 [ ]show if composite is private or not
