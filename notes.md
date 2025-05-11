@@ -323,3 +323,5 @@ nested in [libraryId]
 [ ]pagination in libraries view
 [ ]sharing composite library
 [ ]history log
+
+so for the first one I created routes and refactored componentContent
