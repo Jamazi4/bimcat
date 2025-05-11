@@ -19,6 +19,7 @@ import { searchParamsToQuery } from "@/utils/utilFunctions";
 import Link from "next/link";
 import { LibraryInfo } from "@/utils/types";
 import CompositeLibraryTitle from "@/components/libraries/composite/CompositeLibraryTitle";
+import LibraryDescription from "@/components/libraries/LibraryDescription";
 const Page = () => {
   const { compositeLibraryId } = useParams<{ compositeLibraryId: string }>();
 
@@ -28,7 +29,6 @@ const Page = () => {
       return fetchCompositeLibraryAction(compositeLibraryId);
     },
   });
-  if (!data) return <div>no data</div>;
 
   if (isPending) return <LoadingSpinner />;
 
@@ -39,6 +39,7 @@ const Page = () => {
       </div>
     );
 
+  if (!data) return <div>no data</div>;
   const libraryName = data.name;
 
   const tableData = data.Libraries.map((entry) => {
@@ -70,6 +71,7 @@ const Page = () => {
     sharedId: data.sharedId || "",
     isEditable: data.editable,
     isPublic: data.public,
+    isComposite: true,
     guests: data.guests.map((guest) => {
       return {
         name: `${guest.firstName} ${guest.secondName}`,
@@ -83,7 +85,13 @@ const Page = () => {
       <Breadcrumbs libraryName={libraryName} />
       <CompositeLibraryTitle libraryInfo={libraryInfo} />
       <ExpandableTable data={tableData} />
-      <MergeLibraryButton />
+      <div className="justify-end flex w-full mt-2">
+        <MergeLibraryButton />
+      </div>
+      <LibraryDescription
+        libraryInfo={libraryInfo}
+        libraryId={compositeLibraryId}
+      />
     </main>
   );
 };

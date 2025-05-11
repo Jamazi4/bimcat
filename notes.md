@@ -303,3 +303,14 @@ working on title bar. now thinking about sharing functionality which is diffucul
 because I'll need to check access to components now also based on a requesting
 user being a guest of a composite library containing a library containing
 the component.
+
+download implemented. think about switching library to private and consequences
+of that in regards to it being present in a compositeLibrary
+
+also it's redundant to display author of a component in a library
+
+above is done along with some cosmetics, now thinking about paths, maybe include
+catchall route at libraries to display component from library?
+no, in order to keep a clean route path I will do that as a separate route
+/libraries/composite/[compositeLibraryId]/[componentId] and just reuse the
+viewer.

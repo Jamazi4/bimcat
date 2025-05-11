@@ -50,6 +50,7 @@ export type LibraryInfo = {
   isPublic: boolean;
   isEditable: boolean;
   guests: { name: string; id: string }[];
+  isComposite?: boolean;
 };
 
 export type BrowserSearchParamsType = {

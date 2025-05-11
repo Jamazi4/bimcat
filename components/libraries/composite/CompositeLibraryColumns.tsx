@@ -13,7 +13,11 @@ export type LibraryRow = {
   components: ComponentRow[];
   public: boolean;
 };
-
+const headerClassname = "flex items-center justify-center font-medium text-lg";
+const headerClassnameLeft =
+  "flex items-center justify-start font-medium text-xl";
+const cellClassname = "flex justify-center gap-2 font-medium";
+const cellClassnameLeft = "flex justify-start gap-2 font-medium";
 export const compositeColumns: ColumnDef<LibraryRow>[] = [
   {
     id: "expander",
@@ -38,19 +42,42 @@ export const compositeColumns: ColumnDef<LibraryRow>[] = [
   },
   {
     accessorKey: "name",
-    header: "Name",
+    header: ({ column }) => {
+      return (
+        <div className="flex justify-start">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <span className={headerClassnameLeft}>Name</span>
+            <ArrowUpDown />
+          </Button>
+        </div>
+      );
+    },
     cell: ({ row }) => (
-      <div className="flex items-center gap-2 font-medium">
-        {row.original.name}
-        {row.getCanExpand() && (
-          <span className="flex items-center text-xs text-muted-foreground"></span>
-        )}
-      </div>
+      <span className={cellClassnameLeft}>{row.original.name}</span>
     ),
   },
   {
     id: "Components",
     accessorFn: (row) => row.components.length,
+    header: ({ column }) => {
+      return (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <span className={headerClassname}>Name</span>
+            <ArrowUpDown />
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => (
+      <div className={cellClassname}>{row.original.components.length}</div>
+    ),
   },
   {
     accessorKey: "createdAt",
@@ -58,17 +85,19 @@ export const compositeColumns: ColumnDef<LibraryRow>[] = [
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       const formatted = format(date, "dd-MM-yy HH:mm");
-      return formatted;
+      return <div className={cellClassname}>{formatted}</div>;
     },
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created
-          <ArrowUpDown />
-        </Button>
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <span className={headerClassname}>Created</span>
+            <ArrowUpDown />
+          </Button>
+        </div>
       );
     },
   },
@@ -78,17 +107,19 @@ export const compositeColumns: ColumnDef<LibraryRow>[] = [
     cell: ({ row }) => {
       const date = new Date(row.getValue("updatedAt"));
       const formatted = format(date, "dd-MM-yy HH:mm");
-      return formatted;
+      return <div className={cellClassname}>{formatted}</div>;
     },
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Updated
-          <ArrowUpDown />
-        </Button>
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <span className={headerClassname}>Updated</span>
+            <ArrowUpDown />
+          </Button>
+        </div>
       );
     },
   },
@@ -97,14 +128,19 @@ export const compositeColumns: ColumnDef<LibraryRow>[] = [
     sortingFn: "text",
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Author
-          <ArrowUpDown />
-        </Button>
+        <div className="flex justify-start">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <span className={headerClassname}>Author</span>
+            <ArrowUpDown />
+          </Button>
+        </div>
       );
+    },
+    cell: ({ row }) => {
+      return <div className={cellClassnameLeft}>{row.original.author}</div>;
     },
   },
 ];

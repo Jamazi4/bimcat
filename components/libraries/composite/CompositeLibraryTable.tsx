@@ -13,6 +13,7 @@ import {
   getExpandedRowModel,
   useReactTable,
   Row,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import React, { useState, Fragment } from "react";
 
@@ -35,6 +36,7 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
     },
     onExpandedChange: setExpanded,
     getSubRows: () => undefined,
+    getSortedRowModel: getSortedRowModel(),
     getRowCanExpand: (row: Row<LibraryRow>) =>
       !!(row.original.components && row.original.components.length > 0),
     getCoreRowModel: getCoreRowModel(),
@@ -49,7 +51,7 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
             <TableRow key={headerGroup.id} className="">
               {headerGroup.headers.map((header) => (
                 <TableHead
-                  className="bg-background font-bold"
+                  className="bg-muted font-bold"
                   key={header.id}
                   colSpan={header.colSpan}
                 >
@@ -68,12 +70,15 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row: Row<LibraryRow>) => {
               const isExpanded = row.getIsExpanded();
-
               return (
                 <Fragment key={row.id}>
                   <TableRow
                     data-state={isExpanded ? "selected" : undefined}
-                    className={isExpanded ? "border-b-0" : ""}
+                    className={
+                      isExpanded
+                        ? "border-b-0 text-background !bg-primary/80"
+                        : ""
+                    }
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -87,7 +92,7 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
                   {isExpanded &&
                     row.original.components &&
                     row.original.components.length > 0 && (
-                      <TableRow className="hover:bg-background">
+                      <TableRow className="hover:bg-primary/90 bg-primary/80 text-background">
                         <TableCell colSpan={row.getVisibleCells().length}>
                           <CompositeLibrarySubrowTable
                             columns={columns}

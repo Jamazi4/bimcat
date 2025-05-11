@@ -38,9 +38,7 @@ const Page = () => {
       <LibraryTitle libraryInfo={libraryInfo} />
       <Suspense fallback={<BrowserFallback />}>
         <ComponentList columns={columns} data={frontendComponents} />
-        {libraryInfo.desc && (
-          <LibraryDescription libraryId={libraryId} libraryInfo={libraryInfo} />
-        )}
+        <LibraryDescription libraryId={libraryId} libraryInfo={libraryInfo} />
       </Suspense>
     </main>
   );

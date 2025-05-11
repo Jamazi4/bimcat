@@ -878,21 +878,43 @@ export const removeGuestAction = async (libraryId: string, userId: string) => {
 export const editLibraryDescriptionAction = async (
   libraryId: string,
   newDescription: string,
+  isComposite: boolean,
 ) => {
   try {
     const dbUser = await getDbUser();
-    const authorized = dbUser?.authoredLibraries.some(
-      (lib) => lib.id === libraryId,
-    );
+    let authorized: boolean = false;
+
+    if (!dbUser) throw new Error("Could not find user");
+    if (isComposite) {
+      authorized = dbUser.authoredCompositeLibraries.some(
+        (lib) => lib.id === libraryId,
+      );
+    } else {
+      authorized = dbUser.authoredLibraries.some((lib) => lib.id === libraryId);
+    }
 
     if (!authorized) throw new Error("Unauthorized");
 
-    const library = await prisma.library.update({
-      where: { id: libraryId },
-      data: { description: newDescription },
-    });
-    revalidatePath(`/libraries/${libraryId}`);
-    return { message: `Description for ${library.name} succesfully changed.` };
+    let libraryName: string = "";
+    if (isComposite) {
+      const library = await prisma.compositeLibrary.update({
+        where: { id: libraryId },
+        data: { description: newDescription },
+      });
+      libraryName = library.name;
+    } else {
+      const library = await prisma.library.update({
+        where: { id: libraryId },
+        data: { description: newDescription },
+      });
+      libraryName = library.name;
+    }
+    const path = isComposite
+      ? `/libraries/composite/${libraryId}`
+      : `/libraries/${libraryId}`;
+
+    revalidatePath(path);
+    return { message: `Description for ${libraryName} succesfully changed.` };
   } catch (error) {
     throw error;
   }

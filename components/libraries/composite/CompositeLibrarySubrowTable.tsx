@@ -5,7 +5,6 @@ import {
   VisibilityState,
   flexRender,
   getCoreRowModel,
-  getPaginationRowModel,
   Row,
   useReactTable,
   SortingState,
@@ -40,9 +39,8 @@ export function CompositeLibrarySubrowTable<TData, TValue>({
   const isInLibraries = pathname.split("/")[1] === "libraries";
 
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [localSelection, setLocalSelection] = useState({});
 
-  const visibilityState: VisibilityState = { select: false };
+  const visibilityState: VisibilityState = { select: false, author: false };
 
   const table = useReactTable({
     data,
@@ -50,19 +48,11 @@ export function CompositeLibrarySubrowTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onRowSelectionChange: setLocalSelection,
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
     getRowId: (data) => (data as ComponentRow).id,
     state: {
       sorting,
-      rowSelection: localSelection,
       columnVisibility: visibilityState,
     },
-    getPaginationRowModel: getPaginationRowModel(),
   });
 
   const handleRowClick = (row: Row<TData>) => {

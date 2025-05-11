@@ -11,11 +11,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "../ui/dialog";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { Textarea } from "../ui/textarea";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 const LibraryDescription = ({
@@ -28,6 +27,7 @@ const LibraryDescription = ({
   const [description, setDescription] = useState(libraryInfo.desc);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const isComposite = libraryInfo.isComposite!;
 
   const renameMutation = useMutation({
     mutationFn: ({
@@ -37,7 +37,11 @@ const LibraryDescription = ({
       libraryId: string;
       newDescription: string;
     }) => {
-      return editLibraryDescriptionAction(libraryId, newDescription);
+      return editLibraryDescriptionAction(
+        libraryId,
+        newDescription,
+        isComposite,
+      );
     },
     meta: { invalidates: ["libraryComponents"] },
   });
@@ -65,52 +69,55 @@ const LibraryDescription = ({
 
   return (
     <div className="mt-12">
-      <h1 className="font-semibold mb-4">Description:</h1>
+      <div className="flex items-center space-x-2 pb-2">
+        <h1 className="font-semibold">Description</h1>
+        <Button onClick={() => setDialogOpen(true)} variant="ghost" size="icon">
+          <Pencil />
+        </Button>
+      </div>
       <div className="flex flex-col items-end gap-y-2">
-        <p className="w-full bg-accent text-muted-foreground rounded-sm p-2 ">
+        <div className="w-full bg-accent text-muted-foreground rounded-sm p-2 flex justify-between">
           {libraryInfo.desc}
-        </p>
-        {libraryInfo.isEditable && (
-          <Dialog
-            open={dialogOpen}
-            onOpenChange={() => {
-              setDialogOpen(!dialogOpen);
-              setDescription(libraryInfo.desc);
-            }}
-          >
-            <DialogTrigger asChild>
-              <Button variant="outline">Edit</Button>
-            </DialogTrigger>
-            <DialogContent onInteractOutside={(e) => e.preventDefault()}>
-              <DialogHeader>
-                <DialogTitle className="mb-4">Edit Description</DialogTitle>
-                <DialogDescription>
-                  Provide new description below:
-                  <Textarea
-                    className="mt-4"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  ></Textarea>
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button
-                  onClick={(e) => {
-                    handleEdit(e);
-                  }}
-                  disabled={pending}
-                  className="w-30 mt-4"
-                >
-                  {pending ? (
-                    <LoaderCircle className="animate-spin" />
-                  ) : (
-                    "Accept"
-                  )}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+          {/* </p> */}
+          {libraryInfo.isEditable && (
+            <Dialog
+              open={dialogOpen}
+              onOpenChange={() => {
+                setDialogOpen(!dialogOpen);
+                setDescription(libraryInfo.desc);
+              }}
+            >
+              <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+                <DialogHeader>
+                  <DialogTitle className="mb-4">Edit Description</DialogTitle>
+                  <DialogDescription>
+                    Provide new description below:
+                    <Textarea
+                      className="mt-4"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    ></Textarea>
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    onClick={(e) => {
+                      handleEdit(e);
+                    }}
+                    disabled={pending}
+                    className="w-30 mt-4"
+                  >
+                    {pending ? (
+                      <LoaderCircle className="animate-spin" />
+                    ) : (
+                      "Accept"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
     </div>
   );
