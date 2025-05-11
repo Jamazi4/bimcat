@@ -54,6 +54,7 @@ const MergeLibraryButton = () => {
     }) => {
       return mergeLibraryAction(compositeId, libraryId);
     },
+    meta: { invalidates: ["compositeLibrary"] },
   });
 
   const handleMerge = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -67,7 +68,6 @@ const MergeLibraryButton = () => {
           toast(result.message);
           setLibraryId("");
           dispatch(fetchUserLibraries());
-          //TODO: invalidateQueries when they actually exist
         },
         onError: (error) => {
           toast(error.message);
