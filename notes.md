@@ -295,3 +295,11 @@ Implemented merging functionality
   someone from its guests, I need to iterate over the guests authored composite
   libraries and potentially remove the library that you have just been thrown
   out from.
+
+### --11.05.2025--
+
+Implemented merging functionality and display of composite library yesterday.
+working on title bar. now thinking about sharing functionality which is diffucult
+because I'll need to check access to components now also based on a requesting
+user being a guest of a composite library containing a library containing
+the component.

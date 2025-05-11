@@ -46,7 +46,7 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="border">
+            <TableRow key={headerGroup.id} className="">
               {headerGroup.headers.map((header) => (
                 <TableHead
                   className="bg-background font-bold"
@@ -87,7 +87,7 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
                   {isExpanded &&
                     row.original.components &&
                     row.original.components.length > 0 && (
-                      <TableRow>
+                      <TableRow className="hover:bg-background">
                         <TableCell colSpan={row.getVisibleCells().length}>
                           <CompositeLibrarySubrowTable
                             columns={columns}

@@ -4,7 +4,11 @@ import { prisma } from "@/db";
 import { revalidatePath } from "next/cache";
 import { getDbUser } from "./globalActions";
 import { renderError } from "../utilFunctions";
-import { componentWithGeometrySchema, validateWithZodSchema } from "../schemas";
+import {
+  componentWithGeometrySchema,
+  componentWithGeometrySchemaType,
+  validateWithZodSchema,
+} from "../schemas";
 import {
   LibrariesSearchParamsType,
   LibraryInfo,
@@ -510,30 +514,62 @@ export const toggleLibraryFavoritesAction = async (
 export const renameLibraryAction = async (
   libraryId: string,
   newName: string,
+  isComposite: boolean,
 ) => {
   try {
-    const library = await prisma.library.findUnique({
-      where: {
-        id: libraryId,
-      },
-      select: { id: true, name: true, userId: true },
-    });
+    let library: { name: string; id: string; userId: string } | null = null;
+
+    if (isComposite) {
+      library = await prisma.compositeLibrary.findUnique({
+        where: {
+          id: libraryId,
+        },
+        select: { id: true, name: true, userId: true },
+      });
+    } else {
+      library = await prisma.library.findUnique({
+        where: {
+          id: libraryId,
+        },
+        select: { id: true, name: true, userId: true },
+      });
+    }
 
     if (!library) throw new Error("Library not found.");
 
     const oldName = library.name;
 
     const dbUser = await getDbUser();
-    const authoredLibrariesIds = dbUser?.authoredLibraries.map((lib) => lib.id);
 
-    const authorized = authoredLibrariesIds?.some((id) => id === libraryId);
+    let authorized: boolean | undefined = false;
+
+    if (isComposite) {
+      const authoredCompositeLibraries = dbUser?.authoredCompositeLibraries.map(
+        (lib) => lib.id,
+      );
+
+      authorized = authoredCompositeLibraries?.some((id) => id === libraryId);
+    } else {
+      const authoredLibrariesIds = dbUser?.authoredLibraries.map(
+        (lib) => lib.id,
+      );
+
+      authorized = authoredLibrariesIds?.some((id) => id === libraryId);
+    }
 
     if (!authorized) throw new Error("Unauthorized.");
 
-    await prisma.library.update({
-      where: { id: libraryId },
-      data: { name: newName, updatedAt: new Date() },
-    });
+    if (isComposite) {
+      await prisma.compositeLibrary.update({
+        where: { id: libraryId },
+        data: { name: newName, updatedAt: new Date() },
+      });
+    } else {
+      await prisma.library.update({
+        where: { id: libraryId },
+        data: { name: newName, updatedAt: new Date() },
+      });
+    }
 
     revalidatePath(`/libraries`);
     revalidatePath(`/libraries/${libraryId}`);
@@ -548,20 +584,28 @@ export const fetchLibraryDownloadAction = async (libraryId: string) => {
   try {
     const dbUser = await getDbUser();
 
-    const library = await prisma.library.findUnique({
+    const libraryInfo = await prisma.library.findUnique({
       where: { id: libraryId },
-      include: { Components: { include: { geometry: true } } },
+      select: { id: true, public: true, name: true },
     });
-    if (!library) throw new Error("Could not find library");
+
+    if (!libraryInfo) throw new Error("Could not find library");
 
     let hasRights = false;
     if (dbUser) {
       hasRights = authReadLibrary(dbUser, libraryId);
     }
 
-    const authorized = hasRights || library.public;
+    const authorized = hasRights || libraryInfo.public;
 
     if (!authorized) throw new Error("Unauthorized");
+
+    const library = await prisma.library.findUnique({
+      where: { id: libraryId },
+      select: { Components: { include: { geometry: true } } },
+    });
+
+    if (!library) throw new Error("Error fetching library");
 
     const validatedComponents = library.Components.map((component) => {
       const componentWithEditable = { ...component, editable: true };
@@ -573,7 +617,66 @@ export const fetchLibraryDownloadAction = async (libraryId: string) => {
       );
     });
 
-    return { libraryName: library.name, validatedComponents };
+    return { libraryName: libraryInfo.name, validatedComponents };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const fetchCompositeLibraryDownloadAction = async (
+  libraryId: string,
+) => {
+  try {
+    const dbUser = await getDbUser();
+
+    const compositeLibraryInfo = await prisma.compositeLibrary.findUnique({
+      where: { id: libraryId },
+      select: { id: true, public: true, name: true },
+    });
+
+    if (!compositeLibraryInfo) throw new Error("Could not find library");
+
+    let hasRights = false;
+    if (dbUser) {
+      hasRights = authReadLibrary(dbUser, libraryId);
+    }
+    const authorized = hasRights || compositeLibraryInfo.public;
+
+    if (!authorized) throw new Error("Unauthorized");
+
+    const compositeLibrary = await prisma.compositeLibrary.findUnique({
+      where: { id: libraryId },
+      select: {
+        Libraries: {
+          select: { Components: { include: { geometry: true } }, name: true },
+        },
+      },
+    });
+
+    const components = compositeLibrary?.Libraries.flatMap(
+      (lib) => lib.Components,
+    );
+
+    if (!components) throw new Error("Could not find components");
+
+    const validatedComponents = compositeLibrary?.Libraries.reduce(
+      (acc, cur) => {
+        acc[cur.name] = cur.Components.map((comp) => {
+          const componentWithEditable = { ...comp, editable: true };
+          return validateWithZodSchema(
+            componentWithGeometrySchema,
+            componentWithEditable,
+          );
+        });
+        return acc;
+      },
+      {} as Record<string, componentWithGeometrySchemaType[]>,
+    );
+
+    return {
+      compositeLibraryName: compositeLibraryInfo.name,
+      validatedComponents,
+    };
   } catch (error) {
     console.log(error);
   }
@@ -583,6 +686,8 @@ const authReadLibrary = <
   T extends {
     authoredLibraries: { id: string }[];
     guestLibraries: { id: string }[];
+    authoredCompositeLibraries: { id: string }[];
+    guestCompositeLibraries: { id: string }[];
   },
 >(
   dbUser: T,
@@ -591,8 +696,18 @@ const authReadLibrary = <
   const authoredLibrariesIds =
     dbUser.authoredLibraries.map((lib) => lib.id) || [];
   const guestLibrariesIds = dbUser.guestLibraries.map((lib) => lib.id) || [];
-  const allUserLibraryIds = [...authoredLibrariesIds, ...guestLibrariesIds];
-  const hasRights = allUserLibraryIds.some((id) => id === libraryId);
+  const authoredCompositeIds = dbUser.authoredCompositeLibraries.map(
+    (lib) => lib.id,
+  );
+  const guestCompositeIds =
+    dbUser.guestCompositeLibraries.map((lib) => lib.id) || [];
+  const allUserLibraryIds = [
+    ...authoredLibrariesIds,
+    ...guestLibrariesIds,
+    ...authoredCompositeIds,
+    ...guestCompositeIds,
+  ];
+  const hasRights = allUserLibraryIds.includes(libraryId);
   return hasRights;
 };
 
@@ -817,7 +932,15 @@ export const fetchCompositeLibraryAction = async (
         },
       },
     });
-    return compositeLibrary;
+
+    if (!compositeLibrary) throw new Error("Could not find library");
+
+    const frontEndLibrary = {
+      ...compositeLibrary,
+      editable: compositeLibrary?.userId === dbUser?.id || false,
+    };
+
+    return frontEndLibrary;
   } catch (error) {
     throw error;
   }

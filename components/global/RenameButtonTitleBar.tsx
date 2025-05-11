@@ -32,13 +32,21 @@ export type RenameButtonProps = {
   curName: string;
 };
 
-const RenameButtonTitleBar = ({ curName }: { curName: string }) => {
+const RenameButtonTitleBar = ({
+  curName,
+  isComposite,
+}: {
+  curName: string;
+  isComposite: boolean;
+}) => {
   const params = useParams() || "";
   const id = Object.values(params)[0] as string;
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [libraryName, setLibraryName] = useState(curName);
   const dispatch = useAppDispatch();
+
+  const queryKey = isComposite ? ["compositeLibrary"] : ["libraryComponents"];
   const renameMutation = useMutation({
     mutationFn: ({
       libraryId,
@@ -47,9 +55,9 @@ const RenameButtonTitleBar = ({ curName }: { curName: string }) => {
       libraryId: string;
       newName: string;
     }) => {
-      return renameLibraryAction(libraryId, newName);
+      return renameLibraryAction(libraryId, newName, isComposite);
     },
-    meta: { invalidates: ["libraryComponents"] },
+    meta: { invalidates: queryKey },
   });
 
   const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {

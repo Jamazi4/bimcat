@@ -64,6 +64,9 @@ export const componentWithGeometrySchema = z.object({
   editable: z.boolean(),
 });
 
+export type componentWithGeometrySchemaType = z.infer<
+  typeof componentWithGeometrySchema
+>;
 export const PsetActionsComponentSchema = z.object({
   psets: z.array(PsetSchema),
   userId: z.string(),

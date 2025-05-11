@@ -1,4 +1,9 @@
-import { PsetContentSchemaType } from "./schemas";
+import { IfcFileInfo } from "@/components/libraries/DownloadLibraryButton";
+import {
+  componentWithGeometrySchemaType,
+  PsetContentSchemaType,
+} from "./schemas";
+import { generateIfcFile } from "./ifc/ifcFileBuilder";
 
 export const renderError = (error: unknown): { message: string } => {
   console.log(error);
@@ -52,4 +57,24 @@ export const psetContentToString = (psetContent: PsetContentSchemaType) => {
         .join(" "),
     )
     .join(" ");
+};
+
+export const generateIfcFilesLibrary = async (
+  validatedComponents: componentWithGeometrySchemaType[],
+) => {
+  const ifcFiles = await Promise.all(
+    validatedComponents.map(async (component) => {
+      const info: IfcFileInfo = {
+        name: component.name,
+        author: component.author,
+      };
+      const blob = await generateIfcFile(
+        component.geometry,
+        info,
+        component.psets,
+      );
+      return { name: component.name, blob };
+    }),
+  );
+  return ifcFiles;
 };

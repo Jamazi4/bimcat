@@ -1,12 +1,14 @@
+import RenameButtonTitleBar from "@/components/global/RenameButtonTitleBar";
 import { Separator } from "@/components/ui/separator";
 import { LibraryInfo } from "@/utils/types";
+import DownloadLibraryButton from "../DownloadLibraryButton";
 
 const CompositeLibraryTitle = ({
   libraryInfo,
 }: {
   libraryInfo: LibraryInfo;
 }) => {
-  const { name } = libraryInfo;
+  const { name, isEditable, empty } = libraryInfo;
   return (
     <div className="my-6">
       <div className="flex justify-between">
@@ -14,8 +16,13 @@ const CompositeLibraryTitle = ({
           <h1 className="font-bold text-xl text-primary whitespace-nowrap">
             {name}
           </h1>
+          {isEditable && (
+            <RenameButtonTitleBar curName={name} isComposite={true} />
+          )}
         </div>
-        <div className="flex space-x-4"></div>
+        <div className="flex space-x-4">
+          <DownloadLibraryButton libraryEmpty={empty} isComposite={true} />
+        </div>
       </div>
       <Separator className="mt-2" />
     </div>

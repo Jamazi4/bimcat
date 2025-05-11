@@ -15,10 +15,12 @@ const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
           <h1 className="font-bold text-xl text-primary whitespace-nowrap">
             {name}
           </h1>
-          {isEditable && <RenameButtonTitleBar curName={name} />}
+          {isEditable && (
+            <RenameButtonTitleBar curName={name} isComposite={false} />
+          )}
         </div>
         <div className="flex space-x-4">
-          <DownloadLibraryButton libraryEmpty={empty} />
+          <DownloadLibraryButton libraryEmpty={empty} isComposite={false} />
           {!isPublic && isEditable && (
             <>
               <ShareLibraryButton sharedId={sharedId} />

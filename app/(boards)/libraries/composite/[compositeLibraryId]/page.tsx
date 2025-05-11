@@ -68,7 +68,7 @@ const Page = () => {
     name: data.name,
     desc: data.description,
     sharedId: data.sharedId || "",
-    isEditable: false,
+    isEditable: data.editable,
     isPublic: data.public,
     guests: data.guests.map((guest) => {
       return {
