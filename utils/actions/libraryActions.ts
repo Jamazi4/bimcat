@@ -975,7 +975,7 @@ export const mergeLibraryAction = async (
   try {
     const dbUser = await getDbUser();
 
-    if (!dbUser) throw new Error("You must be logged in to create a library");
+    if (!dbUser) throw new Error("Not logged in.");
 
     const isCompositeAuthor = dbUser.authoredCompositeLibraries.some(
       (lib) => lib.id === compositeLibraryId,

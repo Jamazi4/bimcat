@@ -1,9 +1,8 @@
-import Renderer from "@/components/editor/Renderer";
 import Title from "@/components/editor/Title";
 import { fetchSingleComponentAction } from "@/utils/actions/componentActions";
-import PsetsList from "@/components/editor/PsetsList";
 import ComponentContentBreadcrums from "./ComponentContentBreacrumbs";
 import { SelectedRow } from "@/utils/types";
+import ComponentContentWrapper from "../global/ComponentContentWrapper";
 
 const ComponentContent = async ({
   params,
@@ -29,24 +28,11 @@ const ComponentContent = async ({
     <div>
       <ComponentContentBreadcrums name={component.name} />
       <Title componentData={componentData} />
-      <div
-        className="justify-center grid grid-cols-1 lg:grid-cols-6
-   gap-4 sm:w-2/3 sm:mx-auto lg:w-full mx-auto"
-      >
-        <div className="lg:col-span-4">
-          {component ? (
-            <Renderer geometry={component.geometry} />
-          ) : (
-            <div>Please wait...</div>
-          )}
-        </div>
-        <div className="lg:col-span-2">
-          <PsetsList
-            psets={component.psets ?? []}
-            editable={component.editable}
-          />
-        </div>
-      </div>
+      <ComponentContentWrapper
+        componentGeometry={component.geometry}
+        componentEditable={component.editable}
+        componentPsets={component.psets}
+      />
     </div>
   );
 };

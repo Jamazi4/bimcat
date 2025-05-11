@@ -36,8 +36,6 @@ export function CompositeLibrarySubrowTable<TData, TValue>({
   const pathname = usePathname();
   const router = useRouter();
 
-  const isInLibraries = pathname.split("/")[1] === "libraries";
-
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const visibilityState: VisibilityState = { select: false, author: false };
@@ -59,18 +57,14 @@ export function CompositeLibrarySubrowTable<TData, TValue>({
     const isAnyDialogOpen = document.querySelector('[data-state="open"]');
     if (isAnyDialogOpen) return;
     const originalRow = row.original as ComponentRow;
-    if (!isInLibraries) {
-      router.push(`/components/${originalRow.id}`);
-    } else {
-      const libraryId = pathname.split("/")[2];
-      router.push(`/libraries/${libraryId}/${originalRow.id}`);
-    }
+    const libraryId = pathname.split("/")[3];
+    router.push(`/libraries/${libraryId}/${originalRow.id}`);
   };
 
   return (
-    <div className="rounded-md">
+    <div>
       <Table>
-        <TableHeader className="bg-muted">
+        <TableHeader className="bg-muted/90">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {

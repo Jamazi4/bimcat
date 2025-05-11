@@ -314,3 +314,12 @@ catchall route at libraries to display component from library?
 no, in order to keep a clean route path I will do that as a separate route
 /libraries/composite/[compositeLibraryId]/[componentId] and just reuse the
 viewer.
+that doesn't make any sense, instead I think it needs both [componentId] but
+nested in [libraryId]
+
+[ ]sort out the navigation to library and/or component from composite
+[ ]show if composite is private or not
+[ ]handle user changing library to private and removing someone from guests.
+[ ]pagination in libraries view
+[ ]sharing composite library
+[ ]history log

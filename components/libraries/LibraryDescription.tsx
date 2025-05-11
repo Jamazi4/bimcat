@@ -76,48 +76,49 @@ const LibraryDescription = ({
         </Button>
       </div>
       <div className="flex flex-col items-end gap-y-2">
-        <div className="w-full bg-accent text-muted-foreground rounded-sm p-2 flex justify-between">
-          {libraryInfo.desc}
-          {/* </p> */}
-          {libraryInfo.isEditable && (
-            <Dialog
-              open={dialogOpen}
-              onOpenChange={() => {
-                setDialogOpen(!dialogOpen);
-                setDescription(libraryInfo.desc);
-              }}
-            >
-              <DialogContent onInteractOutside={(e) => e.preventDefault()}>
-                <DialogHeader>
-                  <DialogTitle className="mb-4">Edit Description</DialogTitle>
-                  <DialogDescription>
-                    Provide new description below:
-                    <Textarea
-                      className="mt-4"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                    ></Textarea>
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    onClick={(e) => {
-                      handleEdit(e);
-                    }}
-                    disabled={pending}
-                    className="w-30 mt-4"
-                  >
-                    {pending ? (
-                      <LoaderCircle className="animate-spin" />
-                    ) : (
-                      "Accept"
-                    )}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
+        {libraryInfo.desc && (
+          <div className="w-full bg-accent text-muted-foreground rounded-sm p-2 flex justify-between">
+            {libraryInfo.desc}
+          </div>
+        )}
+        {libraryInfo.isEditable && (
+          <Dialog
+            open={dialogOpen}
+            onOpenChange={() => {
+              setDialogOpen(!dialogOpen);
+              setDescription(libraryInfo.desc);
+            }}
+          >
+            <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+              <DialogHeader>
+                <DialogTitle className="mb-4">Edit Description</DialogTitle>
+                <DialogDescription>
+                  Provide new description below:
+                  <Textarea
+                    className="mt-4"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  ></Textarea>
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  onClick={(e) => {
+                    handleEdit(e);
+                  }}
+                  disabled={pending}
+                  className="w-30 mt-4"
+                >
+                  {pending ? (
+                    <LoaderCircle className="animate-spin" />
+                  ) : (
+                    "Accept"
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );

@@ -58,7 +58,7 @@ const Page = () => {
           updatedAt: component.updatedAt.toISOString(),
           createdAt: component.createdAt.toISOString(),
           editable: false,
-          public: false,
+          public: component.public,
         };
       }),
     };
