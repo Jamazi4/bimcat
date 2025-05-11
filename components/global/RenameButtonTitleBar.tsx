@@ -37,7 +37,7 @@ const RenameButtonTitleBar = ({
   isComposite,
 }: {
   curName: string;
-  isComposite: boolean;
+  isComposite?: boolean;
 }) => {
   const params = useParams() || "";
   const id = Object.values(params)[0] as string;
@@ -55,7 +55,7 @@ const RenameButtonTitleBar = ({
       libraryId: string;
       newName: string;
     }) => {
-      return renameLibraryAction(libraryId, newName, isComposite);
+      return renameLibraryAction(libraryId, newName, isComposite ?? false);
     },
     meta: { invalidates: queryKey },
   });
