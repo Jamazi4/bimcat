@@ -19,26 +19,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ComponentRow } from "@/components/componentList/ComponentListColumns";
 import { useState } from "react";
-
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-}
+import { useAppDispatch } from "@/lib/hooks";
+import {
+  updateCompponentNavigation,
+  updateLibraryNavigation,
+} from "@/lib/features/libraries/libraryBrowserSlice";
 
 export function CompositeLibrarySubrowTable<TData, TValue>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
-  const pathname = usePathname();
+  libraryId,
+  libraryName,
+}: {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  libraryId: string;
+  libraryName: string;
+}) {
   const router = useRouter();
-
+  const { compositeLibraryId } = useParams<{ compositeLibraryId: string }>();
   const [sorting, setSorting] = useState<SortingState>([]);
-
   const visibilityState: VisibilityState = { select: false, author: false };
+  const dispatch = useAppDispatch();
 
   const table = useReactTable({
     data,
@@ -57,8 +62,21 @@ export function CompositeLibrarySubrowTable<TData, TValue>({
     const isAnyDialogOpen = document.querySelector('[data-state="open"]');
     if (isAnyDialogOpen) return;
     const originalRow = row.original as ComponentRow;
-    const libraryId = pathname.split("/")[3];
-    router.push(`/libraries/${libraryId}/${originalRow.id}`);
+    dispatch(
+      updateCompponentNavigation({
+        id: originalRow.id,
+        name: originalRow.name,
+      }),
+    );
+    dispatch(
+      updateLibraryNavigation({
+        id: libraryId,
+        name: libraryName,
+      }),
+    );
+    router.push(
+      `/libraries/composite/${compositeLibraryId}/${libraryId}/${originalRow.id}`,
+    );
   };
 
   return (
