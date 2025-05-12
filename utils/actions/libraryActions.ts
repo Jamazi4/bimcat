@@ -1015,3 +1015,69 @@ export const mergeLibraryAction = async (
     throw error;
   }
 };
+
+export const fetchCompositeComponent = async (
+  compositeId: string,
+  libraryId: string,
+  componentId: string,
+) => {
+  try {
+    const dbUser = await getDbUser();
+
+    const componentInfo = await prisma.component.findUnique({
+      where: { id: componentId },
+      select: { public: true },
+    });
+
+    if (!componentInfo) throw new Error("Could not find Component");
+
+    const canAccessLibrary =
+      dbUser?.authoredCompositeLibraries.some(
+        (library) => library.id === compositeId,
+      ) ||
+      dbUser?.guestCompositeLibraries.some(
+        (library) => library.id === compositeId,
+      );
+    const componentPublic = componentInfo.public;
+
+    const authorized = canAccessLibrary && componentPublic;
+
+    if (!authorized) throw new Error("Unauthorized");
+
+    const component = await prisma.component.findUnique({
+      where: { id: componentId },
+      include: { geometry: true },
+    });
+
+    const libraryName = await prisma.library.findUnique({
+      where: { id: libraryId },
+      select: { name: true },
+    });
+
+    const compositeName = await prisma.compositeLibrary.findUnique({
+      where: { id: compositeId },
+      select: { name: true },
+    });
+
+    if (!compositeName && !libraryName)
+      throw new Error("Error getting library names");
+
+    const componentWithEditable = {
+      ...component,
+      editable: component?.userId === dbUser?.id,
+    };
+
+    const validatedComponent = validateWithZodSchema(
+      componentWithGeometrySchema,
+      componentWithEditable,
+    );
+
+    return {
+      component: validatedComponent,
+      libraryName: libraryName!.name,
+      compositeName: compositeName!.name,
+    };
+  } catch (error) {
+    throw error;
+  }
+};

@@ -326,3 +326,14 @@ nested in libraryId
 so for the first one I created routes and refactored componentContent
 
 more height on empty library in composite table
+
+### --12.05.2025--
+
+Implemented navigating to component from compositeLibrary and persisting the
+state in the state but that breaks on page refresh. But once I implement
+actually fetching the data in this location I can use this data to actually
+render breadcrumbs which may mean that the compositestate is useless?
+
+implemented that with useQuery and no redux (only for the searchParams).
+now the buttons in the title don't work. I can add psets, but renameComponent
+doesnt work and also toggling private.
