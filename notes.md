@@ -316,13 +316,6 @@ viewer.
 that doesn't make any sense, instead I think it needs both componentId but
 nested in libraryId
 
-[ ]sort out the navigation to library and/or component from composite
-[ ]show if composite is private or not
-[ ]handle user changing library to private and removing someone from guests.
-[ ]pagination in libraries view
-[ ]sharing composite library
-[ ]history log
-
 so for the first one I created routes and refactored componentContent
 
 more height on empty library in composite table
@@ -337,3 +330,23 @@ render breadcrumbs which may mean that the compositestate is useless?
 implemented that with useQuery and no redux (only for the searchParams).
 now the buttons in the title don't work. I can add psets, but renameComponent
 doesnt work and also toggling private.
+
+### --13.05.2025--
+
+Fixed renaming in the titlebar as it wasnt always working, broke at some point
+while refactoring to work in libraries.
+
+there is one more edge case - when I enter the component from a composite, and
+the component is in a public library, i can then change this component to
+private therefore removing it from the public library, it kinda works anyway.
+
+### Current task list
+
+[ ]sort out the navigation to library and/or component from composite
+[ ]show if composite is private or not
+[ ]handle user changing component private from inside libraries (redirect)
+[ ]handle user changing library to private and removing someone from guests.
+[ ]pagination in libraries view
+[ ]sharing composite library
+[ ]history log
+[ ] handle pset values and stats

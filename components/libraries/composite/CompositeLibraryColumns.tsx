@@ -69,7 +69,7 @@ export const compositeColumns: ColumnDef<LibraryRow>[] = [
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            <span className={headerClassname}>Name</span>
+            <span className={headerClassname}>Components</span>
             <ArrowUpDown />
           </Button>
         </div>

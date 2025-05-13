@@ -95,7 +95,6 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
                       <TableRow className="hover:bg-primary/90 bg-primary/80 text-background">
                         <TableCell colSpan={row.getVisibleCells().length}>
                           <CompositeLibrarySubrowTable
-                            libraryName={row.original.name}
                             libraryId={row.original.id}
                             columns={columns}
                             data={row.original.components}

@@ -3,19 +3,11 @@
 import Title from "@/components/editor/Title";
 import ComponentContentWrapper from "@/components/global/ComponentContentWrapper";
 import LoadingSpinner from "@/components/global/LoadingSpinner";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { useAppSelector } from "@/lib/hooks";
+import CompositeComponentBreadcrumbs from "@/components/libraries/composite/CompositeComponentBreadcrumbs";
 import { fetchCompositeComponent } from "@/utils/actions/libraryActions";
 import { componentWithGeometrySchemaType } from "@/utils/schemas";
 import { SelectedRow } from "@/utils/types";
-import { searchParamsToQuery } from "@/utils/utilFunctions";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
@@ -28,10 +20,6 @@ const Page = () => {
 
   const [libraryName, setLibraryName] = useState<string>("");
   const [compositeName, setCompositeName] = useState<string>("");
-
-  const stateSearchParams = useAppSelector(
-    (state) => state.libraryBrowser.librarySliceSearchParams,
-  );
 
   type responseType = {
     component: componentWithGeometrySchemaType;
@@ -72,41 +60,16 @@ const Page = () => {
     },
   };
 
-  const query = searchParamsToQuery(stateSearchParams);
-  const linkURL = `/libraries?${query}`;
-
   return (
     <div>
-      <Breadcrumb className="border-accent">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <Link href="/">Home</Link>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <Link href={linkURL}>Libraries</Link>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <Link href={`/libraries/composite/${compositeLibraryId}`}>
-              {compositeName}
-            </Link>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <Link
-              href={`/libraries/composite/${compositeLibraryId}/${libraryId}`}
-            >
-              {libraryName}
-            </Link>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <Link href={linkURL}>{data.component.name}</Link>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
       <Title componentData={componentData} />
+      <CompositeComponentBreadcrumbs
+        compositeName={compositeName}
+        compositeLibraryId={compositeLibraryId}
+        libraryName={libraryName}
+        libraryId={libraryId}
+        componentName={data.component.name}
+      />
       <ComponentContentWrapper
         componentGeometry={data.component.geometry}
         componentEditable={data.component.editable}

@@ -14,16 +14,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { ExpandableTable } from "@/components/libraries/composite/CompositeLibraryTable";
 import LoadingSpinner from "@/components/global/LoadingSpinner";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useAppSelector } from "@/lib/hooks";
 import { searchParamsToQuery } from "@/utils/utilFunctions";
 import Link from "next/link";
 import { LibraryInfo } from "@/utils/types";
 import CompositeLibraryTitle from "@/components/libraries/composite/CompositeLibraryTitle";
 import LibraryDescription from "@/components/libraries/LibraryDescription";
-import { updateCompositeNavigation } from "@/lib/features/libraries/libraryBrowserSlice";
 const Page = () => {
   const { compositeLibraryId } = useParams<{ compositeLibraryId: string }>();
-  const dispatch = useAppDispatch();
 
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["compositeLibrary", compositeLibraryId],
@@ -43,10 +41,6 @@ const Page = () => {
 
   if (!data) return <div>no data</div>;
   const libraryName = data.name;
-
-  dispatch(
-    updateCompositeNavigation({ id: compositeLibraryId, name: libraryName }),
-  );
 
   const tableData = data.Libraries.map((entry) => {
     return {
