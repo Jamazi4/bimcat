@@ -4,6 +4,7 @@ import RenameButtonTitleBar from "../global/RenameButtonTitleBar";
 import DownloadLibraryButton from "./DownloadLibraryButton";
 import ShareLibraryButton from "./ShareLibraryButton";
 import ManageGuestsButton from "./ManageGuestsButton";
+import { renameLibraryAction } from "@/utils/actions/libraryActions";
 
 const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
   const { name, isEditable, isPublic, empty, sharedId, guests } = libraryInfo;
@@ -16,7 +17,12 @@ const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
             {name}
           </h1>
           {isEditable && (
-            <RenameButtonTitleBar curName={name} isComposite={false} />
+            <RenameButtonTitleBar
+              curName={name}
+              isComposite={false}
+              action={renameLibraryAction}
+              isComponent={false}
+            />
           )}
         </div>
         <div className="flex space-x-4">

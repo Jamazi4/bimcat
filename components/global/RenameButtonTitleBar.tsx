@@ -18,44 +18,39 @@ import { Input } from "../ui/input";
 import { useAppDispatch } from "@/lib/hooks";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 import { useMutation } from "@tanstack/react-query";
-import { renameLibraryAction } from "@/utils/actions/libraryActions";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 
 export type RenameButtonProps = {
   action: (
-    prevState: unknown,
-    formData: FormData,
+    newName: string,
+    id: string,
+    isComposite?: boolean,
   ) => Promise<{
     message: string;
   }>;
   curName: string;
+  isComposite?: boolean;
+  isComponent: boolean;
 };
 
 const RenameButtonTitleBar = ({
   curName,
   isComposite,
-}: {
-  curName: string;
-  isComposite?: boolean;
-}) => {
+  action,
+}: RenameButtonProps) => {
   const params = useParams() || "";
-  const id = Object.values(params)[0] as string;
+  const paramValues = Object.values(params);
+  const id = paramValues[paramValues.length - 1] as string;
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
-  const [libraryName, setLibraryName] = useState(curName);
+  const [newName, setNewName] = useState(curName);
   const dispatch = useAppDispatch();
 
   const queryKey = isComposite ? ["compositeLibrary"] : ["libraryComponents"];
   const renameMutation = useMutation({
-    mutationFn: ({
-      libraryId,
-      newName,
-    }: {
-      libraryId: string;
-      newName: string;
-    }) => {
-      return renameLibraryAction(libraryId, newName, isComposite ?? false);
+    mutationFn: ({ id, newName }: { id: string; newName: string }) => {
+      return action(id, newName, isComposite ?? false);
     },
     meta: { invalidates: queryKey },
   });
@@ -65,7 +60,7 @@ const RenameButtonTitleBar = ({
     setPending(true);
 
     renameMutation.mutate(
-      { libraryId: id, newName: libraryName },
+      { id: id, newName },
       {
         onSuccess: (result) => {
           toast(result.message);
@@ -100,8 +95,8 @@ const RenameButtonTitleBar = ({
         <p>Enter new name</p>
         <div className="flex gap-2 mb-4 mt-4">
           <Input
-            onChange={(e) => setLibraryName(e.target.value)}
-            value={libraryName}
+            onChange={(e) => setNewName(e.target.value)}
+            value={newName}
             required={true}
           />
           <input type="hidden" name="id" value={id} />

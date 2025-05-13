@@ -553,13 +553,10 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
 };
 
 export const renameComponentAction = async (
-  _prevState: unknown,
-  formData: FormData,
+  componentId: string,
+  newName: string,
 ) => {
   try {
-    const newName = formData.get("newName") as string;
-    const componentId = formData.get("id") as string;
-
     const component = await prisma.component.findUnique({
       where: { id: componentId },
       select: { id: true, name: true, userId: true },

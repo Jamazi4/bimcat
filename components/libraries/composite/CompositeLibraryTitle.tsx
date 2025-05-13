@@ -2,6 +2,7 @@ import RenameButtonTitleBar from "@/components/global/RenameButtonTitleBar";
 import { Separator } from "@/components/ui/separator";
 import { LibraryInfo } from "@/utils/types";
 import DownloadLibraryButton from "../DownloadLibraryButton";
+import { renameLibraryAction } from "@/utils/actions/libraryActions";
 
 const CompositeLibraryTitle = ({
   libraryInfo,
@@ -17,7 +18,12 @@ const CompositeLibraryTitle = ({
             {name}
           </h1>
           {isEditable && (
-            <RenameButtonTitleBar curName={name} isComposite={true} />
+            <RenameButtonTitleBar
+              action={renameLibraryAction}
+              curName={name}
+              isComposite={true}
+              isComponent={false}
+            />
           )}
         </div>
         <div className="flex space-x-4">

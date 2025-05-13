@@ -512,9 +512,9 @@ export const toggleLibraryFavoritesAction = async (
 };
 
 export const renameLibraryAction = async (
-  libraryId: string,
+  id: string,
   newName: string,
-  isComposite: boolean,
+  isComposite?: boolean,
 ) => {
   try {
     let library: { name: string; id: string; userId: string } | null = null;
@@ -522,57 +522,52 @@ export const renameLibraryAction = async (
     if (isComposite) {
       library = await prisma.compositeLibrary.findUnique({
         where: {
-          id: libraryId,
+          id,
         },
         select: { id: true, name: true, userId: true },
       });
     } else {
       library = await prisma.library.findUnique({
         where: {
-          id: libraryId,
+          id,
         },
         select: { id: true, name: true, userId: true },
       });
     }
 
     if (!library) throw new Error("Library not found.");
-
     const oldName = library.name;
-
     const dbUser = await getDbUser();
-
     let authorized: boolean | undefined = false;
 
     if (isComposite) {
       const authoredCompositeLibraries = dbUser?.authoredCompositeLibraries.map(
         (lib) => lib.id,
       );
-
-      authorized = authoredCompositeLibraries?.some((id) => id === libraryId);
+      authorized = authoredCompositeLibraries?.some((curId) => curId === id);
     } else {
       const authoredLibrariesIds = dbUser?.authoredLibraries.map(
         (lib) => lib.id,
       );
-
-      authorized = authoredLibrariesIds?.some((id) => id === libraryId);
+      authorized = authoredLibrariesIds?.some((curId) => curId === id);
     }
 
     if (!authorized) throw new Error("Unauthorized.");
 
     if (isComposite) {
       await prisma.compositeLibrary.update({
-        where: { id: libraryId },
+        where: { id },
         data: { name: newName, updatedAt: new Date() },
       });
     } else {
       await prisma.library.update({
-        where: { id: libraryId },
+        where: { id },
         data: { name: newName, updatedAt: new Date() },
       });
     }
 
     revalidatePath(`/libraries`);
-    revalidatePath(`/libraries/${libraryId}`);
+    revalidatePath(`/libraries/${id}`);
 
     return { message: `Succesfully renamed ${oldName} to ${newName}` };
   } catch (error) {
@@ -1040,7 +1035,7 @@ export const fetchCompositeComponent = async (
       );
     const componentPublic = componentInfo.public;
 
-    const authorized = canAccessLibrary && componentPublic;
+    const authorized = canAccessLibrary || componentPublic;
 
     if (!authorized) throw new Error("Unauthorized");
 

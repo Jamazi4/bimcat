@@ -15,6 +15,7 @@ const Title = ({ componentData }: { componentData: SelectedRow }) => {
   const renameButtonProps: RenameButtonProps = {
     action: renameComponentAction,
     curName: name,
+    isComponent: true,
   };
   const icon = isPublic ? <Eye /> : <EyeClosed />;
   const shortLength = 60;
