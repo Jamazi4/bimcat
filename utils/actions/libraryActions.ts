@@ -1019,23 +1019,13 @@ export const fetchCompositeComponent = async (
   try {
     const dbUser = await getDbUser();
 
-    const componentInfo = await prisma.component.findUnique({
-      where: { id: componentId },
-      select: { public: true },
-    });
-
-    if (!componentInfo) throw new Error("Could not find Component");
-
-    const canAccessLibrary =
+    const authorized =
       dbUser?.authoredCompositeLibraries.some(
         (library) => library.id === compositeId,
       ) ||
       dbUser?.guestCompositeLibraries.some(
         (library) => library.id === compositeId,
       );
-    const componentPublic = componentInfo.public;
-
-    const authorized = canAccessLibrary || componentPublic;
 
     if (!authorized) throw new Error("Unauthorized");
 
@@ -1070,6 +1060,44 @@ export const fetchCompositeComponent = async (
     return {
       component: validatedComponent,
       libraryName: libraryName!.name,
+      compositeName: compositeName!.name,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchLibraryFromComposite = async (
+  libraryId: string,
+  compositeId: string,
+) => {
+  try {
+    const dbUser = await getDbUser();
+
+    const authorized =
+      dbUser?.authoredCompositeLibraries.some(
+        (library) => library.id === compositeId,
+      ) ||
+      dbUser?.guestCompositeLibraries.some(
+        (library) => library.id === compositeId,
+      );
+
+    if (!authorized) throw new Error("Unauthorized");
+
+    const compositeName = await prisma.compositeLibrary.findUnique({
+      where: { id: compositeId },
+      select: { name: true },
+    });
+
+    const library = await prisma.library.findUnique({
+      where: { id: libraryId },
+    });
+
+    if (!library && !compositeName) throw new Error("Could not find library");
+
+    return {
+      library,
+      libraryName: library!.name,
       compositeName: compositeName!.name,
     };
   } catch (error) {

@@ -3,6 +3,7 @@ import {
   BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbSeparator,
+  BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { useAppSelector } from "@/lib/hooks";
 import { searchParamsToQuery } from "@/utils/utilFunctions";
@@ -51,9 +52,7 @@ const CompositeComponentBreadcrumbs = ({
           </Link>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <Link href={linkURL}>{componentName}</Link>
-        </BreadcrumbItem>
+        <BreadcrumbPage>{componentName}</BreadcrumbPage>
       </BreadcrumbList>
     </Breadcrumb>
   );

@@ -349,4 +349,4 @@ private therefore removing it from the public library, it kinda works anyway.
 [ ]pagination in libraries view
 [ ]sharing composite library
 [ ]history log
-[ ] handle pset values and stats
+[ ]handle pset values and stats
