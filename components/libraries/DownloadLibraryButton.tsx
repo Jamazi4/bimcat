@@ -2,7 +2,7 @@
 
 import { DownloadIcon, LoaderCircle } from "lucide-react";
 import { Button } from "../ui/button";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   Tooltip,
@@ -30,7 +30,9 @@ const DownloadLibraryButton = ({
   isComposite: boolean;
 }) => {
   const params = useParams();
-  const libraryId = Object.values(params)[0] as string;
+  const pathname = usePathname();
+  const isInComposite = pathname.split("/")[2] === "composite";
+  const libraryId = Object.values(params)[isInComposite ? 1 : 0] as string;
   const [pending, setPending] = useState(false);
 
   const handleDownload = async () => {

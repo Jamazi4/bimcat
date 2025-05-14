@@ -62,7 +62,6 @@ const Page = () => {
 
   return (
     <div>
-      <Title componentData={componentData} />
       <CompositeComponentBreadcrumbs
         compositeName={compositeName}
         compositeLibraryId={compositeLibraryId}
@@ -70,6 +69,7 @@ const Page = () => {
         libraryId={libraryId}
         componentName={data.component.name}
       />
+      <Title componentData={componentData} />
       <ComponentContentWrapper
         componentGeometry={data.component.geometry}
         componentEditable={data.component.editable}

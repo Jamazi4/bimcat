@@ -1,6 +1,11 @@
 "use client";
 
+import BrowserFallback from "@/components/componentList/BrowserFallback";
+import { ComponentList } from "@/components/componentList/ComponentList";
+import { columns } from "@/components/componentList/ComponentListColumns";
 import LoadingSpinner from "@/components/global/LoadingSpinner";
+import LibraryDescription from "@/components/libraries/LibraryDescription";
+import LibraryTitle from "@/components/libraries/LibraryTitle";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,11 +19,9 @@ import { searchParamsToQuery } from "@/utils/utilFunctions";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense } from "react";
 
 const Page = () => {
-  const [libraryName, setLibraryName] = useState<string>("");
-  const [compositeName, setCompositeName] = useState<string>("");
   const { compositeLibraryId, libraryId } = useParams<{
     compositeLibraryId: string;
     libraryId: string;
@@ -34,8 +37,6 @@ const Page = () => {
         libraryId,
         compositeLibraryId,
       );
-      setLibraryName(result.libraryName);
-      setCompositeName(result.compositeName);
       return result;
     },
   });
@@ -49,29 +50,38 @@ const Page = () => {
       </div>
     );
 
-  if (!data) return <div>no data</div>;
+  if (!data || !data.frontendComponents) return <div>no data</div>;
+  const { frontendComponents, libraryInfo, compositeName } = data;
+
   const query = searchParamsToQuery(stateSearchParams);
   const linkURL = `/libraries?${query}`;
   return (
-    <Breadcrumb className="border-accent">
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <Link href="/">Home</Link>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <Link href={linkURL}>Libraries</Link>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <Link href={`/libraries/composite/${compositeLibraryId}`}>
-            {compositeName}
-          </Link>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbPage>{libraryName}</BreadcrumbPage>
-      </BreadcrumbList>
-    </Breadcrumb>
+    <div>
+      <Breadcrumb className="border-accent">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <Link href="/">Home</Link>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <Link href={linkURL}>Libraries</Link>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <Link href={`/libraries/composite/${compositeLibraryId}`}>
+              {compositeName}
+            </Link>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbPage>{libraryInfo.name}</BreadcrumbPage>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <LibraryTitle libraryInfo={libraryInfo} />
+      <Suspense fallback={<BrowserFallback />}>
+        <ComponentList columns={columns} data={frontendComponents} />
+        <LibraryDescription libraryId={libraryId} libraryInfo={libraryInfo} />
+      </Suspense>
+    </div>
   );
 };
 

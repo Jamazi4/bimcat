@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronDown, ChevronRight } from "lucide-react";
+import GoToLibraryButton from "./GoToLibraryButton";
 
 export type LibraryRow = {
   id: string;
@@ -61,7 +62,6 @@ export const compositeColumns: ColumnDef<LibraryRow>[] = [
   },
   {
     id: "Components",
-    accessorFn: (row) => row.components.length,
     header: ({ column }) => {
       return (
         <div className="flex justify-center">
@@ -141,6 +141,12 @@ export const compositeColumns: ColumnDef<LibraryRow>[] = [
     },
     cell: ({ row }) => {
       return <div className={cellClassnameLeft}>{row.original.author}</div>;
+    },
+  },
+  {
+    id: "action",
+    cell: ({ row }) => {
+      return <GoToLibraryButton id={row.original.id} />;
     },
   },
 ];

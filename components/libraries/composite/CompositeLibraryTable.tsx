@@ -92,7 +92,7 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
                   {isExpanded &&
                     row.original.components &&
                     row.original.components.length > 0 && (
-                      <TableRow className="hover:bg-primary/90 bg-primary/80 text-background">
+                      <TableRow className="hover:bg-background">
                         <TableCell colSpan={row.getVisibleCells().length}>
                           <CompositeLibrarySubrowTable
                             libraryId={row.original.id}

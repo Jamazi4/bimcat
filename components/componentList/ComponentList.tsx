@@ -42,6 +42,7 @@ export function ComponentList<TData, TValue>({
   const router = useRouter();
 
   const isInLibraries = pathname.split("/")[1] === "libraries";
+  const isInComposite = pathname.split("/")[2] === "composite";
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localSelection, setLocalSelection] = useState({});
@@ -98,11 +99,17 @@ export function ComponentList<TData, TValue>({
     const isAnyDialogOpen = document.querySelector('[data-state="open"]');
     if (isAnyDialogOpen) return;
     const originalRow = row.original as ComponentRow;
-    if (!isInLibraries) {
-      router.push(`/components/${originalRow.id}`);
-    } else {
+    if (isInComposite) {
+      const libraryId = pathname.split("/")[4];
+      const compositeId = pathname.split("/")[3];
+      router.push(
+        `/libraries/composite/${compositeId}/${libraryId}/${originalRow.id}`,
+      );
+    } else if (isInLibraries) {
       const libraryId = pathname.split("/")[2];
       router.push(`/libraries/${libraryId}/${originalRow.id}`);
+    } else {
+      router.push(`/components/${originalRow.id}`);
     }
   };
 

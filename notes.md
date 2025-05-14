@@ -340,9 +340,15 @@ there is one more edge case - when I enter the component from a composite, and
 the component is in a public library, i can then change this component to
 private therefore removing it from the public library, it kinda works anyway.
 
+### --14.05.2025--
+
+You can now navigate to the library from the composite menu
+still need to add button from the composite list
+either add private inside library title bar or remove it from component
+
 ### Current task list
 
-[ ]sort out the navigation to library and/or component from composite
+[x]sort out the navigation to library and/or component from composite
 [ ]show if composite is private or not
 [ ]handle user changing component private from inside libraries (redirect)
 [ ]handle user changing library to private and removing someone from guests.

@@ -275,54 +275,62 @@ export const addComponentToLibraryAction = async (
   }
 };
 
+const getLibraryListData = async (libraryId: string, userId?: string) => {
+  const library = await prisma.library.findUnique({
+    where: { id: libraryId },
+    include: { Components: true, guests: true },
+  });
+
+  if (!library) throw new Error("Could not fetch library");
+  const frontendGuests = library.guests.map((guest) => {
+    return { name: `${guest.firstName} ${guest.secondName}`, id: guest.id };
+  });
+  const frontendComponents = library?.Components.map((component) => {
+    return {
+      id: component.id,
+      name: component.name,
+      createdAt: component.createdAt.toISOString(),
+      updatedAt: component.updatedAt.toISOString(),
+      author: component.author,
+      public: component.public,
+      editable: component.userId === userId,
+    };
+  });
+
+  const libraryEditable = library.userId === userId;
+
+  const libraryInfo: LibraryInfo = {
+    empty: library.Components.length === 0,
+    name: library?.name,
+    desc: library?.description,
+    isEditable: libraryEditable,
+    sharedId: library.sharedId || "",
+    isPublic: library.public,
+    guests: frontendGuests,
+  };
+
+  return { libraryInfo, frontendComponents };
+};
+
 export const fetchLibraryComponents = async (libraryId: string) => {
   try {
     const dbUser = await getDbUser();
 
-    const library = await prisma.library.findUnique({
+    const libraryPublic = await prisma.library.findUnique({
       where: { id: libraryId },
-      include: { Components: true, guests: true },
+      select: { public: true },
     });
-
-    if (!library) throw new Error("Could not fetch library");
 
     let hasRights = false;
     if (dbUser) {
       hasRights = authReadLibrary(dbUser, libraryId);
     }
 
-    const authorized = hasRights || library.public;
+    const authorized = hasRights || libraryPublic;
 
     if (!authorized) throw new Error("Unauthorized");
 
-    const frontendGuests = library.guests.map((guest) => {
-      return { name: `${guest.firstName} ${guest.secondName}`, id: guest.id };
-    });
-    const frontendComponents = library?.Components.map((component) => {
-      return {
-        id: component.id,
-        name: component.name,
-        createdAt: component.createdAt.toISOString(),
-        updatedAt: component.updatedAt.toISOString(),
-        author: component.author,
-        public: component.public,
-        editable: component.userId === dbUser?.id,
-      };
-    });
-
-    const libraryEditable = library.userId === dbUser?.id;
-
-    const libraryInfo: LibraryInfo = {
-      empty: library.Components.length === 0,
-      name: library?.name,
-      desc: library?.description,
-      isEditable: libraryEditable,
-      sharedId: library.sharedId || "",
-      isPublic: library.public,
-      guests: frontendGuests,
-    };
-
-    return { libraryInfo, frontendComponents };
+    return getLibraryListData(libraryId, dbUser?.id);
   } catch (error) {
     console.log(error);
   }
@@ -1089,15 +1097,16 @@ export const fetchLibraryFromComposite = async (
       select: { name: true },
     });
 
-    const library = await prisma.library.findUnique({
-      where: { id: libraryId },
-    });
+    const { frontendComponents, libraryInfo } = await getLibraryListData(
+      libraryId,
+      dbUser?.id,
+    );
 
-    if (!library && !compositeName) throw new Error("Could not find library");
+    if (!compositeName) throw new Error("Could not find library");
 
     return {
-      library,
-      libraryName: library!.name,
+      frontendComponents,
+      libraryInfo,
       compositeName: compositeName!.name,
     };
   } catch (error) {
