@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import LoadingSpinner from "@/components/global/LoadingSpinner";
 import LibraryDescription from "@/components/libraries/LibraryDescription";
+import LibraryInfo from "@/components/libraries/LibraryInfo";
 
 const Page = () => {
   const { libraryId } = useParams<{ libraryId: string }>();
@@ -38,8 +39,18 @@ const Page = () => {
       <LibraryTitle libraryInfo={libraryInfo} />
       <Suspense fallback={<BrowserFallback />}>
         <ComponentList columns={columns} data={frontendComponents} />
-        <LibraryDescription libraryId={libraryId} libraryInfo={libraryInfo} />
       </Suspense>
+      <LibraryInfo
+        author={data.libraryInfo.author}
+        createdAt={data.libraryInfo.createdAt}
+        updatedAt={data.libraryInfo.updatedAt}
+        isPublic={data.libraryInfo.isPublic}
+      />
+      <LibraryDescription
+        isEditable={data.libraryInfo.isEditable}
+        libraryId={libraryId}
+        libraryInfo={libraryInfo}
+      />
     </main>
   );
 };

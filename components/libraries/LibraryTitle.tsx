@@ -1,4 +1,4 @@
-import { LibraryInfo } from "@/utils/types";
+import { LibraryInfoType } from "@/utils/types";
 import { Separator } from "../ui/separator";
 import RenameButtonTitleBar from "../global/RenameButtonTitleBar";
 import DownloadLibraryButton from "./DownloadLibraryButton";
@@ -6,7 +6,7 @@ import ShareLibraryButton from "./ShareLibraryButton";
 import ManageGuestsButton from "./ManageGuestsButton";
 import { renameLibraryAction } from "@/utils/actions/libraryActions";
 
-const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfo }) => {
+const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfoType }) => {
   const { name, isEditable, isPublic, empty, sharedId, guests } = libraryInfo;
 
   return (

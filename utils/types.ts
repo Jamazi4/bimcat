@@ -42,7 +42,10 @@ export type SelectedRow = Record<
   { name: string; editable: boolean; isPublic: boolean }
 >;
 
-export type LibraryInfo = {
+export type LibraryInfoType = {
+  updatedAt: string;
+  createdAt: string;
+  author: string;
   empty: boolean;
   name: string;
   desc: string;

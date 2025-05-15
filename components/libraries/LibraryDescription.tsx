@@ -1,6 +1,6 @@
 "use client";
 
-import { LibraryInfo } from "@/utils/types";
+import { LibraryInfoType } from "@/utils/types";
 import { Button } from "../ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { editLibraryDescriptionAction } from "@/utils/actions/libraryActions";
@@ -20,9 +20,11 @@ import { toast } from "sonner";
 const LibraryDescription = ({
   libraryInfo,
   libraryId,
+  isEditable,
 }: {
-  libraryInfo: LibraryInfo;
+  libraryInfo: LibraryInfoType;
   libraryId: string;
+  isEditable: boolean;
 }) => {
   const [description, setDescription] = useState(libraryInfo.desc);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -68,12 +70,18 @@ const LibraryDescription = ({
   };
 
   return (
-    <div className="mt-12">
+    <div className="my-2">
       <div className="flex items-center space-x-2 pb-2">
         <h1 className="font-semibold">Description</h1>
-        <Button onClick={() => setDialogOpen(true)} variant="ghost" size="icon">
-          <Pencil />
-        </Button>
+        {isEditable && (
+          <Button
+            onClick={() => setDialogOpen(true)}
+            variant="ghost"
+            size="icon"
+          >
+            <Pencil />
+          </Button>
+        )}
       </div>
       <div className="flex flex-col items-end gap-y-2">
         {libraryInfo.desc && (

@@ -5,6 +5,7 @@ import { ComponentList } from "@/components/componentList/ComponentList";
 import { columns } from "@/components/componentList/ComponentListColumns";
 import LoadingSpinner from "@/components/global/LoadingSpinner";
 import LibraryDescription from "@/components/libraries/LibraryDescription";
+import LibraryInfo from "@/components/libraries/LibraryInfo";
 import LibraryTitle from "@/components/libraries/LibraryTitle";
 import {
   Breadcrumb,
@@ -79,8 +80,18 @@ const Page = () => {
       <LibraryTitle libraryInfo={libraryInfo} />
       <Suspense fallback={<BrowserFallback />}>
         <ComponentList columns={columns} data={frontendComponents} />
-        <LibraryDescription libraryId={libraryId} libraryInfo={libraryInfo} />
       </Suspense>
+      <LibraryInfo
+        author={data.libraryInfo.author}
+        isPublic={data.libraryInfo.isPublic}
+        updatedAt={data.libraryInfo.updatedAt}
+        createdAt={data.libraryInfo.createdAt}
+      />
+      <LibraryDescription
+        isEditable={libraryInfo.isEditable}
+        libraryId={libraryId}
+        libraryInfo={libraryInfo}
+      />
     </div>
   );
 };

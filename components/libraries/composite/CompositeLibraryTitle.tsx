@@ -1,6 +1,6 @@
 import RenameButtonTitleBar from "@/components/global/RenameButtonTitleBar";
 import { Separator } from "@/components/ui/separator";
-import { LibraryInfo } from "@/utils/types";
+import { LibraryInfoType } from "@/utils/types";
 import DownloadLibraryButton from "../DownloadLibraryButton";
 import { renameLibraryAction } from "@/utils/actions/libraryActions";
 import MergeLibraryButton from "./MergeLibraryButton";
@@ -8,7 +8,7 @@ import MergeLibraryButton from "./MergeLibraryButton";
 const CompositeLibraryTitle = ({
   libraryInfo,
 }: {
-  libraryInfo: LibraryInfo;
+  libraryInfo: LibraryInfoType;
 }) => {
   const { name, isEditable, empty } = libraryInfo;
   return (

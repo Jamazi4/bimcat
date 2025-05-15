@@ -11,7 +11,7 @@ import {
 } from "../schemas";
 import {
   LibrariesSearchParamsType,
-  LibraryInfo,
+  LibraryInfoType,
   LibraryErrors,
 } from "../types";
 import { v4 as uuidv4 } from "uuid";
@@ -278,7 +278,11 @@ export const addComponentToLibraryAction = async (
 const getLibraryListData = async (libraryId: string, userId?: string) => {
   const library = await prisma.library.findUnique({
     where: { id: libraryId },
-    include: { Components: true, guests: true },
+    include: {
+      Components: true,
+      guests: true,
+      author: { select: { firstName: true, secondName: true } },
+    },
   });
 
   if (!library) throw new Error("Could not fetch library");
@@ -297,9 +301,13 @@ const getLibraryListData = async (libraryId: string, userId?: string) => {
     };
   });
 
+  const authorString = `${library.author.firstName} ${library.author.secondName}`;
   const libraryEditable = library.userId === userId;
 
-  const libraryInfo: LibraryInfo = {
+  const libraryInfo: LibraryInfoType = {
+    createdAt: library.createdAt.toISOString(),
+    updatedAt: library.updatedAt.toISOString(),
+    author: authorString,
     empty: library.Components.length === 0,
     name: library?.name,
     desc: library?.description,
@@ -948,6 +956,7 @@ export const fetchCompositeLibraryAction = async (
     const compositeLibrary = await prisma.compositeLibrary.findUnique({
       where: { id: compositeLibraryId },
       include: {
+        author: { select: { firstName: true, secondName: true } },
         guests: { select: { firstName: true, secondName: true, id: true } },
         Libraries: {
           include: {

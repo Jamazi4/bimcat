@@ -16,9 +16,10 @@ import LoadingSpinner from "@/components/global/LoadingSpinner";
 import { useAppSelector } from "@/lib/hooks";
 import { searchParamsToQuery } from "@/utils/utilFunctions";
 import Link from "next/link";
-import { LibraryInfo } from "@/utils/types";
+import { LibraryInfoType as LibraryInfoType } from "@/utils/types";
 import CompositeLibraryTitle from "@/components/libraries/composite/CompositeLibraryTitle";
 import LibraryDescription from "@/components/libraries/LibraryDescription";
+import LibraryInfo from "@/components/libraries/LibraryInfo";
 const Page = () => {
   const { compositeLibraryId } = useParams<{ compositeLibraryId: string }>();
 
@@ -63,7 +64,11 @@ const Page = () => {
     };
   });
 
-  const libraryInfo: LibraryInfo = {
+  const authorString = `${data.author.firstName} ${data.author.secondName}`;
+  const libraryInfo: LibraryInfoType = {
+    createdAt: data.createdAt.toISOString(),
+    updatedAt: data.updatedAt.toISOString(),
+    author: authorString,
     empty: data.Libraries.length === 0,
     name: data.name,
     desc: data.description,
@@ -84,7 +89,14 @@ const Page = () => {
       <Breadcrumbs libraryName={libraryName} />
       <CompositeLibraryTitle libraryInfo={libraryInfo} />
       <ExpandableTable data={tableData} />
+      <LibraryInfo
+        author={authorString}
+        updatedAt={libraryInfo.updatedAt}
+        createdAt={libraryInfo.createdAt}
+        isPublic={libraryInfo.isPublic}
+      />
       <LibraryDescription
+        isEditable={libraryInfo.isEditable}
         libraryInfo={libraryInfo}
         libraryId={compositeLibraryId}
       />

@@ -357,10 +357,13 @@ normal library, where it's just a normal server action)
 In the future it might be beneficial to use guery in all these places and switch
 formcontainer everywhere to just mutations
 
+Also created libraryInfo component, visually not okay - maybe do as one with
+description?
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite
-[ ]show if composite is private or not
+[x]show if composite is private or not
 [ ]handle user changing component private from inside libraries (redirect)
 [ ]handle user changing library to private and removing someone from guests.
 [ ]pagination in libraries view
