@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import { LibraryInfo } from "@/utils/types";
 import DownloadLibraryButton from "../DownloadLibraryButton";
 import { renameLibraryAction } from "@/utils/actions/libraryActions";
+import MergeLibraryButton from "./MergeLibraryButton";
 
 const CompositeLibraryTitle = ({
   libraryInfo,
@@ -18,16 +19,19 @@ const CompositeLibraryTitle = ({
             {name}
           </h1>
           {isEditable && (
-            <RenameButtonTitleBar
-              action={renameLibraryAction}
-              curName={name}
-              isComposite={true}
-              isComponent={false}
-            />
+            <div>
+              <RenameButtonTitleBar
+                action={renameLibraryAction}
+                curName={name}
+                isComposite={true}
+                isComponent={false}
+              />
+            </div>
           )}
         </div>
         <div className="flex space-x-4">
           <DownloadLibraryButton libraryEmpty={empty} isComposite={true} />
+          <MergeLibraryButton />
         </div>
       </div>
       <Separator className="mt-2" />

@@ -346,6 +346,17 @@ You can now navigate to the library from the composite menu
 still need to add button from the composite list
 either add private inside library title bar or remove it from component
 
+!ISSUE when editing psets while accessing component from composite library,it
+doesn't refetch but works when accessed from normal library????
+
+### --15-05-2025--
+
+Sorted the issue with editing psets, the problem was that I used query to fetch
+composite component, as opposed to the other places (component browser and
+normal library, where it's just a normal server action)
+In the future it might be beneficial to use guery in all these places and switch
+formcontainer everywhere to just mutations
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite

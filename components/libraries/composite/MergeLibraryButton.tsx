@@ -17,7 +17,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown, FolderDot, LoaderCircle } from "lucide-react";
+import {
+  BookPlus,
+  Check,
+  ChevronsUpDown,
+  FolderDot,
+  LoaderCircle,
+} from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -33,6 +39,12 @@ import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 import InfoMessage from "@/components/global/InfoMessage";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const MergeLibraryButton = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -88,7 +100,26 @@ const MergeLibraryButton = () => {
       }}
     >
       <DialogTrigger asChild>
-        <Button>Merge</Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="cursor-pointer"
+                onClick={() => setDialogOpen(true)}
+                disabled={pending}
+              >
+                {pending ? (
+                  <LoaderCircle className="animate-spin" />
+                ) : (
+                  <BookPlus />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Merge</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </DialogTrigger>
       <DialogContent onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
@@ -108,6 +139,7 @@ const MergeLibraryButton = () => {
           <Button
             onClick={(e) => {
               handleMerge(e);
+              setDialogOpen(false);
             }}
             disabled={pending}
             className="w-30 mt-4"

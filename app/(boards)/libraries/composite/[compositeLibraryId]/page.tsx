@@ -1,6 +1,5 @@
 "use client";
 
-import MergeLibraryButton from "@/components/libraries/composite/MergeLibraryButton";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -85,9 +84,6 @@ const Page = () => {
       <Breadcrumbs libraryName={libraryName} />
       <CompositeLibraryTitle libraryInfo={libraryInfo} />
       <ExpandableTable data={tableData} />
-      <div className="justify-end flex w-full mt-2">
-        <MergeLibraryButton />
-      </div>
       <LibraryDescription
         libraryInfo={libraryInfo}
         libraryId={compositeLibraryId}

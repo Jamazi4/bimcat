@@ -20,7 +20,7 @@ const PsetAccordion = ({
     <Accordion type="multiple" className="w-full flex-1">
       {psets.map((pset, index) => {
         return (
-          <AccordionItem value={pset.title} key={index}>
+          <AccordionItem value={pset.title} key={`${pset.title}${index}`}>
             <AccordionTrigger className="text-primary">
               {pset.title}
             </AccordionTrigger>
