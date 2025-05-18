@@ -80,6 +80,10 @@ edge cases:
      will become private. In this case it will still be in your composite library
      until the owner removes you from the guests.
 
+   - Removing a library from your favorites will remove you from it's guests and
+     therefore remove all occurances of this library in any composite library you
+     own
+
 ## KNOWN ISSUES
 
 - the last pset won't trigger toast on removal -
@@ -365,13 +369,18 @@ description?
 Fixed a bit the liraryInfo component and also removed select column from all
 library views if library is not editable
 
+Also instead of handling the togglecomponentPrivate from inside library inside
+a component I removed the toggle button from component view at all.
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite
 [x]show if composite is private or not
-[ ]handle user changing component private from inside libraries (redirect)
+[x]handle user changing component private from inside libraries (just removed button)
+[ ]restrict merging libraries with uncompatible privacy status
 [ ]handle user changing library to private and removing someone from guests.
-[ ]pagination in libraries view
+[ ]handle removing library from favorites
+[ ]pagination in libraries view and component browser
 [ ]sharing composite library
 [ ]history log
 [ ]handle pset values and stats

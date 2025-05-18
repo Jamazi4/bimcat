@@ -3,6 +3,7 @@ import { fetchSingleComponentAction } from "@/utils/actions/componentActions";
 import ComponentContentBreadcrums from "./ComponentContentBreacrumbs";
 import { SelectedRow } from "@/utils/types";
 import ComponentContentWrapper from "../global/ComponentContentWrapper";
+import LibraryInfo from "../libraries/LibraryInfo";
 
 const ComponentContent = async ({
   params,
@@ -28,6 +29,12 @@ const ComponentContent = async ({
     <div>
       <ComponentContentBreadcrums name={component.name} />
       <Title componentData={componentData} />
+      <LibraryInfo
+        author={component.author}
+        updatedAt={component.updatedAt.toISOString()}
+        createdAt={component.createdAt.toISOString()}
+        isPublic={component.public}
+      />
       <ComponentContentWrapper
         componentGeometry={component.geometry}
         componentEditable={component.editable}

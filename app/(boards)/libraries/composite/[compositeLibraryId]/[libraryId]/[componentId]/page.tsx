@@ -3,6 +3,7 @@
 import Title from "@/components/editor/Title";
 import ComponentContentWrapper from "@/components/global/ComponentContentWrapper";
 import CompositeComponentBreadcrumbs from "@/components/libraries/composite/CompositeComponentBreadcrumbs";
+import LibraryInfo from "@/components/libraries/LibraryInfo";
 import { fetchCompositeComponent } from "@/utils/actions/libraryActions";
 import { SelectedRow } from "@/utils/types";
 
@@ -84,6 +85,12 @@ const Page = async ({
         componentName={result.component.name}
       />
       <Title componentData={componentData} />
+      <LibraryInfo
+        author={result.component.author}
+        updatedAt={result.component.updatedAt.toISOString()}
+        createdAt={result.component.createdAt.toISOString()}
+        isPublic={result.component.public}
+      />
       <ComponentContentWrapper
         componentGeometry={result.component.geometry}
         componentEditable={result.component.editable}

@@ -3,6 +3,7 @@ import { SelectedRow } from "@/utils/types";
 import { fetchSingleLibraryComponentAction } from "@/utils/actions/libraryActions";
 import LibraryComponentContentBreadcrumbs from "./LibraryComponentContentBreadcrumbs";
 import ComponentContentWrapper from "../global/ComponentContentWrapper";
+import LibraryInfo from "./LibraryInfo";
 
 const LibraryComponentContent = async ({
   params,
@@ -37,7 +38,12 @@ const LibraryComponentContent = async ({
         libraryName={libraryName}
       />
       <Title componentData={componentData} />
-
+      <LibraryInfo
+        author={component.author}
+        updatedAt={component.updatedAt.toISOString()}
+        createdAt={component.createdAt.toISOString()}
+        isPublic={component.public}
+      />
       <ComponentContentWrapper
         componentGeometry={component.geometry}
         componentEditable={component.editable}
