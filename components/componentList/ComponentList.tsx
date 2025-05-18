@@ -28,21 +28,22 @@ import { usePathname } from "next/navigation";
 import LibraryActionButtons from "../libraries/LibraryActionButtons";
 import { SelectedRow } from "@/utils/types";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-}
-
 export function ComponentList<TData, TValue>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+  libraryEditable,
+}: {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  libraryEditable?: boolean;
+}) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
 
   const isInLibraries = pathname.split("/")[1] === "libraries";
   const isInComposite = pathname.split("/")[2] === "composite";
+  const showSelect = libraryEditable === undefined ? true : libraryEditable;
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localSelection, setLocalSelection] = useState({});
@@ -56,6 +57,9 @@ export function ComponentList<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onRowSelectionChange: setLocalSelection,
     initialState: {
+      columnVisibility: {
+        select: showSelect,
+      },
       pagination: {
         pageSize: 10,
       },
@@ -97,8 +101,10 @@ export function ComponentList<TData, TValue>({
 
   const handleRowClick = (row: Row<TData>) => {
     const isAnyDialogOpen = document.querySelector('[data-state="open"]');
+
     if (isAnyDialogOpen) return;
     const originalRow = row.original as ComponentRow;
+
     if (isInComposite) {
       const libraryId = pathname.split("/")[4];
       const compositeId = pathname.split("/")[3];

@@ -88,13 +88,13 @@ const Page = () => {
     <main>
       <Breadcrumbs libraryName={libraryName} />
       <CompositeLibraryTitle libraryInfo={libraryInfo} />
-      <ExpandableTable data={tableData} />
       <LibraryInfo
         author={authorString}
         updatedAt={libraryInfo.updatedAt}
         createdAt={libraryInfo.createdAt}
         isPublic={libraryInfo.isPublic}
       />
+      <ExpandableTable data={tableData} />
       <LibraryDescription
         isEditable={libraryInfo.isEditable}
         libraryInfo={libraryInfo}

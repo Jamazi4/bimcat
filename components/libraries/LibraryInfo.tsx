@@ -10,34 +10,37 @@ const LibraryInfo = ({
   createdAt: string;
   isPublic: boolean;
 }) => {
+  const cellClassname = "text-start w-full";
+  const rowClassName = "grid grid-cols-[90px_1fr]";
+  const colClassname = "mr-4 grid grid-rows-2 gap-2";
   return (
     <div className="my-2 mb-4">
-      <h2 className="font-bold">Info</h2>
-      <div className="grid-cols-2 grid bg-accent rounded-md p-2 my-2 text-secondary-foreground">
-        <div className="mr-4">
-          <div className="flex justify-between">
+      <div className="grid-cols-2 grid bg-accent rounded-md p-2 my-2 text-secondary-foreground gap-6 ">
+        <div className={colClassname}>
+          <div className={rowClassName}>
             <p>Author:</p>
-            <div className="text-center w-full">
+            <div className={cellClassname}>
               <p>{author}</p>
             </div>
           </div>
-          <div className="flex justify-between">
+          <div className={rowClassName}>
             <p>Public:</p>
-            <div className="text-center w-full">
+            <div className={cellClassname}>
               <p>{isPublic.toString()}</p>
             </div>
           </div>
         </div>
-        <div className="mr-4">
-          <div className="flex justify-between">
+
+        <div className={colClassname}>
+          <div className={rowClassName}>
             <p>Updated:</p>
-            <div className="text-center w-full">
+            <div className={cellClassname}>
               <p>{format(updatedAt, "dd-MM-yy HH:mm")}</p>
             </div>
           </div>
-          <div className="flex justify-between">
+          <div className={rowClassName}>
             <p>Created:</p>
-            <div className="text-center w-full">
+            <div className={cellClassname}>
               <p>{format(createdAt, "dd-MM-yy HH:mm")}</p>
             </div>
           </div>

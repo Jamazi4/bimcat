@@ -78,15 +78,15 @@ const Page = () => {
         </BreadcrumbList>
       </Breadcrumb>
       <LibraryTitle libraryInfo={libraryInfo} />
-      <Suspense fallback={<BrowserFallback />}>
-        <ComponentList columns={columns} data={frontendComponents} />
-      </Suspense>
       <LibraryInfo
         author={data.libraryInfo.author}
         isPublic={data.libraryInfo.isPublic}
         updatedAt={data.libraryInfo.updatedAt}
         createdAt={data.libraryInfo.createdAt}
       />
+      <Suspense fallback={<BrowserFallback />}>
+        <ComponentList columns={columns} data={frontendComponents} />
+      </Suspense>
       <LibraryDescription
         isEditable={libraryInfo.isEditable}
         libraryId={libraryId}

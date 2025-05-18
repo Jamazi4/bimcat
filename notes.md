@@ -360,6 +360,11 @@ formcontainer everywhere to just mutations
 Also created libraryInfo component, visually not okay - maybe do as one with
 description?
 
+### --18-05-2025--
+
+Fixed a bit the liraryInfo component and also removed select column from all
+library views if library is not editable
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite

@@ -33,19 +33,26 @@ const Page = () => {
 
   if (!frontendComponents) return <div>No components found.</div>;
 
+  {
+    console.log(libraryInfo.isEditable);
+  }
   return (
     <main className="w-full px-4 justify-center mx-auto">
       <LibraryBreadCrumbs libraryName={libraryInfo.name} />
       <LibraryTitle libraryInfo={libraryInfo} />
-      <Suspense fallback={<BrowserFallback />}>
-        <ComponentList columns={columns} data={frontendComponents} />
-      </Suspense>
       <LibraryInfo
         author={data.libraryInfo.author}
         createdAt={data.libraryInfo.createdAt}
         updatedAt={data.libraryInfo.updatedAt}
         isPublic={data.libraryInfo.isPublic}
       />
+      <Suspense fallback={<BrowserFallback />}>
+        <ComponentList
+          columns={columns}
+          data={frontendComponents}
+          libraryEditable={libraryInfo.isEditable}
+        />
+      </Suspense>
       <LibraryDescription
         isEditable={data.libraryInfo.isEditable}
         libraryId={libraryId}
