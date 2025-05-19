@@ -172,7 +172,12 @@ const MergableList = ({
 
   const [open, setOpen] = useState(false);
   const libraries = stateLibraries
-    .filter((lib) => (lib.isEditable || lib.isFavorite) && !lib.isComposite)
+    .filter((lib) => {
+      if (curCompositeLibrary?.isPublic) {
+        if (!lib.isPublic) return false;
+      }
+      return (lib.isEditable || lib.isFavorite) && !lib.isComposite;
+    })
     .map((lib) => {
       return {
         value: lib.id,
