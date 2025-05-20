@@ -5,11 +5,15 @@ import { usePathname, useRouter } from "next/navigation";
 
 const GoToLibraryButton = ({ id }: { id: string }) => {
   const router = useRouter();
-  const path = usePathname();
+  let path = usePathname();
+  if (path.includes("browse")) {
+    path = path.replace("browse", "");
+  }
   return (
     <Button
       size="icon"
       variant="ghost"
+      className="cursor-pointer"
       onClick={() => {
         router.push(`${path}/${id}`);
       }}

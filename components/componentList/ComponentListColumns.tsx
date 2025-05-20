@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { ArrowUpDown, Eye, EyeOff } from "lucide-react";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
+import GoToLibraryButton from "../libraries/composite/GoToLibraryButton";
 
 export type ComponentRow = {
   id: string;
@@ -146,6 +147,12 @@ export const columns: ColumnDef<ComponentRow>[] = [
           )}
         </div>
       );
+    },
+  },
+  {
+    id: "action",
+    cell: ({ row }) => {
+      return <GoToLibraryButton id={row.original.id} />;
     },
   },
 ];

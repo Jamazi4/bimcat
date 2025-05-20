@@ -5,6 +5,7 @@ import DownloadLibraryButton from "./DownloadLibraryButton";
 import ShareLibraryButton from "./ShareLibraryButton";
 import ManageGuestsButton from "./ManageGuestsButton";
 import { renameLibraryAction } from "@/utils/actions/libraryActions";
+import { Book } from "lucide-react";
 
 const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfoType }) => {
   const { name, isEditable, isPublic, empty, sharedId, guests } = libraryInfo;
@@ -14,7 +15,10 @@ const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfoType }) => {
       <div className="flex justify-between">
         <div className="flex items-center space-x-2">
           <h1 className="font-bold text-xl text-primary whitespace-nowrap">
-            {name}
+            <div className="flex">
+              <Book className="mr-2" />
+              {name}
+            </div>
           </h1>
           {isEditable && (
             <RenameButtonTitleBar

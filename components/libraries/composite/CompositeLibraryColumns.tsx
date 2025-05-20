@@ -2,7 +2,13 @@ import { ComponentRow } from "@/components/componentList/ComponentListColumns";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  ArrowUpDown,
+  ChevronDown,
+  ChevronRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import GoToLibraryButton from "./GoToLibraryButton";
 
 export type LibraryRow = {
@@ -141,6 +147,36 @@ export const compositeColumns: ColumnDef<LibraryRow>[] = [
     },
     cell: ({ row }) => {
       return <div className={cellClassnameLeft}>{row.original.author}</div>;
+    },
+  },
+  {
+    accessorKey: "public",
+    id: "private",
+    header: ({ column }) => {
+      return (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <span className={headerClassname}>Public</span>
+            <ArrowUpDown />
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const component = row.original;
+      const className = "h-5 w-5 mx-auto";
+      return (
+        <div className={cellClassname}>
+          {component.public ? (
+            <Eye className={className} />
+          ) : (
+            <EyeOff className={className} />
+          )}
+        </div>
+      );
     },
   },
   {

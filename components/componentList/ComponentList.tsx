@@ -5,7 +5,6 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
-  Row,
   useReactTable,
   SortingState,
   getSortedRowModel,
@@ -20,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ComponentRow } from "./ComponentListColumns";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import BrowserActionButtons from "./BrowserActionButtons";
@@ -39,10 +38,8 @@ export function ComponentList<TData, TValue>({
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const router = useRouter();
 
   const isInLibraries = pathname.split("/")[1] === "libraries";
-  const isInComposite = pathname.split("/")[2] === "composite";
   const showSelect = libraryEditable === undefined ? true : libraryEditable;
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -99,26 +96,6 @@ export function ComponentList<TData, TValue>({
     setLocalSelection([]);
   }, [searchParams]);
 
-  const handleRowClick = (row: Row<TData>) => {
-    const isAnyDialogOpen = document.querySelector('[data-state="open"]');
-
-    if (isAnyDialogOpen) return;
-    const originalRow = row.original as ComponentRow;
-
-    if (isInComposite) {
-      const libraryId = pathname.split("/")[4];
-      const compositeId = pathname.split("/")[3];
-      router.push(
-        `/libraries/composite/${compositeId}/${libraryId}/${originalRow.id}`,
-      );
-    } else if (isInLibraries) {
-      const libraryId = pathname.split("/")[2];
-      router.push(`/libraries/${libraryId}/${originalRow.id}`);
-    } else {
-      router.push(`/components/${originalRow.id}`);
-    }
-  };
-
   return (
     <div className="rounded-md">
       <Table>
@@ -146,8 +123,7 @@ export function ComponentList<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                onClick={() => handleRowClick(row)}
-                className="cursor-pointer h-12"
+                className="h-12"
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
