@@ -89,10 +89,6 @@ edge cases:
 - the last pset won't trigger toast on removal -
   instead of form do it as removeComponentButton but with optimistic ui update
 
-- When library filters are applied, and user goes into [libraryId] and then
-  in [componentId], then goes back to [libraryId], the filters in /libraries
-  are lost.
-
 ## WORKAROUNDS/ISSUES
 
 tanstack query has meta that invalidates queries and it auto refetches.
@@ -372,12 +368,31 @@ library views if library is not editable
 Also instead of handling the togglecomponentPrivate from inside library inside
 a component I removed the toggle button from component view at all.
 
+### --19-05-2025--
+
+Today only managed to filter libraries in merge library dialog so that user cant
+add private lib to public composite. NEED TO DO THAT ALSO ON BACKEND.
+
+tommorrow remember that a library is only removed automatically from composite
+if its owner removes composite owner from guests.
+
+and handling the privacy change in library with regards to containing composite:
+
+- from public to private if it's in private composite - nothing appears
+- from public to private if it's in public composite - remove from composite
+- from private to public if it's in private composite - nothing happens
+- from private to public if it's in public composite - can't reach this
+
+removing guest always removes the library from their composites.
+
+maybe in merge library dialog add option to remove selected library
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite
 [x]show if composite is private or not
 [x]handle user changing component private from inside libraries (just removed button)
-[ ]restrict merging libraries with uncompatible privacy status
+[x]restrict merging libraries with uncompatible privacy status
 [ ]handle user changing library to private and removing someone from guests.
 [ ]handle removing library from favorites
 [ ]pagination in libraries view and component browser

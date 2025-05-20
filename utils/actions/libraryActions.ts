@@ -162,15 +162,23 @@ export const fetchAllLibrariesAction = async (
       whereCondition.AND = compositeAndConditions;
     }
 
-    const compositeLibraries = await prisma.compositeLibrary.findMany({
-      include: {
-        guests: { select: { id: true, firstName: true, secondName: true } },
-        author: { select: { id: true, firstName: true, secondName: true } },
-        Libraries: { select: { id: true } },
-      },
-      where: whereCondition as Prisma.CompositeLibraryWhereInput,
-      orderBy: { updatedAt: "asc" },
-    });
+    const compositePayload = {
+      guests: { select: { id: true, firstName: true, secondName: true } },
+      author: { select: { id: true, firstName: true, secondName: true } },
+      Libraries: { select: { id: true } },
+    };
+
+    let compositeLibraries: Prisma.CompositeLibraryGetPayload<{
+      include: typeof compositePayload;
+    }>[] = [];
+
+    if (composite) {
+      compositeLibraries = await prisma.compositeLibrary.findMany({
+        include: compositePayload,
+        where: whereCondition as Prisma.CompositeLibraryWhereInput,
+        orderBy: { updatedAt: "asc" },
+      });
+    }
 
     const frontEndLibraries = [...compositeLibraries, ...libraries].map(
       (library) => {
@@ -986,33 +994,30 @@ export const mergeLibraryAction = async (
 ) => {
   try {
     const dbUser = await getDbUser();
-
     if (!dbUser) throw new Error("Not logged in.");
 
-    const isCompositeAuthor = dbUser.authoredCompositeLibraries.some(
+    const curCompositeLibrary = dbUser.authoredCompositeLibraries.find(
       (lib) => lib.id === compositeLibraryId,
     );
+    if (!curCompositeLibrary)
+      throw new Error("Could not find composite library.");
 
-    let libraryName = "";
-    const canAccessGuest = dbUser.guestLibraries.some((lib) => {
-      if (lib.id === libraryId) {
-        libraryName = lib.name;
-        return true;
-      }
-      return false;
-    });
+    const curLibrary = [
+      ...dbUser.authoredLibraries,
+      ...dbUser.guestLibraries,
+    ].find((lib) => lib.id === libraryId);
+    if (!curLibrary) throw new Error("Could not find library");
 
-    const canAccessOwn = dbUser.authoredLibraries.some((lib) => {
-      if (lib.id === libraryId) {
-        libraryName = lib.name;
-        return true;
-      }
-      return false;
-    });
+    const libraryName = curLibrary.name;
 
-    const canAccess = canAccessGuest || canAccessOwn;
+    const canMerge =
+      !curCompositeLibrary.public ||
+      (curCompositeLibrary.public && curLibrary.public);
 
-    if (!isCompositeAuthor || !canAccess) throw new Error("Unauthorized.");
+    if (!canMerge && curCompositeLibrary.public)
+      throw new Error(
+        "Public composite libraries can only merge public libraries.",
+      );
 
     const compositeLibrary = await prisma.compositeLibrary.update({
       where: { id: compositeLibraryId },
