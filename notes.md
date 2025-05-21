@@ -375,7 +375,6 @@ add private lib to public composite. NEED TO DO THAT ALSO ON BACKEND.
 
 tommorrow remember that a library is only removed automatically from composite
 if its owner removes composite owner from guests.
-
 and handling the privacy change in library with regards to containing composite:
 
 - from public to private if it's in private composite - nothing appears
@@ -386,6 +385,26 @@ and handling the privacy change in library with regards to containing composite:
 removing guest always removes the library from their composites.
 
 maybe in merge library dialog add option to remove selected library
+
+### --20-05-2025--
+
+Now composites are only displayed when you click composite filter, and not
+showing up if it's not checked.
+The rows are no longer clickable, everything is handled by an additional column
+that's a GoToLibraryButton which I should probably rename since it's also now
+used for going to component.
+User can now see the type of library they're in because the icon is in the title.
+
+first thing tomorrow is to handle removing library from composite when its
+inside a public composite and lib goes private (keeps guests, maybe asks if
+remove all, and then remove from all public composites)
+then removing guests which will inadvertedly result in removing librs from their
+composites
+and composite logic should be done, only sharing left before implementing logs
+
+### --21-05-2025--
+
+First of all let's actually implement removing library from composite.
 
 ### Current task list
 

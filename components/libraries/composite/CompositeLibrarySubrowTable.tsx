@@ -87,7 +87,7 @@ export function CompositeLibrarySubrowTable<TData, TValue>({
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => handleRowClick(row)}
-                className="cursor-pointer h-12"
+                className="h-12"
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
