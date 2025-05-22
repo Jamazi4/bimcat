@@ -42,6 +42,8 @@ export type SelectedRow = Record<
   { name: string; editable: boolean; isPublic: boolean }
 >;
 
+export type SelectedComposite = Record<string, { name: string }>;
+
 export type LibraryInfoType = {
   updatedAt: string;
   createdAt: string;

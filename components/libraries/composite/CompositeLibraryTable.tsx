@@ -14,11 +14,16 @@ import {
   useReactTable,
   Row,
   getSortedRowModel,
+  SortingState,
+  getPaginationRowModel,
 } from "@tanstack/react-table";
-import React, { useState, Fragment } from "react";
+import React, { useState, Fragment, useEffect } from "react";
 import { LibraryRow, compositeColumns } from "./CompositeLibraryColumns";
 import { columns } from "@/components/componentList/ComponentListColumns";
 import { CompositeLibrarySubrowTable } from "./CompositeLibrarySubrowTable";
+import { Button } from "@/components/ui/button";
+import { SelectedComposite } from "@/utils/types";
+import UnmergeButton from "./UnmergeButton";
 
 interface ExpandableTableProps {
   data: LibraryRow[];
@@ -27,11 +32,24 @@ interface ExpandableTableProps {
 export function ExpandableTable({ data }: ExpandableTableProps) {
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [localSelection, setLocalSelection] = useState({});
+  const [actionableItems, setActionableItems] = useState<SelectedComposite[]>(
+    [],
+  );
+
   const table = useReactTable<LibraryRow>({
     data,
     columns: compositeColumns,
     state: {
       expanded,
+      sorting,
+      rowSelection: localSelection,
+    },
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
     },
     onExpandedChange: setExpanded,
     getSubRows: () => undefined,
@@ -40,7 +58,24 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
       !!(row.original.components && row.original.components.length > 0),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onRowSelectionChange: setLocalSelection,
+    onSortingChange: setSorting,
   });
+
+  useEffect(() => {
+    const tempSelectedComponents: SelectedComposite[] = Object.entries(
+      table.getSelectedRowModel().rows,
+    ).map((entry) => {
+      const { id, name } = entry[1].original;
+      return {
+        [id]: {
+          name,
+        },
+      };
+    });
+    setActionableItems(tempSelectedComponents);
+  }, [localSelection, table]);
 
   return (
     <div>
@@ -72,7 +107,7 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
               return (
                 <Fragment key={row.id}>
                   <TableRow
-                    data-state={isExpanded ? "selected" : undefined}
+                    data-state={row.getIsSelected() && "selected"}
                     className={
                       isExpanded
                         ? "border-b-0 text-background !bg-secondary"
@@ -115,6 +150,38 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
           )}
         </TableBody>
       </Table>
+      <div className="grid items-center grid-cols-3 w-full space-x-2 py-4">
+        <div className="text-sm text-muted-foreground space-x-2">
+          <UnmergeButton
+            libraries={actionableItems}
+            setSelection={setLocalSelection}
+          />
+        </div>
+
+        <p className="text-muted-foreground text-center">
+          Selected {Object.keys(localSelection).length} /{" "}
+          {table.getFilteredRowModel().rows.length}
+        </p>
+
+        <div className="space-x-2 items-end justify-end text-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
