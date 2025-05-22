@@ -15,7 +15,7 @@ const LibraryInfo = ({
   const colClassname = "mr-4 grid grid-rows-2 gap-2";
   return (
     <div className="my-2 mb-4">
-      <div className="grid-cols-2 grid bg-accent rounded-md p-2 my-2 text-secondary-foreground gap-6 ">
+      <div className="grid-cols-2 grid bg-muted rounded-md p-2 my-2 text-secondary-foreground gap-6 ">
         <div className={colClassname}>
           <div className={rowClassName}>
             <p>Author:</p>

@@ -104,7 +104,10 @@ export function ComponentList<TData, TValue>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className="bg-muted font-bold first:rounded-l-md last:rounded-r-md"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(

@@ -16,7 +16,6 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import React, { useState, Fragment } from "react";
-
 import { LibraryRow, compositeColumns } from "./CompositeLibraryColumns";
 import { columns } from "@/components/componentList/ComponentListColumns";
 import { CompositeLibrarySubrowTable } from "./CompositeLibrarySubrowTable";
@@ -48,10 +47,10 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="">
+            <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <TableHead
-                  className="bg-muted font-bold"
+                  className="bg-muted font-bold first:rounded-l-md last:rounded-r-md"
                   key={header.id}
                   colSpan={header.colSpan}
                 >
@@ -76,7 +75,7 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
                     data-state={isExpanded ? "selected" : undefined}
                     className={
                       isExpanded
-                        ? "border-b-0 text-background !bg-primary/80"
+                        ? "border-b-0 text-background !bg-secondary"
                         : ""
                     }
                   >
@@ -95,7 +94,6 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
                       <TableRow className="hover:bg-background">
                         <TableCell colSpan={row.getVisibleCells().length}>
                           <CompositeLibrarySubrowTable
-                            libraryId={row.original.id}
                             columns={columns}
                             data={row.original.components}
                           />

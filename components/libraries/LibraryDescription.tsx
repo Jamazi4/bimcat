@@ -85,7 +85,7 @@ const LibraryDescription = ({
       </div>
       <div className="flex flex-col items-end gap-y-2">
         {libraryInfo.desc && (
-          <div className="w-full bg-accent text-muted-foreground rounded-sm p-2 flex justify-between">
+          <div className="w-full bg-muted text-muted-foreground rounded-sm p-2 flex justify-between">
             {libraryInfo.desc}
           </div>
         )}

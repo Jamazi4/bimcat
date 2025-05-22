@@ -10,6 +10,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import GoToLibraryButton from "./GoToLibraryButton";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export type LibraryRow = {
   id: string;
@@ -22,10 +23,33 @@ export type LibraryRow = {
 };
 const headerClassname = "flex items-center justify-center font-medium text-lg";
 const headerClassnameLeft =
-  "flex items-center justify-start font-medium text-xl";
+  "flex items-center justify-start font-medium text-lg";
 const cellClassname = "flex justify-center gap-2 font-medium";
 const cellClassnameLeft = "flex justify-start gap-2 font-medium";
 export const compositeColumns: ColumnDef<LibraryRow>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        onClick={(e) => e.stopPropagation()}
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: true,
+  },
   {
     id: "expander",
     header: () => null,
@@ -36,7 +60,7 @@ export const compositeColumns: ColumnDef<LibraryRow>[] = [
           size="icon"
           onClick={row.getToggleExpandedHandler()}
           aria-label="Expand row"
-          className="p-0 h-8 w-8"
+          className="p-0 h-8 w-8 hover:bg-background hover:cursor-pointer"
         >
           {row.getIsExpanded() ? (
             <ChevronDown className="h-4 w-4" />
@@ -51,7 +75,7 @@ export const compositeColumns: ColumnDef<LibraryRow>[] = [
     accessorKey: "name",
     header: ({ column }) => {
       return (
-        <div className="flex justify-start">
+        <div className="p-0 m-0 ml-[-12px]">
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -139,7 +163,7 @@ export const compositeColumns: ColumnDef<LibraryRow>[] = [
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            <span className={headerClassname}>Author</span>
+            <span className={headerClassnameLeft}>Author</span>
             <ArrowUpDown />
           </Button>
         </div>

@@ -13,7 +13,7 @@ const GoToLibraryButton = ({ id }: { id: string }) => {
     <Button
       size="icon"
       variant="ghost"
-      className="cursor-pointer"
+      className="cursor-pointer hover:bg-background"
       onClick={() => {
         router.push(`${path}/${id}`);
       }}

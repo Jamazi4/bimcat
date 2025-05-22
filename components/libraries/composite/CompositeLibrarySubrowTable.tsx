@@ -5,7 +5,6 @@ import {
   VisibilityState,
   flexRender,
   getCoreRowModel,
-  Row,
   useReactTable,
   SortingState,
   getSortedRowModel,
@@ -19,21 +18,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useParams, useRouter } from "next/navigation";
 import { ComponentRow } from "@/components/componentList/ComponentListColumns";
 import { useState } from "react";
 
 export function CompositeLibrarySubrowTable<TData, TValue>({
   columns,
   data,
-  libraryId,
 }: {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  libraryId: string;
 }) {
-  const router = useRouter();
-  const { compositeLibraryId } = useParams<{ compositeLibraryId: string }>();
   const [sorting, setSorting] = useState<SortingState>([]);
   const visibilityState: VisibilityState = { select: false, author: false };
 
@@ -50,15 +44,6 @@ export function CompositeLibrarySubrowTable<TData, TValue>({
     },
   });
 
-  const handleRowClick = (row: Row<TData>) => {
-    const isAnyDialogOpen = document.querySelector('[data-state="open"]');
-    if (isAnyDialogOpen) return;
-    const originalRow = row.original as ComponentRow;
-    router.push(
-      `/libraries/composite/${compositeLibraryId}/${libraryId}/${originalRow.id}`,
-    );
-  };
-
   return (
     <div>
       <Table>
@@ -67,7 +52,10 @@ export function CompositeLibrarySubrowTable<TData, TValue>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    className="bg-muted font-bold first:rounded-l-md last:rounded-r-md"
+                    key={header.id}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -86,7 +74,6 @@ export function CompositeLibrarySubrowTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                onClick={() => handleRowClick(row)}
                 className="h-12"
               >
                 {row.getVisibleCells().map((cell) => (
