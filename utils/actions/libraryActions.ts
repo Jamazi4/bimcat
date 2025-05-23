@@ -1127,3 +1127,32 @@ export const fetchLibraryFromComposite = async (
     throw error;
   }
 };
+
+export const unmergeLibraryAction = async (
+  libraryIds: string[],
+  compositeId: string,
+) => {
+  try {
+    const dbUser = await getDbUser();
+    const curComposite = dbUser?.authoredCompositeLibraries.find(
+      (lib) => lib.id === compositeId,
+    );
+
+    const authorized = curComposite !== undefined;
+
+    if (!authorized)
+      throw new Error("Unauthorized or could not find composite library.");
+
+    await prisma.compositeLibrary.update({
+      where: { id: compositeId },
+      data: {
+        Libraries: { disconnect: libraryIds.map((id) => ({ id: id })) },
+      },
+    });
+    return {
+      message: `${libraryIds.length} ${libraryIds.length > 1 ? "libraries" : "library"} succesfully removed from ${curComposite.name}`,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
