@@ -67,7 +67,10 @@ const UnmergeButton = ({
               {libraries.length > 1 ? " libraries" : " library"} from current
               composite library.
             </DialogTitle>
-            <DialogDescription></DialogDescription>
+            <DialogDescription>
+              This action will remove selected libraries from current composite
+              library.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button

@@ -32,8 +32,11 @@ const DownloadLibraryButton = ({
   const params = useParams();
   const pathname = usePathname();
   const isInComposite = pathname.split("/")[2] === "composite";
-  const libraryId = Object.values(params)[isInComposite ? 1 : 0] as string;
   const [pending, setPending] = useState(false);
+
+  const libraryId = params[
+    isInComposite ? "compositeLibraryId" : "libraryId"
+  ] as string;
 
   const handleDownload = async () => {
     setPending(true);
@@ -58,7 +61,6 @@ const DownloadLibraryButton = ({
     setPending(true);
     const libraryComponents =
       await fetchCompositeLibraryDownloadAction(libraryId);
-
     if (!libraryComponents) return setPending(false);
     const { compositeLibraryName, validatedComponents } = libraryComponents;
 

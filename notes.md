@@ -414,7 +414,7 @@ First of all let's actually implement removing library from composite.
 [x]restrict merging libraries with uncompatible privacy status
 [ ]handle user changing library to private and removing someone from guests.
 [ ]handle removing library from favorites
-[ ]pagination in libraries view and component browser
 [ ]sharing composite library
+[ ]pagination in libraries view and component browser
 [ ]history log
 [ ]handle pset values and stats

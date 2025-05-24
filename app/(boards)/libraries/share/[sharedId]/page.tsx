@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { fetchUserLibraries } from "@/lib/features/user/userSlice";
+import { useAppDispatch } from "@/lib/hooks";
 import { giveAccessToLibraryAction } from "@/utils/actions/libraryActions";
 import { LibraryErrors } from "@/utils/types";
 import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
@@ -50,6 +52,7 @@ const SignInScreen = () => {
 const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
   const [failed, setFailed] = useState(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const giveAccessToLibraryMutation = useMutation({
     mutationFn: (sharedId: string) => {
       return giveAccessToLibraryAction(sharedId);
@@ -62,6 +65,7 @@ const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
       onSuccess: (result) => {
         toast("Library shared succesfully.");
         router.replace(`/libraries/${result}`);
+        dispatch(fetchUserLibraries());
       },
       onError: (error) => {
         setFailed(true);
@@ -84,7 +88,7 @@ const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
         }
       },
     });
-  }, [mutate, sharedId, router]);
+  }, [mutate, dispatch, sharedId, router]);
 
   return (
     <>
