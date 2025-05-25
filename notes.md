@@ -406,6 +406,25 @@ and composite logic should be done, only sharing left before implementing logs
 
 First of all let's actually implement removing library from composite.
 
+### --24-05-2025--
+
+That's done and some other improvements. Now the idea is to:
+Do nothing when user changes a lib to private, just deactivate this row.
+
+The same thing happens when you are removed from the guests.
+
+That should be all. Then implement hisotry log and get into cool stuff funally.
+
+### --25-05-2025--
+
+Okay so I have two options when a public library inside someone elses public
+composite
+goes private:
+
+- it gets removed automatically - i choose this one
+- i get a weird case where it's still there until the composite author gets
+  removed from guests.
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite

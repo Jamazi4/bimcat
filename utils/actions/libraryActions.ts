@@ -139,42 +139,42 @@ export const fetchAllLibrariesAction = async (
       whereCondition.AND = libraryAndConditions;
     }
 
-    const libraryPayload = {
+    const libraryInclude: Prisma.LibraryInclude = {
       guests: { select: { id: true, firstName: true, secondName: true } },
       author: { select: { id: true, firstName: true, secondName: true } },
       Components: { select: { id: true } },
     };
 
     let libraries: Prisma.LibraryGetPayload<{
-      include: typeof libraryPayload;
+      include: typeof libraryInclude;
     }>[] = [];
 
     if (!composite) {
       libraries = await prisma.library.findMany({
-        include: libraryPayload,
+        include: libraryInclude,
         where: whereCondition as Prisma.LibraryWhereInput,
         orderBy: { updatedAt: "asc" },
       });
     }
-    whereCondition.AND = [];
 
+    whereCondition.AND = [];
     if (compositeAndConditions.length > 0) {
       whereCondition.AND = compositeAndConditions;
     }
 
-    const compositePayload = {
+    const compositeInclude: Prisma.CompositeLibraryInclude = {
       guests: { select: { id: true, firstName: true, secondName: true } },
       author: { select: { id: true, firstName: true, secondName: true } },
       Libraries: { select: { id: true } },
     };
 
     let compositeLibraries: Prisma.CompositeLibraryGetPayload<{
-      include: typeof compositePayload;
+      include: typeof compositeInclude;
     }>[] = [];
 
     if (composite) {
       compositeLibraries = await prisma.compositeLibrary.findMany({
-        include: compositePayload,
+        include: compositeInclude,
         where: whereCondition as Prisma.CompositeLibraryWhereInput,
         orderBy: { updatedAt: "asc" },
       });
@@ -399,6 +399,7 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
       where: { id: libraryId },
       include: {
         Components: { select: { id: true, userId: true, public: true } },
+        CompositeLibraries: { select: { id: true, public: true } },
       },
     });
 
@@ -409,17 +410,35 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
 
     const curPublic = library.public;
 
+    const publicComposites = library.CompositeLibraries.filter(
+      (compLib) => compLib.public,
+    );
+
     const privateComponents = library.Components.filter((component) => {
       const privateFlag = component.public === false;
       const authorized = component.userId === dbUser.id;
       return privateFlag && authorized;
     });
 
-    if (privateComponents.length > 0 && !curPublic) {
+    const makeComponentsPublic = privateComponents.length > 0 && !curPublic;
+    const removeFromComposites = curPublic && publicComposites.length > 0;
+
+    if (makeComponentsPublic) {
       await prisma.component.updateMany({
         where: { id: { in: privateComponents.map((comp) => comp.id) } },
         data: { public: true },
       });
+    }
+
+    if (removeFromComposites) {
+      await prisma.$transaction(
+        publicComposites.map((compLib) =>
+          prisma.compositeLibrary.update({
+            where: { id: compLib.id },
+            data: { Libraries: { disconnect: { id: libraryId } } },
+          }),
+        ),
+      );
     }
 
     const displayWarning = !curPublic && privateComponents.length > 0;
@@ -889,6 +908,7 @@ export const removeGuestAction = async (libraryId: string, userId: string) => {
       data: { guests: { disconnect: { id: userId } } },
     });
     revalidatePath(`/libraries/${libraryId}`);
+    return { message: `User succesfully removed from guests.` };
   } catch (error) {
     return renderError(error);
   }

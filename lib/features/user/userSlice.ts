@@ -16,6 +16,7 @@ type UserStateLibrary = {
   isComposite: boolean;
   isFavorite: boolean;
   content: UserStateContent[];
+  compositeLibraries?: { id: string; public: boolean }[];
 };
 
 export type UserState = {
@@ -37,20 +38,23 @@ export const fetchUserLibraries = createAsyncThunk(
       const dbUser = await getUserStateLibrariesAction();
       if (!dbUser) return [];
 
-      const librariesState = dbUser.frontendLibraries?.map((lib) => ({
-        id: lib.id,
-        name: lib.name,
-        isPublic: lib.isPublic,
-        isShared: lib.isShared,
-        isEditable: lib.isEditable,
-        isComposite: lib.isComposite,
-        isFavorite: lib.isFavorite,
-        content: lib.content.map((cont) => ({
-          id: cont.id,
-          name: cont.name,
-          public: cont.public,
-        })),
-      }));
+      const librariesState: UserStateLibrary[] = dbUser.frontendLibraries?.map(
+        (lib) => ({
+          id: lib.id,
+          name: lib.name,
+          isPublic: lib.isPublic,
+          isShared: lib.isShared,
+          isEditable: lib.isEditable,
+          isComposite: lib.isComposite,
+          isFavorite: lib.isFavorite,
+          compositeLibraries: lib.CompositeLibraries,
+          content: lib.content.map((cont) => ({
+            id: cont.id,
+            name: cont.name,
+            public: cont.public,
+          })),
+        }),
+      );
 
       return librariesState;
     } catch (err) {

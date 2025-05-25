@@ -12,6 +12,10 @@ import {
 import { Button } from "../ui/button";
 import { useParams } from "next/navigation";
 import { removeGuestAction } from "@/utils/actions/libraryActions";
+import { useAppDispatch } from "@/lib/hooks";
+import { fetchUserLibraries } from "@/lib/features/user/userSlice";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 const ManageGuestsButton = ({
   guests,
 }: {
@@ -20,11 +24,38 @@ const ManageGuestsButton = ({
   const { libraryId } = useParams<{ libraryId: string }>();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const dispatch = useAppDispatch();
+
+  const removeGuestMutation = useMutation({
+    mutationFn: ({
+      libraryId,
+      userId,
+    }: {
+      libraryId: string;
+      userId: string;
+    }) => {
+      return removeGuestAction(libraryId, userId);
+    },
+    meta: { invalidates: ["libraryComponents"] },
+  });
 
   const handleRemove = async (userId: string) => {
     setPending(true);
-    await removeGuestAction(libraryId, userId);
-    setPending(false);
+    removeGuestMutation.mutate(
+      { libraryId, userId },
+      {
+        onSuccess: (result) => {
+          toast(result.message);
+        },
+        onError: (error) => {
+          toast(error.message);
+        },
+        onSettled: () => {
+          setPending(false);
+          dispatch(fetchUserLibraries());
+        },
+      },
+    );
   };
 
   return (

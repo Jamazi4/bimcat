@@ -21,6 +21,20 @@ export const createUserAciton = async (user: Partial<User>) => {
   }
 };
 
+type LibraryWithComposite = {
+  CompositeLibraries: { id: string; public: boolean }[];
+};
+
+function hasCompositeLibraries(lib: unknown): lib is LibraryWithComposite {
+  return (
+    typeof lib === "object" &&
+    lib !== null &&
+    "CompositeLibraries" in lib &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Array.isArray((lib as any).CompositeLibraries)
+  );
+}
+
 export const getUserStateLibrariesAction = async () => {
   try {
     const { userId } = await auth();
@@ -49,6 +63,7 @@ export const getUserStateLibrariesAction = async () => {
             sharedId: true,
             Components: { select: { id: true, name: true, public: true } },
             userId: true,
+            CompositeLibraries: { select: { id: true, public: true } },
           },
         },
         guestLibraries: {
@@ -75,6 +90,13 @@ export const getUserStateLibrariesAction = async () => {
     ].map((lib) => {
       const isComposite = "Libraries" in lib;
       const isFavorite = guestLibraries.some((glib) => glib.id === lib.id);
+      const CompositeLibraries: { id: string; public: boolean }[] =
+        !isComposite && hasCompositeLibraries(lib)
+          ? lib.CompositeLibraries.map((comp) => ({
+              id: comp.id,
+              public: comp.public,
+            }))
+          : [];
       return {
         id: lib.id,
         name: lib.name,
@@ -84,6 +106,7 @@ export const getUserStateLibrariesAction = async () => {
         isComposite,
         isFavorite,
         content: isComposite ? lib.Libraries : lib.Components,
+        CompositeLibraries,
       };
     });
     const frontendDbUser = { ...dbUser, frontendLibraries };

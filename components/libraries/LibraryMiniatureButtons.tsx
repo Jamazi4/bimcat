@@ -32,6 +32,20 @@ const LibraryMinatureButtons = ({
   const warningPrivateComponents =
     publicFlag === false && privateContentInside?.length > 0;
 
+  const isInsidePublicComposites = currentLibrary.compositeLibraries?.some(
+    (compLib) => compLib.public === true,
+  );
+
+  const numPublicComposites = currentLibrary.compositeLibraries?.reduce(
+    (acc, cur) => {
+      if (cur.public) return (acc += 1);
+      else return 0;
+    },
+    0,
+  );
+
+  const warningMessageInsidePublicComposite = `${libraryName} is inside ${numPublicComposites} composite ${numPublicComposites! > 1 ? "libraries" : "library"}. Making this library private will automatically remove it from all public composite libraries.`;
+
   const warningMessagePrivateComponents = `${libraryName} contains private components(${privateContentInside.length}), making this library public will automatically change all contained components to public`;
 
   const warningMessageLibraryShared = `This action will deactivate private share link for ${libraryName}.`;
@@ -43,6 +57,9 @@ const LibraryMinatureButtons = ({
   }
   if (currentLibrary.isShared) {
     warningMessages.push(warningMessageLibraryShared);
+  }
+  if (isInsidePublicComposites && currentLibrary.isPublic) {
+    warningMessages.push(warningMessageInsidePublicComposite);
   }
 
   const toggleAction = libraryTogglePrivateAction.bind(null, libraryId);
