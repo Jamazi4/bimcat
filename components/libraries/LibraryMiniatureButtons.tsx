@@ -39,7 +39,7 @@ const LibraryMinatureButtons = ({
   const numPublicComposites = currentLibrary.compositeLibraries?.reduce(
     (acc, cur) => {
       if (cur.public) return (acc += 1);
-      else return 0;
+      else return acc;
     },
     0,
   );

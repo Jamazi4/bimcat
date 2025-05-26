@@ -425,13 +425,23 @@ goes private:
 - i get a weird case where it's still there until the composite author gets
   removed from guests.
 
+Make sure that clerk ids dont get to frontend with guests
+
+Another milestone achieved - now handling removing guests and changing privacy
+for library and its membership to composites
+
+I want to add info how many composites include cur library while managing it's
+guests
+
+### --26-05-2025--
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite
 [x]show if composite is private or not
 [x]handle user changing component private from inside libraries (just removed button)
 [x]restrict merging libraries with uncompatible privacy status
-[ ]handle user changing library to private and removing someone from guests.
+[x]handle user changing library to private and removing someone from guests.
 [ ]handle removing library from favorites
 [ ]sharing composite library
 [ ]pagination in libraries view and component browser

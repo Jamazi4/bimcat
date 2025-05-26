@@ -288,14 +288,30 @@ const getLibraryListData = async (libraryId: string, userId?: string) => {
     where: { id: libraryId },
     include: {
       Components: true,
-      guests: true,
+      guests: {
+        include: {
+          authoredCompositeLibraries: {
+            select: { Libraries: { select: { id: true } } },
+          },
+        },
+      },
       author: { select: { firstName: true, secondName: true } },
     },
   });
 
   if (!library) throw new Error("Could not fetch library");
   const frontendGuests = library.guests.map((guest) => {
-    return { name: `${guest.firstName} ${guest.secondName}`, id: guest.id };
+    return {
+      name: `${guest.firstName} ${guest.secondName}`,
+      id: guest.id,
+      numAuthoredCompositeLibraries: guest.authoredCompositeLibraries.reduce(
+        (acc, cur) => {
+          if (cur.Libraries.some((lib) => lib.id === libraryId)) return acc + 1;
+          else return acc;
+        },
+        0,
+      ),
+    };
   });
   const frontendComponents = library?.Components.map((component) => {
     return {
@@ -317,8 +333,8 @@ const getLibraryListData = async (libraryId: string, userId?: string) => {
     updatedAt: library.updatedAt.toISOString(),
     author: authorString,
     empty: library.Components.length === 0,
-    name: library?.name,
-    desc: library?.description,
+    name: library.name,
+    desc: library.description,
     isEditable: libraryEditable,
     sharedId: library.sharedId || "",
     isPublic: library.public,
@@ -391,6 +407,64 @@ export const deleteLibraryAction = async (
   }
 };
 
+type libraryWithPublicCompositesOnly = {
+  public: boolean;
+  CompositeLibraries: { id: string; public: boolean }[];
+};
+
+const removeFromPublicComposites = async <
+  T extends libraryWithPublicCompositesOnly,
+>(
+  libraryId: string,
+  library: T,
+) => {
+  const publicComposites = library.CompositeLibraries.filter(
+    (compLib) => compLib.public,
+  );
+  const curPublic = library.public;
+
+  const removeFromComposites = curPublic && publicComposites.length > 0;
+  if (removeFromComposites) {
+    await prisma.$transaction(
+      publicComposites.map((compLib) =>
+        prisma.compositeLibrary.update({
+          where: { id: compLib.id },
+          data: { Libraries: { disconnect: { id: libraryId } } },
+        }),
+      ),
+    );
+  }
+};
+
+type libraryWithForeignCompositesOnly = {
+  public: boolean;
+  CompositeLibraries: { id: string; public: boolean; author: { id: string } }[];
+};
+
+const removeFromForeignComposites = async <
+  T extends libraryWithForeignCompositesOnly,
+>(
+  libraryId: string,
+  library: T,
+  userId: string,
+) => {
+  const removedGuestComposites = library.CompositeLibraries.filter(
+    (compLib) => compLib.author.id === userId,
+  );
+
+  const removeFromComposites = removedGuestComposites.length > 0;
+  if (removeFromComposites) {
+    await prisma.$transaction(
+      removedGuestComposites.map((compLib) =>
+        prisma.compositeLibrary.update({
+          where: { id: compLib.id },
+          data: { Libraries: { disconnect: { id: libraryId } } },
+        }),
+      ),
+    );
+  }
+};
+
 export const libraryTogglePrivateAction = async (libraryId: string) => {
   try {
     const dbUser = await getDbUser();
@@ -410,10 +484,6 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
 
     const curPublic = library.public;
 
-    const publicComposites = library.CompositeLibraries.filter(
-      (compLib) => compLib.public,
-    );
-
     const privateComponents = library.Components.filter((component) => {
       const privateFlag = component.public === false;
       const authorized = component.userId === dbUser.id;
@@ -421,7 +491,6 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
     });
 
     const makeComponentsPublic = privateComponents.length > 0 && !curPublic;
-    const removeFromComposites = curPublic && publicComposites.length > 0;
 
     if (makeComponentsPublic) {
       await prisma.component.updateMany({
@@ -430,16 +499,7 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
       });
     }
 
-    if (removeFromComposites) {
-      await prisma.$transaction(
-        publicComposites.map((compLib) =>
-          prisma.compositeLibrary.update({
-            where: { id: compLib.id },
-            data: { Libraries: { disconnect: { id: libraryId } } },
-          }),
-        ),
-      );
-    }
+    await removeFromPublicComposites(libraryId, library);
 
     const displayWarning = !curPublic && privateComponents.length > 0;
 
@@ -465,7 +525,6 @@ export const libraryTogglePrivateAction = async (libraryId: string) => {
     return renderError(error);
   }
 };
-
 export const removeComponentFromLibraryAction = async (
   componentIds: string[],
   libraryId: string,
@@ -895,10 +954,17 @@ export const removeGuestAction = async (libraryId: string, userId: string) => {
     if (!hasRights) throw new Error(LibraryErrors.Unauthorized);
     const library = await prisma.library.findUnique({
       where: { id: libraryId },
-      include: { guests: true },
+      include: {
+        guests: true,
+        CompositeLibraries: {
+          select: { id: true, public: true, author: { select: { id: true } } },
+        },
+      },
     });
 
     if (!library) throw new Error(LibraryErrors.LibraryNotFound);
+
+    await removeFromForeignComposites(libraryId, library, userId);
 
     const userIsGuest = library.guests.some((guest) => guest.id === userId);
     if (!userIsGuest) throw new Error(LibraryErrors.UserNotFound);

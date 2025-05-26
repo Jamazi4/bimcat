@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import TooltipActionTriggerButton from "../componentList/TooltipActionTriggerButton";
-import { LoaderCircle, Users, X } from "lucide-react";
+import { LoaderCircle, SquareLibrary, Users, X } from "lucide-react";
 import {
   DialogHeader,
   Dialog,
@@ -16,10 +16,11 @@ import { useAppDispatch } from "@/lib/hooks";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { LibraryInfoType } from "@/utils/types";
 const ManageGuestsButton = ({
   guests,
 }: {
-  guests: { name: string; id: string }[];
+  guests: LibraryInfoType["guests"];
 }) => {
   const { libraryId } = useParams<{ libraryId: string }>();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -86,8 +87,14 @@ const ManageGuestsButton = ({
           </DialogHeader>
           {guests.map((guest) => {
             return (
-              <div key={guest.id} className="flex space-x-2 items-center">
-                <p>{guest.name}</p>
+              <div key={guest.id} className="flex justify-between items-center">
+                <div className="flex space-x-2">
+                  <p>{guest.name}</p>
+                  <p className="flex">
+                    - {guest.numAuthoredCompositeLibraries}
+                    <SquareLibrary className="ml-2 w-5 h-5" />
+                  </p>
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"

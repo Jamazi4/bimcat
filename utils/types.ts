@@ -54,7 +54,11 @@ export type LibraryInfoType = {
   sharedId: string;
   isPublic: boolean;
   isEditable: boolean;
-  guests: { name: string; id: string }[];
+  guests: {
+    name: string;
+    id: string;
+    numAuthoredCompositeLibraries: number;
+  }[];
   isComposite?: boolean;
 };
 
