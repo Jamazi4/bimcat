@@ -6,6 +6,7 @@ import RenameButtonTitleBar, {
   RenameButtonProps,
 } from "../global/RenameButtonTitleBar";
 import { renameComponentAction } from "@/utils/actions/componentActions";
+import { Box } from "lucide-react";
 
 const Title = ({ componentData }: { componentData: SelectedRow }) => {
   const id = Object.keys(componentData)[0];
@@ -20,12 +21,15 @@ const Title = ({ componentData }: { componentData: SelectedRow }) => {
     <div className="my-6">
       <div className="flex justify-between">
         <div className="flex items-center space-x-2">
+          <Box className="mr-2" />
           <h1 className="font-bold text-xl text-primary whitespace-nowrap">
             {name.length > shortLength
               ? `${name.slice(0, shortLength)}...`
               : name}
           </h1>
-          {editable && <RenameButtonTitleBar {...renameButtonProps} />}
+          <div>
+            {editable && <RenameButtonTitleBar {...renameButtonProps} />}
+          </div>
         </div>
         <div className="space-x-4">
           <DownloadIfcButton />
