@@ -435,6 +435,27 @@ guests
 
 ### --26-05-2025--
 
+Now you can see the number of composite libraries that include current library
+in the manage users dialog
+
+tomorrow I will want to create a dialog before removing shared library from
+favs - maybe showing how many composite libraries will be affected.
+
+Also current number of things happening without any notice:
+
+- when user is removed from guests - no info even if it removes the libs
+  from composites
+- When library is changed to private - will be removed from composite libraries
+
+Above things are crucial to record in the composite history log
+
+It will be only things like - composite library created, library added, user
+joined, library went private
+or user removed it from favs or library disappeared because you were kicked out
+of guests.
+
+Maybe also add number of stars in public library
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite

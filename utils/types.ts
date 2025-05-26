@@ -57,7 +57,7 @@ export type LibraryInfoType = {
   guests: {
     name: string;
     id: string;
-    numAuthoredCompositeLibraries: number;
+    numAuthoredCompositeLibraries?: number;
   }[];
   isComposite?: boolean;
 };

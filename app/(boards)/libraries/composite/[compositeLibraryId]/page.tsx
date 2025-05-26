@@ -83,6 +83,7 @@ const Page = () => {
       };
     }),
   };
+  //TODO: I shouldn't have to do the above, it's already good on backend
 
   return (
     <main>
