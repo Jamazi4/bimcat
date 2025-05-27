@@ -27,8 +27,12 @@ const RemoveFromLibraryActionButton = ({
   setSelection: Dispatch<SetStateAction<object>>;
 }) => {
   const { libraryId } = useParams<{ libraryId: string }>();
-
+  const componentIds = components.map((component) => Object.keys(component)[0]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  const disabled = components.length === 0;
   const dispatch = useAppDispatch();
+
   const removeMutation = useMutation({
     mutationFn: ({
       componentIds,
@@ -42,10 +46,28 @@ const RemoveFromLibraryActionButton = ({
     meta: { invalidates: ["libraryComponents"] },
   });
 
-  const componentIds = components.map((component) => Object.keys(component)[0]);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [pending, setPending] = useState(false);
-  const disabled = components.length === 0;
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setDialogOpen(false);
+    setPending(true);
+
+    removeMutation.mutate(
+      { componentIds, libraryId },
+      {
+        onSuccess: (result) => {
+          toast(result.message);
+          setSelection([]);
+          dispatch(fetchUserLibraries());
+        },
+        onError: (error) => {
+          toast(error.message);
+        },
+        onSettled: () => {
+          setPending(false);
+        },
+      },
+    );
+  };
 
   return (
     <>
@@ -72,26 +94,7 @@ const RemoveFromLibraryActionButton = ({
           <DialogFooter>
             <Button
               onClick={(e) => {
-                e.stopPropagation();
-                setDialogOpen(false);
-                setPending(true);
-
-                removeMutation.mutate(
-                  { componentIds, libraryId },
-                  {
-                    onSuccess: (result) => {
-                      toast(result.message);
-                      setSelection([]);
-                      dispatch(fetchUserLibraries());
-                    },
-                    onError: (error) => {
-                      toast(error.message);
-                    },
-                    onSettled: () => {
-                      setPending(false);
-                    },
-                  },
-                );
+                handleClick(e);
               }}
               disabled={pending}
               className="w-30 mt-4"

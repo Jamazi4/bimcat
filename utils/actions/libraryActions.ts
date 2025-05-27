@@ -60,7 +60,7 @@ export const fetchAllLibrariesAction = async (
     searchName,
     searchDescription,
     searchAuthor,
-    searchContent: searchContent,
+    searchContent,
     myLibraries,
     favorites,
     composite,
@@ -586,6 +586,32 @@ export const toggleLibraryFavoritesAction = async (
     const isFavorite = currentGuestLibrariesIds.some(
       (curGuestId) => curGuestId === libraryId,
     );
+
+    if (isFavorite && !isComposite) {
+      const library = await prisma.library.findUnique({
+        where: { id: libraryId },
+        select: {
+          CompositeLibraries: {
+            select: { Libraries: { select: { id: true } }, id: true },
+          },
+        },
+      });
+
+      const compositesToEdit = library?.CompositeLibraries.filter((compLib) =>
+        compLib.Libraries.some((lib) => lib.id === libraryId),
+      );
+
+      await prisma.library.update({
+        where: { id: libraryId },
+        data: {
+          CompositeLibraries: {
+            disconnect: compositesToEdit?.map((comp) => ({
+              id: comp.id,
+            })),
+          },
+        },
+      });
+    }
 
     const updateData = isComposite
       ? {

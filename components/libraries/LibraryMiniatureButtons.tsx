@@ -31,7 +31,6 @@ const LibraryMinatureButtons = ({
   );
   const warningPrivateComponents =
     publicFlag === false && privateContentInside?.length > 0;
-
   const isInsidePublicComposites = currentLibrary.compositeLibraries?.some(
     (compLib) => compLib.public === true,
   );

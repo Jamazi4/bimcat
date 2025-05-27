@@ -8,15 +8,15 @@
 1. PSETS - add support for bool values (frontend) - maybe differentiate
    between types of properties (backend) - don't allow to save empty pset
 2. LOADING FILES/COMPONENTS - show link to component in toast on creation/copy
-3. Libraries - user assigned or public libraries of elements - private/public
-4. USERS - delete user
-5. when accessing component from library, change breadcrumbs somehow
-6. locale date is wrong on prod
-7. sonner styling for success and error (border color maybe) - link on upload
+3. locale date is wrong on prod
+4. sonner styling for success and error (border color maybe) - link on upload
    - or uploading toast and success toast
    - owner functionality - add/remove users, add/remove components
-8. duplicated psets sometimes - also opens both
-9. Write guides and usage, explain filters (don't forget 04.05.2025 key: val)
+5. duplicated psets sometimes - also opens both
+6. Write guides and usage, explain filters (don't forget 04.05.2025 key: val)
+7. Maybe also add number of stars in public library
+8. history log for composite
+9. user prof page, display name
 
 edge cases:
 
