@@ -13,15 +13,13 @@ import { useRouter } from "next/navigation";
 import { Book, SquareLibrary } from "lucide-react";
 import { frontendLibrary } from "@/utils/types";
 import PrivateIcon from "../global/PrivateIcon";
-import LibraryMiniatureButton from "./LibraryMiniatureButton";
-import { toggleLibraryFavoritesAction } from "@/utils/actions/libraryActions";
-import { FaRegStar, FaStar } from "react-icons/fa6";
-import { useAppSelector } from "@/lib/hooks";
+import LibraryFavoriteButton from "./LibraryFavoriteButton";
 
 const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
   const router = useRouter();
   const {
     id,
+    isGuest,
     name,
     description,
     createdAt,
@@ -33,35 +31,6 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
     isComposite,
   } = library;
   const charLimit = 140;
-
-  const stateUser = useAppSelector((state) => state.userSlice);
-  const toggleFavoriteTitle = library.isGuest
-    ? `Add ${name} to favorites`
-    : `Remove ${name} from favorites`;
-
-  const containingComposites = stateUser.libraries.filter((lib) => {
-    if (!lib.isComposite) return false;
-    if (lib.content.some((content) => content.id === id)) return true;
-  });
-
-  const warningMessagePrivateLibrary = `${name} is a private library, removing it from favorites will make it inaccessible.`;
-  const warningMessageLibraryInComposite = `${name} is in ${containingComposites.length} composite ${containingComposites.length > 1 ? "libraries" : "library"} that you own. Continuing this action will remove it from your composite libraries.`;
-
-  const warningMessages = [];
-
-  if (library.isGuest && !library.publicFlag) {
-    warningMessages.push(warningMessagePrivateLibrary);
-  }
-  if (containingComposites.length > 0) {
-    warningMessages.push(warningMessageLibraryInComposite);
-  }
-  const toggleFavoriteAction = toggleLibraryFavoritesAction.bind(
-    null,
-    id,
-    isComposite,
-  );
-
-  const toggleFavoriteMessage = `You are about to toggle favorite for ${name}.`;
 
   return (
     <Card
@@ -97,20 +66,13 @@ const LibraryMinature = ({ library }: { library: frontendLibrary }) => {
           ) : (
             <div className="flex">
               <PrivateIcon publicFlag={publicFlag} />
-              {/* <LibraryFavoriteButton */}
-              {/*   isComposite={isComposite} */}
-              {/*   libraryId={id} */}
-              {/*   isGuest={library.isGuest} */}
-              {/* /> */}
-              <LibraryMiniatureButton
-                warningMessages={warningMessages}
+
+              <LibraryFavoriteButton
                 libraryId={id}
-                title={toggleFavoriteTitle}
-                message={toggleFavoriteMessage}
-                action={toggleFavoriteAction}
-                icon={library.isGuest ? <FaStar /> : <FaRegStar />}
-                destructive={false}
-                tooltip={library.isGuest ? "Remove From Faves" : "Add To Faves"}
+                isGuest={isGuest}
+                isComposite={isComposite}
+                libraryName={name}
+                isPublic={publicFlag}
               />
             </div>
           )}

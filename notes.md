@@ -456,6 +456,12 @@ of guests.
 
 Maybe also add number of stars in public library
 
+### --27-05-2025--
+
+Now removing library from favorites triggers removing it from all composites.
+Consider refactoring the button and logic for toggling library favorite to
+LibraryFavoriteButton as it's now unused.
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite
@@ -463,7 +469,7 @@ Maybe also add number of stars in public library
 [x]handle user changing component private from inside libraries (just removed button)
 [x]restrict merging libraries with uncompatible privacy status
 [x]handle user changing library to private and removing someone from guests.
-[ ]handle removing library from favorites
+[x]handle removing library from favorites
 [ ]sharing composite library
 [ ]pagination in libraries view and component browser
 [ ]history log

@@ -18,7 +18,7 @@ import { AppDispatch } from "@/lib/store";
 import { fetchUserLibraries } from "@/lib/features/user/userSlice";
 import { useMutation } from "@tanstack/react-query";
 
-type LibraryMiniatureButtonProps = {
+export type LibraryMiniatureButtonProps = {
   libraryId: string;
   title: string;
   message: string;
