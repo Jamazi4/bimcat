@@ -21,21 +21,37 @@ import {
 } from "@/utils/actions/libraryActions";
 import { toast } from "sonner";
 
-const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
+const ShareLibraryButton = ({
+  sharedId,
+  isComposite,
+}: {
+  sharedId: string;
+  isComposite: boolean;
+}) => {
   const basePath = window.location.origin + "/libraries/share";
   //TODO: might break, move window statement to useEffect for example
 
-  const { libraryId } = useParams();
+  const params = useParams();
+  let libraryId: string;
+
+  if (isComposite) {
+    libraryId = params["compositeLibraryId"] as string;
+  } else {
+    libraryId = params["libraryId"] as string;
+  }
+  const searchParams = new URLSearchParams();
+  searchParams.set("composite", isComposite.toString());
   const [shareUrl, setShareUrl] = useState(
-    sharedId ? `${basePath}/${sharedId}` : ""
+    sharedId ? `${basePath}/${sharedId}?${searchParams}` : "",
   );
+
   const [isShared, setIsShared] = useState(!!sharedId);
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const shareLibraryMutation = useMutation({
     mutationFn: (libraryId: string) => {
-      return shareLibraryAction(libraryId);
+      return shareLibraryAction(libraryId, isComposite);
     },
   });
 
@@ -53,7 +69,7 @@ const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
     shareLibraryMutation.isPending || disableShareLibraryMutation.isPending;
 
   const handleGenerate = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.stopPropagation();
 
@@ -70,7 +86,7 @@ const ShareLibraryButton = ({ sharedId }: { sharedId: string }) => {
   };
 
   const handleDisable = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.stopPropagation();
 

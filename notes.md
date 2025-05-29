@@ -14,7 +14,7 @@
    - owner functionality - add/remove users, add/remove components
 5. duplicated psets sometimes - also opens both
 6. Write guides and usage, explain filters (don't forget 04.05.2025 key: val)
-7. Maybe also add number of stars in public library
+7. Maybe also display number of stars
 8. history log for composite
 9. user prof page, display name
 
@@ -461,6 +461,18 @@ Maybe also add number of stars in public library
 Now removing library from favorites triggers removing it from all composites.
 Consider refactoring the button and logic for toggling library favorite to
 LibraryFavoriteButton as it's now unused.
+
+### --28-05-2025--
+
+Refactored it to a new button. Starting with sharing?
+started with sharing composite but need to
+
+- fix share route to handle composite or just create new share route under
+  composite
+- handle composites in disableshared
+- finally make manageguests work for composite
+
+so for now only generating link works
 
 ### Current task list
 

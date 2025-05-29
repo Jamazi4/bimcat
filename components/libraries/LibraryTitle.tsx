@@ -33,7 +33,7 @@ const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfoType }) => {
           <DownloadLibraryButton libraryEmpty={empty} isComposite={false} />
           {!isPublic && isEditable && (
             <>
-              <ShareLibraryButton sharedId={sharedId} />
+              <ShareLibraryButton sharedId={sharedId} isComposite={false} />
               <ManageGuestsButton guests={guests} />
             </>
           )}

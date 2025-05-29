@@ -884,14 +884,22 @@ export const fetchSingleLibraryComponentAction = async (
   }
 };
 
-const authShareActions = async (libraryId: string) => {
+const authShareActions = async (libraryId: string, isComposite: boolean) => {
   const dbUser = await getDbUser();
 
   if (!dbUser) throw new Error("Could not find user");
 
-  const targetLibrary = dbUser.authoredLibraries.find(
-    (lib) => lib.id === libraryId,
-  );
+  let targetLibrary;
+
+  if (isComposite) {
+    targetLibrary = dbUser.authoredCompositeLibraries.find(
+      (lib) => lib.id === libraryId,
+    );
+  } else {
+    targetLibrary = dbUser.authoredLibraries.find(
+      (lib) => lib.id === libraryId,
+    );
+  }
 
   if (!targetLibrary) throw new Error("Could not find library.");
   const alreadyShared = targetLibrary.sharedId !== null;
@@ -903,18 +911,27 @@ const authShareActions = async (libraryId: string) => {
   return { authorized, alreadyShared };
 };
 
-export const shareLibraryAction = async (libraryId: string) => {
+export const shareLibraryAction = async (
+  libraryId: string,
+  isComposite: boolean,
+) => {
   try {
-    const { alreadyShared } = await authShareActions(libraryId);
+    const { alreadyShared } = await authShareActions(libraryId, isComposite);
 
     if (alreadyShared) throw new Error("Already shared.");
     const sharedId = uuidv4();
 
-    await prisma.library.update({
-      where: { id: libraryId },
-      data: { sharedId },
-    });
-
+    if (isComposite) {
+      await prisma.compositeLibrary.update({
+        where: { id: libraryId },
+        data: { sharedId },
+      });
+    } else {
+      await prisma.library.update({
+        where: { id: libraryId },
+        data: { sharedId },
+      });
+    }
     return sharedId;
   } catch (error) {
     throw error;
@@ -923,7 +940,8 @@ export const shareLibraryAction = async (libraryId: string) => {
 
 export const disableShareLibraryAction = async (libraryId: string) => {
   try {
-    const { alreadyShared } = await authShareActions(libraryId);
+    const { alreadyShared } = await authShareActions(libraryId, false);
+    //TODO: above needs fixing for composite
 
     if (!alreadyShared) throw new Error(LibraryErrors.NotShared);
 
