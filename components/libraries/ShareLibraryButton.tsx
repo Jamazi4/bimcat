@@ -32,17 +32,18 @@ const ShareLibraryButton = ({
   //TODO: might break, move window statement to useEffect for example
 
   const params = useParams();
-  let libraryId: string;
 
+  let libraryId: string;
   if (isComposite) {
     libraryId = params["compositeLibraryId"] as string;
   } else {
     libraryId = params["libraryId"] as string;
   }
   const searchParams = new URLSearchParams();
-  searchParams.set("composite", isComposite.toString());
+  searchParams.set("isComposite", isComposite.toString());
+  console.log(searchParams);
   const [shareUrl, setShareUrl] = useState(
-    sharedId ? `${basePath}/${sharedId}?${searchParams}` : "",
+    sharedId ? `${basePath}/${sharedId}?${searchParams.toString()}` : "",
   );
 
   const [isShared, setIsShared] = useState(!!sharedId);
@@ -57,7 +58,7 @@ const ShareLibraryButton = ({
 
   const disableShareLibraryMutation = useMutation({
     mutationFn: (libraryId: string) => {
-      return disableShareLibraryAction(libraryId);
+      return disableShareLibraryAction(libraryId, isComposite);
     },
   });
 

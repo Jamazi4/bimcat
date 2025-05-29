@@ -474,6 +474,14 @@ started with sharing composite but need to
 
 so for now only generating link works
 
+### --29-05-2025--
+
+This might be already working but wifi in the train lol
+if share is working correctly for composites and redirects correctly, then
+start with manageUsers for compositeLibrary.
+
+I think that composites should handle changing the privacy
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite
@@ -483,6 +491,7 @@ so for now only generating link works
 [x]handle user changing library to private and removing someone from guests.
 [x]handle removing library from favorites
 [ ]sharing composite library
+[ ]starred amount and guests amount
 [ ]pagination in libraries view and component browser
 [ ]history log
 [ ]handle pset values and stats

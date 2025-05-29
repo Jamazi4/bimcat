@@ -7,21 +7,19 @@ import { giveAccessToLibraryAction } from "@/utils/actions/libraryActions";
 import { LibraryErrors } from "@/utils/types";
 import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
 import { useMutation } from "@tanstack/react-query";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const Page = () => {
-  const { sharedId } = useParams();
   const { isSignedIn, isLoaded } = useUser();
+  const { sharedId } = useParams();
 
   if (typeof sharedId !== "string") {
     return <div>Invalid library ID</div>;
   }
-
   if (!isLoaded) return <div className="flex mx-auto">Loading...</div>;
-
   return (
     <>
       {isSignedIn ? <ProcessingScreen sharedId={sharedId} /> : <SignInScreen />}
@@ -53,9 +51,10 @@ const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
   const [failed, setFailed] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const isComposite = useSearchParams().get("isComposite") === "true";
   const giveAccessToLibraryMutation = useMutation({
     mutationFn: (sharedId: string) => {
-      return giveAccessToLibraryAction(sharedId);
+      return giveAccessToLibraryAction(sharedId, isComposite);
     },
   });
   const { mutate } = giveAccessToLibraryMutation;
@@ -64,7 +63,8 @@ const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
     mutate(sharedId, {
       onSuccess: (result) => {
         toast("Library shared succesfully.");
-        router.replace(`/libraries/${result}`);
+        const finalRoute = `/libraries${isComposite ? "/composite" : ""}/${result}`;
+        router.replace(finalRoute);
         dispatch(fetchUserLibraries());
       },
       onError: (error) => {
@@ -88,7 +88,7 @@ const ProcessingScreen = ({ sharedId }: { sharedId: string }) => {
         }
       },
     });
-  }, [mutate, dispatch, sharedId, router]);
+  }, [mutate, dispatch, sharedId, router, isComposite]);
 
   return (
     <>

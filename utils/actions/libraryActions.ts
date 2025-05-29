@@ -938,46 +938,87 @@ export const shareLibraryAction = async (
   }
 };
 
-export const disableShareLibraryAction = async (libraryId: string) => {
+export const disableShareLibraryAction = async (
+  libraryId: string,
+  isComposite: boolean,
+) => {
   try {
-    const { alreadyShared } = await authShareActions(libraryId, false);
-    //TODO: above needs fixing for composite
+    const { alreadyShared } = await authShareActions(libraryId, isComposite);
 
     if (!alreadyShared) throw new Error(LibraryErrors.NotShared);
 
-    const targetLibrary = await prisma.library.update({
-      where: { id: libraryId },
-      data: { sharedId: null },
-    });
+    let targetLibrary;
+    if (isComposite) {
+      targetLibrary = await prisma.compositeLibrary.update({
+        where: { id: libraryId },
+        data: { sharedId: null },
+      });
+    } else {
+      targetLibrary = await prisma.library.update({
+        where: { id: libraryId },
+        data: { sharedId: null },
+      });
+    }
     return { message: `Share link for ${targetLibrary.name} disabled.` };
   } catch (error) {
     throw error;
   }
 };
 
-export const giveAccessToLibraryAction = async (sharedId: string) => {
+export const giveAccessToLibraryAction = async (
+  sharedId: string,
+  isComposite: boolean,
+) => {
   try {
     const dbUser = await getDbUser();
 
     if (!dbUser) throw new Error(LibraryErrors.UserNotFound);
 
-    const isYourOwn = dbUser.authoredLibraries.some(
-      (lib) => lib.sharedId === sharedId,
-    );
+    let isYourOwn: boolean;
+    if (isComposite) {
+      isYourOwn = dbUser.authoredCompositeLibraries.some(
+        (lib) => lib.sharedId === sharedId,
+      );
+    } else {
+      isYourOwn = dbUser.authoredLibraries.some(
+        (lib) => lib.sharedId === sharedId,
+      );
+    }
 
     if (isYourOwn) throw new Error(LibraryErrors.OwnLibrary);
 
-    const sharedLibraryId = await prisma.library.findFirst({
-      where: { sharedId },
-      select: { id: true },
-    });
+    let sharedLibraryId: { id: string } | null;
+    if (isComposite) {
+      sharedLibraryId = await prisma.compositeLibrary.findFirst({
+        where: { sharedId },
+        select: { id: true },
+      });
+    } else {
+      sharedLibraryId = await prisma.library.findFirst({
+        where: { sharedId },
+        select: { id: true },
+      });
+    }
 
     if (!sharedLibraryId) throw new Error(LibraryErrors.NotShared);
+    let updateStatement: Prisma.UserUpdateArgs;
+    if (isComposite) {
+      updateStatement = {
+        where: { id: dbUser.id },
+        data: {
+          guestCompositeLibraries: { connect: { id: sharedLibraryId.id } },
+        },
+      };
+    } else {
+      updateStatement = {
+        where: { id: dbUser.id },
+        data: {
+          guestLibraries: { connect: { id: sharedLibraryId.id } },
+        },
+      };
+    }
 
-    await prisma.user.update({
-      where: { id: dbUser.id },
-      data: { guestLibraries: { connect: { id: sharedLibraryId.id } } },
-    });
+    await prisma.user.update(updateStatement);
 
     return sharedLibraryId.id;
   } catch (error) {
