@@ -482,6 +482,10 @@ start with manageUsers for compositeLibrary.
 
 I think that composites should handle changing the privacy
 
+When I remove guest from composite and they have any libraries inside?, nothing
+happens, as it should. They can remove the composite owner from guest and it will
+be the same
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite
@@ -490,8 +494,8 @@ I think that composites should handle changing the privacy
 [x]restrict merging libraries with uncompatible privacy status
 [x]handle user changing library to private and removing someone from guests.
 [x]handle removing library from favorites
-[ ]sharing composite library
+[x]sharing composite library
 [ ]starred amount and guests amount
 [ ]pagination in libraries view and component browser
-[ ]history log
 [ ]handle pset values and stats
+[ ]history log
