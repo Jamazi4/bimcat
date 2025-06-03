@@ -486,6 +486,10 @@ When I remove guest from composite and they have any libraries inside?, nothing
 happens, as it should. They can remove the composite owner from guest and it will
 be the same
 
+### --02-06-2025--
+
+sharing link was generating without params - now it's solved
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite

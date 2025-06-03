@@ -76,7 +76,7 @@ const ShareLibraryButton = ({
 
     shareLibraryMutation.mutate(libraryId, {
       onSuccess: (result) => {
-        setShareUrl(`${basePath}/${result}`);
+        setShareUrl(`${basePath}/${result}?${searchParams.toString()}`);
         setIsShared(true);
         toast("Generated private share link.");
       },
