@@ -42,7 +42,9 @@ const Page = () => {
   if (!data) return <div>no data</div>;
   const libraryName = data.name;
 
+  const mergedLibraryIds: string[] = [];
   const tableData = data.Libraries.map((entry) => {
+    mergedLibraryIds.push(entry.id);
     return {
       id: entry.id,
       name: entry.name,
@@ -80,11 +82,15 @@ const Page = () => {
       return {
         name: `${guest.firstName} ${guest.secondName}`,
         id: guest.id,
+        numMergedLibraries: guest.authoredLibraries.reduce((acc, cur) => {
+          if (mergedLibraryIds.includes(cur.id)) return acc + 1;
+          else return acc;
+        }, 0),
       };
     }),
   };
   //TODO: I shouldn't have to do the above, it's already good on backend
-
+  //TODO: also the fetchCompositeLibraryAction leaks user ids in guests
   return (
     <main>
       <Breadcrumbs libraryName={libraryName} />

@@ -1026,39 +1026,83 @@ export const giveAccessToLibraryAction = async (
   }
 };
 
-export const removeGuestAction = async (libraryId: string, userId: string) => {
+export const removeGuestAction = async (
+  libraryId: string,
+  userId: string,
+  isComposite: boolean,
+) => {
   try {
     const dbUser = await getDbUser();
 
     if (!dbUser) throw new Error(LibraryErrors.UserNotFound);
 
-    const hasRights = dbUser.authoredLibraries.some(
-      (lib) => lib.userId === dbUser.id,
-    );
+    let hasRights;
+    if (isComposite) {
+      hasRights = dbUser.authoredCompositeLibraries.some(
+        (lib) => lib.userId === dbUser.id,
+      );
+    } else {
+      hasRights = dbUser.authoredLibraries.some(
+        (lib) => lib.userId === dbUser.id,
+      );
+    }
 
     if (!hasRights) throw new Error(LibraryErrors.Unauthorized);
-    const library = await prisma.library.findUnique({
-      where: { id: libraryId },
-      include: {
-        guests: true,
-        CompositeLibraries: {
-          select: { id: true, public: true, author: { select: { id: true } } },
+    let library;
+
+    if (isComposite) {
+      library = await prisma.compositeLibrary.findUnique({
+        where: { id: libraryId },
+        include: {
+          guests: true,
         },
-      },
-    });
+      });
+    } else {
+      library = await prisma.library.findUnique({
+        where: { id: libraryId },
+        include: {
+          guests: true,
+          CompositeLibraries: {
+            select: {
+              id: true,
+              public: true,
+              author: { select: { id: true } },
+            },
+          },
+        },
+      });
+    }
 
     if (!library) throw new Error(LibraryErrors.LibraryNotFound);
 
-    await removeFromForeignComposites(libraryId, library, userId);
+    if (
+      !isComposite &&
+      "CompositeLibraries" in library &&
+      Array.isArray(library.CompositeLibraries)
+    ) {
+      await removeFromForeignComposites(
+        libraryId,
+        library as libraryWithForeignCompositesOnly,
+        userId,
+      );
+    }
 
     const userIsGuest = library.guests.some((guest) => guest.id === userId);
     if (!userIsGuest) throw new Error(LibraryErrors.UserNotFound);
 
-    await prisma.library.update({
-      where: { id: libraryId },
-      data: { guests: { disconnect: { id: userId } } },
-    });
-    revalidatePath(`/libraries/${libraryId}`);
+    if (isComposite) {
+      await prisma.compositeLibrary.update({
+        where: { id: libraryId },
+        data: { guests: { disconnect: { id: userId } } },
+      });
+      revalidatePath(`/libraries/composite/${libraryId}`);
+    } else {
+      await prisma.library.update({
+        where: { id: libraryId },
+        data: { guests: { disconnect: { id: userId } } },
+      });
+      revalidatePath(`/libraries/${libraryId}`);
+    }
     return { message: `User succesfully removed from guests.` };
   } catch (error) {
     return renderError(error);
@@ -1136,7 +1180,14 @@ export const fetchCompositeLibraryAction = async (
       where: { id: compositeLibraryId },
       include: {
         author: { select: { firstName: true, secondName: true } },
-        guests: { select: { firstName: true, secondName: true, id: true } },
+        guests: {
+          select: {
+            firstName: true,
+            secondName: true,
+            id: true,
+            authoredLibraries: { select: { id: true } },
+          },
+        },
         Libraries: {
           include: {
             Components: true,

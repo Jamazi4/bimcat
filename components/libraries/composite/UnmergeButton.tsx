@@ -43,10 +43,9 @@ const UnmergeButton = ({
       libraryIds: string[];
       compositeId: string;
     }) => {
-      console.log(libraryIds, compositeId);
       return unmergeLibraryAction(libraryIds, compositeId);
     },
-    meta: { invalidates: ["libraryBrowser"] },
+    meta: { invalidates: ["libraryBrowser", "compositeLibrary"] },
   });
 
   return (
@@ -57,7 +56,7 @@ const UnmergeButton = ({
         pending={pending}
         icon={<BookX />}
         tooltip="Unmerge"
-        destructive={false}
+        destructive={true}
       />
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent onInteractOutside={(e) => e.preventDefault()}>
@@ -88,7 +87,6 @@ const UnmergeButton = ({
                     onSuccess: (result) => {
                       toast(result.message);
                       setSelection([]);
-
                       dispatch(fetchUserLibraries());
                     },
                     onError: (error) => {

@@ -489,6 +489,13 @@ be the same
 ### --02-06-2025--
 
 sharing link was generating without params - now it's solved
+now you can also manage guests in composite - just add number of user's
+libraries in currrent composite so removing will show that just in case
+
+### --04-06-2025--
+
+Above is done, I still need to hide ids on backend, todos added in the code for
+[compositeLibraryId]/page.tsx
 
 ### Current task list
 

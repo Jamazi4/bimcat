@@ -41,7 +41,6 @@ const ShareLibraryButton = ({
   }
   const searchParams = new URLSearchParams();
   searchParams.set("isComposite", isComposite.toString());
-  console.log(searchParams);
   const [shareUrl, setShareUrl] = useState(
     sharedId ? `${basePath}/${sharedId}?${searchParams.toString()}` : "",
   );

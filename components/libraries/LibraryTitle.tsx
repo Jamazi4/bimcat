@@ -34,7 +34,7 @@ const LibraryTitle = ({ libraryInfo }: { libraryInfo: LibraryInfoType }) => {
           {!isPublic && isEditable && (
             <>
               <ShareLibraryButton sharedId={sharedId} isComposite={false} />
-              <ManageGuestsButton guests={guests} />
+              <ManageGuestsButton guests={guests} isComposite={false} />
             </>
           )}
         </div>

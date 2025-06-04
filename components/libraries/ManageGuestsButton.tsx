@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import TooltipActionTriggerButton from "../componentList/TooltipActionTriggerButton";
-import { LoaderCircle, SquareLibrary, Users, X } from "lucide-react";
+import { Book, LoaderCircle, SquareLibrary, Users, X } from "lucide-react";
 import {
   DialogHeader,
   Dialog,
@@ -19,10 +19,18 @@ import { toast } from "sonner";
 import { LibraryInfoType } from "@/utils/types";
 const ManageGuestsButton = ({
   guests,
+  isComposite,
 }: {
   guests: LibraryInfoType["guests"];
+  isComposite: boolean;
 }) => {
-  const { libraryId } = useParams<{ libraryId: string }>();
+  const params = useParams();
+  let libraryId: string;
+  if (isComposite) {
+    libraryId = params["compositeLibraryId"] as string;
+  } else {
+    libraryId = params["libraryId"] as string;
+  }
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const dispatch = useAppDispatch();
@@ -31,11 +39,13 @@ const ManageGuestsButton = ({
     mutationFn: ({
       libraryId,
       userId,
+      isComposite,
     }: {
       libraryId: string;
       userId: string;
+      isComposite: boolean;
     }) => {
-      return removeGuestAction(libraryId, userId);
+      return removeGuestAction(libraryId, userId, isComposite);
     },
     meta: { invalidates: ["libraryComponents"] },
   });
@@ -43,7 +53,7 @@ const ManageGuestsButton = ({
   const handleRemove = async (userId: string) => {
     setPending(true);
     removeGuestMutation.mutate(
-      { libraryId, userId },
+      { libraryId, userId, isComposite },
       {
         onSuccess: (result) => {
           toast(result.message);
@@ -90,10 +100,19 @@ const ManageGuestsButton = ({
               <div key={guest.id} className="flex justify-between items-center">
                 <div className="flex space-x-2">
                   <p>{guest.name}</p>
-                  <p className="flex">
-                    - {guest.numAuthoredCompositeLibraries}
-                    <SquareLibrary className="ml-2 w-5 h-5" />
-                  </p>
+                  {!isComposite && (
+                    <p className="flex">
+                      - {guest.numAuthoredCompositeLibraries}
+                      <SquareLibrary className="ml-2 w-5 h-5" />
+                    </p>
+                  )}
+                  {isComposite && (
+                    <p className="flex">
+                      - {guest.numMergedLibraries}
+                      <Book className="ml-2 w-5 h-5" />
+                    </p>
+                  )}
+                  {/* TODO: Show number of libraries if in composite  */}
                 </div>
                 <Button
                   variant="ghost"

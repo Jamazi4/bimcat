@@ -6,13 +6,14 @@ import { renameLibraryAction } from "@/utils/actions/libraryActions";
 import MergeLibraryButton from "./MergeLibraryButton";
 import { SquareLibrary } from "lucide-react";
 import ShareLibraryButton from "../ShareLibraryButton";
+import ManageGuestsButton from "../ManageGuestsButton";
 
 const CompositeLibraryTitle = ({
   libraryInfo,
 }: {
   libraryInfo: LibraryInfoType;
 }) => {
-  const { name, isEditable, sharedId, isPublic, empty } = libraryInfo;
+  const { name, isEditable, sharedId, isPublic, empty, guests } = libraryInfo;
   return (
     <div className="my-6">
       <div className="flex justify-between">
@@ -38,7 +39,10 @@ const CompositeLibraryTitle = ({
           <DownloadLibraryButton libraryEmpty={empty} isComposite={true} />
 
           {!isPublic && isEditable && (
-            <ShareLibraryButton sharedId={sharedId} isComposite={true} />
+            <>
+              <ShareLibraryButton sharedId={sharedId} isComposite={true} />
+              <ManageGuestsButton guests={guests} isComposite={true} />
+            </>
           )}
           <MergeLibraryButton />
         </div>

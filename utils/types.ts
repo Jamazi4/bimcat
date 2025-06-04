@@ -58,6 +58,7 @@ export type LibraryInfoType = {
     name: string;
     id: string;
     numAuthoredCompositeLibraries?: number;
+    numMergedLibraries?: number;
   }[];
   isComposite?: boolean;
 };
