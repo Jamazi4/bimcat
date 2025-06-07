@@ -1197,14 +1197,56 @@ export const fetchCompositeLibraryAction = async (
       },
     });
 
+    const mergedLibraryIds: string[] = [];
     if (!compositeLibrary) throw new Error("Could not find library");
+    const tableData = compositeLibrary.Libraries.map((entry) => {
+      mergedLibraryIds.push(entry.id);
+      return {
+        id: entry.id,
+        name: entry.name,
+        author: `${entry.author.firstName} ${entry.author.secondName}`,
+        updatedAt: entry.updatedAt.toISOString(),
+        createdAt: entry.createdAt.toISOString(),
+        public: entry.public,
+        components: entry.Components.map((component) => {
+          return {
+            id: component.id,
+            name: component.name,
+            author: `${entry.author.firstName} ${entry.author.secondName}`,
+            updatedAt: component.updatedAt.toISOString(),
+            createdAt: component.createdAt.toISOString(),
+            editable: false,
+            public: component.public,
+          };
+        }),
+      };
+    });
 
-    const frontEndLibrary = {
-      ...compositeLibrary,
-      editable: compositeLibrary?.userId === dbUser?.id || false,
+    const editable = compositeLibrary?.userId === dbUser?.id || false;
+    const authorString = `${compositeLibrary.author.firstName} ${compositeLibrary.author.secondName}`;
+    const libraryInfo: LibraryInfoType = {
+      createdAt: compositeLibrary.createdAt.toISOString(),
+      updatedAt: compositeLibrary.updatedAt.toISOString(),
+      author: authorString,
+      empty: compositeLibrary.Libraries.length === 0,
+      name: compositeLibrary.name,
+      desc: compositeLibrary.description,
+      sharedId: compositeLibrary.sharedId || "",
+      isEditable: editable,
+      isPublic: compositeLibrary.public,
+      isComposite: true,
+      guests: compositeLibrary.guests.map((guest) => {
+        return {
+          name: `${guest.firstName} ${guest.secondName}`,
+          id: guest.id,
+          numMergedLibraries: guest.authoredLibraries.reduce((acc, cur) => {
+            if (mergedLibraryIds.includes(cur.id)) return acc + 1;
+            else return acc;
+          }, 0),
+        };
+      }),
     };
-
-    return frontEndLibrary;
+    return { tableData, libraryInfo };
   } catch (error) {
     throw error;
   }

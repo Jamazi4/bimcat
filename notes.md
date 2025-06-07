@@ -497,6 +497,10 @@ libraries in currrent composite so removing will show that just in case
 Above is done, I still need to hide ids on backend, todos added in the code for
 [compositeLibraryId]/page.tsx
 
+### --07-06-2025--
+
+this is done, start with starred and guests amount graphically
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite
