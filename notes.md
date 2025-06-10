@@ -501,6 +501,12 @@ Above is done, I still need to hide ids on backend, todos added in the code for
 
 this is done, start with starred and guests amount graphically
 
+### --08-06-2025--
+
+New notes file - this one will be dedicated to the 'cat' part of application.
+Since it's a somewhat working system already I will start working on node edior
+notes for that are in the 'node-notes.md'
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite
@@ -510,7 +516,9 @@ this is done, start with starred and guests amount graphically
 [x]handle user changing library to private and removing someone from guests.
 [x]handle removing library from favorites
 [x]sharing composite library
+[ ]Filter by - components and libraries
 [ ]starred amount and guests amount
 [ ]pagination in libraries view and component browser
 [ ]handle pset values and stats
 [ ]history log
+[ ]profile page, user customization (display name), and user stats

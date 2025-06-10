@@ -1199,6 +1199,7 @@ export const fetchCompositeLibraryAction = async (
 
     const mergedLibraryIds: string[] = [];
     if (!compositeLibrary) throw new Error("Could not find library");
+
     const tableData = compositeLibrary.Libraries.map((entry) => {
       mergedLibraryIds.push(entry.id);
       return {
@@ -1224,6 +1225,7 @@ export const fetchCompositeLibraryAction = async (
 
     const editable = compositeLibrary?.userId === dbUser?.id || false;
     const authorString = `${compositeLibrary.author.firstName} ${compositeLibrary.author.secondName}`;
+
     const libraryInfo: LibraryInfoType = {
       createdAt: compositeLibrary.createdAt.toISOString(),
       updatedAt: compositeLibrary.updatedAt.toISOString(),

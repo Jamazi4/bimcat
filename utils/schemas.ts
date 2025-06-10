@@ -51,6 +51,35 @@ export const componentSchema = z.object({
 
 export const componentArraySchema = z.array(componentSchema);
 
+export const GeomNodeSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  x: z.number(),
+  y: z.number(),
+  width: z.number(),
+  height: z.number(),
+  text: z.string(),
+  values: z.record(z.union([z.number(), z.string(), z.boolean()])),
+});
+
+export type GeomNodeType = z.infer<typeof GeomNodeSchema>;
+
+export const NodeEdgeSchema = z.object({
+  id: z.string(),
+  sourceId: z.string(),
+  targetId: z.string(),
+});
+
+export type NodeEdgeSchema = z.infer<typeof NodeEdgeSchema>;
+
+export const NodeProjectSchema = z.object({
+  id: z.string(),
+  sourceId: z.string(),
+  targetId: z.string(),
+});
+
+export type NodeProjectType = z.infer<typeof NodeProjectSchema>;
+
 export const componentWithGeometrySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -62,6 +91,7 @@ export const componentWithGeometrySchema = z.object({
   author: z.string(),
   public: z.boolean(),
   editable: z.boolean(),
+  nodes: NodeProjectSchema.optional(),
 });
 
 export type componentWithGeometrySchemaType = z.infer<

@@ -22,17 +22,19 @@ model ComponentGeometry {
 }
 
 model Component {
-  id        String              @id @default(uuid())
-  name      String
-  geometry  ComponentGeometry[] @relation("ComponentToGeometry")
-  psets     Json
-  libraries Library[]           @relation("ComponentToLibrary")
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
-  User      User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  author    String
-  public    Boolean             @default(true)
+  id            String              @id @default(uuid())
+  name          String
+  geometry      ComponentGeometry[] @relation("ComponentToGeometry")
+  psets         Json
+  libraries     Library[]           @relation("ComponentToLibrary")
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  User          User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  author        String
+  public        Boolean             @default(true)
+  nodes         NodeProject?
+  nodeProjectId String?
 }
 
 model Library {
@@ -78,6 +80,14 @@ model CompositeLibrary {
   userId      String
   public      Boolean
   sharedId    String?
+}
+
+model NodeProject {
+  id          String    @id @default(uuid())
+  nodes       Json
+  edges       Json
+  Component   Component @relation(fields: [componentId], references: [id])
+  componentId String    @unique
 }
 
 model HistoryEntry {

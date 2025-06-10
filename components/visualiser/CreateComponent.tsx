@@ -1,3 +1,5 @@
+"use client";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { MenubarItem } from "../ui/menubar";
 import {
   Dialog,
@@ -7,54 +9,40 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { useCallback, useEffect, useState } from "react";
-import { getIfcDataById } from "@/utils/ifc/ifcjs";
-import { ComponentGeometry, Pset } from "@/utils/types";
+} from "../ui/dialog";
 import { createComponentAction } from "@/utils/actions/componentActions";
 import FormContainer from "../global/FormContainer";
-import { Checkbox } from "../ui/checkbox";
 import SubmitButton from "../global/SubmitButton";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Checkbox } from "../ui/checkbox";
+import { Pset } from "@/utils/schemas";
+import { ComponentGeometry } from "@/utils/types";
 
-const SaveComponent = ({
-  selected,
-  file,
+const CreateComponent = ({
+  disabled,
+  setNodeMode,
 }: {
-  selected: number | null;
-  file: File | null;
+  disabled: boolean;
+  setNodeMode: Dispatch<SetStateAction<boolean>>;
 }) => {
+  // const handleCreateComponent = () => {
+  //   setNodeMode(true);
+  // };
   const [open, setOpen] = useState(false);
-  const [geometry, setGeometry] = useState<ComponentGeometry[] | null>(null);
-  const [psets, setPsets] = useState<Pset[] | null>(null);
-
-  useEffect(() => {
-    if (!open || !file || !selected) return;
-
-    const loadData = async () => {
-      const data = await getIfcDataById(file, selected);
-      setGeometry(data.geometry);
-      setPsets(data.psets);
-    };
-
-    loadData();
-  }, [open, file, selected]);
+  const geometry: ComponentGeometry[] = [];
+  const psets: Pset[] = [];
 
   const handleSuccess = useCallback(() => {
     setOpen(false);
-  }, []);
+    setNodeMode(true);
+  }, [setNodeMode]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <MenubarItem
-          disabled={selected === null}
-          onSelect={(e) => {
-            e.preventDefault();
-          }}
-        >
-          Save
+        <MenubarItem disabled={disabled} onSelect={(e) => e.preventDefault()}>
+          Create
         </MenubarItem>
       </DialogTrigger>
       <DialogContent>
@@ -83,7 +71,7 @@ const SaveComponent = ({
           {psets && (
             <input type="hidden" name="psets" value={JSON.stringify(psets)} />
           )}
-          <input type="hidden" name="useNodes" value={"false"} />
+          <input type="hidden" name="useNodes" value={"true"} />
           <DialogFooter>
             <SubmitButton />
           </DialogFooter>
@@ -92,4 +80,5 @@ const SaveComponent = ({
     </Dialog>
   );
 };
-export default SaveComponent;
+
+export default CreateComponent;

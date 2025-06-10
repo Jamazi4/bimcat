@@ -46,6 +46,7 @@ export const createComponentAction = async (
   const geometry = formData.get("geometry") as string;
   const psets = formData.get("psets") as string;
   const makePrivate = formData.get("makePrivate") === "on";
+  const useNodes = formData.get("useNodes") === "true";
 
   const parsedGeometry = validateWithZodSchema(
     geometryArraySchema,
@@ -56,18 +57,29 @@ export const createComponentAction = async (
   try {
     const dbUser = await getDbUser();
     const author = `${dbUser?.firstName} ${dbUser?.secondName}`;
+    if (!dbUser) throw new Error("Could not find user");
+
+    const data: Prisma.ComponentCreateInput = {
+      name,
+      psets: parsedPsets,
+      public: !makePrivate,
+      geometry: {
+        create: parsedGeometry,
+      },
+      User: {
+        connect: {
+          id: dbUser.id,
+        },
+      },
+      author,
+    };
+
+    if (useNodes) {
+      data["nodes"] = { create: { nodes: [], edges: [] } };
+    }
 
     await prisma.component.create({
-      data: {
-        name,
-        psets: parsedPsets,
-        public: !makePrivate,
-        geometry: {
-          create: parsedGeometry,
-        },
-        userId: dbUser?.id,
-        author,
-      },
+      data,
     });
     revalidatePath(`/components`);
     revalidateTag("allComponents");

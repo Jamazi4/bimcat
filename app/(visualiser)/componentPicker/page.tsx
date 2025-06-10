@@ -2,21 +2,18 @@
 
 import MenuBar from "@/components/visualiser/MenuBar";
 import { Grid, OrbitControls } from "@react-three/drei";
-import { Canvas, ThreeEvent, useThree } from "@react-three/fiber";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import * as THREE from "three";
-import * as OBC from "@thatopen/components";
-import { FragmentsGroup } from "@thatopen/fragments";
-import { type IfcRelationsIndexer } from "@thatopen/components";
+import { Canvas } from "@react-three/fiber";
+import { useState } from "react";
 import type { Pset } from "@/utils/schemas";
-import { getIfcPsetsById } from "@/utils/ifc/ifcjs";
 import PsetAccordion from "@/components/editor/PsetAccordion";
-import MeshItem from "@/components/visualiser/MeshItem";
+import IFCModel from "@/components/visualiser/IFCModel";
+import NodeEditor from "@/components/visualiser/NodeEditor";
 
 const Page = () => {
   const [file, setFile] = useState<File | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [displayPsets, setDisplayPsets] = useState<Pset[] | null>(null);
+  const [nodeMode, setNodeMode] = useState(false);
 
   const handlePointerMissed = (e: MouseEvent) => {
     if (e.button !== 0) return;
@@ -31,7 +28,14 @@ const Page = () => {
           <PsetAccordion edit={false} psets={displayPsets} />
         </div>
       )}
-      <MenuBar setFile={setFile} file={file} selected={selected} />
+      {nodeMode && <NodeEditor />}
+      <MenuBar
+        setFile={setFile}
+        file={file}
+        selected={selected}
+        nodeMode={nodeMode}
+        setNodeMode={setNodeMode}
+      />
       <Canvas
         camera={{ position: [0, 1, 0] }}
         onPointerMissed={handlePointerMissed}
@@ -49,7 +53,7 @@ const Page = () => {
           infiniteGrid={true}
         />
         {file && (
-          <Model
+          <IFCModel
             file={file}
             setSelected={setSelected}
             setDisplayPsets={setDisplayPsets}
@@ -63,102 +67,3 @@ const Page = () => {
   );
 };
 export default Page;
-
-const Model = ({
-  file,
-  setSelected,
-  setDisplayPsets,
-  selected,
-}: {
-  file: File;
-  setSelected: Dispatch<SetStateAction<number | null>>;
-  setDisplayPsets: Dispatch<SetStateAction<Pset[] | null>>;
-  selected: number | null;
-}) => {
-  const [fragments, setFragments] = useState<FragmentsGroup>();
-  const [indexer, setIndexer] = useState<IfcRelationsIndexer | null>(null);
-
-  const colorHighlighted = new THREE.Color().setRGB(0.9, 0.1, 0.9);
-
-  const { scene } = useThree();
-
-  useEffect(() => {
-    const loadModel = async () => {
-      const components = new OBC.Components();
-      const loader = components.get(OBC.IfcLoader);
-      const indexer = components.get(OBC.IfcRelationsIndexer);
-
-      await loader.setup();
-
-      const data = await file.arrayBuffer();
-      const buffer = new Uint8Array(data);
-      const model = await loader.load(buffer);
-      await indexer.process(model);
-
-      setIndexer(indexer);
-      setFragments(model);
-
-      // Cleanup will refer to *this* instance
-      return () => {
-        scene.remove(model);
-        model.dispose();
-      };
-    };
-
-    let cleanup: (() => void) | undefined;
-
-    loadModel().then((clean) => {
-      cleanup = clean;
-    });
-
-    return () => {
-      if (cleanup) cleanup();
-    };
-  }, [file, scene]);
-
-  if (!fragments) return;
-
-  const retrievePsets = async (id: number) => {
-    if (!indexer) return;
-    let psets: Pset[] = [];
-    psets = await getIfcPsetsById(fragments, indexer, id); //granted that the indexer already processed the model
-    setDisplayPsets(psets);
-  };
-
-  const handleMeshClick = (e: ThreeEvent<MouseEvent>, id: number) => {
-    e.stopPropagation();
-    retrievePsets(id);
-    setSelected(id);
-  };
-
-  const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
-    e.stopPropagation();
-    document.body.style.cursor = "pointer";
-  };
-
-  const handlePointerOut = (e: ThreeEvent<PointerEvent>) => {
-    e.stopPropagation();
-    document.body.style.cursor = "default";
-  };
-
-  const handlePointerMissed = (e: MouseEvent) => {
-    e.stopPropagation();
-  };
-
-  return (
-    <>
-      {fragments.items.map((obj, index) => (
-        <MeshItem
-          key={index}
-          obj={obj}
-          selectedId={selected}
-          onMeshClick={handleMeshClick}
-          onPointerOver={handlePointerOver}
-          onPointerOut={handlePointerOut}
-          onPointerMissed={handlePointerMissed}
-          colorHighlighted={colorHighlighted}
-        />
-      ))}
-    </>
-  );
-};

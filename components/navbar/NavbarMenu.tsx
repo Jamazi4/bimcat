@@ -30,10 +30,10 @@ export function NavbarMenu() {
           <NavigationMenuContent className="flex-col">
             <ul className="grid gap-3 p-0 mb-0.5 w-[300px]">
               <ListItem href="/componentPicker" title="Create">
-                Open your .ifc file to select components to add.
+                Import from IFC or create from scratch.
               </ListItem>
               <ListItem href="/components/browse" title="Browse">
-                Browse and manage components added by you and others.
+                Explore and manage BIM components.
               </ListItem>
             </ul>
           </NavigationMenuContent>
@@ -61,7 +61,7 @@ const ListItem = React.forwardRef<
           ref={ref}
           className={cn(
             "block select-none  rounded-md  leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
+            className,
           )}
           {...props}
         >
