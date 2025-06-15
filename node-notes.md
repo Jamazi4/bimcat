@@ -36,3 +36,16 @@ and also create an initial node with object.
 
 component picker is now visualiser and currently I get the componentId in the
 nodeEditor, need to fetch component with node project
+
+### --15-06-2025--
+
+ok now it fetches correct node project, it validates it nd displays a draggable
+node. Added /nodes/utils.ts with object defining nodes that I search based on
+type.
+
+Now addnodemenu so I can select a node type to add
+
+need to create exit node mode, actual panning and zooming, switching nav mode
+saving node project
+
+add button to open node project from browser.
