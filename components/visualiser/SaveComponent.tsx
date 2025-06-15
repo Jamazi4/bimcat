@@ -83,7 +83,6 @@ const SaveComponent = ({
           {psets && (
             <input type="hidden" name="psets" value={JSON.stringify(psets)} />
           )}
-          <input type="hidden" name="useNodes" value={"false"} />
           <DialogFooter>
             <SubmitButton />
           </DialogFooter>

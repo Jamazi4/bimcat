@@ -1,5 +1,5 @@
 "use client";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { MenubarItem } from "../ui/menubar";
 import {
   Dialog,
@@ -10,33 +10,36 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import { createComponentAction } from "@/utils/actions/componentActions";
-import FormContainer from "../global/FormContainer";
-import SubmitButton from "../global/SubmitButton";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
-import { Pset } from "@/utils/schemas";
-import { ComponentGeometry } from "@/utils/types";
+import { Button } from "../ui/button";
+import { createNodeComponentAction } from "@/utils/actions/componentActions";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { LoaderCircle } from "lucide-react";
 
-const CreateComponent = ({
-  disabled,
-  setNodeMode,
-}: {
-  disabled: boolean;
-  setNodeMode: Dispatch<SetStateAction<boolean>>;
-}) => {
-  // const handleCreateComponent = () => {
-  //   setNodeMode(true);
-  // };
+const CreateComponent = ({ disabled }: { disabled: boolean }) => {
   const [open, setOpen] = useState(false);
-  const geometry: ComponentGeometry[] = [];
-  const psets: Pset[] = [];
+  const [makePrivate, setMakePrivate] = useState(false);
+  const [componentName, setComponentName] = useState("");
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
 
-  const handleSuccess = useCallback(() => {
+  async function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    setPending(true);
+    const { message, componentId } = await createNodeComponentAction(
+      componentName,
+      makePrivate,
+    );
+    const searchParams = new URLSearchParams();
+    searchParams.set("component", componentId);
+    router.push(`?${searchParams.toString()}`);
     setOpen(false);
-    setNodeMode(true);
-  }, [setNodeMode]);
+    setPending(false);
+    toast(message);
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -47,35 +50,40 @@ const CreateComponent = ({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Upload component to BimCAT:</DialogTitle>
+          <DialogTitle>Create new node project.</DialogTitle>
           <DialogDescription>
             Please provide a name for the component.
           </DialogDescription>
         </DialogHeader>
-        <FormContainer action={createComponentAction} onSuccess={handleSuccess}>
-          <Label htmlFor="name">
-            <p className="text-sm text-secondary-foreground">Component Name</p>
-          </Label>
-          <Input name="name" id="name"></Input>
-          <div className="flex mt-4 space-x-2">
-            <Checkbox name="makePrivate" id="makePrivate" />
-            <Label htmlFor="makePrivate">Make private</Label>
-          </div>
-          {geometry && (
-            <input
-              type="hidden"
-              name="geometry"
-              value={JSON.stringify(geometry)}
-            />
-          )}
-          {psets && (
-            <input type="hidden" name="psets" value={JSON.stringify(psets)} />
-          )}
-          <input type="hidden" name="useNodes" value={"true"} />
-          <DialogFooter>
-            <SubmitButton />
-          </DialogFooter>
-        </FormContainer>
+        <Label htmlFor="name">
+          <p className="text-sm text-secondary-foreground">Component Name</p>
+        </Label>
+        <Input
+          name="name"
+          id="name"
+          value={componentName}
+          onChange={(e) => setComponentName(e.target.value)}
+        ></Input>
+        <div className="flex mt-4 space-x-2">
+          <Checkbox
+            name="makePrivate"
+            id="makePrivate"
+            checked={makePrivate}
+            onCheckedChange={(checked) => setMakePrivate(checked === true)}
+          />
+          <Label htmlFor="makePrivate">Make private</Label>
+        </div>
+        <DialogFooter>
+          <Button
+            onClick={(e) => {
+              handleClick(e);
+            }}
+            disabled={componentName === "" && pending}
+            className="w-30 mt-4"
+          >
+            {pending ? <LoaderCircle className="animate-spin" /> : "Accept"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

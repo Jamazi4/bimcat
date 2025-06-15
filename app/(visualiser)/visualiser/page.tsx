@@ -3,17 +3,27 @@
 import MenuBar from "@/components/visualiser/MenuBar";
 import { Grid, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Pset } from "@/utils/schemas";
 import PsetAccordion from "@/components/editor/PsetAccordion";
 import IFCModel from "@/components/visualiser/IFCModel";
 import NodeEditor from "@/components/visualiser/NodeEditor";
+import { useSearchParams } from "next/navigation";
 
 const Page = () => {
   const [file, setFile] = useState<File | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [displayPsets, setDisplayPsets] = useState<Pset[] | null>(null);
   const [nodeMode, setNodeMode] = useState(false);
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const componentId = searchParams.get("component");
+    if (!componentId) return;
+
+    setNodeMode(true);
+  }, [searchParams]);
 
   const handlePointerMissed = (e: MouseEvent) => {
     if (e.button !== 0) return;
@@ -34,7 +44,6 @@ const Page = () => {
         file={file}
         selected={selected}
         nodeMode={nodeMode}
-        setNodeMode={setNodeMode}
       />
       <Canvas
         camera={{ position: [0, 1, 0] }}

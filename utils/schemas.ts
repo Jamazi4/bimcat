@@ -51,7 +51,7 @@ export const componentSchema = z.object({
 
 export const componentArraySchema = z.array(componentSchema);
 
-export const GeomNodeSchema = z.object({
+export const GeomNodeSchemaFront = z.object({
   id: z.string(),
   type: z.string(),
   x: z.number(),
@@ -59,10 +59,20 @@ export const GeomNodeSchema = z.object({
   width: z.number(),
   height: z.number(),
   text: z.string(),
-  values: z.record(z.union([z.number(), z.string(), z.boolean()])),
+  inputs: z.array(z.string()),
+  outputs: z.array(z.string()),
 });
 
-export type GeomNodeType = z.infer<typeof GeomNodeSchema>;
+export type GeomNodeFrontType = z.infer<typeof GeomNodeSchemaFront>;
+
+export const GeomNodeSchemaBack = z.object({
+  id: z.string(),
+  type: z.string(),
+  x: z.number(),
+  y: z.number(),
+});
+
+export type GeomNodeBackType = z.infer<typeof GeomNodeSchemaBack>;
 
 export const NodeEdgeSchema = z.object({
   id: z.string(),
@@ -70,12 +80,13 @@ export const NodeEdgeSchema = z.object({
   targetId: z.string(),
 });
 
-export type NodeEdgeSchema = z.infer<typeof NodeEdgeSchema>;
+export type NodeEdgeType = z.infer<typeof NodeEdgeSchema>;
 
 export const NodeProjectSchema = z.object({
   id: z.string(),
-  sourceId: z.string(),
-  targetId: z.string(),
+  componentId: z.string(),
+  nodes: z.array(GeomNodeSchemaBack),
+  edges: z.array(NodeEdgeSchema),
 });
 
 export type NodeProjectType = z.infer<typeof NodeProjectSchema>;

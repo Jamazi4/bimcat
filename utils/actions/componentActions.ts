@@ -10,10 +10,14 @@ import {
   PsetActionsComponentSchema,
   PsetArraySchema,
   componentArraySchema,
+  GeomNodeBackType,
+  GeomNodeSchemaBack,
+  NodeProjectSchema,
 } from "../schemas";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getDbUser } from "./globalActions";
 import {
+  createNodeId,
   psetContentToString,
   renderError,
   searchInsensitive,
@@ -38,6 +42,74 @@ const addEditableToComponent = async <T extends { userId: string }>(
   return componentWithEditable;
 };
 
+export const createNodeComponentAction = async (
+  name: string,
+  makePrivate: boolean,
+) => {
+  try {
+    const dbUser = await getDbUser();
+    const author = `${dbUser?.firstName} ${dbUser?.secondName}`;
+    if (!dbUser) throw new Error("Could not find user");
+
+    const data: Prisma.ComponentCreateInput = {
+      name,
+      psets: [],
+      public: !makePrivate,
+      geometry: {
+        create: [],
+      },
+      User: {
+        connect: {
+          id: dbUser.id,
+        },
+      },
+      author,
+    };
+
+    const outputNode: GeomNodeBackType = {
+      id: createNodeId(),
+      type: "output",
+      x: 300,
+      y: 300,
+    };
+
+    data["nodes"] = { create: { nodes: [outputNode], edges: [] } };
+
+    const component = await prisma.component.create({
+      data,
+    });
+    revalidatePath(`/components`);
+    revalidateTag("allComponents");
+    return {
+      message: `Component ${name} created successfully!`,
+      componentId: component.id,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchNodeProject = async (componentId: string) => {
+  try {
+    const dbUser = getDbUser();
+    if (!dbUser) throw new Error("Unauthorized");
+    const nodeProject = await prisma.component.findUnique({
+      where: { id: componentId },
+      select: { nodes: true },
+    });
+
+    if (!nodeProject) throw new Error("Could not find component");
+
+    const validatedNodeProject = validateWithZodSchema(
+      NodeProjectSchema,
+      nodeProject.nodes,
+    );
+    return validatedNodeProject;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const createComponentAction = async (
   _prevState: unknown,
   formData: FormData,
@@ -46,7 +118,6 @@ export const createComponentAction = async (
   const geometry = formData.get("geometry") as string;
   const psets = formData.get("psets") as string;
   const makePrivate = formData.get("makePrivate") === "on";
-  const useNodes = formData.get("useNodes") === "true";
 
   const parsedGeometry = validateWithZodSchema(
     geometryArraySchema,
@@ -73,10 +144,6 @@ export const createComponentAction = async (
       },
       author,
     };
-
-    if (useNodes) {
-      data["nodes"] = { create: { nodes: [], edges: [] } };
-    }
 
     await prisma.component.create({
       data,

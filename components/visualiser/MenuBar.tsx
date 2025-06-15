@@ -15,13 +15,11 @@ const MenuBar = ({
   selected,
   file,
   nodeMode,
-  setNodeMode,
 }: {
   setFile: Dispatch<SetStateAction<File | null>>;
   selected: number | null;
   file: File | null;
   nodeMode: boolean;
-  setNodeMode: Dispatch<SetStateAction<boolean>>;
 }) => {
   return (
     <Menubar className="absolute m-4 z-10">
@@ -36,10 +34,7 @@ const MenuBar = ({
         <MenubarTrigger>Component</MenubarTrigger>
         <MenubarContent>
           <SaveComponent selected={selected} file={file} />
-          <CreateComponent
-            disabled={nodeMode || file !== null}
-            setNodeMode={setNodeMode}
-          />
+          <CreateComponent disabled={nodeMode || file !== null} />
         </MenubarContent>
       </MenubarMenu>
     </Menubar>

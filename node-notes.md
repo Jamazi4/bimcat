@@ -31,3 +31,8 @@ now it creates a new component when I use create in componentPicker. It creates
 component with empty nodeProject.
 Now before I start with that I need to create exit nodemode and switch navigation
 and also create an initial node with object.
+
+### --14-06-2025--
+
+component picker is now visualiser and currently I get the componentId in the
+nodeEditor, need to fetch component with node project

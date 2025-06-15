@@ -29,7 +29,7 @@ export function NavbarMenu() {
           <NavigationMenuTrigger>Components</NavigationMenuTrigger>
           <NavigationMenuContent className="flex-col">
             <ul className="grid gap-3 p-0 mb-0.5 w-[300px]">
-              <ListItem href="/componentPicker" title="Create">
+              <ListItem href="/visualiser" title="Create">
                 Import from IFC or create from scratch.
               </ListItem>
               <ListItem href="/components/browse" title="Browse">
