@@ -84,7 +84,6 @@ export type NodeEdgeType = z.infer<typeof NodeEdgeSchema>;
 
 export const NodeProjectSchema = z.object({
   id: z.string(),
-  componentId: z.string(),
   nodes: z.array(GeomNodeSchemaBack),
   edges: z.array(NodeEdgeSchema),
 });

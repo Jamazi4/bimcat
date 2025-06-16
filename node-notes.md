@@ -49,3 +49,8 @@ need to create exit node mode, actual panning and zooming, switching nav mode
 saving node project
 
 add button to open node project from browser.
+
+### --16-06-2025--
+
+Today only fixed error, couldnt remove components with node projects because
+of connection, reversed the relation and added cascade on delete

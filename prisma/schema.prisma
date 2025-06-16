@@ -33,8 +33,15 @@ model Component {
   userId        String
   author        String
   public        Boolean             @default(true)
-  nodes         NodeProject?
-  nodeProjectId String?
+  nodes         NodeProject?        @relation("NodeProjectToComponent", fields: [nodeProjectId], references: [id], onDelete: Cascade)
+  nodeProjectId String?             @unique
+}
+
+model NodeProject {
+  id        String     @id @default(uuid())
+  nodes     Json
+  edges     Json
+  Component Component? @relation("NodeProjectToComponent")
 }
 
 model Library {
@@ -80,14 +87,6 @@ model CompositeLibrary {
   userId      String
   public      Boolean
   sharedId    String?
-}
-
-model NodeProject {
-  id          String    @id @default(uuid())
-  nodes       Json
-  edges       Json
-  Component   Component @relation(fields: [componentId], references: [id])
-  componentId String    @unique
 }
 
 model HistoryEntry {

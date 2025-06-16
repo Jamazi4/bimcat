@@ -7,6 +7,7 @@ import { useNodeSystem } from "@/utils/customHooks/useNodeSystem";
 import { useSearchParams } from "next/navigation";
 import DraggableNode from "./DraggableNode";
 import { Plus } from "lucide-react";
+import AddNodeMenu from "./AddNodeMenu";
 
 const NodeEditor = () => {
   const [nodeNavigation, setNodeNavigation] = useState(true);
@@ -35,9 +36,7 @@ const NodeEditor = () => {
         </Label>
       </div>
       <div className="fixed top-36 left-4 z-20">
-        <Button className="">
-          <Plus />
-        </Button>
+        <AddNodeMenu />
       </div>
       {nodes.map((node) => {
         return (
