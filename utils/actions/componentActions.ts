@@ -11,8 +11,8 @@ import {
   PsetArraySchema,
   componentArraySchema,
   GeomNodeBackType,
-  GeomNodeSchemaBack,
   NodeProjectSchema,
+  NodeEdgeType,
 } from "../schemas";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getDbUser } from "./globalActions";
@@ -86,6 +86,35 @@ export const createNodeComponentAction = async (
     };
   } catch (error) {
     throw error;
+  }
+};
+
+export const updateNodeProject = async (
+  nodes: GeomNodeBackType[],
+  edges: NodeEdgeType[],
+  componentId: string,
+) => {
+  try {
+    const dbUser = await getDbUser();
+    if (!dbUser) throw new Error("Could not find user");
+    const component = await prisma.component.findUnique({
+      where: { id: componentId },
+      select: { userId: true, nodeProjectId: true },
+    });
+
+    if (dbUser.id !== component?.userId || !component)
+      throw new Error("No Component or unauthorized");
+    if (!component.nodeProjectId)
+      throw new Error("No node project for this component");
+
+    await prisma.nodeProject.update({
+      where: { id: component.nodeProjectId },
+      data: { nodes: nodes, edges: edges },
+    });
+
+    return { message: "Node project succesfully saved" };
+  } catch (error) {
+    return renderError(error);
   }
 };
 

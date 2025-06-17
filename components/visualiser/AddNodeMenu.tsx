@@ -8,18 +8,22 @@ import {
 import { Button } from "../ui/button";
 import { PlusIcon } from "lucide-react";
 import { nodeDefinitions } from "@/utils/nodes";
-const AddNodeMenu = () => {
+const AddNodeMenu = ({ addNode }: { addNode: (nodeDefId: number) => void }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
+        <Button size="icon" variant="outline">
           <PlusIcon />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">
         <DropdownMenuLabel>Add node</DropdownMenuLabel>
         {nodeDefinitions.map((node) => {
-          return <DropdownMenuItem key={node.id}>{node.type}</DropdownMenuItem>;
+          return (
+            <DropdownMenuItem key={node.id} onClick={() => addNode(node.id)}>
+              {node.type}
+            </DropdownMenuItem>
+          );
         })}
       </DropdownMenuContent>
     </DropdownMenu>

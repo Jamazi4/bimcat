@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GeomNodeBackType, NodeEdgeType } from "../schemas";
-import { fetchNodeProject } from "../actions/componentActions";
+import {
+  fetchNodeProject,
+  updateNodeProject,
+} from "../actions/componentActions";
+import { createNodeId } from "../utilFunctions";
+import { nodeDefinitions } from "../nodes";
+import { toast } from "sonner";
 
 export function useNodeSystem() {
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
@@ -19,6 +25,32 @@ export function useNodeSystem() {
     if (!nodeProject) return;
     setNodes(nodeProject.nodes);
     setEdges(nodeProject.edges);
+  }, []);
+
+  const saveNodeProject = useCallback(
+    async (componentId: string) => {
+      const response = await updateNodeProject(nodes, edges, componentId);
+      toast(response.message);
+    },
+    [nodes, edges],
+  );
+
+  const addNode = useCallback((nodeDefId: number) => {
+    const nodeId = createNodeId();
+    const nodeType = nodeDefinitions.find(
+      (node) => node.id === nodeDefId,
+    )?.type;
+    const nodeX = 100;
+    const nodeY = 100;
+
+    const newBackNode: GeomNodeBackType = {
+      id: nodeId,
+      type: nodeType!,
+      x: nodeX,
+      y: nodeY,
+    };
+
+    setNodes((prevNodes) => [...prevNodes, newBackNode]);
   }, []);
 
   const startDraggingNode = useCallback(
@@ -89,9 +121,17 @@ export function useNodeSystem() {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  });
+  }, [draggingNode, handleMouseMove, handleMouseUp]);
 
-  return { fetchNodes, nodes, edges, editorRef, startDraggingNode };
+  return {
+    saveNodeProject,
+    fetchNodes,
+    addNode,
+    nodes,
+    edges,
+    editorRef,
+    startDraggingNode,
+  };
 }
 
 export default useNodeSystem;
