@@ -56,4 +56,14 @@ export const nodeDefinitions: InodeDefinition[] = [
     ],
     outputs: ["mesh(edge)"],
   },
+
+  {
+    id: 5,
+    type: "test multi number",
+    inputs: [
+      { type: "number", id: 0, value: "0", name: "num1" },
+      { type: "number", id: 1, value: "2", name: "num2" },
+    ],
+    outputs: [],
+  },
 ];
