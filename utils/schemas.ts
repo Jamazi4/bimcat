@@ -70,6 +70,7 @@ export const GeomNodeSchemaBack = z.object({
   type: z.string(),
   x: z.number(),
   y: z.number(),
+  values: z.optional(z.array(z.string())),
 });
 
 export type GeomNodeBackType = z.infer<typeof GeomNodeSchemaBack>;

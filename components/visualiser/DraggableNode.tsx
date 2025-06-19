@@ -3,19 +3,27 @@
 import { nodeDefinitions } from "@/utils/nodes";
 import { GeomNodeBackType } from "@/utils/schemas";
 import { CircleDot } from "lucide-react";
+import { Input } from "../ui/input";
+import { useEffect, useState } from "react";
 
 interface GeometryNodeProps {
   node: GeomNodeBackType;
   onMouseDown: (nodeId: string, e: React.MouseEvent) => void;
+  changeNodeValue: (nodeId: string, inputId: number, value: string) => void;
 }
-const DraggableNode = ({ node, onMouseDown }: GeometryNodeProps) => {
+const DraggableNode = ({
+  node,
+  onMouseDown,
+  changeNodeValue,
+}: GeometryNodeProps) => {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
+  const changeThisNodeValues = changeNodeValue.bind(null, node.id);
   return (
     <div
       style={{ transform: `translate(${node.x}px, ${node.y}px)` }}
-      className="w-40 min-h-15 bg-accent absolute z-10 border-2 rounded-lg hover:border-primary transition-colors cursor-grab"
+      className="w-50 min-h-15 bg-accent absolute z-10 border-2 rounded-lg hover:border-primary transition-colors cursor-grab"
       onMouseDown={(e) => {
-        e.preventDefault();
+        // e.preventDefault();
         if ((e.target as HTMLDivElement).closest(".connect-slot")) return;
         onMouseDown(node.id, e);
       }}
@@ -28,23 +36,67 @@ const DraggableNode = ({ node, onMouseDown }: GeometryNodeProps) => {
       {/* inputs  */}
       <div className="grid grid-cols-2 items-center h-full my-auto py-2">
         <div>
-          {nodeDef.inputs.map((input) => {
-            return <InputSlot key={input} name={input} />;
+          {nodeDef.inputs.map((input, i) => {
+            if (input.type === "number") {
+              const changeThisValue = changeThisNodeValues.bind(null, input.id);
+              if (!node.values) return;
+              return (
+                <InputNumber
+                  key={input.id}
+                  value={node.values[input.id]}
+                  changeThisValue={changeThisValue}
+                />
+              );
+            } else if (input.type === "slot") {
+              return <InputSlot key={i} name={input.name} />;
+            }
           })}
         </div>
+
+        {/* outputs */}
         <div>
-          {nodeDef.outputs.map((output) => {
-            return <OutputSlot key={output} name={output} />;
+          {nodeDef.outputs.map((output, i) => {
+            return <OutputSlot key={i} name={output} />;
           })}
         </div>
       </div>
-
-      {/* outputs */}
     </div>
   );
 };
 
 export default DraggableNode;
+
+const InputNumber = ({
+  value,
+  changeThisValue,
+}: {
+  value: string;
+  changeThisValue: (value: string) => void;
+}) => {
+  const [curVal, setCurVal] = useState(value);
+  const [isValidValue, setIsValidValue] = useState(true);
+
+  useEffect(() => {
+    const num = Number(curVal);
+    setIsValidValue(!isNaN(num) || curVal === "");
+  }, [curVal]);
+
+  const changeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurVal(e.target.value);
+    changeThisValue(e.target.value);
+  };
+
+  return (
+    <div className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
+      <Input
+        type="text"
+        value={curVal}
+        onChange={(e) => changeValue(e)}
+        className={isValidValue ? "" : "text-destructive border-destructive"}
+      />
+    </div>
+  );
+};
 
 const InputSlot = ({ name }: { name: string }) => {
   return (

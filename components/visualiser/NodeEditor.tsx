@@ -21,9 +21,9 @@ const NodeEditor = () => {
     fetchNodes,
     addNode,
     nodes,
-    edges,
     editorRef,
     startDraggingNode,
+    changeNodeValue,
   } = useNodeSystem();
 
   const fetchNodesWrapper = useCallback(async () => {
@@ -76,6 +76,7 @@ const NodeEditor = () => {
       {nodes.map((node) => {
         return (
           <DraggableNode
+            changeNodeValue={changeNodeValue}
             key={node.id}
             node={node}
             onMouseDown={startDraggingNode}

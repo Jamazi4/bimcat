@@ -10,7 +10,7 @@ import { createNodeId } from "../utilFunctions";
 import { nodeDefinitions } from "../nodes";
 import { toast } from "sonner";
 
-export function useNodeSystem() {
+export const useNodeSystem = () => {
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
   const [edges, setEdges] = useState<NodeEdgeType[]>([]);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -35,13 +35,42 @@ export function useNodeSystem() {
     [nodes, edges],
   );
 
+  const changeNodeValue = useCallback(
+    (nodeId: string, inputId: number, value: string) => {
+      const node = nodes.find((node) => node.id === nodeId);
+      if (!node?.values) return;
+      const newValues = node.values;
+      newValues[inputId] = value;
+
+      setNodes((prevNodes) =>
+        prevNodes.map((n) =>
+          n.id === nodeId
+            ? {
+                ...n,
+                values: newValues,
+              }
+            : n,
+        ),
+      );
+    },
+    [nodes],
+  );
+
   const addNode = useCallback((nodeDefId: number) => {
     const nodeId = createNodeId();
-    const nodeType = nodeDefinitions.find(
+    const nodeDefinition = nodeDefinitions.find(
       (node) => node.id === nodeDefId,
-    )?.type;
+    );
+    const nodeType = nodeDefinition?.type;
     const nodeX = 100;
     const nodeY = 100;
+
+    const initValues = nodeDefinition?.inputs
+      .filter(
+        (input): input is typeof input & { value: string } =>
+          typeof input.value === "string",
+      )
+      .map((input) => input.value);
 
     const newBackNode: GeomNodeBackType = {
       id: nodeId,
@@ -49,6 +78,10 @@ export function useNodeSystem() {
       x: nodeX,
       y: nodeY,
     };
+
+    if (initValues) {
+      newBackNode["values"] = initValues;
+    }
 
     setNodes((prevNodes) => [...prevNodes, newBackNode]);
   }, []);
@@ -131,7 +164,8 @@ export function useNodeSystem() {
     edges,
     editorRef,
     startDraggingNode,
+    changeNodeValue,
   };
-}
+};
 
 export default useNodeSystem;

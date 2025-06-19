@@ -54,3 +54,14 @@ add button to open node project from browser.
 
 Today only fixed error, couldnt remove components with node projects because
 of connection, reversed the relation and added cascade on delete
+
+### --18-06-2025--
+
+Yesterday implemented add node and save button which updated node project, also
+need to support enter to trigger the create component
+
+in near future need to be able to enter the node project from component page.
+button over renderer to open in node editor. it just needs to go to visualiser
+with correct componentId
+
+probably good to get those with tanstack query
