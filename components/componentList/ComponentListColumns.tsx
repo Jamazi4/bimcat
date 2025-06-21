@@ -152,6 +152,7 @@ export const columns: ColumnDef<ComponentRow>[] = [
   {
     id: "action",
     cell: ({ row }) => {
+
       return <GoToLibraryButton id={row.original.id} />;
     },
   },

@@ -46,9 +46,9 @@ export const useNodeSystem = () => {
         prevNodes.map((n) =>
           n.id === nodeId
             ? {
-                ...n,
-                values: newValues,
-              }
+              ...n,
+              values: newValues,
+            }
             : n,
         ),
       );
@@ -102,6 +102,7 @@ export const useNodeSystem = () => {
     },
     [nodes],
   );
+
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!editorRef.current) return;
@@ -114,10 +115,10 @@ export const useNodeSystem = () => {
           prevNodes.map((n) =>
             n.id === draggingNode.id
               ? {
-                  ...n,
-                  x: mouseX - draggingNode.offsetX,
-                  y: mouseY - draggingNode.offsetY,
-                }
+                ...n,
+                x: mouseX - draggingNode.offsetX,
+                y: mouseY - draggingNode.offsetY,
+              }
               : n,
           ),
         );

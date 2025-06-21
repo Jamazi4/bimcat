@@ -507,6 +507,15 @@ New notes file - this one will be dedicated to the 'cat' part of application.
 Since it's a somewhat working system already I will start working on node edior
 notes for that are in the 'node-notes.md'
 
+### --21-06-2025--
+
+When going to a component from a composite library it doesn't plug in the
+library ID in the route, so there's an error because it thinks that
+componentId is the libraryId
+
+also on prod sometimes doesnt work even going straight to lib from composite
+privateComposite/doorsLib
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite
