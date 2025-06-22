@@ -65,3 +65,19 @@ button over renderer to open in node editor. it just needs to go to visualiser
 with correct componentId
 
 probably good to get those with tanstack query
+
+### --19-06-2025--
+
+Added number node, it works and saves the value to the server, it fetches
+correctly.
+
+shaky system, might break...
+
+now need to connect nodes and implement basic processing
+
+milestone: make point appear in 3d
+
+first step: click on output and render temp edge following mouse
+
+oh my fucking god: selecting node, box select, drag multiple, copy paste delete
+pan zoom

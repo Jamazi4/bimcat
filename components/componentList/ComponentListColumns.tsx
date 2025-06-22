@@ -15,6 +15,7 @@ export type ComponentRow = {
   author: string;
   editable: boolean;
   public: boolean;
+  containingLibId?: string;
 };
 
 export const columns: ColumnDef<ComponentRow>[] = [
@@ -152,8 +153,15 @@ export const columns: ColumnDef<ComponentRow>[] = [
   {
     id: "action",
     cell: ({ row }) => {
+      let path: string;
+      const containingLibId = row.original.containingLibId;
+      if (containingLibId) {
+        path = `${containingLibId}/${row.original.id}`;
+      } else {
+        path = row.original.id;
+      }
 
-      return <GoToLibraryButton id={row.original.id} />;
+      return <GoToLibraryButton id={path} />;
     },
   },
 ];

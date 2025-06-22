@@ -19,7 +19,10 @@ import {
 } from "@tanstack/react-table";
 import React, { useState, Fragment, useEffect } from "react";
 import { LibraryRow, compositeColumns } from "./CompositeLibraryColumns";
-import { columns } from "@/components/componentList/ComponentListColumns";
+import {
+  columns,
+  ComponentRow,
+} from "@/components/componentList/ComponentListColumns";
 import { CompositeLibrarySubrowTable } from "./CompositeLibrarySubrowTable";
 import { Button } from "@/components/ui/button";
 import { SelectedComposite } from "@/utils/types";
@@ -103,6 +106,14 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row: Row<LibraryRow>) => {
+              const componentRow: ComponentRow[] = row.original.components;
+              const componentRowWithLibId = componentRow.map((componentRow) => {
+                return {
+                  ...componentRow,
+                  containingLibId: row.original.id,
+                };
+              });
+
               const isExpanded = row.getIsExpanded();
               return (
                 <Fragment key={row.id}>
@@ -130,7 +141,7 @@ export function ExpandableTable({ data }: ExpandableTableProps) {
                         <TableCell colSpan={row.getVisibleCells().length}>
                           <CompositeLibrarySubrowTable
                             columns={columns}
-                            data={row.original.components}
+                            data={componentRowWithLibId}
                           />
                         </TableCell>
                       </TableRow>
