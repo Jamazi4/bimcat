@@ -10,14 +10,32 @@ import { createNodeId } from "../utilFunctions";
 import { nodeDefinitions } from "../nodes";
 import { toast } from "sonner";
 
-export const useNodeSystem = () => {
+export type NodeSlot = {
+  nodeId: string;
+  slotId: number;
+  slotType: "input" | "output";
+  el: SVGSVGElement;
+};
+
+export const useNodeSystem = (nodeNavigation: boolean) => {
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
   const [edges, setEdges] = useState<NodeEdgeType[]>([]);
+  const [nodeSlots, setNodeSlots] = useState<NodeSlot[]>([]);
   const editorRef = useRef<HTMLDivElement>(null);
   const [draggingNode, setDraggingNode] = useState<{
     id: string;
     offsetX: number;
     offsetY: number;
+  } | null>(null);
+  const [tempEdgePosition, setTempEdgePosition] = useState<{
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  } | null>(null);
+  const [connectingFromNode, setConnectingFromNode] = useState<{
+    nodeId: string;
+    slotId: number;
   } | null>(null);
 
   const fetchNodes = useCallback(async (componentId: string) => {
@@ -46,9 +64,9 @@ export const useNodeSystem = () => {
         prevNodes.map((n) =>
           n.id === nodeId
             ? {
-              ...n,
-              values: newValues,
-            }
+                ...n,
+                values: newValues,
+              }
             : n,
         ),
       );
@@ -59,7 +77,7 @@ export const useNodeSystem = () => {
   const addNode = useCallback((nodeDefId: number) => {
     const nodeId = createNodeId();
     const nodeDefinition = nodeDefinitions.find(
-      (node) => node.id === nodeDefId,
+      (node) => node.nodeTypeId === nodeDefId,
     );
     const nodeType = nodeDefinition?.type;
     const nodeX = 100;
@@ -86,6 +104,19 @@ export const useNodeSystem = () => {
     setNodes((prevNodes) => [...prevNodes, newBackNode]);
   }, []);
 
+  const registerNodeSlot = useCallback((slotData: NodeSlot) => {
+    setNodeSlots((prev) => {
+      const alreadyRegistered = prev.some(
+        (slot) =>
+          slot.nodeId === slotData.nodeId &&
+          slot.slotId === slotData.slotId &&
+          slot.slotType === slotData.slotType,
+      );
+      if (alreadyRegistered) return prev;
+      return [...prev, slotData];
+    });
+  }, []);
+
   const startDraggingNode = useCallback(
     (nodeId: string, e: React.MouseEvent) => {
       const node = nodes.find((n) => n.id === nodeId);
@@ -103,6 +134,33 @@ export const useNodeSystem = () => {
     [nodes],
   );
 
+  const getSlotCenter = (element: SVGSVGElement) => {
+    const boundingClientRect = element.getBoundingClientRect();
+    const iconX = boundingClientRect.x + boundingClientRect.width / 2;
+    const iconY = boundingClientRect.y + boundingClientRect.height / 2;
+    return { iconX, iconY };
+  };
+
+  const startConnecting = useCallback(
+    (nodeId: string, slotId: number) => {
+      console.log(nodeId, slotId);
+      setConnectingFromNode({ nodeId, slotId });
+      const slotIcon = nodeSlots.find(
+        (slot) => slot.nodeId === nodeId && slot.slotId === slotId,
+      )?.el;
+      if (!slotIcon) return;
+
+      const { iconX, iconY } = getSlotCenter(slotIcon);
+      setTempEdgePosition({
+        x1: iconX,
+        y1: iconY,
+        x2: iconX,
+        y2: iconY,
+      });
+    },
+    [nodeSlots],
+  );
+
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!editorRef.current) return;
@@ -115,36 +173,45 @@ export const useNodeSystem = () => {
           prevNodes.map((n) =>
             n.id === draggingNode.id
               ? {
-                ...n,
-                x: mouseX - draggingNode.offsetX,
-                y: mouseY - draggingNode.offsetY,
-              }
+                  ...n,
+                  x: mouseX - draggingNode.offsetX,
+                  y: mouseY - draggingNode.offsetY,
+                }
               : n,
           ),
         );
+      } else if (connectingFromNode) {
+        const sourceIcon = nodeSlots.find(
+          (slot) =>
+            slot.nodeId === connectingFromNode.nodeId &&
+            slot.slotId === connectingFromNode.slotId,
+        )?.el;
+        if (sourceIcon) {
+          const { iconX, iconY } = getSlotCenter(sourceIcon);
+          setTempEdgePosition({
+            x1: iconX,
+            y1: iconY,
+            x2: mouseX + editorRect.left,
+            y2: mouseY + editorRect.top,
+          });
+        }
       }
-      // else if (connectingFromNodeId) {
-      //   const sourceNode = nodes.find((n) => n.id === connectingFromNodeId);
-      //   if (sourceNode) {
-      //     const sourceCenter = getNodeCenter(sourceNode);
-      //     setTempEdgePosition({
-      //       x1: sourceCenter.x,
-      //       y1: sourceCenter.y,
-      //       x2: mouseX,
-      //       y2: mouseY,
-      //     });
-      //   }
-      // }
     },
-    [draggingNode],
+    [draggingNode, nodeSlots, connectingFromNode],
   );
+
+  const cancelConnecting = () => {
+    setConnectingFromNode(null);
+    setTempEdgePosition(null);
+  };
 
   const handleMouseUp = useCallback(() => {
     setDraggingNode(null);
+    cancelConnecting();
   }, []);
 
   useEffect(() => {
-    if (draggingNode) {
+    if ((draggingNode || connectingFromNode) && nodeNavigation) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     } else {
@@ -155,7 +222,13 @@ export const useNodeSystem = () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [draggingNode, handleMouseMove, handleMouseUp]);
+  }, [
+    connectingFromNode,
+    draggingNode,
+    handleMouseMove,
+    handleMouseUp,
+    nodeNavigation,
+  ]);
 
   return {
     saveNodeProject,
@@ -166,6 +239,9 @@ export const useNodeSystem = () => {
     editorRef,
     startDraggingNode,
     changeNodeValue,
+    registerNodeSlot,
+    tempEdgePosition,
+    startConnecting,
   };
 };
 

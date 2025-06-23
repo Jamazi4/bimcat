@@ -20,7 +20,10 @@ const AddNodeMenu = ({ addNode }: { addNode: (nodeDefId: number) => void }) => {
         <DropdownMenuLabel>Add node</DropdownMenuLabel>
         {nodeDefinitions.map((node) => {
           return (
-            <DropdownMenuItem key={node.id} onClick={() => addNode(node.id)}>
+            <DropdownMenuItem
+              key={node.nodeTypeId}
+              onClick={() => addNode(node.nodeTypeId)}
+            >
               {node.type}
             </DropdownMenuItem>
           );

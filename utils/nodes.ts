@@ -5,28 +5,34 @@ type NodeInputType = {
   value?: string;
 };
 
-interface InodeDefinition {
+type NodeOutputType = {
+  type: "mesh" | "point" | "number" | "boolean";
+  name: string;
   id: number;
+};
+
+interface InodeDefinition {
+  nodeTypeId: number;
   type: string;
   inputs: NodeInputType[];
-  outputs: string[];
+  outputs: NodeOutputType[];
 }
 
 export const nodeDefinitions: InodeDefinition[] = [
   {
-    id: 1,
+    nodeTypeId: 1,
     type: "output",
     inputs: [{ type: "slot", id: 0, name: "mesh" }],
     outputs: [],
   },
   {
-    id: 2,
+    nodeTypeId: 2,
     type: "number",
     inputs: [{ type: "number", id: 0, value: "0", name: "number" }],
-    outputs: ["float"],
+    outputs: [{ type: "number", name: "number", id: 1 }],
   },
   {
-    id: 3,
+    nodeTypeId: 3,
     type: "pointByXYZ",
     inputs: [
       {
@@ -41,10 +47,10 @@ export const nodeDefinitions: InodeDefinition[] = [
       },
       { type: "slot", name: "Point Z", id: 2 },
     ],
-    outputs: ["mesh(point)"],
+    outputs: [{ type: "point", name: "point", id: 3 }],
   },
   {
-    id: 4,
+    nodeTypeId: 4,
     type: "edgeByPoints",
     inputs: [
       {
@@ -52,13 +58,13 @@ export const nodeDefinitions: InodeDefinition[] = [
         name: "Point start",
         id: 0,
       },
-      { type: "slot", name: "Point end", id: 12 },
+      { type: "slot", name: "Point end", id: 1 },
     ],
-    outputs: ["mesh(edge)"],
+    outputs: [{ type: "mesh", name: "edge", id: 2 }],
   },
 
   {
-    id: 5,
+    nodeTypeId: 5,
     type: "test multi number",
     inputs: [
       { type: "number", id: 0, value: "0", name: "num1" },

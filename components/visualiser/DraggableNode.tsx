@@ -4,17 +4,22 @@ import { nodeDefinitions } from "@/utils/nodes";
 import { GeomNodeBackType } from "@/utils/schemas";
 import { CircleDot } from "lucide-react";
 import { Input } from "../ui/input";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { NodeSlot } from "@/utils/customHooks/useNodeSystem";
 
 interface GeometryNodeProps {
   node: GeomNodeBackType;
   onMouseDown: (nodeId: string, e: React.MouseEvent) => void;
   changeNodeValue: (nodeId: string, inputId: number, value: string) => void;
+  registerNodeSlot: (slotData: NodeSlot) => void;
+  startConnecting: (nodeId: string, slotId: number) => void;
 }
 const DraggableNode = ({
   node,
   onMouseDown,
   changeNodeValue,
+  registerNodeSlot,
+  startConnecting,
 }: GeometryNodeProps) => {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const changeThisNodeValues = changeNodeValue.bind(null, node.id);
@@ -23,13 +28,12 @@ const DraggableNode = ({
       style={{ transform: `translate(${node.x}px, ${node.y}px)` }}
       className="w-50 min-h-15 bg-accent absolute z-10 border-2 rounded-lg hover:border-primary transition-colors cursor-grab"
       onMouseDown={(e) => {
-        // e.preventDefault();
         if ((e.target as HTMLDivElement).closest(".connect-slot")) return;
         onMouseDown(node.id, e);
       }}
     >
       {/* title  */}
-      <div className="flex justify-center bg-accent-foreground text-background rounded-tl-md rounded-tr-md font-bold">
+      <div className="flex justify-center bg-accent-foreground text-background rounded-tl-md rounded-tr-md font-bold select-none">
         {node.type}
       </div>
 
@@ -48,7 +52,19 @@ const DraggableNode = ({
                 />
               );
             } else if (input.type === "slot") {
-              return <InputSlot key={i} name={input.name} />;
+              const partialSlotData: Partial<NodeSlot> = {
+                nodeId: node.id,
+                slotId: input.id,
+                slotType: "input",
+              };
+              return (
+                <InputSlot
+                  partialSlotData={partialSlotData}
+                  registerNodeSlot={registerNodeSlot}
+                  key={i}
+                  name={input.name}
+                />
+              );
             }
           })}
         </div>
@@ -56,7 +72,20 @@ const DraggableNode = ({
         {/* outputs */}
         <div>
           {nodeDef.outputs.map((output, i) => {
-            return <OutputSlot key={i} name={output} />;
+            const partialSlotData: Partial<NodeSlot> = {
+              nodeId: node.id,
+              slotId: output.id,
+              slotType: "output",
+            };
+            return (
+              <OutputSlot
+                startConnecting={startConnecting}
+                registerNodeSlot={registerNodeSlot}
+                partialSlotData={partialSlotData}
+                key={i}
+                name={output.name}
+              />
+            );
           })}
         </div>
       </div>
@@ -98,20 +127,72 @@ const InputNumber = ({
   );
 };
 
-const InputSlot = ({ name }: { name: string }) => {
+interface InputNodeSlotsProps {
+  name: string;
+  partialSlotData: Partial<NodeSlot>;
+  registerNodeSlot: (slotData: NodeSlot) => void;
+}
+
+const InputSlot = ({
+  name,
+  partialSlotData,
+  registerNodeSlot,
+}: InputNodeSlotsProps) => {
+  const { nodeId, slotId, slotType } = partialSlotData;
+  const ref = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const slotData: NodeSlot = {
+      nodeId: nodeId!,
+      slotId: slotId!,
+      slotType: slotType!,
+      el: ref.current,
+    };
+    registerNodeSlot(slotData);
+  }, [nodeId, registerNodeSlot, slotType, slotId]);
+
   return (
     <div className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-8px] connect-slot">
-      <CircleDot size={16} className="bg-background rounded-full" />
-      <p className="text-sm">{name}</p>
+      <CircleDot ref={ref} size={16} className="bg-background rounded-full" />
+      <p className="text-sm select-none">{name}</p>
     </div>
   );
 };
+interface OutputNodeSlotsProps {
+  name: string;
+  partialSlotData: Partial<NodeSlot>;
+  registerNodeSlot: (slotData: NodeSlot) => void;
+  startConnecting: (nodeId: string, slotId: number) => void;
+}
 
-const OutputSlot = ({ name }: { name: string }) => {
+const OutputSlot = ({
+  name,
+  partialSlotData,
+  registerNodeSlot,
+  startConnecting,
+}: OutputNodeSlotsProps) => {
+  const { nodeId, slotId, slotType } = partialSlotData;
+  const ref = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const slotData: NodeSlot = {
+      nodeId: nodeId!,
+      slotId: slotId!,
+      slotType: slotType!,
+      el: ref.current,
+    };
+    registerNodeSlot(slotData);
+  }, [nodeId, registerNodeSlot, slotType, slotId]);
+
   return (
-    <div className="flex space-x-1 justify-end items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-8px] connect-slot">
-      <p className="text-sm">{name}</p>
-      <CircleDot size={16} className="bg-background rounded-full" />
+    <div
+      className="flex space-x-1 justify-end items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-8px] connect-slot"
+      onMouseDown={() => startConnecting(nodeId!, slotId!)}
+    >
+      <p className="text-sm select-none">{name}</p>
+      <CircleDot ref={ref} size={16} className="bg-background rounded-full" />
     </div>
   );
 };

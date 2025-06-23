@@ -81,3 +81,12 @@ first step: click on output and render temp edge following mouse
 
 oh my fucking god: selecting node, box select, drag multiple, copy paste delete
 pan zoom
+
+### --22-06-2025--
+
+now I have references to all the node slots, copied some boilerplate to set
+it up in useNodeSystem and created EdgeLine.tsx
+
+### --23-06-2025--
+
+next step is to display temp line on clicking the output slot

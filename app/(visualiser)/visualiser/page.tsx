@@ -15,6 +15,7 @@ const Page = () => {
   const [selected, setSelected] = useState<number | null>(null);
   const [displayPsets, setDisplayPsets] = useState<Pset[] | null>(null);
   const [nodeMode, setNodeMode] = useState(false);
+  const [nodeNavigation, setNodeNavigation] = useState(false);
 
   const searchParams = useSearchParams();
 
@@ -38,7 +39,12 @@ const Page = () => {
           <PsetAccordion edit={false} psets={displayPsets} />
         </div>
       )}
-      {nodeMode && <NodeEditor />}
+      {nodeMode && (
+        <NodeEditor
+          nodeNavigation={nodeNavigation}
+          setNodeNavigation={setNodeNavigation}
+        />
+      )}
       <MenuBar
         setFile={setFile}
         file={file}
@@ -70,7 +76,11 @@ const Page = () => {
           />
         )}
 
-        <OrbitControls enableZoom={true} makeDefault />
+        <OrbitControls
+          enabled={!nodeNavigation}
+          enableZoom={true}
+          makeDefault
+        />
       </Canvas>
     </div>
   );

@@ -516,6 +516,10 @@ componentId is the libraryId
 also on prod sometimes doesnt work even going straight to lib from composite
 privateComposite/doorsLib
 
+### --22-06-2025--
+
+above error fixed but not the one from prod - check it
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite
