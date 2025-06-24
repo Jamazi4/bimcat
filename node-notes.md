@@ -89,4 +89,7 @@ it up in useNodeSystem and created EdgeLine.tsx
 
 ### --23-06-2025--
 
+Now the temp edge appears when user starts dragging, next make it connect
+to the slot under the cursor on mouse up
+
 next step is to display temp line on clicking the output slot

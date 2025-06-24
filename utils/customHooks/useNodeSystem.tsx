@@ -6,7 +6,7 @@ import {
   fetchNodeProject,
   updateNodeProject,
 } from "../actions/componentActions";
-import { createNodeId } from "../utilFunctions";
+import { createEdgeId, createNodeId } from "../utilFunctions";
 import { nodeDefinitions } from "../nodes";
 import { toast } from "sonner";
 
@@ -34,6 +34,10 @@ export const useNodeSystem = (nodeNavigation: boolean) => {
     y2: number;
   } | null>(null);
   const [connectingFromNode, setConnectingFromNode] = useState<{
+    nodeId: string;
+    slotId: number;
+  } | null>(null);
+  const [connectingToNode, setConnectingToNode] = useState<{
     nodeId: string;
     slotId: number;
   } | null>(null);
@@ -134,16 +138,16 @@ export const useNodeSystem = (nodeNavigation: boolean) => {
     [nodes],
   );
 
-  const getSlotCenter = (element: SVGSVGElement) => {
+  const getSlotCenter = useCallback((element: SVGSVGElement) => {
     const boundingClientRect = element.getBoundingClientRect();
     const iconX = boundingClientRect.x + boundingClientRect.width / 2;
     const iconY = boundingClientRect.y + boundingClientRect.height / 2;
     return { iconX, iconY };
-  };
+  }, []);
 
   const startConnecting = useCallback(
     (nodeId: string, slotId: number) => {
-      console.log(nodeId, slotId);
+      setConnectingToNode(null);
       setConnectingFromNode({ nodeId, slotId });
       const slotIcon = nodeSlots.find(
         (slot) => slot.nodeId === nodeId && slot.slotId === slotId,
@@ -158,7 +162,15 @@ export const useNodeSystem = (nodeNavigation: boolean) => {
         y2: iconY,
       });
     },
-    [nodeSlots],
+    [nodeSlots, getSlotCenter],
+  );
+
+  const finishConnecting = useCallback(
+    (nodeId: string, slotId: number, clear?: boolean) => {
+      if (clear) setConnectingToNode(null);
+      else setConnectingToNode({ nodeId, slotId });
+    },
+    [],
   );
 
   const handleMouseMove = useCallback(
@@ -197,8 +209,30 @@ export const useNodeSystem = (nodeNavigation: boolean) => {
         }
       }
     },
-    [draggingNode, nodeSlots, connectingFromNode],
+    [draggingNode, nodeSlots, connectingFromNode, getSlotCenter],
   );
+
+  const addEdge = (
+    fromNodeId: string,
+    fromSlotId: number,
+    toNodeId: string,
+    toSlotId: number,
+  ) => {
+    const newEdge: NodeEdgeType = {
+      id: createEdgeId(),
+      fromNodeId,
+      fromSlotId,
+      toNodeId,
+      toSlotId,
+    };
+    setEdges((prevEdges) => [...prevEdges, newEdge]);
+  };
+
+  const deleteEdge = useCallback((edgeId: string) => {
+    setEdges((prevEdges) => {
+      return prevEdges.filter((edge) => edge.id !== edgeId);
+    });
+  }, []);
 
   const cancelConnecting = () => {
     setConnectingFromNode(null);
@@ -206,9 +240,17 @@ export const useNodeSystem = (nodeNavigation: boolean) => {
   };
 
   const handleMouseUp = useCallback(() => {
-    setDraggingNode(null);
+    if (connectingToNode && connectingFromNode) {
+      addEdge(
+        connectingFromNode.nodeId,
+        connectingFromNode.slotId,
+        connectingToNode.nodeId,
+        connectingToNode.slotId,
+      );
+    }
     cancelConnecting();
-  }, []);
+    setDraggingNode(null);
+  }, [connectingToNode, connectingFromNode]);
 
   useEffect(() => {
     if ((draggingNode || connectingFromNode) && nodeNavigation) {
@@ -237,11 +279,15 @@ export const useNodeSystem = (nodeNavigation: boolean) => {
     nodes,
     edges,
     editorRef,
+    nodeSlots,
     startDraggingNode,
     changeNodeValue,
     registerNodeSlot,
     tempEdgePosition,
     startConnecting,
+    finishConnecting,
+    getSlotCenter,
+    deleteEdge,
   };
 };
 

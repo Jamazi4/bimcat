@@ -77,8 +77,10 @@ export type GeomNodeBackType = z.infer<typeof GeomNodeSchemaBack>;
 
 export const NodeEdgeSchema = z.object({
   id: z.string(),
-  sourceId: z.string(),
-  targetId: z.string(),
+  fromNodeId: z.string(),
+  fromSlotId: z.number(),
+  toNodeId: z.string(),
+  toSlotId: z.number(),
 });
 
 export type NodeEdgeType = z.infer<typeof NodeEdgeSchema>;

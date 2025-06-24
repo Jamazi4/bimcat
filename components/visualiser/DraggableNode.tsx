@@ -13,6 +13,7 @@ interface GeometryNodeProps {
   changeNodeValue: (nodeId: string, inputId: number, value: string) => void;
   registerNodeSlot: (slotData: NodeSlot) => void;
   startConnecting: (nodeId: string, slotId: number) => void;
+  finishConnecting: (nodeId: string, slotId: number, clear?: boolean) => void;
 }
 const DraggableNode = ({
   node,
@@ -20,13 +21,14 @@ const DraggableNode = ({
   changeNodeValue,
   registerNodeSlot,
   startConnecting,
+  finishConnecting,
 }: GeometryNodeProps) => {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const changeThisNodeValues = changeNodeValue.bind(null, node.id);
   return (
     <div
       style={{ transform: `translate(${node.x}px, ${node.y}px)` }}
-      className="w-50 min-h-15 bg-accent absolute z-10 border-2 rounded-lg hover:border-primary transition-colors cursor-grab"
+      className="w-50 min-h-15 bg-accent absolute z-20 border-2 rounded-lg hover:border-primary transition-colors cursor-grab"
       onMouseDown={(e) => {
         if ((e.target as HTMLDivElement).closest(".connect-slot")) return;
         onMouseDown(node.id, e);
@@ -59,6 +61,7 @@ const DraggableNode = ({
               };
               return (
                 <InputSlot
+                  finishConnecting={finishConnecting}
                   partialSlotData={partialSlotData}
                   registerNodeSlot={registerNodeSlot}
                   key={i}
@@ -131,12 +134,14 @@ interface InputNodeSlotsProps {
   name: string;
   partialSlotData: Partial<NodeSlot>;
   registerNodeSlot: (slotData: NodeSlot) => void;
+  finishConnecting: (nodeId: string, slotId: number, clear?: boolean) => void;
 }
 
 const InputSlot = ({
   name,
   partialSlotData,
   registerNodeSlot,
+  finishConnecting,
 }: InputNodeSlotsProps) => {
   const { nodeId, slotId, slotType } = partialSlotData;
   const ref = useRef<SVGSVGElement>(null);
@@ -153,7 +158,11 @@ const InputSlot = ({
   }, [nodeId, registerNodeSlot, slotType, slotId]);
 
   return (
-    <div className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-8px] connect-slot">
+    <div
+      className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-8px] connect-slot"
+      onMouseOver={() => finishConnecting(nodeId!, slotId!)}
+      onMouseLeave={() => finishConnecting(nodeId!, slotId!, true)}
+    >
       <CircleDot ref={ref} size={16} className="bg-background rounded-full" />
       <p className="text-sm select-none">{name}</p>
     </div>
