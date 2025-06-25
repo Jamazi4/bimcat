@@ -20,7 +20,7 @@ const EdgeLine = ({
   deleteEdge,
 }: EdgeLineProps) => {
   const [hover, setHover] = useState(false);
-  const stroke = "var(--muted-foreground)";
+  const stroke = "var(--primary-foreground)";
   const hoverStroke = "var(--primary)";
 
   const applyHover = (isHovering: boolean) => {

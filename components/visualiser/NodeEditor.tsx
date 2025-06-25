@@ -16,13 +16,16 @@ import { Button } from "../ui/button";
 import { LoaderCircle, Save } from "lucide-react";
 import LoadingSpinner from "../global/LoadingSpinner";
 import EdgeLine from "./EdgeLine";
+import * as THREE from "three";
 
 const NodeEditor = ({
   nodeNavigation,
   setNodeNavigation,
+  nodeMeshGroup,
 }: {
   nodeNavigation: boolean;
   setNodeNavigation: Dispatch<SetStateAction<boolean>>;
+  nodeMeshGroup: THREE.Group;
 }) => {
   const [pendingSave, setPendingSave] = useState(false);
   const [pendingFetch, setPendingFetch] = useState(true);
@@ -44,7 +47,7 @@ const NodeEditor = ({
     nodeSlots,
     getSlotCenter,
     deleteEdge,
-  } = useNodeSystem(nodeNavigation);
+  } = useNodeSystem(nodeNavigation, nodeMeshGroup);
 
   const fetchNodesWrapper = useCallback(async () => {
     if (!componentId) return;
@@ -98,8 +101,8 @@ const NodeEditor = ({
         height="100%"
         className={
           nodeNavigation
-            ? "fixed top-0 left-0 pointer-events-none z-50"
-            : "pointer-events-none opacity-50 absolute top-0 left-0 z-50"
+            ? "fixed top-0 left-0 pointer-events-none z-30"
+            : "fixed top-0 left-0 pointer-events-none z-0"
         }
       >
         <defs>
@@ -111,7 +114,10 @@ const NodeEditor = ({
             refY="3.5"
             orient="auto"
           >
-            <polygon points="0 0, 10 3.5, 0 7" fill="var(--muted-foreground)" />
+            <polygon
+              points="0 0, 10 3.5, 0 7"
+              fill="var(--primary-foreground)"
+            />
           </marker>
           <marker
             id="arrowhead-hover"

@@ -16,6 +16,9 @@ interface InodeDefinition {
   type: string;
   inputs: NodeInputType[];
   outputs: NodeOutputType[];
+  function?: (
+    data: Record<string, number | number[] | boolean>,
+  ) => Record<string, number | number[] | boolean>;
 }
 
 export const nodeDefinitions: InodeDefinition[] = [
@@ -35,17 +38,9 @@ export const nodeDefinitions: InodeDefinition[] = [
     nodeTypeId: 3,
     type: "pointByXYZ",
     inputs: [
-      {
-        type: "slot",
-        name: "point X",
-        id: 0,
-      },
-      {
-        type: "slot",
-        name: "point Y",
-        id: 1,
-      },
-      { type: "slot", name: "Point Z", id: 2 },
+      { type: "slot", name: "number(X)", id: 0 },
+      { type: "slot", name: "number(Y)", id: 1 },
+      { type: "slot", name: "number(Z)", id: 2 },
     ],
     outputs: [{ type: "point", name: "point", id: 3 }],
   },
@@ -53,16 +48,11 @@ export const nodeDefinitions: InodeDefinition[] = [
     nodeTypeId: 4,
     type: "edgeByPoints",
     inputs: [
-      {
-        type: "slot",
-        name: "Point start",
-        id: 0,
-      },
+      { type: "slot", name: "Point start", id: 0 },
       { type: "slot", name: "Point end", id: 1 },
     ],
     outputs: [{ type: "mesh", name: "edge", id: 2 }],
   },
-
   {
     nodeTypeId: 5,
     type: "test multi number",

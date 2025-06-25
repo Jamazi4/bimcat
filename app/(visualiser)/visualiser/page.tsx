@@ -9,6 +9,7 @@ import PsetAccordion from "@/components/editor/PsetAccordion";
 import IFCModel from "@/components/visualiser/IFCModel";
 import NodeEditor from "@/components/visualiser/NodeEditor";
 import { useSearchParams } from "next/navigation";
+import * as THREE from "three";
 
 const Page = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -16,6 +17,7 @@ const Page = () => {
   const [displayPsets, setDisplayPsets] = useState<Pset[] | null>(null);
   const [nodeMode, setNodeMode] = useState(false);
   const [nodeNavigation, setNodeNavigation] = useState(false);
+  const [nodeMeshGroup, setNodeMeshGroup] = useState<THREE.Group | null>(null);
 
   const searchParams = useSearchParams();
 
@@ -24,6 +26,8 @@ const Page = () => {
     if (!componentId) return;
 
     setNodeMode(true);
+    const group = new THREE.Group();
+    setNodeMeshGroup(group);
   }, [searchParams]);
 
   const handlePointerMissed = (e: MouseEvent) => {
@@ -43,6 +47,7 @@ const Page = () => {
         <NodeEditor
           nodeNavigation={nodeNavigation}
           setNodeNavigation={setNodeNavigation}
+          nodeMeshGroup={nodeMeshGroup!}
         />
       )}
       <MenuBar
@@ -55,8 +60,9 @@ const Page = () => {
         camera={{ position: [0, 1, 0] }}
         onPointerMissed={handlePointerMissed}
       >
-        <ambientLight intensity={1} />
-        <directionalLight position={[-100, 100, -100]} intensity={0.5} />
+        <ambientLight intensity={0.2} />
+        <directionalLight position={[-100, 100, -100]} intensity={1} />
+        <directionalLight position={[100, 50, 30]} intensity={5} />
 
         <Grid
           side={2}
@@ -75,6 +81,8 @@ const Page = () => {
             selected={selected}
           />
         )}
+
+        {nodeMode && <primitive object={nodeMeshGroup!} />}
 
         <OrbitControls
           enabled={!nodeNavigation}

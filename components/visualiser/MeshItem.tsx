@@ -24,12 +24,12 @@ const MeshItem = ({
   const transform = obj.get(id).transforms[0];
   const curColor = useMemo(
     () => obj.get(id).colors?.[0] || new THREE.Color(0xd1d1d1),
-    [id, obj]
+    [id, obj],
   );
 
   const material = useMemo(
     () => new THREE.MeshStandardMaterial({ color: curColor }),
-    [curColor]
+    [curColor],
   );
 
   useEffect(() => {

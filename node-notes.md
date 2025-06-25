@@ -93,3 +93,12 @@ Now the temp edge appears when user starts dragging, next make it connect
 to the slot under the cursor on mouse up
 
 next step is to display temp line on clicking the output slot
+
+### --24-06-2025--
+
+Now connecting works, I can start implementing the runtime and mesh generation
+
+also just to remember: need to be able to open node editor in the browser,
+remove main menu when node editor and exiting node editor?
+
+add measuring tool

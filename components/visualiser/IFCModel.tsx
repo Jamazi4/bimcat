@@ -42,7 +42,6 @@ const IFCModel = ({
       setIndexer(indexer);
       setFragments(model);
 
-      // Cleanup will refer to *this* instance
       return () => {
         scene.remove(model);
         model.dispose();
