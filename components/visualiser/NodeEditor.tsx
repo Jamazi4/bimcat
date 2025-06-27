@@ -6,17 +6,13 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Label } from "../ui/label";
-import { Switch } from "../ui/switch";
 import { useNodeSystem } from "@/utils/customHooks/useNodeSystem";
 import { useSearchParams } from "next/navigation";
 import DraggableNode from "./DraggableNode";
-import AddNodeMenu from "./AddNodeMenu";
-import { Button } from "../ui/button";
-import { LoaderCircle, Save } from "lucide-react";
 import LoadingSpinner from "../global/LoadingSpinner";
-import EdgeLine from "./EdgeLine";
 import * as THREE from "three";
+import NodeMenu from "./NodeMenu";
+import SVGRenderer from "./SVGRenderer";
 
 const NodeEditor = ({
   nodeNavigation,
@@ -31,6 +27,7 @@ const NodeEditor = ({
   const [pendingFetch, setPendingFetch] = useState(true);
   const searchParams = useSearchParams();
   const componentId = searchParams.get("component");
+  const [zoom, setZoom] = useState(1);
   const {
     saveNodeProject,
     fetchNodes,
@@ -67,118 +64,52 @@ const NodeEditor = ({
     setPendingSave(false);
   };
 
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    console.log(e.deltaY);
+  };
+
   if (!nodes) return;
 
   if (pendingFetch) return <LoadingSpinner />;
 
   return (
-    <div ref={editorRef} className="select-none">
-      <div className="flex w-40 space-x-2 fixed top-24 right-4 z-20">
-        <Switch
-          id="nodeNavigation"
-          checked={nodeNavigation}
-          onCheckedChange={() => setNodeNavigation((cur) => !cur)}
-        />
-        <Label htmlFor="nodeNavigation">
-          {nodeNavigation ? "Node navigation" : "3D navigation"}
-        </Label>
-      </div>
-      <div className="fixed top-36 left-4 z-20 space-x-2">
-        <AddNodeMenu addNode={addNode} />
-        <Button
-          size="icon"
-          variant="outline"
-          disabled={pendingSave}
-          onClick={() => {
-            handleSaveProject();
-          }}
-        >
-          {pendingSave ? <LoaderCircle className="animate-spin" /> : <Save />}
-        </Button>
-      </div>
-      <svg
-        width="100%"
-        height="100%"
-        className={
-          nodeNavigation
-            ? "fixed top-0 left-0 pointer-events-none z-30"
-            : "fixed top-0 left-0 pointer-events-none z-0"
-        }
+    <div className="select-none">
+      <NodeMenu
+        nodeNavigation={nodeNavigation}
+        setNodeNavigation={setNodeNavigation}
+        addNode={addNode}
+        pendingSave={pendingSave}
+        handleSaveProject={handleSaveProject}
+      />
+      <div
+        onWheel={(e) => handleWheel(e)}
+        ref={editorRef}
+        className="select-none"
       >
-        <defs>
-          <marker
-            id="arrowhead-def"
-            markerWidth="10"
-            markerHeight="7"
-            refX="9"
-            refY="3.5"
-            orient="auto"
-          >
-            <polygon
-              points="0 0, 10 3.5, 0 7"
-              fill="var(--primary-foreground)"
-            />
-          </marker>
-          <marker
-            id="arrowhead-hover"
-            markerWidth="10"
-            markerHeight="7"
-            refX="9"
-            refY="3.5"
-            orient="auto"
-          >
-            <polygon points="0 0, 10 3.5, 0 7" fill="var(--primary)" />
-          </marker>
-        </defs>
-        {edges.map((edge) => {
-          const sourceIcon = nodeSlots.find(
-            (fns) =>
-              fns.nodeId === edge.fromNodeId && fns.slotId === edge.fromSlotId,
-          )?.el;
-          const targetIcon = nodeSlots.find(
-            (tns) =>
-              tns.nodeId === edge.toNodeId && tns.slotId === edge.toSlotId,
-          )?.el;
-          if (!sourceIcon || !targetIcon) return null;
+        <SVGRenderer
+          nodeNavigation={nodeNavigation}
+          edges={edges}
+          nodeSlots={nodeSlots}
+          getSlotCenter={getSlotCenter}
+          deleteEdge={deleteEdge}
+          tempEdgePosition={tempEdgePosition}
+        />
 
-          const { iconX: sourceX, iconY: sourceY } = getSlotCenter(sourceIcon);
-          const { iconX: targetX, iconY: targetY } = getSlotCenter(targetIcon);
-
-          return (
-            <EdgeLine
-              deleteEdge={deleteEdge.bind(null, edge.id)}
-              key={edge.id}
-              x1={sourceX}
-              y1={sourceY}
-              x2={targetX}
-              y2={targetY}
-            />
-          );
-        })}
-        {tempEdgePosition && (
-          <EdgeLine
-            x1={tempEdgePosition.x1}
-            y1={tempEdgePosition.y1}
-            x2={tempEdgePosition.x2}
-            y2={tempEdgePosition.y2}
-            isTemporary
-          />
-        )}
-      </svg>
-      <div className={nodeNavigation ? "" : "pointer-events-none opacity-50"}>
-        {nodes.map((node) => {
-          return (
-            <DraggableNode
-              finishConnecting={finishConnecting}
-              startConnecting={startConnecting}
-              changeNodeValue={changeNodeValue}
-              key={node.id}
-              node={node}
-              onMouseDown={startDraggingNode}
-              registerNodeSlot={registerNodeSlot}
-            />
-          );
-        })}
+        <div className={nodeNavigation ? "" : "pointer-events-none opacity-50"}>
+          {nodes.map((node) => {
+            return (
+              <DraggableNode
+                finishConnecting={finishConnecting}
+                startConnecting={startConnecting}
+                changeNodeValue={changeNodeValue}
+                key={node.id}
+                node={node}
+                onMouseDown={startDraggingNode}
+                registerNodeSlot={registerNodeSlot}
+              />
+            );
+          })}
+        </div>
       </div>
     </div>
   );

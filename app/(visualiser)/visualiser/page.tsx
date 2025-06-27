@@ -37,7 +37,7 @@ const Page = () => {
   };
 
   return (
-    <div className="w-full h-[calc(100vh-72px)]">
+    <div className="w-full h-[calc(100vh-72px)] overflow-hidden">
       {selected && displayPsets && displayPsets.length > 0 && (
         <div className="absolute right-4 top-22 z-10 bg-background-transparent rounded p-4 w-xs border max-h-1/2 overflow-scroll overflow-x-hidden">
           <PsetAccordion edit={false} psets={displayPsets} />

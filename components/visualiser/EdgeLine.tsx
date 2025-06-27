@@ -20,7 +20,7 @@ const EdgeLine = ({
   deleteEdge,
 }: EdgeLineProps) => {
   const [hover, setHover] = useState(false);
-  const stroke = "var(--primary-foreground)";
+  const stroke = "var(--secondary-foreground)";
   const hoverStroke = "var(--primary)";
 
   const applyHover = (isHovering: boolean) => {
@@ -57,24 +57,7 @@ const EdgeLine = ({
         stroke={hover ? hoverStroke : stroke}
         strokeWidth={2}
         strokeDasharray={isTemporary ? "4 4" : undefined}
-        markerEnd={
-          isTemporary
-            ? undefined
-            : hover
-              ? "url(#arrowhead-hover)"
-              : "url(#arrowhead-def)"
-        }
         pointerEvents="none"
-      />
-
-      <circle
-        cx={x2}
-        cy={y2}
-        r={8}
-        fill="transparent"
-        onMouseEnter={() => applyHover(true)}
-        onMouseLeave={() => applyHover(false)}
-        style={{ cursor: "pointer" }}
       />
     </>
   );
