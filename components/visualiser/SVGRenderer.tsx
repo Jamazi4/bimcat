@@ -9,7 +9,7 @@ interface SVGRendererProps {
   getSlotCenter: (element: SVGSVGElement) => { iconX: number; iconY: number };
   deleteEdge: (edgeId: string) => void;
   tempEdgePosition: { x1: number; y1: number; x2: number; y2: number } | null;
-  zoom: number;
+  viewTransform: { x: number; y: number; scale: number };
 }
 
 const SVGRenderer = ({
@@ -19,7 +19,7 @@ const SVGRenderer = ({
   getSlotCenter,
   deleteEdge,
   tempEdgePosition,
-  zoom,
+  viewTransform,
 }: SVGRendererProps) => {
   return (
     <svg
@@ -27,7 +27,9 @@ const SVGRenderer = ({
       height="100%"
       className={`absolute top-0 left-0 ${!nodeNavigation && "pointer-events-none"}`}
     >
-      <g transform={`scale(${zoom})`}>
+      <g
+        transform={`translate(${viewTransform.x}, ${viewTransform.y}) scale(${viewTransform.scale})`}
+      >
         {edges.map((edge) => {
           const sourceIcon = nodeSlots.find(
             (fns) =>

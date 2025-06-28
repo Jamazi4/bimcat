@@ -10,12 +10,15 @@ import { createEdgeId, createNodeId } from "../utilFunctions";
 import { nodeDefinitions } from "../nodes";
 import { toast } from "sonner";
 import * as THREE from "three";
+import useNodesRuntime from "./useNodesRuntime";
 
 export type NodeSlot = {
   nodeId: string;
   slotId: number;
   slotType: "input" | "output";
   el: SVGSVGElement;
+  relativeX: number;
+  relativeY: number;
 };
 
 export const useNodeSystem = (
@@ -25,6 +28,8 @@ export const useNodeSystem = (
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
   const [edges, setEdges] = useState<NodeEdgeType[]>([]);
   const [nodeSlots, setNodeSlots] = useState<NodeSlot[]>([]);
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const editorRef = useRef<HTMLDivElement>(null);
   const [draggingNode, setDraggingNode] = useState<{
     id: string;
@@ -45,74 +50,13 @@ export const useNodeSystem = (
     nodeId: string;
     slotId: number;
   } | null>(null);
+  const [viewTransform, setViewTransform] = useState({ x: 0, y: 0, scale: 1 });
 
-  const getChildrenNodes = useCallback(
-    (parentId: string) => {
-      const edgesToParent = edges.filter((edge) => edge.toNodeId === parentId);
-      const childrenNodes = edgesToParent
-        .map((edge) => nodes.find((node) => node.id === edge.fromNodeId))
-        .filter((node): node is GeomNodeBackType => node !== undefined);
-      return childrenNodes;
-    },
-    [edges, nodes],
-  );
-
-  const run = useCallback(() => {
-    try {
-      const outputs = nodes.filter((node) => node.type === "output");
-
-      const finalEdge = edges.find((edge) => edge.toNodeId === outputs[0].id);
-      if (!finalEdge) throw new Error("Nothing connected to output");
-
-      const prevNode = nodes.find((node) => node.id === finalEdge?.fromNodeId);
-      if (!prevNode) throw new Error("Could not find node");
-
-      const valueNodes = getChildrenNodes(prevNode.id);
-      if (!valueNodes || valueNodes.length === 0)
-        throw new Error("Wrong values");
-
-      const valueNodesFiltered = valueNodes.filter(
-        (node): node is GeomNodeBackType & { values: string } =>
-          node.values !== undefined,
-      );
-
-      if (valueNodesFiltered.length !== 3) throw new Error("Not enough values");
-
-      const valuesParsed = valueNodesFiltered.flatMap((node) =>
-        node.values.map((val) => {
-          const value = parseFloat(val);
-          if (!isNaN(value)) {
-            return parseFloat(val);
-          } else {
-            return 0;
-          }
-        }),
-      );
-
-      const geom = new THREE.BufferGeometry();
-
-      //assuming that prevnodes output is point
-      const vert = new Float32Array(valuesParsed);
-      geom.setAttribute("position", new THREE.BufferAttribute(vert, 3));
-
-      const col = new THREE.Color(0x7aadfa);
-      const mat = new THREE.PointsMaterial({
-        color: col,
-        size: 0.05,
-        sizeAttenuation: true,
-      });
-
-      const mesh = new THREE.Points(geom, mat);
-      meshGroup.clear();
-      meshGroup.add(mesh);
-    } catch (error) {
-      meshGroup.clear();
-    }
-  }, [edges, nodes, meshGroup, getChildrenNodes]);
+  const startNodeRuntime = useNodesRuntime({ nodes, edges, meshGroup });
 
   useEffect(() => {
-    run();
-  }, [run]);
+    startNodeRuntime();
+  }, [startNodeRuntime]);
 
   const fetchNodes = useCallback(async (componentId: string) => {
     const nodeProject = await fetchNodeProject(componentId);
@@ -148,6 +92,21 @@ export const useNodeSystem = (
       );
     },
     [nodes],
+  );
+
+  const screenToWorld = useCallback(
+    (screenX: number, screenY: number) => {
+      if (!editorRef.current) return { x: 0, y: 0 };
+
+      const rect = editorRef.current.getBoundingClientRect();
+      const worldX =
+        (screenX - rect.left - viewTransform.x) / viewTransform.scale;
+      const worldY =
+        (screenY - rect.top - viewTransform.y) / viewTransform.scale;
+
+      return { x: worldX, y: worldY };
+    },
+    [viewTransform],
   );
 
   const addNode = useCallback((nodeDefId: number) => {
@@ -197,25 +156,33 @@ export const useNodeSystem = (
     (nodeId: string, e: React.MouseEvent) => {
       const node = nodes.find((n) => n.id === nodeId);
       if (node && editorRef.current) {
-        const editorRect = editorRef.current.getBoundingClientRect();
-        const mouseX = e.clientX - editorRect.left;
-        const mouseY = e.clientY - editorRect.top;
+        const worldPos = screenToWorld(e.clientX, e.clientY);
         setDraggingNode({
           id: nodeId,
-          offsetX: mouseX - node.x,
-          offsetY: mouseY - node.y,
+          offsetX: worldPos.x - node.x,
+          offsetY: worldPos.y - node.y,
         });
       }
     },
-    [nodes],
+    [nodes, screenToWorld],
   );
 
-  const getSlotCenter = useCallback((element: SVGSVGElement) => {
-    const boundingClientRect = element.getBoundingClientRect();
-    const iconX = boundingClientRect.x + boundingClientRect.width / 2;
-    const iconY = boundingClientRect.y + boundingClientRect.height / 2;
-    return { iconX, iconY };
-  }, []);
+  const getSlotCenter = useCallback(
+    (element: SVGSVGElement) => {
+      const elementRect = element.getBoundingClientRect();
+      if (!editorRef.current) return { iconX: 0, iconY: 0 };
+      const editorRect = editorRef.current.getBoundingClientRect();
+
+      const centerX =
+        elementRect.left + elementRect.width / 2 - editorRect.left;
+      const centerY = elementRect.top + elementRect.height / 2 - editorRect.top;
+
+      const iconX = (centerX - viewTransform.x) / viewTransform.scale;
+      const iconY = (centerY - viewTransform.y) / viewTransform.scale;
+      return { iconX, iconY };
+    },
+    [viewTransform],
+  );
 
   const startConnecting = useCallback(
     (nodeId: string, slotId: number) => {
@@ -275,9 +242,15 @@ export const useNodeSystem = (
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!editorRef.current) return;
-      const editorRect = editorRef.current.getBoundingClientRect();
-      const mouseX = e.clientX - editorRect.left;
-      const mouseY = e.clientY - editorRect.top;
+
+      if (isPanning) {
+        const newX = e.clientX - panStart.x;
+        const newY = e.clientY - panStart.y;
+        setViewTransform((prev) => ({ ...prev, x: newX, y: newY }));
+        return;
+      }
+
+      const worldPos = screenToWorld(e.clientX, e.clientY);
 
       if (draggingNode) {
         setNodes((prevNodes) =>
@@ -285,8 +258,8 @@ export const useNodeSystem = (
             n.id === draggingNode.id
               ? {
                   ...n,
-                  x: mouseX - draggingNode.offsetX,
-                  y: mouseY - draggingNode.offsetY,
+                  x: worldPos.x - draggingNode.offsetX,
+                  y: worldPos.y - draggingNode.offsetY,
                 }
               : n,
           ),
@@ -302,13 +275,22 @@ export const useNodeSystem = (
           setTempEdgePosition({
             x1: iconX,
             y1: iconY,
-            x2: mouseX + editorRect.left,
-            y2: mouseY + editorRect.top,
+            x2: worldPos.x,
+            y2: worldPos.y,
           });
         }
       }
     },
-    [draggingNode, nodeSlots, connectingFromNode, getSlotCenter],
+    [
+      isPanning,
+      screenToWorld,
+      draggingNode,
+      connectingFromNode,
+      panStart.x,
+      panStart.y,
+      nodeSlots,
+      getSlotCenter,
+    ],
   );
 
   const handleMouseUp = useCallback(() => {
@@ -322,10 +304,56 @@ export const useNodeSystem = (
     }
     cancelConnecting();
     setDraggingNode(null);
+    setIsPanning(false);
   }, [connectingToNode, connectingFromNode]);
 
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      if (!nodeNavigation) return;
+
+      setViewTransform((prevTransform) => {
+        if (!editorRef.current) return prevTransform;
+        const rect = editorRef.current.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const zoomIntensity = 0.1;
+        const delta = e.deltaY > 0 ? -1 : 1;
+        const newScale =
+          prevTransform.scale + delta * zoomIntensity * prevTransform.scale;
+        const clampedScale = Math.max(0.2, Math.min(3, newScale));
+
+        const worldX = (mouseX - prevTransform.x) / prevTransform.scale;
+        const worldY = (mouseY - prevTransform.y) / prevTransform.scale;
+
+        const newX = mouseX - worldX * clampedScale;
+        const newY = mouseY - worldY * clampedScale;
+        const newTransform = { x: newX, y: newY, scale: clampedScale };
+        return newTransform;
+      });
+    },
+    [nodeNavigation, setViewTransform, editorRef],
+  );
+
+  const handleEditorMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!nodeNavigation) return;
+
+      if (e.button === 1) {
+        e.preventDefault();
+        setIsPanning(true);
+        setPanStart({
+          x: e.clientX - viewTransform.x,
+          y: e.clientY - viewTransform.y,
+        });
+        return;
+      }
+    },
+    [viewTransform, nodeNavigation],
+  );
+
   useEffect(() => {
-    if ((draggingNode || connectingFromNode) && nodeNavigation) {
+    if ((draggingNode || connectingFromNode || isPanning) && nodeNavigation) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     } else {
@@ -337,6 +365,7 @@ export const useNodeSystem = (
       document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [
+    isPanning,
     connectingFromNode,
     draggingNode,
     handleMouseMove,
@@ -360,6 +389,9 @@ export const useNodeSystem = (
     finishConnecting,
     getSlotCenter,
     deleteEdge,
+    viewTransform,
+    handleWheel,
+    handleEditorMouseDown,
   };
 };
 

@@ -27,7 +27,6 @@ const NodeEditor = ({
   const [pendingFetch, setPendingFetch] = useState(true);
   const searchParams = useSearchParams();
   const componentId = searchParams.get("component");
-  const [zoom, setZoom] = useState(1);
   const {
     saveNodeProject,
     fetchNodes,
@@ -44,6 +43,9 @@ const NodeEditor = ({
     nodeSlots,
     getSlotCenter,
     deleteEdge,
+    viewTransform,
+    handleWheel,
+    handleEditorMouseDown,
   } = useNodeSystem(nodeNavigation, nodeMeshGroup);
 
   const fetchNodesWrapper = useCallback(async () => {
@@ -64,23 +66,15 @@ const NodeEditor = ({
     setPendingSave(false);
   };
 
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    console.log(e.deltaY);
-    const zoomIntensity = 0.1;
-    const delta = e.deltaY > 0 ? -1 : 1;
-    const newScale = zoom + delta * zoomIntensity * zoom;
-
-    setZoom(newScale);
-  };
-
   if (!nodes) return;
 
   if (pendingFetch) return <LoadingSpinner />;
 
   return (
     <div
-      onWheel={(e) => handleWheel(e)}
       ref={editorRef}
+      onMouseDown={handleEditorMouseDown}
+      onWheel={handleWheel}
       className={`absolute overflow-hidden select-none h-full w-full inset-0 ${nodeNavigation ? "" : "opacity-50 pointer-events-none"}`}
     >
       <SVGRenderer
@@ -90,12 +84,12 @@ const NodeEditor = ({
         getSlotCenter={getSlotCenter}
         deleteEdge={deleteEdge}
         tempEdgePosition={tempEdgePosition}
-        zoom={zoom}
+        viewTransform={viewTransform}
       />
       <div
         className={`absolute w-full h-full top-0 left-0 ${nodeNavigation ? "" : "opacity-50"}`}
         style={{
-          transform: `scale(${zoom})`,
+          transform: `translate(${viewTransform.x}px, ${viewTransform.y}px) scale(${viewTransform.scale})`,
           transformOrigin: "0 0",
           pointerEvents: "none",
         }}
