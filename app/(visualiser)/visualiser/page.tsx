@@ -31,24 +31,17 @@ const Page = () => {
   }, [searchParams]);
 
   const handlePointerMissed = (e: MouseEvent) => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 && nodeNavigation) return;
     setSelected(null);
     setDisplayPsets(null);
   };
 
   return (
-    <div className="w-full h-[calc(100vh-72px)] overflow-hidden">
+    <div className="relative w-full h-[calc(100vh-72px)] overflow-hidden">
       {selected && displayPsets && displayPsets.length > 0 && (
         <div className="absolute right-4 top-22 z-10 bg-background-transparent rounded p-4 w-xs border max-h-1/2 overflow-scroll overflow-x-hidden">
           <PsetAccordion edit={false} psets={displayPsets} />
         </div>
-      )}
-      {nodeMode && (
-        <NodeEditor
-          nodeNavigation={nodeNavigation}
-          setNodeNavigation={setNodeNavigation}
-          nodeMeshGroup={nodeMeshGroup!}
-        />
       )}
       <MenuBar
         setFile={setFile}
@@ -57,6 +50,7 @@ const Page = () => {
         nodeMode={nodeMode}
       />
       <Canvas
+        className={`${nodeNavigation === true && "pointer-events-none"}`}
         camera={{ position: [0, 1, 0] }}
         onPointerMissed={handlePointerMissed}
       >
@@ -90,6 +84,13 @@ const Page = () => {
           makeDefault
         />
       </Canvas>
+      {nodeMode && (
+        <NodeEditor
+          nodeNavigation={nodeNavigation}
+          setNodeNavigation={setNodeNavigation}
+          nodeMeshGroup={nodeMeshGroup!}
+        />
+      )}
     </div>
   );
 };

@@ -22,17 +22,18 @@ const NodeMenu = ({
 }: NodeMenuProps) => {
   return (
     <>
-      <div className="flex w-40 space-x-2 fixed top-24 right-4 z-20">
+      <div className="fixed flex w-40 space-x-2 top-24 right-4 z-20">
         <Switch
           id="nodeNavigation"
           checked={nodeNavigation}
           onCheckedChange={() => setNodeNavigation((cur) => !cur)}
+          className="cursor-pointer pointer-events-auto"
         />
         <Label htmlFor="nodeNavigation">
           {nodeNavigation ? "Node navigation" : "3D navigation"}
         </Label>
       </div>
-      <div className="fixed top-36 left-4 z-20 space-x-2">
+      <div className="fixed top-36 left-4 z-20 space-x-2 pointer-events-auto">
         <AddNodeMenu addNode={addNode} />
         <Button
           size="icon"
@@ -41,6 +42,7 @@ const NodeMenu = ({
           onClick={() => {
             handleSaveProject();
           }}
+          className="cursor-pointer"
         >
           {pendingSave ? <LoaderCircle className="animate-spin" /> : <Save />}
         </Button>

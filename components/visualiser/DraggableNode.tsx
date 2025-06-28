@@ -14,6 +14,7 @@ interface GeometryNodeProps {
   registerNodeSlot: (slotData: NodeSlot) => void;
   startConnecting: (nodeId: string, slotId: number) => void;
   finishConnecting: (nodeId: string, slotId: number, clear?: boolean) => void;
+  nodeNavigation: boolean;
 }
 const DraggableNode = ({
   node,
@@ -22,13 +23,17 @@ const DraggableNode = ({
   registerNodeSlot,
   startConnecting,
   finishConnecting,
+  nodeNavigation,
 }: GeometryNodeProps) => {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const changeThisNodeValues = changeNodeValue.bind(null, node.id);
   return (
     <div
-      style={{ transform: `translate(${node.x}px, ${node.y}px)` }}
-      className="w-50 min-h-15 bg-accent absolute z-20 border-2 rounded-lg hover:border-primary transition-colors cursor-grab"
+      style={{
+        transform: `translate(${node.x}px, ${node.y}px)`,
+        pointerEvents: `${nodeNavigation ? "auto" : "none"}`,
+      }}
+      className={`w-50 min-h-15 bg-accent absolute z-20 border-2 rounded-lg hover:border-primary transition-colors cursor-grab`}
       onMouseDown={(e) => {
         if ((e.target as HTMLDivElement).closest(".connect-slot")) return;
         onMouseDown(node.id, e);

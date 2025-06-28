@@ -12,7 +12,7 @@ const AddNodeMenu = ({ addNode }: { addNode: (nodeDefId: number) => void }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="icon" variant="outline">
+        <Button className="cursor-pointer" size="icon" variant="outline">
           <PlusIcon />
         </Button>
       </DropdownMenuTrigger>

@@ -102,3 +102,10 @@ also just to remember: need to be able to open node editor in the browser,
 remove main menu when node editor and exiting node editor?
 
 add measuring tool
+
+### --27-06-2025--
+
+forgot to mention I implemented creating point with nodes!
+
+now I'm implementing zooming and soon also panning. Need to figure out why
+edges no loger highlight on hover

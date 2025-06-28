@@ -66,6 +66,11 @@ const NodeEditor = ({
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     console.log(e.deltaY);
+    const zoomIntensity = 0.1;
+    const delta = e.deltaY > 0 ? -1 : 1;
+    const newScale = zoom + delta * zoomIntensity * zoom;
+
+    setZoom(newScale);
   };
 
   if (!nodes) return;
@@ -73,7 +78,43 @@ const NodeEditor = ({
   if (pendingFetch) return <LoadingSpinner />;
 
   return (
-    <div className="select-none">
+    <div
+      onWheel={(e) => handleWheel(e)}
+      ref={editorRef}
+      className={`absolute overflow-hidden select-none h-full w-full inset-0 ${nodeNavigation ? "" : "opacity-50 pointer-events-none"}`}
+    >
+      <SVGRenderer
+        nodeNavigation={nodeNavigation}
+        edges={edges}
+        nodeSlots={nodeSlots}
+        getSlotCenter={getSlotCenter}
+        deleteEdge={deleteEdge}
+        tempEdgePosition={tempEdgePosition}
+        zoom={zoom}
+      />
+      <div
+        className={`absolute w-full h-full top-0 left-0 ${nodeNavigation ? "" : "opacity-50"}`}
+        style={{
+          transform: `scale(${zoom})`,
+          transformOrigin: "0 0",
+          pointerEvents: "none",
+        }}
+      >
+        {nodes.map((node) => {
+          return (
+            <DraggableNode
+              nodeNavigation={nodeNavigation}
+              finishConnecting={finishConnecting}
+              startConnecting={startConnecting}
+              changeNodeValue={changeNodeValue}
+              key={node.id}
+              node={node}
+              onMouseDown={startDraggingNode}
+              registerNodeSlot={registerNodeSlot}
+            />
+          );
+        })}
+      </div>
       <NodeMenu
         nodeNavigation={nodeNavigation}
         setNodeNavigation={setNodeNavigation}
@@ -81,36 +122,6 @@ const NodeEditor = ({
         pendingSave={pendingSave}
         handleSaveProject={handleSaveProject}
       />
-      <div
-        onWheel={(e) => handleWheel(e)}
-        ref={editorRef}
-        className="select-none"
-      >
-        <SVGRenderer
-          nodeNavigation={nodeNavigation}
-          edges={edges}
-          nodeSlots={nodeSlots}
-          getSlotCenter={getSlotCenter}
-          deleteEdge={deleteEdge}
-          tempEdgePosition={tempEdgePosition}
-        />
-
-        <div className={nodeNavigation ? "" : "pointer-events-none opacity-50"}>
-          {nodes.map((node) => {
-            return (
-              <DraggableNode
-                finishConnecting={finishConnecting}
-                startConnecting={startConnecting}
-                changeNodeValue={changeNodeValue}
-                key={node.id}
-                node={node}
-                onMouseDown={startDraggingNode}
-                registerNodeSlot={registerNodeSlot}
-              />
-            );
-          })}
-        </div>
-      </div>
     </div>
   );
 };

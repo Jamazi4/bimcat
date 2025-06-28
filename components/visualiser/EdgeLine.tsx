@@ -9,6 +9,7 @@ interface EdgeLineProps {
   y2: number;
   isTemporary?: boolean;
   deleteEdge?: () => void;
+  nodeNavigation: boolean;
 }
 
 const EdgeLine = ({
@@ -18,13 +19,14 @@ const EdgeLine = ({
   y2,
   isTemporary = false,
   deleteEdge,
+  nodeNavigation,
 }: EdgeLineProps) => {
   const [hover, setHover] = useState(false);
   const stroke = "var(--secondary-foreground)";
   const hoverStroke = "var(--primary)";
 
   const applyHover = (isHovering: boolean) => {
-    if (isTemporary) return;
+    if (!nodeNavigation || isTemporary) return;
     setHover(isHovering);
   };
 
@@ -42,10 +44,14 @@ const EdgeLine = ({
           onMouseLeave={() => applyHover(false)}
           onClick={() => {
             if (deleteEdge) {
+              if (!nodeNavigation) return;
               deleteEdge();
             }
           }}
-          style={{ pointerEvents: "stroke", cursor: "pointer" }}
+          style={{
+            pointerEvents: nodeNavigation ? "stroke" : "none",
+            cursor: nodeNavigation ? "pointer" : "default",
+          }}
         />
       )}
 
