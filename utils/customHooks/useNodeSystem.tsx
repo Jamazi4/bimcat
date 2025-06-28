@@ -169,6 +169,17 @@ export const useNodeSystem = (
 
   const getSlotCenter = useCallback(
     (element: SVGSVGElement) => {
+      const slot = nodeSlots.find((s) => s.el === element);
+      if (slot) {
+        const node = nodes.find((n) => n.id === slot.nodeId);
+        if (node) {
+          const iconX = node.x + slot.relativeX;
+          const iconY = node.y + slot.relativeY;
+          return { iconX, iconY };
+        }
+      }
+
+      // fallback to older approach
       const elementRect = element.getBoundingClientRect();
       if (!editorRef.current) return { iconX: 0, iconY: 0 };
       const editorRect = editorRef.current.getBoundingClientRect();
@@ -181,7 +192,7 @@ export const useNodeSystem = (
       const iconY = (centerY - viewTransform.y) / viewTransform.scale;
       return { iconX, iconY };
     },
-    [viewTransform],
+    [viewTransform, nodeSlots, nodes],
   );
 
   const startConnecting = useCallback(

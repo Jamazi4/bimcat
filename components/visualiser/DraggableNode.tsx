@@ -26,9 +26,11 @@ const DraggableNode = ({
   nodeNavigation,
 }: GeometryNodeProps) => {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
+  const nodeRef = useRef<HTMLDivElement>(null);
   const changeThisNodeValues = changeNodeValue.bind(null, node.id);
   return (
     <div
+      ref={nodeRef}
       style={{
         transform: `translate(${node.x}px, ${node.y}px)`,
         pointerEvents: `${nodeNavigation ? "auto" : "none"}`,
@@ -66,6 +68,7 @@ const DraggableNode = ({
               };
               return (
                 <InputSlot
+                  nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
                   finishConnecting={finishConnecting}
                   partialSlotData={partialSlotData}
                   registerNodeSlot={registerNodeSlot}
@@ -87,6 +90,7 @@ const DraggableNode = ({
             };
             return (
               <OutputSlot
+                nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
                 startConnecting={startConnecting}
                 registerNodeSlot={registerNodeSlot}
                 partialSlotData={partialSlotData}
@@ -135,11 +139,24 @@ const InputNumber = ({
   );
 };
 
+const getSlotRelativePosition = (
+  nodeRef: React.RefObject<HTMLDivElement>,
+  slotRef: React.RefObject<SVGSVGElement>,
+) => {
+  const nodeRect = nodeRef.current.getBoundingClientRect();
+  const slotRect = slotRef.current.getBoundingClientRect();
+  const relativeX = slotRect.left + slotRect.width / 2 - nodeRect.left;
+  const relativeY = slotRect.top + slotRect.height / 2 - nodeRect.top;
+
+  return { relativeX, relativeY };
+};
+
 interface InputNodeSlotsProps {
   name: string;
   partialSlotData: Partial<NodeSlot>;
   registerNodeSlot: (slotData: NodeSlot) => void;
   finishConnecting: (nodeId: string, slotId: number, clear?: boolean) => void;
+  nodeRef: React.RefObject<HTMLDivElement>;
 }
 
 const InputSlot = ({
@@ -147,20 +164,29 @@ const InputSlot = ({
   partialSlotData,
   registerNodeSlot,
   finishConnecting,
+  nodeRef,
 }: InputNodeSlotsProps) => {
   const { nodeId, slotId, slotType } = partialSlotData;
   const ref = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
     if (!ref.current) return;
+
+    const { relativeY, relativeX } = getSlotRelativePosition(
+      nodeRef,
+      ref as React.RefObject<SVGSVGElement>,
+    );
+
     const slotData: NodeSlot = {
       nodeId: nodeId!,
       slotId: slotId!,
       slotType: slotType!,
       el: ref.current,
+      relativeX,
+      relativeY,
     };
     registerNodeSlot(slotData);
-  }, [nodeId, registerNodeSlot, slotType, slotId]);
+  }, [nodeId, registerNodeSlot, slotType, slotId, nodeRef]);
 
   return (
     <div
@@ -178,6 +204,7 @@ interface OutputNodeSlotsProps {
   partialSlotData: Partial<NodeSlot>;
   registerNodeSlot: (slotData: NodeSlot) => void;
   startConnecting: (nodeId: string, slotId: number) => void;
+  nodeRef: React.RefObject<HTMLDivElement>;
 }
 
 const OutputSlot = ({
@@ -185,20 +212,28 @@ const OutputSlot = ({
   partialSlotData,
   registerNodeSlot,
   startConnecting,
+  nodeRef,
 }: OutputNodeSlotsProps) => {
   const { nodeId, slotId, slotType } = partialSlotData;
   const ref = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
     if (!ref.current) return;
+
+    const { relativeX, relativeY } = getSlotRelativePosition(
+      nodeRef,
+      ref as React.RefObject<SVGSVGElement>,
+    );
     const slotData: NodeSlot = {
       nodeId: nodeId!,
       slotId: slotId!,
       slotType: slotType!,
       el: ref.current,
+      relativeX,
+      relativeY,
     };
     registerNodeSlot(slotData);
-  }, [nodeId, registerNodeSlot, slotType, slotId]);
+  }, [nodeId, registerNodeSlot, slotType, slotId, nodeRef]);
 
   return (
     <div
