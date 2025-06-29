@@ -46,6 +46,7 @@ const NodeEditor = ({
     viewTransform,
     handleWheel,
     handleEditorMouseDown,
+    selectionRect,
   } = useNodeSystem(nodeNavigation, nodeMeshGroup);
 
   const fetchNodesWrapper = useCallback(async () => {
@@ -78,6 +79,7 @@ const NodeEditor = ({
       className={`absolute overflow-hidden select-none h-full w-full inset-0 ${nodeNavigation ? "" : "opacity-50 pointer-events-none"}`}
     >
       <SVGRenderer
+        selectionRect={selectionRect}
         nodeNavigation={nodeNavigation}
         edges={edges}
         nodeSlots={nodeSlots}
@@ -104,7 +106,7 @@ const NodeEditor = ({
               changeNodeValue={changeNodeValue}
               key={node.id}
               node={node}
-              onMouseDown={startDraggingNode}
+              startDraggingNode={startDraggingNode}
               registerNodeSlot={registerNodeSlot}
             />
           );

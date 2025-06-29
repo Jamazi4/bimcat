@@ -9,7 +9,7 @@ import { NodeSlot } from "@/utils/customHooks/useNodeSystem";
 
 interface GeometryNodeProps {
   node: GeomNodeBackType;
-  onMouseDown: (nodeId: string, e: React.MouseEvent) => void;
+  startDraggingNode: (nodeId: string, e: React.MouseEvent) => void;
   changeNodeValue: (nodeId: string, inputId: number, value: string) => void;
   registerNodeSlot: (slotData: NodeSlot) => void;
   startConnecting: (nodeId: string, slotId: number) => void;
@@ -19,7 +19,7 @@ interface GeometryNodeProps {
 }
 const DraggableNode = ({
   node,
-  onMouseDown,
+  startDraggingNode,
   changeNodeValue,
   registerNodeSlot,
   startConnecting,
@@ -27,6 +27,10 @@ const DraggableNode = ({
   nodeNavigation,
   viewTransform,
 }: GeometryNodeProps) => {
+  const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
+  const nodeRef = useRef<HTMLDivElement>(null);
+  const changeThisNodeValues = changeNodeValue.bind(null, node.id);
+
   const getSlotRelativePosition = useCallback(
     (
       nodeRef: React.RefObject<HTMLDivElement>,
@@ -41,16 +45,11 @@ const DraggableNode = ({
         (slotRect.top + slotRect.height / 2 - nodeRect.top) /
         viewTransform.scale;
 
-      console.log(relativeX, relativeY);
-
       return { relativeX, relativeY };
     },
     [viewTransform],
   );
 
-  const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
-  const nodeRef = useRef<HTMLDivElement>(null);
-  const changeThisNodeValues = changeNodeValue.bind(null, node.id);
   return (
     <div
       ref={nodeRef}
@@ -58,10 +57,10 @@ const DraggableNode = ({
         transform: `translate(${node.x}px, ${node.y}px)`,
         pointerEvents: `${nodeNavigation ? "auto" : "none"}`,
       }}
-      className={`w-50 min-h-15 bg-accent absolute z-20 border-2 rounded-lg hover:border-primary transition-colors cursor-grab`}
+      className={`draggable-node w-50 min-h-15 bg-accent absolute z-20 border-2 rounded-lg hover:border-primary transition-colors cursor-grab`}
       onMouseDown={(e) => {
         if ((e.target as HTMLDivElement).closest(".connect-slot")) return;
-        onMouseDown(node.id, e);
+        startDraggingNode(node.id, e);
       }}
     >
       {/* title  */}

@@ -10,6 +10,7 @@ interface SVGRendererProps {
   deleteEdge: (edgeId: string) => void;
   tempEdgePosition: { x1: number; y1: number; x2: number; y2: number } | null;
   viewTransform: { x: number; y: number; scale: number };
+  selectionRect: { x1: number; y1: number; x2: number; y2: number } | null;
 }
 
 const SVGRenderer = ({
@@ -20,6 +21,7 @@ const SVGRenderer = ({
   deleteEdge,
   tempEdgePosition,
   viewTransform,
+  selectionRect,
 }: SVGRendererProps) => {
   return (
     <svg
@@ -67,6 +69,18 @@ const SVGRenderer = ({
           />
         )}
       </g>
+      {selectionRect && (
+        <rect
+          x={Math.min(selectionRect.x1, selectionRect.x2)}
+          y={Math.min(selectionRect.y1, selectionRect.y2)}
+          width={Math.abs(selectionRect.x2 - selectionRect.x1)}
+          height={Math.abs(selectionRect.y2 - selectionRect.y1)}
+          stroke="var(--primary)"
+          strokeWidth={1}
+          fillOpacity={0.2}
+          fill="var(--primary)"
+        />
+      )}
     </svg>
   );
 };

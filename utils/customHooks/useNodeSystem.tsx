@@ -51,6 +51,12 @@ export const useNodeSystem = (
     slotId: number;
   } | null>(null);
   const [viewTransform, setViewTransform] = useState({ x: 0, y: 0, scale: 1 });
+  const [selectionRect, setSelectionRect] = useState<{
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  } | null>(null);
 
   const startNodeRuntime = useNodesRuntime({ nodes, edges, meshGroup });
 
@@ -263,6 +269,19 @@ export const useNodeSystem = (
 
       const worldPos = screenToWorld(e.clientX, e.clientY);
 
+      if (selectionRect) {
+        const boundingRect = editorRef.current.getBoundingClientRect();
+        setSelectionRect((prevRect) => {
+          if (!prevRect) return null;
+          return {
+            x1: prevRect.x1,
+            y1: prevRect.y1,
+            x2: e.clientX - boundingRect.left,
+            y2: e.clientY - boundingRect.top,
+          };
+        });
+      }
+
       if (draggingNode) {
         setNodes((prevNodes) =>
           prevNodes.map((n) =>
@@ -293,6 +312,7 @@ export const useNodeSystem = (
       }
     },
     [
+      selectionRect,
       isPanning,
       screenToWorld,
       draggingNode,
@@ -316,6 +336,7 @@ export const useNodeSystem = (
     cancelConnecting();
     setDraggingNode(null);
     setIsPanning(false);
+    setSelectionRect(null);
   }, [connectingToNode, connectingFromNode]);
 
   const handleWheel = useCallback(
@@ -358,13 +379,29 @@ export const useNodeSystem = (
           y: e.clientY - viewTransform.y,
         });
         return;
+      } else if (e.button === 0) {
+        e.preventDefault();
+        if (!editorRef.current) return;
+        if ((e.target as HTMLDivElement).closest(".draggable-node")) return;
+        const boudingRect = editorRef.current.getBoundingClientRect();
+        setSelectionRect({
+          x1: e.clientX - boudingRect.left,
+          y1: e.clientY - boudingRect.top,
+          x2: e.clientX - boudingRect.left,
+          y2: e.clientY - boudingRect.top,
+        });
+        return;
       }
     },
     [viewTransform, nodeNavigation],
   );
 
   useEffect(() => {
-    if ((draggingNode || connectingFromNode || isPanning) && nodeNavigation) {
+    const isInteracting =
+      (draggingNode || connectingFromNode || isPanning || !!selectionRect) &&
+      nodeNavigation;
+
+    if (isInteracting) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     } else {
@@ -382,6 +419,7 @@ export const useNodeSystem = (
     handleMouseMove,
     handleMouseUp,
     nodeNavigation,
+    selectionRect,
   ]);
 
   return {
@@ -403,6 +441,7 @@ export const useNodeSystem = (
     viewTransform,
     handleWheel,
     handleEditorMouseDown,
+    selectionRect,
   };
 };
 
