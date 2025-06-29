@@ -39,6 +39,7 @@ export const useNodeSystem = (
       offsetY: number;
     }[]
   >([]);
+  const wasDragging = useRef(false);
   const [tempEdgePosition, setTempEdgePosition] = useState<{
     x1: number;
     y1: number;
@@ -61,7 +62,8 @@ export const useNodeSystem = (
     y2: number;
   } | null>(null);
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
-  const wasDragging = useRef(false);
+  const [copiedNodes, setCopiedNodes] = useState<GeomNodeBackType[]>([]);
+  const [copiedEdges, setCopiedEdges] = useState<NodeEdgeType[]>([]);
 
   const startNodeRuntime = useNodesRuntime({ nodes, edges, meshGroup });
 
@@ -150,40 +152,47 @@ export const useNodeSystem = (
     setNodes((prevNodes) => [...prevNodes, newBackNode]);
   }, []);
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Delete") {
-        setNodes((prevNodes) => {
-          return prevNodes.filter((n) => !selectedNodeIds.includes(n.id));
-        });
+  const copySelectedNodes = useCallback(() => {
+    const curCopiedNodes = nodes.filter((n) => selectedNodeIds.includes(n.id));
+    setCopiedNodes(curCopiedNodes);
 
-        setNodeSlots((prevSlots) => {
-          return prevSlots.filter(
-            (slot) => !selectedNodeIds.includes(slot.nodeId),
-          );
-        });
+    const curCopiedEdges = edges.filter(
+      (e) =>
+        selectedNodeIds.includes(e.fromNodeId) &&
+        selectedNodeIds.includes(e.toNodeId),
+    );
+    setCopiedEdges(curCopiedEdges);
+  }, [edges, nodes, selectedNodeIds]);
 
-        setNodeDivs((prevNodeDivs) => {
-          const prevNodeDivsArr = Object.entries(prevNodeDivs);
-          const newNodeDivs = prevNodeDivsArr.filter(
-            ([id, _]) => !selectedNodeIds.includes(id),
-          );
-          return Object.fromEntries(newNodeDivs);
-        });
+  const pasteCopiedNodes = useCallback(() => {
+    if (!copiedNodes.length) return;
 
-        setEdges((prevEdges) => {
-          return prevEdges.filter((edge) => {
-            return (
-              !selectedNodeIds.includes(edge.fromNodeId) &&
-              !selectedNodeIds.includes(edge.toNodeId)
-            );
-          });
-        });
-      }
-    },
+    const idMap: Record<string, string> = {};
+    const offset = 30;
 
-    [selectedNodeIds],
-  );
+    const newNodes = copiedNodes.map((n) => {
+      const newId = createNodeId();
+      idMap[n.id] = newId;
+
+      return {
+        ...n,
+        id: newId,
+        x: n.x + offset,
+        y: n.y + offset,
+      };
+    });
+
+    const newEdges = copiedEdges.map((e) => ({
+      ...e,
+      id: createEdgeId(),
+      fromNodeId: idMap[e.fromNodeId],
+      toNodeId: idMap[e.toNodeId],
+    }));
+
+    setNodes((prevNodes) => [...prevNodes, ...newNodes]);
+    setEdges((prevEdges) => [...prevEdges, ...newEdges]);
+    setSelectedNodeIds(newNodes.map((n) => n.id));
+  }, [copiedEdges, copiedNodes]);
 
   const registerNodeSlot = useCallback((slotData: NodeSlot) => {
     setNodeSlots((prev) => {
@@ -297,6 +306,46 @@ export const useNodeSystem = (
     setConnectingFromNode(null);
     setTempEdgePosition(null);
   };
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Delete") {
+        setNodes((prevNodes) => {
+          return prevNodes.filter((n) => !selectedNodeIds.includes(n.id));
+        });
+
+        setNodeSlots((prevSlots) => {
+          return prevSlots.filter(
+            (slot) => !selectedNodeIds.includes(slot.nodeId),
+          );
+        });
+
+        setNodeDivs((prevNodeDivs) => {
+          const prevNodeDivsArr = Object.entries(prevNodeDivs);
+          const newNodeDivs = prevNodeDivsArr.filter(
+            ([id, _]) => !selectedNodeIds.includes(id),
+          );
+          return Object.fromEntries(newNodeDivs);
+        });
+
+        setEdges((prevEdges) => {
+          return prevEdges.filter((edge) => {
+            return (
+              !selectedNodeIds.includes(edge.fromNodeId) &&
+              !selectedNodeIds.includes(edge.toNodeId)
+            );
+          });
+        });
+      } else if ((e.metaKey || e.ctrlKey) && e.key === "c") {
+        e.preventDefault();
+        copySelectedNodes();
+      } else if ((e.metaKey || e.ctrlKey) && e.key === "v") {
+        e.preventDefault();
+        pasteCopiedNodes();
+      }
+    },
+    [copySelectedNodes, pasteCopiedNodes, selectedNodeIds],
+  );
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
