@@ -4,10 +4,18 @@ import { nodeDefinitions } from "@/utils/nodes";
 import { GeomNodeBackType } from "@/utils/schemas";
 import { CircleDot } from "lucide-react";
 import { Input } from "../ui/input";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { NodeSlot } from "@/utils/customHooks/useNodeSystem";
 
 interface GeometryNodeProps {
+  selected: boolean;
   node: GeomNodeBackType;
   startDraggingNode: (nodeId: string, e: React.MouseEvent) => void;
   changeNodeValue: (nodeId: string, inputId: number, value: string) => void;
@@ -16,8 +24,10 @@ interface GeometryNodeProps {
   finishConnecting: (nodeId: string, slotId: number, clear?: boolean) => void;
   nodeNavigation: boolean;
   viewTransform: { x: number; y: number; scale: number };
+  setNodeDivs: Dispatch<SetStateAction<Record<string, HTMLDivElement>>>;
 }
 const DraggableNode = ({
+  selected,
   node,
   startDraggingNode,
   changeNodeValue,
@@ -26,10 +36,17 @@ const DraggableNode = ({
   finishConnecting,
   nodeNavigation,
   viewTransform,
+  setNodeDivs,
 }: GeometryNodeProps) => {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const nodeRef = useRef<HTMLDivElement>(null);
   const changeThisNodeValues = changeNodeValue.bind(null, node.id);
+
+  useEffect(() => {
+    setNodeDivs((prevDivs) => {
+      return { ...prevDivs, [node.id]: nodeRef.current! };
+    });
+  }, [node, setNodeDivs]);
 
   const getSlotRelativePosition = useCallback(
     (
@@ -57,7 +74,7 @@ const DraggableNode = ({
         transform: `translate(${node.x}px, ${node.y}px)`,
         pointerEvents: `${nodeNavigation ? "auto" : "none"}`,
       }}
-      className={`draggable-node w-50 min-h-15 bg-accent absolute z-20 border-2 rounded-lg hover:border-primary transition-colors cursor-grab`}
+      className={`draggable-node w-50 min-h-15 bg-accent absolute z-20 border-2 rounded-lg transition-colors cursor-grab ${selected ? "border-primary" : "hover:border-primary "}`}
       onMouseDown={(e) => {
         if ((e.target as HTMLDivElement).closest(".connect-slot")) return;
         startDraggingNode(node.id, e);

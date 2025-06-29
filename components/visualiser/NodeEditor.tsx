@@ -47,6 +47,8 @@ const NodeEditor = ({
     handleWheel,
     handleEditorMouseDown,
     selectionRect,
+    setNodeDivs,
+    selectedNodeIds,
   } = useNodeSystem(nodeNavigation, nodeMeshGroup);
 
   const fetchNodesWrapper = useCallback(async () => {
@@ -97,8 +99,11 @@ const NodeEditor = ({
         }}
       >
         {nodes.map((node) => {
+          const selected = selectedNodeIds.includes(node.id);
           return (
             <DraggableNode
+              selected={selected}
+              setNodeDivs={setNodeDivs}
               viewTransform={viewTransform}
               nodeNavigation={nodeNavigation}
               finishConnecting={finishConnecting}

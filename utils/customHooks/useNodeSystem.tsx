@@ -26,16 +26,19 @@ export const useNodeSystem = (
   meshGroup: THREE.Group,
 ) => {
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
+  const [nodeDivs, setNodeDivs] = useState<Record<string, HTMLDivElement>>({});
   const [edges, setEdges] = useState<NodeEdgeType[]>([]);
   const [nodeSlots, setNodeSlots] = useState<NodeSlot[]>([]);
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const editorRef = useRef<HTMLDivElement>(null);
-  const [draggingNode, setDraggingNode] = useState<{
-    id: string;
-    offsetX: number;
-    offsetY: number;
-  } | null>(null);
+  const [draggingNodes, setDraggingNodes] = useState<
+    {
+      id: string;
+      offsetX: number;
+      offsetY: number;
+    }[]
+  >([]);
   const [tempEdgePosition, setTempEdgePosition] = useState<{
     x1: number;
     y1: number;
@@ -57,6 +60,7 @@ export const useNodeSystem = (
     x2: number;
     y2: number;
   } | null>(null);
+  const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
 
   const startNodeRuntime = useNodesRuntime({ nodes, edges, meshGroup });
 
@@ -160,17 +164,30 @@ export const useNodeSystem = (
 
   const startDraggingNode = useCallback(
     (nodeId: string, e: React.MouseEvent) => {
+      if (!editorRef.current) return;
+
+      const worldPos = screenToWorld(e.clientX, e.clientY);
       const node = nodes.find((n) => n.id === nodeId);
-      if (node && editorRef.current) {
-        const worldPos = screenToWorld(e.clientX, e.clientY);
-        setDraggingNode({
-          id: nodeId,
-          offsetX: worldPos.x - node.x,
-          offsetY: worldPos.y - node.y,
-        });
-      }
+      if (!node) return;
+
+      const isMulti = selectedNodeIds.includes(nodeId);
+      const dragTargets = isMulti ? selectedNodeIds : [nodeId];
+
+      const newDraggingNodes = dragTargets
+        .map((id) => {
+          const n = nodes.find((n) => n.id === id);
+          if (!n) return null;
+          return {
+            id,
+            offsetX: worldPos.x - n.x,
+            offsetY: worldPos.y - n.y,
+          };
+        })
+        .filter(Boolean) as { id: string; offsetX: number; offsetY: number }[];
+
+      setDraggingNodes(newDraggingNodes);
     },
-    [nodes, screenToWorld],
+    [nodes, screenToWorld, selectedNodeIds],
   );
 
   const getSlotCenter = useCallback(
@@ -184,21 +201,9 @@ export const useNodeSystem = (
           return { iconX, iconY };
         }
       }
-
-      // fallback to older approach
-      const elementRect = element.getBoundingClientRect();
-      if (!editorRef.current) return { iconX: 0, iconY: 0 };
-      const editorRect = editorRef.current.getBoundingClientRect();
-
-      const centerX =
-        elementRect.left + elementRect.width / 2 - editorRect.left;
-      const centerY = elementRect.top + elementRect.height / 2 - editorRect.top;
-
-      const iconX = (centerX - viewTransform.x) / viewTransform.scale;
-      const iconY = (centerY - viewTransform.y) / viewTransform.scale;
-      return { iconX, iconY };
+      return { iconX: 0, iconY: 0 };
     },
-    [viewTransform, nodeSlots, nodes],
+    [nodeSlots, nodes],
   );
 
   const startConnecting = useCallback(
@@ -282,19 +287,23 @@ export const useNodeSystem = (
         });
       }
 
-      if (draggingNode) {
+      if (draggingNodes.length > 0) {
         setNodes((prevNodes) =>
-          prevNodes.map((n) =>
-            n.id === draggingNode.id
-              ? {
-                  ...n,
-                  x: worldPos.x - draggingNode.offsetX,
-                  y: worldPos.y - draggingNode.offsetY,
-                }
-              : n,
-          ),
+          prevNodes.map((n) => {
+            const draggingInfo = draggingNodes.find((d) => d.id === n.id);
+            if (draggingInfo) {
+              return {
+                ...n,
+                x: worldPos.x - draggingInfo.offsetX,
+                y: worldPos.y - draggingInfo.offsetY,
+              };
+            }
+            return n;
+          }),
         );
-      } else if (connectingFromNode) {
+      }
+
+      if (connectingFromNode) {
         const sourceIcon = nodeSlots.find(
           (slot) =>
             slot.nodeId === connectingFromNode.nodeId &&
@@ -315,7 +324,7 @@ export const useNodeSystem = (
       selectionRect,
       isPanning,
       screenToWorld,
-      draggingNode,
+      draggingNodes,
       connectingFromNode,
       panStart.x,
       panStart.y,
@@ -334,10 +343,48 @@ export const useNodeSystem = (
       );
     }
     cancelConnecting();
-    setDraggingNode(null);
+    setDraggingNodes([]);
     setIsPanning(false);
+
+    if (!!selectionRect) {
+      if (!editorRef.current) return;
+      const editorBoundingRect = editorRef.current.getBoundingClientRect();
+      const editorOffsetX = editorBoundingRect.left;
+      const editorOffsetY = editorBoundingRect.top;
+
+      const upperLeftSelectionX = Math.min(selectionRect.x1, selectionRect.x2);
+      const upperLeftSelectionY = Math.min(selectionRect.y1, selectionRect.y2);
+      const bottomRightSelectionX = Math.max(
+        selectionRect.x1,
+        selectionRect.x2,
+      );
+      const bottomRightSelectionY = Math.max(
+        selectionRect.y1,
+        selectionRect.y2,
+      );
+
+      const selectedIds = Object.entries(nodeDivs)
+        .filter(([_, div]) => {
+          const boundingRect = div.getBoundingClientRect();
+
+          const nodeTop = boundingRect.top - editorOffsetY;
+          const nodeLeft = boundingRect.left - editorOffsetX;
+          const nodeBottom = boundingRect.bottom - editorOffsetY;
+          const nodeRight = boundingRect.right - editorOffsetX;
+
+          const inside =
+            nodeTop > upperLeftSelectionY &&
+            nodeLeft > upperLeftSelectionX &&
+            nodeBottom < bottomRightSelectionY &&
+            nodeRight < bottomRightSelectionX;
+          return inside;
+        })
+        .map(([id, _]) => id);
+
+      setSelectedNodeIds(selectedIds);
+    }
     setSelectionRect(null);
-  }, [connectingToNode, connectingFromNode]);
+  }, [connectingToNode, connectingFromNode, selectionRect, nodeDivs]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
@@ -380,10 +427,11 @@ export const useNodeSystem = (
         });
         return;
       } else if (e.button === 0) {
-        e.preventDefault();
         if (!editorRef.current) return;
         if ((e.target as HTMLDivElement).closest(".draggable-node")) return;
+
         const boudingRect = editorRef.current.getBoundingClientRect();
+
         setSelectionRect({
           x1: e.clientX - boudingRect.left,
           y1: e.clientY - boudingRect.top,
@@ -398,7 +446,7 @@ export const useNodeSystem = (
 
   useEffect(() => {
     const isInteracting =
-      (draggingNode || connectingFromNode || isPanning || !!selectionRect) &&
+      (draggingNodes || connectingFromNode || isPanning || !!selectionRect) &&
       nodeNavigation;
 
     if (isInteracting) {
@@ -415,7 +463,7 @@ export const useNodeSystem = (
   }, [
     isPanning,
     connectingFromNode,
-    draggingNode,
+    draggingNodes,
     handleMouseMove,
     handleMouseUp,
     nodeNavigation,
@@ -442,6 +490,8 @@ export const useNodeSystem = (
     handleWheel,
     handleEditorMouseDown,
     selectionRect,
+    setNodeDivs,
+    selectedNodeIds,
   };
 };
 
