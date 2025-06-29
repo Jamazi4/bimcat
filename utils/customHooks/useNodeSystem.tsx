@@ -61,6 +61,7 @@ export const useNodeSystem = (
     y2: number;
   } | null>(null);
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
+  const wasDragging = useRef(false);
 
   const startNodeRuntime = useNodesRuntime({ nodes, edges, meshGroup });
 
@@ -149,6 +150,41 @@ export const useNodeSystem = (
     setNodes((prevNodes) => [...prevNodes, newBackNode]);
   }, []);
 
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Delete") {
+        setNodes((prevNodes) => {
+          return prevNodes.filter((n) => !selectedNodeIds.includes(n.id));
+        });
+
+        setNodeSlots((prevSlots) => {
+          return prevSlots.filter(
+            (slot) => !selectedNodeIds.includes(slot.nodeId),
+          );
+        });
+
+        setNodeDivs((prevNodeDivs) => {
+          const prevNodeDivsArr = Object.entries(prevNodeDivs);
+          const newNodeDivs = prevNodeDivsArr.filter(
+            ([id, _]) => !selectedNodeIds.includes(id),
+          );
+          return Object.fromEntries(newNodeDivs);
+        });
+
+        setEdges((prevEdges) => {
+          return prevEdges.filter((edge) => {
+            return (
+              !selectedNodeIds.includes(edge.fromNodeId) &&
+              !selectedNodeIds.includes(edge.toNodeId)
+            );
+          });
+        });
+      }
+    },
+
+    [selectedNodeIds],
+  );
+
   const registerNodeSlot = useCallback((slotData: NodeSlot) => {
     setNodeSlots((prev) => {
       const alreadyRegistered = prev.some(
@@ -165,6 +201,7 @@ export const useNodeSystem = (
   const startDraggingNode = useCallback(
     (nodeId: string, e: React.MouseEvent) => {
       if (!editorRef.current) return;
+      wasDragging.current = false;
 
       const worldPos = screenToWorld(e.clientX, e.clientY);
       const node = nodes.find((n) => n.id === nodeId);
@@ -265,6 +302,8 @@ export const useNodeSystem = (
     (e: MouseEvent) => {
       if (!editorRef.current) return;
 
+      wasDragging.current = true;
+
       if (isPanning) {
         const newX = e.clientX - panStart.x;
         const newY = e.clientY - panStart.y;
@@ -342,9 +381,18 @@ export const useNodeSystem = (
         connectingToNode.slotId,
       );
     }
+
+    if (draggingNodes.length === 1 && wasDragging.current === false) {
+      setSelectedNodeIds([draggingNodes[0].id]);
+      setDraggingNodes([]);
+      return;
+    }
+
     cancelConnecting();
     setDraggingNodes([]);
     setIsPanning(false);
+
+    wasDragging.current = false;
 
     if (!!selectionRect) {
       if (!editorRef.current) return;
@@ -384,7 +432,13 @@ export const useNodeSystem = (
       setSelectedNodeIds(selectedIds);
     }
     setSelectionRect(null);
-  }, [connectingToNode, connectingFromNode, selectionRect, nodeDivs]);
+  }, [
+    connectingToNode,
+    connectingFromNode,
+    draggingNodes,
+    selectionRect,
+    nodeDivs,
+  ]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
@@ -456,9 +510,16 @@ export const useNodeSystem = (
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     }
+
+    if (nodeNavigation) {
+      document.addEventListener("keydown", handleKeyDown);
+    } else {
+      document.removeEventListener("keydown", handleKeyDown);
+    }
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [
     isPanning,
@@ -468,6 +529,7 @@ export const useNodeSystem = (
     handleMouseUp,
     nodeNavigation,
     selectionRect,
+    handleKeyDown,
   ]);
 
   return {
