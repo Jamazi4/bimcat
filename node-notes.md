@@ -109,3 +109,11 @@ forgot to mention I implemented creating point with nodes!
 
 now I'm implementing zooming and soon also panning. Need to figure out why
 edges no loger highlight on hover
+
+### --28-06-2025--
+
+panning and zooming now works perfectly. ALMOST - newly created nodes point to
+slightly wrong node slot local coords
+
+I think that before implementing the next nodes or logic I need to implement
+box selection and copy, delete, move selected

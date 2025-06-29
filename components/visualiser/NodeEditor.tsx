@@ -97,6 +97,7 @@ const NodeEditor = ({
         {nodes.map((node) => {
           return (
             <DraggableNode
+              viewTransform={viewTransform}
               nodeNavigation={nodeNavigation}
               finishConnecting={finishConnecting}
               startConnecting={startConnecting}
