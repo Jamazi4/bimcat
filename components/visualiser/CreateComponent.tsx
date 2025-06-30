@@ -26,7 +26,11 @@ const CreateComponent = ({ disabled }: { disabled: boolean }) => {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 
-  async function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+  async function handleClick(
+    e:
+      | React.MouseEvent<HTMLButtonElement>
+      | React.KeyboardEvent<HTMLInputElement>,
+  ) {
     e.preventDefault();
     setPending(true);
     const { message, componentId } = await createNodeComponentAction(
@@ -63,6 +67,11 @@ const CreateComponent = ({ disabled }: { disabled: boolean }) => {
           id="name"
           value={componentName}
           onChange={(e) => setComponentName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleClick(e);
+            }
+          }}
         ></Input>
         <div className="flex mt-4 space-x-2">
           <Checkbox
@@ -80,6 +89,7 @@ const CreateComponent = ({ disabled }: { disabled: boolean }) => {
             }}
             disabled={componentName === "" && pending}
             className="w-30 mt-4"
+            type="submit"
           >
             {pending ? <LoaderCircle className="animate-spin" /> : "Accept"}
           </Button>

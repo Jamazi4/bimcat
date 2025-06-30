@@ -55,7 +55,11 @@ const RenameButtonTitleBar = ({
     meta: { invalidates: queryKey },
   });
 
-  const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleEdit = (
+    e:
+      | React.MouseEvent<HTMLButtonElement>
+      | React.KeyboardEvent<HTMLInputElement>,
+  ) => {
     e.stopPropagation();
     setPending(true);
 
@@ -98,6 +102,11 @@ const RenameButtonTitleBar = ({
             onChange={(e) => setNewName(e.target.value)}
             value={newName}
             required={true}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleEdit(e);
+              }
+            }}
           />
           <input type="hidden" name="id" value={id} />
         </div>
