@@ -64,6 +64,7 @@ export const useNodeSystem = (
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
   const [copiedNodes, setCopiedNodes] = useState<GeomNodeBackType[]>([]);
   const [copiedEdges, setCopiedEdges] = useState<NodeEdgeType[]>([]);
+  const copyOffset = useRef(30);
 
   const startNodeRuntime = useNodesRuntime({ nodes, edges, meshGroup });
 
@@ -122,35 +123,41 @@ export const useNodeSystem = (
     [viewTransform],
   );
 
-  const addNode = useCallback((nodeDefId: number) => {
-    const nodeId = createNodeId();
-    const nodeDefinition = nodeDefinitions.find(
-      (node) => node.nodeTypeId === nodeDefId,
-    );
-    const nodeType = nodeDefinition?.type;
-    const nodeX = 100;
-    const nodeY = 100;
+  const addNode = useCallback(
+    (nodeDefId: number) => {
+      const nodeId = createNodeId();
+      const nodeDefinition = nodeDefinitions.find(
+        (node) => node.nodeTypeId === nodeDefId,
+      );
+      const nodeType = nodeDefinition?.type;
+      const relInitPos = 200;
+      const worldPoint = screenToWorld(relInitPos, relInitPos);
+      const randFactor = 100;
+      const nodeX = worldPoint.x + Math.floor(Math.random() * randFactor);
+      const nodeY = worldPoint.y + Math.floor(Math.random() * randFactor);
 
-    const initValues = nodeDefinition?.inputs
-      .filter(
-        (input): input is typeof input & { value: string } =>
-          typeof input.value === "string",
-      )
-      .map((input) => input.value);
+      const initValues = nodeDefinition?.inputs
+        .filter(
+          (input): input is typeof input & { value: string } =>
+            typeof input.value === "string",
+        )
+        .map((input) => input.value);
 
-    const newBackNode: GeomNodeBackType = {
-      id: nodeId,
-      type: nodeType!,
-      x: nodeX,
-      y: nodeY,
-    };
+      const newBackNode: GeomNodeBackType = {
+        id: nodeId,
+        type: nodeType!,
+        x: nodeX,
+        y: nodeY,
+      };
 
-    if (initValues) {
-      newBackNode["values"] = initValues;
-    }
+      if (initValues) {
+        newBackNode["values"] = initValues;
+      }
 
-    setNodes((prevNodes) => [...prevNodes, newBackNode]);
-  }, []);
+      setNodes((prevNodes) => [...prevNodes, newBackNode]);
+    },
+    [screenToWorld],
+  );
 
   const copySelectedNodes = useCallback(() => {
     const curCopiedNodes = nodes.filter((n) => selectedNodeIds.includes(n.id));
@@ -162,25 +169,29 @@ export const useNodeSystem = (
         selectedNodeIds.includes(e.toNodeId),
     );
     setCopiedEdges(curCopiedEdges);
+    copyOffset.current = 30;
   }, [edges, nodes, selectedNodeIds]);
 
   const pasteCopiedNodes = useCallback(() => {
     if (!copiedNodes.length) return;
 
     const idMap: Record<string, string> = {};
-    const offset = 30;
 
     const newNodes = copiedNodes.map((n) => {
       const newId = createNodeId();
       idMap[n.id] = newId;
+      const newValues = n.values?.map((val) => val);
 
       return {
         ...n,
         id: newId,
-        x: n.x + offset,
-        y: n.y + offset,
+        x: n.x + copyOffset.current,
+        y: n.y + copyOffset.current,
+        values: newValues,
       };
     });
+
+    copyOffset.current = copyOffset.current + 30;
 
     const newEdges = copiedEdges.map((e) => ({
       ...e,
