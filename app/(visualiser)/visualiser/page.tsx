@@ -1,7 +1,12 @@
 "use client";
 
 import MenuBar from "@/components/visualiser/MenuBar";
-import { Grid, OrbitControls } from "@react-three/drei";
+import {
+  GizmoHelper,
+  GizmoViewport,
+  Grid,
+  OrbitControls,
+} from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useState } from "react";
 import type { Pset } from "@/utils/schemas";
@@ -83,6 +88,16 @@ const Page = () => {
           enableZoom={true}
           makeDefault
         />
+        <GizmoHelper
+          alignment="bottom-right" // widget alignment within scene
+          margin={[80, 80]} // widget margins (X, Y)
+        >
+          <GizmoViewport
+            axisColors={["red", "green", "blue"]}
+            labelColor="black"
+          />
+          {/* alternative: <GizmoViewcube /> */}
+        </GizmoHelper>
       </Canvas>
       {nodeMode && (
         <NodeEditor

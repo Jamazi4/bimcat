@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback } from "react";
+import react, { useCallback } from "react";
 import { GeomNodeBackType, NodeEdgeType } from "../schemas";
 import * as THREE from "three";
+import { nodeDefinitions } from "../nodes";
 
 interface useNodesRuntimeProps {
   nodes: GeomNodeBackType[];
@@ -10,70 +11,134 @@ interface useNodesRuntimeProps {
   meshGroup: THREE.Group;
 }
 
+type ASTNode = {
+  type: string;
+  id: string;
+  inputs: { inputId: number; ast: ASTNode }[];
+  values: string[];
+};
+
+type NodeEvalResult =
+  | { type: "number"; value: number }
+  | { type: "point"; value: THREE.Vector3 }
+  | { type: "edge"; value: [THREE.Vector3, THREE.Vector3] }
+  | { type: "geometry"; value: THREE.Object3D };
+
 const useNodesRuntime = ({ nodes, edges, meshGroup }: useNodesRuntimeProps) => {
-  const getChildrenNodes = useCallback(
-    (parentId: string) => {
-      const edgesToParent = edges.filter((edge) => edge.toNodeId === parentId);
-      const childrenNodes = edgesToParent
-        .map((edge) => nodes.find((node) => node.id === edge.fromNodeId))
-        .filter((node): node is GeomNodeBackType => node !== undefined);
-      return childrenNodes;
+  const buildAST = react.useCallback(
+    (nodeId: string): ASTNode => {
+      const node = nodes.find((n) => n.id === nodeId);
+      if (!node) throw new Error(`Missing node ${nodeId}`);
+
+      const nodeDef = nodeDefinitions.find((nd) => nd.type === node.type);
+      if (!nodeDef) throw new Error(`Unknown node type ${node.type}`);
+
+      const inputs = edges
+        .filter((e) => e.toNodeId === nodeId)
+        .map((e) => ({
+          inputId: e.toSlotId,
+          ast: buildAST(e.fromNodeId),
+        }));
+
+      return {
+        type: node.type,
+        id: node.id,
+        inputs,
+        values: node.values ?? [],
+      };
     },
     [edges, nodes],
   );
 
-  const startNodeRuntime = useCallback(() => {
-    try {
-      const outputs = nodes.filter((node) => node.type === "output");
+  const evaluateAST = useCallback((node: ASTNode): NodeEvalResult => {
+    switch (node.type) {
+      case "number":
+        return { type: "number", value: parseFloat(node.values[0] ?? "0") };
 
-      const finalEdge = edges.find((edge) => edge.toNodeId === outputs[0].id);
-      if (!finalEdge) throw new Error("Nothing connected to output");
+      case "pointByXYZ": {
+        const x = evaluateAST(node.inputs[0].ast);
+        const y = evaluateAST(node.inputs[1].ast);
+        const z = evaluateAST(node.inputs[2].ast);
 
-      const prevNode = nodes.find((node) => node.id === finalEdge?.fromNodeId);
-      if (!prevNode) throw new Error("Could not find node");
+        if (x.type === "number" && y.type === "number" && z.type === "number") {
+          return {
+            type: "point",
+            value: new THREE.Vector3(x.value, y.value, z.value),
+          };
+        }
+        throw new Error("Invalid inputs to pointByXYZ");
+      }
 
-      const valueNodes = getChildrenNodes(prevNode.id);
-      if (!valueNodes || valueNodes.length === 0)
-        throw new Error("Wrong values");
+      case "edgeByPoints": {
+        const p1 = evaluateAST(node.inputs[0].ast);
+        const p2 = evaluateAST(node.inputs[1].ast);
 
-      const valueNodesFiltered = valueNodes.filter(
-        (node): node is GeomNodeBackType & { values: string } =>
-          node.values !== undefined,
-      );
+        if (p1.type === "point" && p2.type === "point") {
+          return { type: "edge", value: [p1.value, p2.value] };
+        }
+        throw new Error("Invalid inputs to edgeByPoints");
+      }
 
-      if (valueNodesFiltered.length !== 3) throw new Error("Not enough values");
+      case "output": {
+        const input = evaluateAST(node.inputs[0].ast);
 
-      const valuesParsed = valueNodesFiltered.flatMap((node) =>
-        node.values.map((val) => {
-          const value = parseFloat(val);
-          if (!isNaN(value)) {
-            return parseFloat(val);
-          } else {
-            return 0;
+        switch (input.type) {
+          case "point": {
+            const geom = new THREE.BufferGeometry().setFromPoints([
+              input.value,
+            ]);
+            const mat = new THREE.PointsMaterial({
+              color: 0x7aadfa,
+              size: 0.05,
+            });
+            const mesh = new THREE.Points(geom, mat);
+            return { type: "geometry", value: mesh };
           }
-        }),
-      );
+          case "edge": {
+            const geom = new THREE.BufferGeometry().setFromPoints(input.value);
+            const mat = new THREE.LineBasicMaterial({ color: 0xffffff });
+            const line = new THREE.Line(geom, mat);
+            return { type: "geometry", value: line };
+          }
+          default:
+            throw new Error("Unsupported input to output node");
+        }
+      }
 
-      const geom = new THREE.BufferGeometry();
+      default:
+        throw new Error(`Unsupported node type: ${node.type}`);
+    }
+  }, []);
 
-      //assuming that prevnodes output is point
-      const vert = new Float32Array(valuesParsed);
-      geom.setAttribute("position", new THREE.BufferAttribute(vert, 3));
-
-      const col = new THREE.Color(0x7aadfa);
-      const mat = new THREE.PointsMaterial({
-        color: col,
-        size: 0.05,
-        sizeAttenuation: true,
-      });
-
-      const mesh = new THREE.Points(geom, mat);
+  const startNodeRuntime = useCallback(() => {
+    const outputNode = nodes.find((n) => n.type === "output");
+    if (!outputNode) {
       meshGroup.clear();
-      meshGroup.add(mesh);
+      return;
+    }
+
+    const edge = edges.find((e) => e.toNodeId === outputNode.id);
+    if (!edge) {
+      meshGroup.clear();
+      return;
+    }
+
+    try {
+      const ast = buildAST(outputNode.id);
+      const result = evaluateAST(ast);
+
+      meshGroup.clear();
+      if (result.type === "geometry") {
+        console.log("im here");
+        meshGroup.add(result.value);
+      } else {
+        console.warn("Result is not a renderable geometry:", result);
+        meshGroup.clear();
+      }
     } catch (error) {
       meshGroup.clear();
     }
-  }, [edges, nodes, meshGroup, getChildrenNodes]);
+  }, [buildAST, edges, evaluateAST, meshGroup, nodes]);
 
   return startNodeRuntime;
 };
