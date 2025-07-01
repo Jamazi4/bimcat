@@ -1,6 +1,6 @@
 import { ASTNode, NodeEvalResult } from "./customHooks/useNodesRuntime";
 import * as THREE from "three";
-
+import { ConvexGeometry } from "three/addons/geometries/ConvexGeometry.js";
 type NodeInputType = {
   type: "slot" | "number" | "boolean";
   name: string;
@@ -55,7 +55,6 @@ export const nodeDefinitions: InodeDefinition[] = [
             color: 0x7aadfa,
             side: THREE.DoubleSide,
           });
-          input.value.computeVertexNormals();
           const mesh = new THREE.Mesh(input.value, mat);
 
           return { type: "geometry", value: mesh };
@@ -159,7 +158,7 @@ export const nodeDefinitions: InodeDefinition[] = [
         const geom = new THREE.BufferGeometry();
         geom.setIndex(indices);
         geom.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-        geom.computeVertexNormals();
+        // geom.computeVertexNormals();
 
         return { type: "mesh", value: geom };
       }
@@ -180,7 +179,9 @@ export const nodeDefinitions: InodeDefinition[] = [
 
       if (vector.type === "point" && initGeom.type === "mesh") {
         const baseGeom = initGeom.value;
-        if (!baseGeom.index) throw new Error("No base geometry indices");
+        if (!baseGeom.index) throw new Error("lost original geom");
+        baseGeom.computeVertexNormals();
+        baseGeom.computeBoundingBox();
 
         const position = baseGeom.attributes.position;
         const vertexCount = position.count;
@@ -193,46 +194,9 @@ export const nodeDefinitions: InodeDefinition[] = [
           vertices.push(v);
           extrudedVertices.push(v.clone().add(vector.value));
         }
-
         const allVerts = [...vertices, ...extrudedVertices];
-        const faces = [];
-        const baseIndices = baseGeom.index.array;
 
-        // Bottom cap (original winding)
-        for (let i = 0; i < baseIndices.length; i += 3) {
-          faces.push(baseIndices[i], baseIndices[i + 1], baseIndices[i + 2]);
-        }
-
-        // Top cap (reversed winding)
-        for (let i = 0; i < baseIndices.length; i += 3) {
-          faces.push(
-            baseIndices[i] + vertexCount,
-            baseIndices[i + 2] + vertexCount,
-            baseIndices[i + 1] + vertexCount,
-          );
-        }
-
-        // Side faces
-        for (let i = 0; i < vertexCount; i++) {
-          const next = (i + 1) % vertexCount;
-          faces.push(i, next, next + vertexCount);
-          faces.push(i, next + vertexCount, i + vertexCount);
-        }
-
-        const allPositions = new Float32Array(allVerts.length * 3);
-        allVerts.forEach((v, i) => {
-          allPositions[i * 3] = v.x;
-          allPositions[i * 3 + 1] = v.y;
-          allPositions[i * 3 + 2] = v.z;
-        });
-
-        const geom = new THREE.BufferGeometry();
-        geom.setAttribute(
-          "position",
-          new THREE.BufferAttribute(allPositions, 3),
-        );
-        geom.setIndex(faces);
-        geom.computeVertexNormals();
+        const geom = new ConvexGeometry(allVerts);
 
         return { type: "mesh", value: geom };
       }
