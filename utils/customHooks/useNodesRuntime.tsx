@@ -22,6 +22,7 @@ export type NodeEvalResult =
   | { type: "number"; value: number }
   | { type: "point"; value: THREE.Vector3 }
   | { type: "edge"; value: [THREE.Vector3, THREE.Vector3] }
+  | { type: "mesh"; value: THREE.BufferGeometry }
   | { type: "geometry"; value: THREE.Object3D };
 
 const useNodesRuntime = ({ nodes, edges, meshGroup }: useNodesRuntimeProps) => {
