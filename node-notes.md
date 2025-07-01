@@ -117,3 +117,9 @@ slightly wrong node slot local coords
 
 I think that before implementing the next nodes or logic I need to implement
 box selection and copy, delete, move selected
+
+### --30-06-2025--
+
+now selecting, deleting copying and pasting works.
+
+Additionally there's now new AST generation workflow to handle mesh generation

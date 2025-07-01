@@ -69,7 +69,11 @@ export const useNodeSystem = (
   const startNodeRuntime = useNodesRuntime({ nodes, edges, meshGroup });
 
   useEffect(() => {
-    startNodeRuntime();
+    try {
+      startNodeRuntime();
+    } catch (error) {
+      console.log(error);
+    }
   }, [startNodeRuntime]);
 
   const fetchNodes = useCallback(async (componentId: string) => {
