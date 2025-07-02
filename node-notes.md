@@ -123,3 +123,9 @@ box selection and copy, delete, move selected
 now selecting, deleting copying and pasting works.
 
 Additionally there's now new AST generation workflow to handle mesh generation
+
+### --01-07-2025--
+
+Now you can save geometry to the DB and open node editor from /browse
+
+button needs hiding for components without node project

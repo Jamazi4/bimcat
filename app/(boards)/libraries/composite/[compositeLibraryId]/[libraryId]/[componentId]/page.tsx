@@ -92,6 +92,7 @@ const Page = async ({
         isPublic={result.component.public}
       />
       <ComponentContentWrapper
+        componentId={componentId}
         componentGeometry={result.component.geometry}
         componentEditable={result.component.editable}
         componentPsets={result.component.psets}
