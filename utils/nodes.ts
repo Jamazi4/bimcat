@@ -158,7 +158,7 @@ export const nodeDefinitions: InodeDefinition[] = [
         const geom = new THREE.BufferGeometry();
         geom.setIndex(indices);
         geom.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-        // geom.computeVertexNormals();
+        geom.computeVertexNormals();
 
         return { type: "mesh", value: geom };
       }

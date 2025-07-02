@@ -26,7 +26,7 @@ export type NodeEvalResult =
   | { type: "geometry"; value: THREE.Object3D };
 
 const useNodesRuntime = ({ nodes, edges, meshGroup }: useNodesRuntimeProps) => {
-  const buildAST = react.useCallback(
+  const buildAST = useCallback(
     (nodeId: string): ASTNode => {
       const node = nodes.find((n) => n.id === nodeId);
       if (!node) throw new Error(`Missing node ${nodeId}`);
@@ -44,11 +44,13 @@ const useNodesRuntime = ({ nodes, edges, meshGroup }: useNodesRuntimeProps) => {
       return {
         type: node.type,
         id: node.id,
-        inputs,
+        inputs: [...inputs].sort((a, b) => a.inputId - b.inputId),
         values: node.values ?? [],
       };
     },
     [edges, nodes],
+    //to node runtime pass new type runtime nodes not containing x and y so it
+    //doesn't recalculate on nodes drag
   );
 
   const evaluateAST = useCallback((node: ASTNode): NodeEvalResult => {
