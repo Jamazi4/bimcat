@@ -36,6 +36,7 @@ const ComponentContent = async ({
         isPublic={component.public}
       />
       <ComponentContentWrapper
+        componentId={id}
         componentGeometry={component.geometry}
         componentEditable={component.editable}
         componentPsets={component.psets}

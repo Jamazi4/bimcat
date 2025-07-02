@@ -11,6 +11,7 @@ import { nodeDefinitions } from "../nodes";
 import { toast } from "sonner";
 import * as THREE from "three";
 import useNodesRuntime from "./useNodesRuntime";
+import { ComponentGeometry } from "../types";
 
 export type NodeSlot = {
   nodeId: string;
@@ -85,10 +86,25 @@ export const useNodeSystem = (
 
   const saveNodeProject = useCallback(
     async (componentId: string) => {
-      const response = await updateNodeProject(nodes, edges, componentId);
+      const geometry: ComponentGeometry[] = meshGroup.children
+        .filter((mesh): mesh is THREE.Mesh => mesh instanceof THREE.Mesh)
+        .map((mesh) => {
+          const bufferGeom = mesh.geometry;
+          console.log("there is geometry", bufferGeom);
+          return {
+            position: Array.from(bufferGeom.attributes.position.array),
+            indices: Array.from(bufferGeom.index?.array || []),
+          };
+        });
+      const response = await updateNodeProject(
+        nodes,
+        edges,
+        componentId,
+        geometry,
+      );
       toast(response.message);
     },
-    [nodes, edges],
+    [meshGroup.children, nodes, edges],
   );
 
   const changeNodeValue = useCallback(

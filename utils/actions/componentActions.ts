@@ -22,7 +22,7 @@ import {
   renderError,
   searchInsensitive,
 } from "../utilFunctions";
-import { BrowserSearchParamsType } from "../types";
+import { BrowserSearchParamsType, ComponentGeometry } from "../types";
 import { Prisma } from "@prisma/client";
 
 const addEditableToComponent = async <T extends { userId: string }>(
@@ -93,23 +93,73 @@ export const updateNodeProject = async (
   nodes: GeomNodeBackType[],
   edges: NodeEdgeType[],
   componentId: string,
+  geometry: ComponentGeometry[],
 ) => {
   try {
     const dbUser = await getDbUser();
     if (!dbUser) throw new Error("Could not find user");
     const component = await prisma.component.findUnique({
       where: { id: componentId },
-      select: { userId: true, nodeProjectId: true },
+      select: {
+        userId: true,
+        nodeProjectId: true,
+        id: true,
+        geometry: { select: { id: true } },
+      },
     });
+    if (!component) throw new Error("Could not find component");
 
     if (dbUser.id !== component?.userId || !component)
       throw new Error("No Component or unauthorized");
     if (!component.nodeProjectId)
       throw new Error("No node project for this component");
 
-    await prisma.nodeProject.update({
-      where: { id: component.nodeProjectId },
-      data: { nodes: nodes, edges: edges },
+    const oldGeomIds = component.geometry.map((geom) => geom.id);
+
+    await prisma.$transaction(async (tx) => {
+      const newGeometryRecords = await Promise.all(
+        geometry.map((g) => tx.componentGeometry.create({ data: g })),
+      );
+
+      await tx.component.update({
+        where: { id: componentId },
+        data: {
+          geometry: { set: [] },
+        },
+      });
+
+      const usage = await tx.component.findMany({
+        where: { id: { in: oldGeomIds } },
+        select: { geometry: { select: { id: true } } },
+      });
+
+      const usageMap: Record<string, number> = {};
+
+      for (const component of usage) {
+        for (const geo of component.geometry) {
+          usageMap[geo.id] = (usageMap[geo.id] || 0) + 1;
+        }
+      }
+
+      const geomsToDelete = oldGeomIds.filter((id) => usageMap[id] === 1);
+
+      await tx.component.update({
+        where: { id: componentId },
+        data: {
+          geometry: {
+            connect: newGeometryRecords.map((g) => ({ id: g.id })),
+          },
+        },
+      });
+
+      await tx.componentGeometry.deleteMany({
+        where: { id: { in: geomsToDelete } },
+      });
+
+      await tx.nodeProject.update({
+        where: { id: component.nodeProjectId! },
+        data: { nodes: nodes, edges: edges },
+      });
     });
 
     return { message: "Node project succesfully saved" };

@@ -5,15 +5,25 @@ import { Bounds, Grid, OrbitControls } from "@react-three/drei";
 
 import { ComponentGeometry } from "@/utils/types";
 import * as THREE from "three";
+import { Button } from "../ui/button";
+import { Workflow } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-const Renderer = ({ geometry }: { geometry: ComponentGeometry[] }) => {
+const Renderer = ({
+  geometry,
+  componentId,
+}: {
+  geometry: ComponentGeometry[];
+  componentId: string;
+}) => {
+  const router = useRouter();
   const geometries = geometry.map((geom) => {
     const bufferGeometry = new THREE.BufferGeometry();
 
     const position = new Float32Array(geom.position);
     bufferGeometry.setAttribute(
       "position",
-      new THREE.BufferAttribute(position, 3)
+      new THREE.BufferAttribute(position, 3),
     );
 
     bufferGeometry.setIndex(geom.indices);
@@ -21,8 +31,21 @@ const Renderer = ({ geometry }: { geometry: ComponentGeometry[] }) => {
     return bufferGeometry;
   });
 
+  const handleOpenEditor = () => {
+    router.replace(`/visualiser?component=${componentId}`);
+  };
+
   return (
     <div className="bg-background border rounded w-full aspect-square">
+      <Button
+        size="icon"
+        variant="default"
+        asChild
+        className="absolute m-2 z-50 cursor-pointer"
+        onClick={handleOpenEditor}
+      >
+        <Workflow className="p-1" />
+      </Button>
       <Canvas camera={{ position: [0, 1, 0] }} className=" h-1/2">
         <ambientLight intensity={2} />
         <directionalLight position={[-100, 100, -100]} intensity={0.5} />
@@ -43,7 +66,10 @@ const Renderer = ({ geometry }: { geometry: ComponentGeometry[] }) => {
               return (
                 <group key={index}>
                   <mesh geometry={geom} scale={1}>
-                    <meshStandardMaterial color="orange" />
+                    <meshStandardMaterial
+                      color="orange"
+                      side={THREE.DoubleSide}
+                    />
                   </mesh>
                   <mesh geometry={geom} scale={1}>
                     <meshStandardMaterial color="black" wireframe />

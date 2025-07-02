@@ -1,6 +1,6 @@
 "use client";
 
-import react, { useCallback } from "react";
+import { useCallback } from "react";
 import { GeomNodeBackType, NodeEdgeType } from "../schemas";
 import * as THREE from "three";
 import { nodeDefinitions } from "../nodes";
@@ -49,7 +49,7 @@ const useNodesRuntime = ({ nodes, edges, meshGroup }: useNodesRuntimeProps) => {
       };
     },
     [edges, nodes],
-    //to node runtime pass new type runtime nodes not containing x and y so it
+    //TODO:to node runtime pass new type runtime nodes not containing x and y so it
     //doesn't recalculate on nodes drag
   );
 

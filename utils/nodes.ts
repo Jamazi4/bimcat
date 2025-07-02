@@ -1,6 +1,7 @@
 import { ASTNode, NodeEvalResult } from "./customHooks/useNodesRuntime";
 import * as THREE from "three";
 import { ConvexGeometry } from "three/addons/geometries/ConvexGeometry.js";
+import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 type NodeInputType = {
   type: "slot" | "number" | "boolean";
   name: string;
@@ -56,6 +57,7 @@ export const nodeDefinitions: InodeDefinition[] = [
             side: THREE.DoubleSide,
           });
           const mesh = new THREE.Mesh(input.value, mat);
+          console.log(mesh);
 
           return { type: "geometry", value: mesh };
         }
@@ -197,8 +199,9 @@ export const nodeDefinitions: InodeDefinition[] = [
         const allVerts = [...vertices, ...extrudedVertices];
 
         const geom = new ConvexGeometry(allVerts);
+        const indexed = BufferGeometryUtils.mergeVertices(geom);
 
-        return { type: "mesh", value: geom };
+        return { type: "mesh", value: indexed };
       }
       throw new Error("Invalid inputs to extrude node");
     },

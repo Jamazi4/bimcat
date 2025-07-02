@@ -7,10 +7,12 @@ const ComponentContentWrapper = ({
   componentGeometry,
   componentEditable,
   componentPsets,
+  componentId,
 }: {
   componentGeometry: ComponentGeometry[];
   componentPsets: Pset[] | undefined;
   componentEditable: boolean;
+  componentId: string;
 }) => {
   return (
     <div>
@@ -20,7 +22,7 @@ const ComponentContentWrapper = ({
       >
         <div className="lg:col-span-4">
           {componentGeometry ? (
-            <Renderer geometry={componentGeometry} />
+            <Renderer geometry={componentGeometry} componentId={componentId} />
           ) : (
             <div>Please wait...</div>
           )}
