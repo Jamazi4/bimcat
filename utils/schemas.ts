@@ -105,6 +105,7 @@ export const componentWithGeometrySchema = z.object({
   public: z.boolean(),
   editable: z.boolean(),
   nodes: NodeProjectSchema.optional(),
+  nodeProjectId: z.nullable(z.string()),
 });
 
 export type componentWithGeometrySchemaType = z.infer<

@@ -8,11 +8,13 @@ const ComponentContentWrapper = ({
   componentEditable,
   componentPsets,
   componentId,
+  isUsingNodes,
 }: {
   componentGeometry: ComponentGeometry[];
   componentPsets: Pset[] | undefined;
   componentEditable: boolean;
   componentId: string;
+  isUsingNodes: boolean;
 }) => {
   return (
     <div>
@@ -22,7 +24,11 @@ const ComponentContentWrapper = ({
       >
         <div className="lg:col-span-4">
           {componentGeometry ? (
-            <Renderer geometry={componentGeometry} componentId={componentId} />
+            <Renderer
+              geometry={componentGeometry}
+              componentId={componentId}
+              isUsingNodes={isUsingNodes}
+            />
           ) : (
             <div>Please wait...</div>
           )}

@@ -12,9 +12,11 @@ import { useRouter } from "next/navigation";
 const Renderer = ({
   geometry,
   componentId,
+  isUsingNodes,
 }: {
   geometry: ComponentGeometry[];
   componentId: string;
+  isUsingNodes: boolean;
 }) => {
   const router = useRouter();
   const geometries = geometry.map((geom) => {
@@ -36,16 +38,18 @@ const Renderer = ({
   };
 
   return (
-    <div className="bg-background border rounded w-full aspect-square">
-      <Button
-        size="icon"
-        variant="default"
-        asChild
-        className="absolute m-2 z-50 cursor-pointer"
-        onClick={handleOpenEditor}
-      >
-        <Workflow className="p-1" />
-      </Button>
+    <div className="relative bg-background border rounded w-full aspect-square">
+      {isUsingNodes && (
+        <Button
+          size="icon"
+          variant="ghost"
+          asChild
+          className="absolute top-2 right-2 z-50 cursor-pointer "
+          onClick={handleOpenEditor}
+        >
+          <Workflow className="p-1" />
+        </Button>
+      )}
       <Canvas camera={{ position: [0, 1, 0] }} className=" h-1/2">
         <ambientLight intensity={2} />
         <directionalLight position={[-100, 100, -100]} intensity={0.5} />
