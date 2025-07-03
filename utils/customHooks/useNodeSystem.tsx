@@ -90,7 +90,6 @@ export const useNodeSystem = (
         .filter((mesh): mesh is THREE.Mesh => mesh instanceof THREE.Mesh)
         .map((mesh) => {
           const bufferGeom = mesh.geometry;
-          console.log("there is geometry", bufferGeom);
           return {
             position: Array.from(bufferGeom.attributes.position.array),
             indices: Array.from(bufferGeom.index?.array || []),

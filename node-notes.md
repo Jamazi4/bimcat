@@ -129,3 +129,18 @@ Additionally there's now new AST generation workflow to handle mesh generation
 Now you can save geometry to the DB and open node editor from /browse
 
 button needs hiding for components without node project
+
+### --03-07-2025--
+
+button now displays conditionally
+
+I need to create a new nodeOutputType which is shape - capped/noCapped
+
+now working on a circle
+
+Idea next is solidify and support for multiple elements
+at some point it would be awesome to create dynamic attributes and expose
+parameters to ui
+
+what I absolutely need to do is to cache the nodes, recompute only what changed
+and update only when values or edges change

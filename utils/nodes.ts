@@ -57,8 +57,6 @@ export const nodeDefinitions: InodeDefinition[] = [
             side: THREE.DoubleSide,
           });
           const mesh = new THREE.Mesh(input.value, mat);
-          console.log(mesh);
-
           return { type: "geometry", value: mesh };
         }
         default:
@@ -204,6 +202,26 @@ export const nodeDefinitions: InodeDefinition[] = [
         return { type: "mesh", value: indexed };
       }
       throw new Error("Invalid inputs to extrude node");
+    },
+  },
+  {
+    nodeTypeId: 7,
+    type: "circle",
+    inputs: [
+      { type: "slot", name: "number(radius)", id: 0 },
+      { type: "slot", name: "number(res)", id: 1 },
+    ],
+    outputs: [{ type: "mesh", name: "mesh", id: 2 }],
+    function: (node, evalFunction) => {
+      const radius = evalFunction(node.inputs[0].ast);
+      const segments = evalFunction(node.inputs[1].ast);
+
+      if (radius.type === "number" && segments.type === "number") {
+        const geom = new THREE.CircleGeometry(radius.value, segments.value);
+
+        return { type: "mesh", value: geom };
+      }
+      throw new Error("Invalid inputs to circle node");
     },
   },
 ];

@@ -529,7 +529,9 @@ above error fixed but not the one from prod - check it
 [x]handle user changing library to private and removing someone from guests.
 [x]handle removing library from favorites
 [x]sharing composite library
+[ ]group attribution in library
 [ ]Filter by - components and libraries
+[ ]filter by parametric
 [ ]starred amount and guests amount
 [ ]pagination in libraries view and component browser
 [ ]handle pset values and stats
