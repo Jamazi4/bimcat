@@ -4,9 +4,10 @@ import { useCallback } from "react";
 import { GeomNodeBackType, NodeEdgeType } from "../schemas";
 import * as THREE from "three";
 import { nodeDefinitions } from "../nodes";
+import { RuntimeNode } from "./useNodeSystem";
 
 interface useNodesRuntimeProps {
-  nodes: GeomNodeBackType[];
+  nodes: RuntimeNode[];
   edges: NodeEdgeType[];
   meshGroup: THREE.Group;
 }
@@ -34,6 +35,7 @@ const useNodesRuntime = ({ nodes, edges, meshGroup }: useNodesRuntimeProps) => {
       const nodeDef = nodeDefinitions.find((nd) => nd.type === node.type);
       if (!nodeDef) throw new Error(`Unknown node type ${node.type}`);
 
+      console.log("building ast");
       const inputs = edges
         .filter((e) => e.toNodeId === nodeId)
         .map((e) => ({
@@ -55,6 +57,7 @@ const useNodesRuntime = ({ nodes, edges, meshGroup }: useNodesRuntimeProps) => {
 
   const evaluateAST = useCallback((node: ASTNode): NodeEvalResult => {
     const nodeDef = nodeDefinitions.find((def) => def.type === node.type);
+    console.log("evaluation");
     try {
       if (nodeDef?.function && nodeDef) {
         return nodeDef.function(node, evaluateAST);
