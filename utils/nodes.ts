@@ -1,30 +1,7 @@
-import { ASTNode, NodeEvalResult } from "./customHooks/useNodesRuntime";
 import * as THREE from "three";
 import { ConvexGeometry } from "three/addons/geometries/ConvexGeometry.js";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
-type NodeInputType = {
-  type: "slot" | "number" | "boolean";
-  name: string;
-  id: number;
-  value?: string;
-};
-
-type NodeOutputType = {
-  type: "mesh" | "point" | "number" | "boolean";
-  name: string;
-  id: number;
-};
-
-interface InodeDefinition {
-  nodeTypeId: number;
-  type: string;
-  inputs: NodeInputType[];
-  outputs: NodeOutputType[];
-  function?: (
-    node: ASTNode,
-    evalFunction: (node: ASTNode) => NodeEvalResult,
-  ) => NodeEvalResult;
-}
+import { InodeDefinition } from "./nodeTypes";
 
 export const nodeDefinitions: InodeDefinition[] = [
   {
@@ -36,7 +13,7 @@ export const nodeDefinitions: InodeDefinition[] = [
       const input = evalFunction(node.inputs[0].ast);
 
       switch (input.type) {
-        case "point": {
+        case "vector": {
           const geom = new THREE.BufferGeometry().setFromPoints([input.value]);
           const mat = new THREE.PointsMaterial({
             color: 0x7aadfa,
@@ -45,7 +22,7 @@ export const nodeDefinitions: InodeDefinition[] = [
           const mesh = new THREE.Points(geom, mat);
           return { type: "geometry", value: mesh };
         }
-        case "edge": {
+        case "linestring": {
           const geom = new THREE.BufferGeometry().setFromPoints(input.value);
           const mat = new THREE.LineBasicMaterial({ color: 0x7aadfa });
           const line = new THREE.Line(geom, mat);
@@ -75,13 +52,13 @@ export const nodeDefinitions: InodeDefinition[] = [
   },
   {
     nodeTypeId: 3,
-    type: "pointByXYZ",
+    type: "vector",
     inputs: [
-      { type: "slot", name: "number(X)", id: 0 },
-      { type: "slot", name: "number(Y)", id: 1 },
-      { type: "slot", name: "number(Z)", id: 2 },
+      { type: "slot", name: "X", id: 0 },
+      { type: "slot", name: "Y", id: 1 },
+      { type: "slot", name: "Z", id: 2 },
     ],
-    outputs: [{ type: "point", name: "point", id: 3 }],
+    outputs: [{ type: "vector", name: "vector", id: 3 }],
     function: (node, evalFunction) => {
       const x = evalFunction(node.inputs[0].ast);
       const y = evalFunction(node.inputs[1].ast);
@@ -89,7 +66,7 @@ export const nodeDefinitions: InodeDefinition[] = [
 
       if (x.type === "number" && y.type === "number" && z.type === "number") {
         return {
-          type: "point",
+          type: "vector",
           value: new THREE.Vector3(x.value, y.value, z.value),
         };
       }
@@ -103,13 +80,13 @@ export const nodeDefinitions: InodeDefinition[] = [
       { type: "slot", name: "Point start", id: 0 },
       { type: "slot", name: "Point end", id: 1 },
     ],
-    outputs: [{ type: "mesh", name: "edge", id: 2 }],
+    outputs: [{ type: "mesh", name: "linestring", id: 2 }],
     function: (node, evalFunction) => {
       const p1 = evalFunction(node.inputs[0].ast);
       const p2 = evalFunction(node.inputs[1].ast);
 
-      if (p1.type === "point" && p2.type === "point") {
-        return { type: "edge", value: [p1.value, p2.value] };
+      if (p1.type === "vector" && p2.type === "vector") {
+        return { type: "linestring", value: [p1.value, p2.value] };
       }
       throw new Error("Invalid inputs to edgeByPoints");
     },
@@ -118,9 +95,9 @@ export const nodeDefinitions: InodeDefinition[] = [
     nodeTypeId: 5,
     type: "plane",
     inputs: [
-      { type: "slot", name: "point", id: 0 },
-      { type: "slot", name: "number(width)", id: 1 },
-      { type: "slot", name: "number(height)", id: 2 },
+      { type: "slot", name: "position", id: 0 },
+      { type: "slot", name: "width", id: 1 },
+      { type: "slot", name: "height", id: 2 },
     ],
     outputs: [{ type: "mesh", name: "mesh", id: 3 }],
     function: (node, evalFunction) => {
@@ -129,7 +106,7 @@ export const nodeDefinitions: InodeDefinition[] = [
       const dim2 = evalFunction(node.inputs[2].ast);
 
       if (
-        p.type === "point" &&
+        p.type === "vector" &&
         dim1.type === "number" &&
         dim2.type === "number"
       ) {
@@ -169,15 +146,15 @@ export const nodeDefinitions: InodeDefinition[] = [
     nodeTypeId: 6,
     type: "extrude",
     inputs: [
-      { type: "slot", name: "point(vector)", id: 0 },
-      { type: "slot", name: "mesh(plane)", id: 1 },
+      { type: "slot", name: "vector", id: 0 },
+      { type: "slot", name: "mesh", id: 1 },
     ],
     outputs: [{ type: "mesh", name: "mesh", id: 2 }],
     function: (node, evalFunction) => {
       const vector = evalFunction(node.inputs[0].ast);
       const initGeom = evalFunction(node.inputs[1].ast);
 
-      if (vector.type === "point" && initGeom.type === "mesh") {
+      if (vector.type === "vector" && initGeom.type === "mesh") {
         const baseGeom = initGeom.value;
         if (!baseGeom.index) throw new Error("lost original geom");
         baseGeom.computeVertexNormals();
@@ -208,8 +185,8 @@ export const nodeDefinitions: InodeDefinition[] = [
     nodeTypeId: 7,
     type: "circle",
     inputs: [
-      { type: "slot", name: "number(radius)", id: 0 },
-      { type: "slot", name: "number(res)", id: 1 },
+      { type: "slot", name: "radius", id: 0 },
+      { type: "slot", name: "resolution", id: 1 },
     ],
     outputs: [{ type: "mesh", name: "mesh", id: 2 }],
     function: (node, evalFunction) => {

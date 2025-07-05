@@ -1,4 +1,5 @@
 import { z, ZodSchema } from "zod";
+import { GeomNodeSchemaBack, NodeEdgeSchema } from "./nodeTypes";
 
 export function validateWithZodSchema<T>(
   schema: ZodSchema<T>,
@@ -50,40 +51,6 @@ export const componentSchema = z.object({
 });
 
 export const componentArraySchema = z.array(componentSchema);
-
-export const GeomNodeSchemaFront = z.object({
-  id: z.string(),
-  type: z.string(),
-  x: z.number(),
-  y: z.number(),
-  width: z.number(),
-  height: z.number(),
-  text: z.string(),
-  inputs: z.array(z.string()),
-  outputs: z.array(z.string()),
-});
-
-export type GeomNodeFrontType = z.infer<typeof GeomNodeSchemaFront>;
-
-export const GeomNodeSchemaBack = z.object({
-  id: z.string(),
-  type: z.string(),
-  x: z.number(),
-  y: z.number(),
-  values: z.optional(z.array(z.string())),
-});
-
-export type GeomNodeBackType = z.infer<typeof GeomNodeSchemaBack>;
-
-export const NodeEdgeSchema = z.object({
-  id: z.string(),
-  fromNodeId: z.string(),
-  fromSlotId: z.number(),
-  toNodeId: z.string(),
-  toSlotId: z.number(),
-});
-
-export type NodeEdgeType = z.infer<typeof NodeEdgeSchema>;
 
 export const NodeProjectSchema = z.object({
   id: z.string(),

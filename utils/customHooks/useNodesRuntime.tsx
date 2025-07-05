@@ -1,35 +1,17 @@
 "use client";
 
 import { useCallback } from "react";
-import { GeomNodeBackType, NodeEdgeType } from "../schemas";
-import * as THREE from "three";
 import { nodeDefinitions } from "../nodes";
-import { RuntimeNode } from "./useNodeSystem";
+import { ASTNode, NodeEvalResult, useNodesRuntimeProps } from "../nodeTypes";
 
-interface useNodesRuntimeProps {
-  nodes: RuntimeNode[];
-  edges: NodeEdgeType[];
-  meshGroup: THREE.Group;
-}
-
-export type ASTNode = {
-  type: string;
-  id: string;
-  inputs: { inputId: number; ast: ASTNode }[];
-  values: string[];
-};
-
-export type NodeEvalResult =
-  | { type: "number"; value: number }
-  | { type: "point"; value: THREE.Vector3 }
-  | { type: "edge"; value: [THREE.Vector3, THREE.Vector3] }
-  | { type: "mesh"; value: THREE.BufferGeometry }
-  | { type: "geometry"; value: THREE.Object3D };
-
-const useNodesRuntime = ({ nodes, edges, meshGroup }: useNodesRuntimeProps) => {
+const useNodesRuntime = ({
+  runtimeNodes,
+  edges,
+  meshGroup,
+}: useNodesRuntimeProps) => {
   const buildAST = useCallback(
     (nodeId: string): ASTNode => {
-      const node = nodes.find((n) => n.id === nodeId);
+      const node = runtimeNodes.find((n) => n.id === nodeId);
       if (!node) throw new Error(`Missing node ${nodeId}`);
 
       const nodeDef = nodeDefinitions.find((nd) => nd.type === node.type);
@@ -50,9 +32,7 @@ const useNodesRuntime = ({ nodes, edges, meshGroup }: useNodesRuntimeProps) => {
         values: node.values ?? [],
       };
     },
-    [edges, nodes],
-    //TODO:to node runtime pass new type runtime nodes not containing x and y so it
-    //doesn't recalculate on nodes drag
+    [edges, runtimeNodes],
   );
 
   const evaluateAST = useCallback((node: ASTNode): NodeEvalResult => {
@@ -70,7 +50,7 @@ const useNodesRuntime = ({ nodes, edges, meshGroup }: useNodesRuntimeProps) => {
   }, []);
 
   const startNodeRuntime = useCallback(() => {
-    const outputNode = nodes.find((n) => n.type === "output");
+    const outputNode = runtimeNodes.find((n) => n.type === "output");
     if (!outputNode) {
       meshGroup.clear();
       return;
@@ -97,7 +77,7 @@ const useNodesRuntime = ({ nodes, edges, meshGroup }: useNodesRuntimeProps) => {
       meshGroup.clear();
       throw error;
     }
-  }, [buildAST, edges, evaluateAST, meshGroup, nodes]);
+  }, [buildAST, edges, evaluateAST, meshGroup, runtimeNodes]);
 
   return startNodeRuntime;
 };

@@ -144,3 +144,32 @@ parameters to ui
 
 what I absolutely need to do is to cache the nodes, recompute only what changed
 and update only when values or edges change
+
+### --05-07-2025--
+
+so far - managed to stop recalculating them each time a node moves.
+
+the problems to solve can be divided into two categories:
+
+- UI
+- Runtime
+
+Runtime:
+
+- multiple outputs
+- cache node outputs
+- capped/uncapped shapes, solidify, get normal,
+
+UI:
+
+- highlight wrong links
+- icons/tooltips for input types
+- shift + click to select
+- categories for add node menu
+- lock node menu buttons
+
+additionally some tools that might need adding
+
+- measure tool
+- expose var (so it's adjustable in the browser)
+- lock editing nodes if it's not author

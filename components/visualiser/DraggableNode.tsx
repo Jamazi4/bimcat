@@ -1,7 +1,6 @@
 "use client";
 
 import { nodeDefinitions } from "@/utils/nodes";
-import { GeomNodeBackType } from "@/utils/schemas";
 import { CircleDot } from "lucide-react";
 import { Input } from "../ui/input";
 import {
@@ -12,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { NodeSlot } from "@/utils/customHooks/useNodeSystem";
+import { GeomNodeBackType, NodeSlot } from "@/utils/nodeTypes";
 
 interface GeometryNodeProps {
   selected: boolean;

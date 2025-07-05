@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { GeomNodeBackType, NodeEdgeType } from "../schemas";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   fetchNodeProject,
   updateNodeProject,
@@ -13,21 +12,7 @@ import * as THREE from "three";
 import useNodesRuntime from "./useNodesRuntime";
 import { ComponentGeometry } from "../types";
 import useRuntimeNodes from "./useRuntimeNodes";
-
-export type NodeSlot = {
-  nodeId: string;
-  slotId: number;
-  slotType: "input" | "output";
-  el: SVGSVGElement;
-  relativeX: number;
-  relativeY: number;
-};
-
-export type RuntimeNode = {
-  id: string;
-  type: string;
-  values: string[];
-};
+import { GeomNodeBackType, NodeEdgeType, NodeSlot } from "../nodeTypes";
 
 export const useNodeSystem = (
   nodeNavigation: boolean,
@@ -77,7 +62,7 @@ export const useNodeSystem = (
   const runtimeNodes = useRuntimeNodes(nodes);
 
   const startNodeRuntime = useNodesRuntime({
-    nodes: runtimeNodes,
+    runtimeNodes,
     edges,
     meshGroup,
   });
