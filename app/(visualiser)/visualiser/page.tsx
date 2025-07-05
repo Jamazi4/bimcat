@@ -88,15 +88,11 @@ const Page = () => {
           enableZoom={true}
           makeDefault
         />
-        <GizmoHelper
-          alignment="bottom-right" // widget alignment within scene
-          margin={[80, 80]} // widget margins (X, Y)
-        >
+        <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
           <GizmoViewport
             axisColors={["red", "green", "blue"]}
             labelColor="black"
           />
-          {/* alternative: <GizmoViewcube /> */}
         </GizmoHelper>
       </Canvas>
       {nodeMode && (

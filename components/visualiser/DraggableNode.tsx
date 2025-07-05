@@ -13,7 +13,7 @@ import {
 } from "react";
 import { GeomNodeBackType, NodeSlot } from "@/utils/nodeTypes";
 
-interface GeometryNodeProps {
+interface DraggableNodeProps {
   selected: boolean;
   node: GeomNodeBackType;
   startDraggingNode: (nodeId: string, e: React.MouseEvent) => void;
@@ -36,7 +36,7 @@ const DraggableNode = ({
   nodeNavigation,
   viewTransform,
   setNodeDivs,
-}: GeometryNodeProps) => {
+}: DraggableNodeProps) => {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const nodeRef = useRef<HTMLDivElement>(null);
   const changeThisNodeValues = changeNodeValue.bind(null, node.id);

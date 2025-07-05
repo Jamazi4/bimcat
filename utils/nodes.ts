@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import { ConvexGeometry } from "three/addons/geometries/ConvexGeometry.js";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
-import { InodeDefinition } from "./nodeTypes";
+import { nodeDefinition } from "./nodeTypes";
 
-export const nodeDefinitions: InodeDefinition[] = [
+export const nodeDefinitions: nodeDefinition[] = [
   {
     nodeTypeId: 1,
     type: "output",

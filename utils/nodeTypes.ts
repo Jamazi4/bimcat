@@ -68,7 +68,7 @@ export type NodeOutputType = {
   id: number;
 };
 
-export interface InodeDefinition {
+export interface nodeDefinition {
   nodeTypeId: number;
   type: string;
   inputs: NodeInputType[];
