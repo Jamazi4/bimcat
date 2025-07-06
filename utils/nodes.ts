@@ -8,14 +8,14 @@ export const defaultNumber: ASTNode = {
   type: "number",
   id: createNodeId(),
   inputs: [],
-  values: ["0"],
+  values: { "0": 0 },
 };
 
 export const defaultBoolean: ASTNode = {
   type: "boolean",
   id: createNodeId(),
   inputs: [],
-  values: ["true"],
+  values: { "0": true },
 };
 
 export const defaultVector: ASTNode = {
@@ -35,7 +35,7 @@ export const defaultVector: ASTNode = {
       ast: defaultNumber,
     },
   ],
-  values: [],
+  values: {},
 };
 
 export const nodeDefinitions: nodeDefinition[] = [
@@ -83,10 +83,10 @@ export const nodeDefinitions: nodeDefinition[] = [
     nodeDefId: 2,
     category: "variable",
     type: "number",
-    inputs: [{ type: "number", id: 0, value: "0", name: "number" }],
+    inputs: [{ type: "number", id: 0, value: 0, name: "number" }],
     outputs: [{ type: "number", name: "number", id: 1 }],
     function: (node, _) => {
-      return { type: "number", value: parseFloat(node.values[0] ?? "0") };
+      return { type: "number", value: (node.values["0"] as number) ?? 0 };
     },
   },
   {
@@ -149,9 +149,9 @@ export const nodeDefinitions: nodeDefinition[] = [
       {
         type: "boolean",
         name: "closed",
+        value: false,
         id: 3,
         slotValueType: "boolean",
-        defaultValue: defaultBoolean,
       },
     ],
     outputs: [{ type: "mesh", name: "mesh", id: 4 }],
@@ -159,19 +159,16 @@ export const nodeDefinitions: nodeDefinition[] = [
       const dim1 = evalFunction(node.inputs[0].ast);
       const dim2 = evalFunction(node.inputs[1].ast);
       const p = evalFunction(node.inputs[2].ast);
-      const closed = evalFunction(node.inputs[3].ast);
+      // const closed = node.values["3"];
 
       if (
         p.type === "vector" &&
         dim1.type === "number" &&
-        dim2.type === "number" &&
-        closed.type === "boolean"
+        dim2.type === "number"
       ) {
         const x = p.value.x;
         const y = p.value.y;
         const z = p.value.z;
-        const test = closed.value;
-        console.log(test);
 
         const w = dim1.value;
         const h = dim2.value;
@@ -266,12 +263,12 @@ export const nodeDefinitions: nodeDefinition[] = [
     nodeDefId: 8,
     category: "variable",
     type: "boolean",
-    inputs: [{ type: "boolean", name: "boolean", id: 0, value: "false" }],
+    inputs: [{ type: "boolean", name: "boolean", id: 0, value: false }],
     outputs: [{ type: "boolean", name: "boolean", id: 1 }],
     function: (node, _) => {
       return {
         type: "boolean",
-        value: node.values[0] === "true" ? true : false,
+        value: node.values["0"] as boolean,
       };
     },
   },

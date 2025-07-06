@@ -20,7 +20,7 @@ export const GeomNodeSchemaBack = z.object({
   type: z.string(),
   x: z.number(),
   y: z.number(),
-  values: z.optional(z.array(z.string())),
+  values: z.optional(z.record(z.union([z.boolean(), z.number(), z.string()]))),
 });
 
 export type GeomNodeBackType = z.infer<typeof GeomNodeSchemaBack>;
@@ -45,7 +45,7 @@ export type ASTNode = {
   type: string;
   id: string;
   inputs: { inputId: number; ast: ASTNode }[];
-  values: string[];
+  values: NodeValues;
 };
 
 export type NodeEvalResult =
@@ -65,12 +65,12 @@ export type SlotValues =
   | "geometry";
 
 export type NodeInputType = {
-  type: "slot" | "number" | "boolean";
+  type: "slot" | "number" | "boolean" | "string";
   slotValueType?: SlotValues;
   defaultValue?: ASTNode;
   name: string;
   id: number;
-  value?: string;
+  value?: number | boolean | string;
 };
 
 export type NodeOutputType = {
@@ -108,10 +108,12 @@ export type NodeSlot = {
   relativeY: number;
 };
 
+export type NodeValues = Record<string, string | number | boolean>;
+
 export type RuntimeNode = {
   id: string;
   type: string;
-  values: string[];
+  values: NodeValues;
 };
 
 export const fillColorClasses = {

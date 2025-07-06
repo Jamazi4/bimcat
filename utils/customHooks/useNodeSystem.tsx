@@ -12,7 +12,12 @@ import * as THREE from "three";
 import useNodesRuntime from "./useNodesRuntime";
 import { ComponentGeometry } from "../types";
 import useRuntimeNodes from "./useRuntimeNodes";
-import { GeomNodeBackType, NodeEdgeType, NodeSlot } from "../nodeTypes";
+import {
+  GeomNodeBackType,
+  NodeEdgeType,
+  NodeSlot,
+  NodeValues,
+} from "../nodeTypes";
 
 export const useNodeSystem = (
   nodeNavigation: boolean,
@@ -164,11 +169,12 @@ export const useNodeSystem = (
   );
 
   const changeNodeValue = useCallback(
-    (nodeId: string, inputId: number, value: string) => {
+    (nodeId: string, inputId: number, value: string | number | boolean) => {
       const node = nodesRef.current.find((node) => node.id === nodeId);
+      if (!node) return;
       if (!node?.values) return;
 
-      const newValues = [...node.values];
+      const newValues = { ...node.values };
       newValues[inputId] = value;
 
       setNodes((prevNodes) =>
@@ -205,6 +211,7 @@ export const useNodeSystem = (
       const nodeDefinition = nodeDefinitions.find(
         (node) => node.nodeDefId === nodeDefId,
       );
+      if (!nodeDefinition) return;
       const nodeType = nodeDefinition?.type;
       const relInitPos = 200;
       const worldPoint = screenToWorld(relInitPos, relInitPos);
@@ -212,13 +219,13 @@ export const useNodeSystem = (
       const nodeX = worldPoint.x + Math.floor(Math.random() * randFactor);
       const nodeY = worldPoint.y + Math.floor(Math.random() * randFactor);
 
-      const initValues = nodeDefinition?.inputs
-        .filter(
-          (input): input is typeof input & { value: string } =>
-            typeof input.value === "string",
-        )
-        .map((input) => input.value);
+      const initValues: NodeValues = {};
 
+      nodeDefinition?.inputs.forEach((input) => {
+        if (input.type !== "slot" || input.value) {
+          initValues[input.id] = input.value!;
+        }
+      });
       const newBackNode: GeomNodeBackType = {
         id: nodeId,
         type: nodeType!,
@@ -258,7 +265,7 @@ export const useNodeSystem = (
     const newNodes = copiedNodesRef.current.map((n) => {
       const newId = createNodeId();
       idMap[n.id] = newId;
-      const newValues = n.values?.map((val) => val);
+      const newValues = { ...n.values };
 
       return {
         ...n,

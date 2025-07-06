@@ -25,7 +25,11 @@ interface DraggableNodeProps {
   selected: boolean;
   node: GeomNodeBackType;
   startDraggingNode: (nodeId: string, e: React.MouseEvent) => void;
-  changeNodeValue: (nodeId: string, inputId: number, value: string) => void;
+  changeNodeValue: (
+    nodeId: string,
+    inputId: number,
+    value: number | boolean | string,
+  ) => void;
   registerNodeSlot: (slotData: NodeSlot) => void;
   startConnecting: (nodeId: string, slotId: number) => void;
   finishConnecting: (nodeId: string, slotId: number, clear?: boolean) => void;
@@ -101,7 +105,7 @@ const DraggableNode = memo(function DraggableNode({
               return (
                 <InputNumber
                   key={input.id}
-                  value={node.values[input.id]}
+                  value={node.values[input.id] as number}
                   changeThisValue={changeThisValue}
                 />
               );
@@ -112,7 +116,7 @@ const DraggableNode = memo(function DraggableNode({
                 <InputBoolean
                   name={input.name}
                   key={input.id}
-                  value={node.values[input.id]}
+                  value={node.values[input.id] as boolean}
                   changeThisValue={changeThisValue}
                 />
               );
@@ -175,14 +179,14 @@ const InputBoolean = ({
   changeThisValue,
 }: {
   name: string;
-  value: string;
-  changeThisValue: (value: string) => void;
+  value: boolean;
+  changeThisValue: (value: boolean) => void;
 }) => {
-  const [curVal, setCurVal] = useState(value === "true");
+  const [curVal, setCurVal] = useState(value);
 
   const changeValue = (e: boolean) => {
     setCurVal(e);
-    changeThisValue(e === true ? "true" : "false");
+    changeThisValue(e);
   };
 
   const displayName = name === "boolean" ? `${value}` : `${name}`;
@@ -199,10 +203,10 @@ const InputNumber = ({
   value,
   changeThisValue,
 }: {
-  value: string;
-  changeThisValue: (value: string) => void;
+  value: number;
+  changeThisValue: (value: number) => void;
 }) => {
-  const [curVal, setCurVal] = useState(value);
+  const [curVal, setCurVal] = useState(String(value));
   const [isValidValue, setIsValidValue] = useState(true);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -213,7 +217,7 @@ const InputNumber = ({
     setCurVal(val);
     setIsValidValue(valid);
     if (valid) {
-      changeThisValue(val);
+      changeThisValue(num);
     }
   };
   return (

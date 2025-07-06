@@ -35,25 +35,28 @@ const useNodesRuntime = ({
       const nodeDef = nodeDefinitions.find((nd) => nd.type === node.type);
       if (!nodeDef) throw new Error(`Unknown node type ${node.type}`);
 
-      const inputs = nodeDef.inputs.map((inputDef) => {
-        const edge = edges.find(
-          (edge) => edge.toNodeId === nodeId && edge.toSlotId === inputDef.id,
-        );
+      const inputs = nodeDef.inputs
+        .filter((inputDef) => inputDef.type === "slot")
+        .map((inputDef) => {
+          const edge = edges.find(
+            (edge) => edge.toNodeId === nodeId && edge.toSlotId === inputDef.id,
+          );
 
-        if (!inputDef.defaultValue && !edge && inputDef.type === "slot")
-          throw new Error(`${node.type} needs ${inputDef.name}`);
+          if (!inputDef.defaultValue && !edge) {
+            throw new Error(`${node.type} needs ${inputDef.name}`);
+          }
 
-        return {
-          inputId: inputDef.id,
-          ast: edge ? buildAST(edge.fromNodeId) : inputDef.defaultValue!,
-        };
-      });
+          return {
+            inputId: inputDef.id,
+            ast: edge ? buildAST(edge.fromNodeId) : inputDef.defaultValue!,
+          };
+        });
 
       return {
         type: node.type,
         id: node.id,
         inputs,
-        values: node.values ?? [],
+        values: node.values ?? {},
       };
     },
     [edges, runtimeNodes],

@@ -155,20 +155,9 @@ export const updateNodeProject = async (
         where: { id: { in: geomsToDelete } },
       });
 
-      const nodesClean = nodes.map((n) => {
-        if (n.values) {
-          return {
-            ...n,
-            values: n.values.map((v) => (v === undefined ? "0" : v)),
-          };
-        } else {
-          return n;
-        }
-      });
-
       await tx.nodeProject.update({
         where: { id: component.nodeProjectId! },
-        data: { nodes: nodesClean, edges: edges },
+        data: { nodes: nodes, edges: edges },
       });
     });
 
