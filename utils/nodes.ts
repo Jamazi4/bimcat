@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { ConvexGeometry } from "three/addons/geometries/ConvexGeometry.js";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
-import { ASTNode, nodeDefinition, NodeEvalResult } from "./nodeTypes";
+import { ASTNode, nodeDefinition } from "./nodeTypes";
 import { createNodeId } from "./utilFunctions";
 
 export const defaultNumber: ASTNode = {
@@ -63,8 +63,8 @@ export const nodeDefinitions: nodeDefinition[] = [
         case "linestring": {
           const geom = new THREE.BufferGeometry().setFromPoints(input.value);
           const mat = new THREE.LineBasicMaterial({ color: 0x7aadfa });
-          const line = new THREE.Line(geom, mat);
-          return { type: "geometry", value: line };
+          const linestring = new THREE.Line(geom, mat);
+          return { type: "geometry", value: linestring };
         }
         case "mesh": {
           const mat = new THREE.MeshStandardMaterial({
@@ -137,33 +137,41 @@ export const nodeDefinitions: nodeDefinition[] = [
     category: "generator",
     type: "plane",
     inputs: [
+      { type: "slot", name: "width", id: 0, slotValueType: "number" },
+      { type: "slot", name: "height", id: 1, slotValueType: "number" },
       {
         type: "slot",
         name: "position",
-        id: 0,
+        id: 2,
         slotValueType: "vector",
         defaultValue: defaultVector,
       },
-      { type: "slot", name: "width", id: 1, slotValueType: "number" },
-      { type: "slot", name: "height", id: 2, slotValueType: "number" },
+      {
+        type: "boolean",
+        name: "closed",
+        id: 3,
+        slotValueType: "boolean",
+        defaultValue: defaultBoolean,
+      },
     ],
-    outputs: [{ type: "mesh", name: "mesh", id: 3 }],
+    outputs: [{ type: "mesh", name: "mesh", id: 4 }],
     function: (node, evalFunction) => {
-      const p = evalFunction(node.inputs[0].ast);
-      const dim1 = evalFunction(node.inputs[1].ast);
-      const dim2 = evalFunction(node.inputs[2].ast);
-
-      console.log(node.inputs[0]);
-      console.log(p);
+      const dim1 = evalFunction(node.inputs[0].ast);
+      const dim2 = evalFunction(node.inputs[1].ast);
+      const p = evalFunction(node.inputs[2].ast);
+      const closed = evalFunction(node.inputs[3].ast);
 
       if (
         p.type === "vector" &&
         dim1.type === "number" &&
-        dim2.type === "number"
+        dim2.type === "number" &&
+        closed.type === "boolean"
       ) {
         const x = p.value.x;
         const y = p.value.y;
         const z = p.value.z;
+        const test = closed.value;
+        console.log(test);
 
         const w = dim1.value;
         const h = dim2.value;

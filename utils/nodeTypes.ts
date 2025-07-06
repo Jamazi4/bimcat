@@ -114,11 +114,20 @@ export type RuntimeNode = {
   values: string[];
 };
 
-export const textColorClasses = {
+export const fillColorClasses = {
   number: "fill-number-input",
   boolean: "fill-boolean-input",
   vector: "fill-vector-input",
   linestring: "fill-linestring-input",
   mesh: "fill-mesh-input",
   geometry: "fill-geometry-input",
+};
+
+export const backgroundColorClasses = {
+  number: "bg-number-input",
+  boolean: "bg-boolean-input",
+  vector: "bg-vector-input",
+  linestring: "bg-linestring-input",
+  mesh: "bg-mesh-input",
+  geometry: "bg-geometry-input",
 };

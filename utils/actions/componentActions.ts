@@ -10,9 +10,7 @@ import {
   PsetActionsComponentSchema,
   PsetArraySchema,
   componentArraySchema,
-  GeomNodeBackType,
   NodeProjectSchema,
-  NodeEdgeType,
 } from "../schemas";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getDbUser } from "./globalActions";
@@ -24,6 +22,7 @@ import {
 } from "../utilFunctions";
 import { BrowserSearchParamsType, ComponentGeometry } from "../types";
 import { Prisma } from "@prisma/client";
+import { GeomNodeBackType, NodeEdgeType } from "../nodeTypes";
 
 const addEditableToComponent = async <T extends { userId: string }>(
   component: T,
@@ -156,9 +155,20 @@ export const updateNodeProject = async (
         where: { id: { in: geomsToDelete } },
       });
 
+      const nodesClean = nodes.map((n) => {
+        if (n.values) {
+          return {
+            ...n,
+            values: n.values.map((v) => (v === undefined ? "0" : v)),
+          };
+        } else {
+          return n;
+        }
+      });
+
       await tx.nodeProject.update({
         where: { id: component.nodeProjectId! },
-        data: { nodes: nodes, edges: edges },
+        data: { nodes: nodesClean, edges: edges },
       });
     });
 

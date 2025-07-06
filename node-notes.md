@@ -153,8 +153,14 @@ also added support for multiple output nodes
 ### --06-07-2025--
 
 color coded inputs, categorized the addNode menu
+gemini optimized rendering the draggable node
+boolean switches now supported
+now I can do default values for nodes
 
-gemini optimized rendering the
+two main challanges now are:
+
+- adding more inputs to things like linestring
+- switching or conditionally disabling inputs - extrude for example
 
 ## General
 
@@ -169,9 +175,7 @@ UI:
 
 - highlight wrong links
 - shift + click to select
-- categories for add node menu
 - lock node menu buttons
-- add boolean input - switch
 
 additionally some tools that might need adding
 
@@ -184,3 +188,5 @@ done:
 - multiple outputs
 - icons/tooltips for input types // for now just color coded
 - memoize draggable nodes to optimize rendering
+- categories for add node menu
+- add boolean input - switch

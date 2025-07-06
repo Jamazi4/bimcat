@@ -113,12 +113,25 @@ export const useNodeSystem = (
     try {
       startNodeRuntime();
     } catch (error) {
+      if (error instanceof Error) {
+        toast(error.message);
+      } else {
+        toast("Unknown error");
+      }
       console.log(error);
     }
   }, [startNodeRuntime]);
 
   useEffect(() => {
-    renderNodeOutput();
+    try {
+      renderNodeOutput();
+    } catch (error) {
+      if (error instanceof Error) {
+        toast(error.message);
+      } else {
+        toast("Unknown error");
+      }
+    }
   }, [renderNodeOutput]);
 
   const fetchNodes = useCallback(async (componentId: string) => {
@@ -154,6 +167,7 @@ export const useNodeSystem = (
     (nodeId: string, inputId: number, value: string) => {
       const node = nodesRef.current.find((node) => node.id === nodeId);
       if (!node?.values) return;
+
       const newValues = [...node.values];
       newValues[inputId] = value;
 

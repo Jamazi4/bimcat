@@ -1,7 +1,7 @@
 "use client";
 
 import { nodeDefinitions } from "@/utils/nodes";
-import { CircleDot } from "lucide-react";
+import { CircleDot, CircleDotDashed } from "lucide-react";
 import { Input } from "../ui/input";
 import {
   Dispatch,
@@ -16,7 +16,8 @@ import {
   GeomNodeBackType,
   NodeSlot,
   SlotValues,
-  textColorClasses,
+  backgroundColorClasses,
+  fillColorClasses,
 } from "@/utils/nodeTypes";
 import { Switch } from "../ui/switch";
 
@@ -109,12 +110,14 @@ const DraggableNode = memo(function DraggableNode({
               if (!node.values) return;
               return (
                 <InputBoolean
+                  name={input.name}
                   key={input.id}
                   value={node.values[input.id]}
                   changeThisValue={changeThisValue}
                 />
               );
             } else if (input.type === "slot") {
+              const optional = input.defaultValue !== undefined;
               const partialSlotData: Partial<NodeSlot> = {
                 nodeId: node.id,
                 slotId: input.id,
@@ -122,6 +125,7 @@ const DraggableNode = memo(function DraggableNode({
               };
               return (
                 <InputSlot
+                  optional={optional}
                   slotValueType={input.slotValueType!}
                   getSlotRelativePosition={getSlotRelativePosition}
                   nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
@@ -166,23 +170,27 @@ const DraggableNode = memo(function DraggableNode({
 export default DraggableNode;
 
 const InputBoolean = ({
+  name,
   value,
   changeThisValue,
 }: {
+  name: string;
   value: string;
   changeThisValue: (value: string) => void;
 }) => {
-  const [curVal, setCurVal] = useState(value);
+  const [curVal, setCurVal] = useState(value === "true");
 
   const changeValue = (e: boolean) => {
-    setCurVal(e === true ? "true" : "false");
+    setCurVal(e);
     changeThisValue(e === true ? "true" : "false");
   };
 
+  const displayName = name === "boolean" ? `${value}` : `${name}`;
+
   return (
     <div className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
-      <Switch value={curVal} onCheckedChange={(e) => changeValue(e)} />
-      <div className="m-2">{value}</div>
+      <Switch value={String(curVal)} onCheckedChange={(e) => changeValue(e)} />
+      <div className="m-2 text-sm">{displayName}</div>
     </div>
   );
 };
@@ -197,22 +205,23 @@ const InputNumber = ({
   const [curVal, setCurVal] = useState(value);
   const [isValidValue, setIsValidValue] = useState(true);
 
-  useEffect(() => {
-    const num = Number(curVal);
-    setIsValidValue(!isNaN(num) || curVal === "");
-  }, [curVal]);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const num = Number(val);
+    const valid = !isNaN(num) && val.trim() !== "";
 
-  const changeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCurVal(e.target.value);
-    changeThisValue(e.target.value);
+    setCurVal(val);
+    setIsValidValue(valid);
+    if (valid) {
+      changeThisValue(val);
+    }
   };
-
   return (
     <div className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
       <Input
         type="text"
         value={curVal}
-        onChange={(e) => changeValue(e)}
+        onChange={(e) => handleChange(e)}
         className={isValidValue ? "" : "text-destructive border-destructive"}
       />
     </div>
@@ -220,6 +229,7 @@ const InputNumber = ({
 };
 
 interface InputNodeSlotsProps {
+  optional: boolean;
   slotValueType: SlotValues;
   name: string;
   partialSlotData: Partial<NodeSlot>;
@@ -236,6 +246,7 @@ interface InputNodeSlotsProps {
 }
 
 const InputSlot = ({
+  optional,
   slotValueType,
   name,
   partialSlotData,
@@ -279,11 +290,19 @@ const InputSlot = ({
       onMouseOver={() => finishConnecting(nodeId!, slotId!)}
       onMouseLeave={() => finishConnecting(nodeId!, slotId!, true)}
     >
-      <CircleDot
-        ref={ref}
-        size={16}
-        className={`bg-background rounded-full ${textColorClasses[slotValueType]} text-primary`}
-      />
+      {!optional ? (
+        <CircleDot
+          ref={ref}
+          size={16}
+          className={`bg-background rounded-full ${fillColorClasses[slotValueType]} text-primary`}
+        />
+      ) : (
+        <CircleDotDashed
+          ref={ref}
+          size={16}
+          className={`bg-background rounded-full ${backgroundColorClasses[slotValueType]} text-primary`}
+        />
+      )}
       <p className="text-sm select-none">{name}</p>
     </div>
   );
@@ -351,7 +370,7 @@ const OutputSlot = ({
       <CircleDot
         ref={ref}
         size={16}
-        className={`bg-background rounded-full ${textColorClasses[slotValueType]} text-primary`}
+        className={`bg-background rounded-full ${fillColorClasses[slotValueType]} text-primary`}
       />
     </div>
   );

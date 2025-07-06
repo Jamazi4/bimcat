@@ -40,6 +40,9 @@ const useNodesRuntime = ({
           (edge) => edge.toNodeId === nodeId && edge.toSlotId === inputDef.id,
         );
 
+        if (!inputDef.defaultValue && !edge && inputDef.type === "slot")
+          throw new Error(`${node.type} needs ${inputDef.name}`);
+
         return {
           inputId: inputDef.id,
           ast: edge ? buildAST(edge.fromNodeId) : inputDef.defaultValue!,
@@ -49,7 +52,6 @@ const useNodesRuntime = ({
       return {
         type: node.type,
         id: node.id,
-        // inputs: [...inputs].sort((a, b) => a.inputId - b.inputId),
         inputs,
         values: node.values ?? [],
       };
