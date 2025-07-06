@@ -19,11 +19,29 @@ export const useNodeSystem = (
   meshGroup: THREE.Group,
 ) => {
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
+  const nodesRef = useRef(nodes);
+  nodesRef.current = nodes;
+
   const [nodeDivs, setNodeDivs] = useState<Record<string, HTMLDivElement>>({});
+  const nodeDivsRef = useRef(nodeDivs);
+  nodeDivsRef.current = nodeDivs;
+
   const [edges, setEdges] = useState<NodeEdgeType[]>([]);
+  const edgesRef = useRef(edges);
+  edgesRef.current = edges;
+
   const [nodeSlots, setNodeSlots] = useState<NodeSlot[]>([]);
+  const nodeSlotsRef = useRef(nodeSlots);
+  nodeSlotsRef.current = nodeSlots;
+
   const [isPanning, setIsPanning] = useState(false);
+  const isPanningRef = useRef(isPanning);
+  isPanningRef.current = isPanning;
+
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const panStartRef = useRef(panStart);
+  panStartRef.current = panStart;
+
   const editorRef = useRef<HTMLDivElement>(null);
   const [draggingNodes, setDraggingNodes] = useState<
     {
@@ -32,6 +50,9 @@ export const useNodeSystem = (
       offsetY: number;
     }[]
   >([]);
+  const draggingNodesRef = useRef(draggingNodes);
+  draggingNodesRef.current = draggingNodes;
+
   const wasDragging = useRef(false);
   const [tempEdgePosition, setTempEdgePosition] = useState<{
     x1: number;
@@ -43,20 +64,41 @@ export const useNodeSystem = (
     nodeId: string;
     slotId: number;
   } | null>(null);
+  const connectingFromNodeRef = useRef(connectingFromNode);
+  connectingFromNodeRef.current = connectingFromNode;
+
   const [connectingToNode, setConnectingToNode] = useState<{
     nodeId: string;
     slotId: number;
   } | null>(null);
+  const connectingToNodeRef = useRef(connectingToNode);
+  connectingToNodeRef.current = connectingToNode;
+
   const [viewTransform, setViewTransform] = useState({ x: 0, y: 0, scale: 1 });
+  const viewTransformRef = useRef(viewTransform);
+  viewTransformRef.current = viewTransform;
+
   const [selectionRect, setSelectionRect] = useState<{
     x1: number;
     y1: number;
     x2: number;
     y2: number;
   } | null>(null);
+  const selectionRectRef = useRef(selectionRect);
+  selectionRectRef.current = selectionRect;
+
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
+  const selectedNodeIdsRef = useRef(selectedNodeIds);
+  selectedNodeIdsRef.current = selectedNodeIds;
+
   const [copiedNodes, setCopiedNodes] = useState<GeomNodeBackType[]>([]);
+  const copiedNodesRef = useRef(copiedNodes);
+  copiedNodesRef.current = copiedNodes;
+
   const [copiedEdges, setCopiedEdges] = useState<NodeEdgeType[]>([]);
+  const copiedEdgesRef = useRef(copiedEdges);
+  copiedEdgesRef.current = copiedEdges;
+
   const copyOffset = useRef(30);
 
   const runtimeNodes = useRuntimeNodes(nodes);
@@ -98,21 +140,21 @@ export const useNodeSystem = (
           };
         });
       const response = await updateNodeProject(
-        nodes,
-        edges,
+        nodesRef.current,
+        edgesRef.current,
         componentId,
         geometry,
       );
       toast(response.message);
     },
-    [meshGroup.children, nodes, edges],
+    [meshGroup.children],
   );
 
   const changeNodeValue = useCallback(
     (nodeId: string, inputId: number, value: string) => {
-      const node = nodes.find((node) => node.id === nodeId);
+      const node = nodesRef.current.find((node) => node.id === nodeId);
       if (!node?.values) return;
-      const newValues = node.values;
+      const newValues = [...node.values];
       newValues[inputId] = value;
 
       setNodes((prevNodes) =>
@@ -126,23 +168,22 @@ export const useNodeSystem = (
         ),
       );
     },
-    [nodes],
+    [],
   );
 
-  const screenToWorld = useCallback(
-    (screenX: number, screenY: number) => {
-      if (!editorRef.current) return { x: 0, y: 0 };
+  const screenToWorld = useCallback((screenX: number, screenY: number) => {
+    if (!editorRef.current) return { x: 0, y: 0 };
 
-      const rect = editorRef.current.getBoundingClientRect();
-      const worldX =
-        (screenX - rect.left - viewTransform.x) / viewTransform.scale;
-      const worldY =
-        (screenY - rect.top - viewTransform.y) / viewTransform.scale;
+    const rect = editorRef.current.getBoundingClientRect();
+    const worldX =
+      (screenX - rect.left - viewTransformRef.current.x) /
+      viewTransformRef.current.scale;
+    const worldY =
+      (screenY - rect.top - viewTransformRef.current.y) /
+      viewTransformRef.current.scale;
 
-      return { x: worldX, y: worldY };
-    },
-    [viewTransform],
-  );
+    return { x: worldX, y: worldY };
+  }, []);
 
   const addNode = useCallback(
     (nodeDefId: number) => {
@@ -181,24 +222,26 @@ export const useNodeSystem = (
   );
 
   const copySelectedNodes = useCallback(() => {
-    const curCopiedNodes = nodes.filter((n) => selectedNodeIds.includes(n.id));
+    const curCopiedNodes = nodesRef.current.filter((n) =>
+      selectedNodeIdsRef.current.includes(n.id),
+    );
     setCopiedNodes(curCopiedNodes);
 
-    const curCopiedEdges = edges.filter(
+    const curCopiedEdges = edgesRef.current.filter(
       (e) =>
-        selectedNodeIds.includes(e.fromNodeId) &&
-        selectedNodeIds.includes(e.toNodeId),
+        selectedNodeIdsRef.current.includes(e.fromNodeId) &&
+        selectedNodeIdsRef.current.includes(e.toNodeId),
     );
     setCopiedEdges(curCopiedEdges);
     copyOffset.current = 30;
-  }, [edges, nodes, selectedNodeIds]);
+  }, []);
 
   const pasteCopiedNodes = useCallback(() => {
-    if (!copiedNodes.length) return;
+    if (!copiedNodesRef.current.length) return;
 
     const idMap: Record<string, string> = {};
 
-    const newNodes = copiedNodes.map((n) => {
+    const newNodes = copiedNodesRef.current.map((n) => {
       const newId = createNodeId();
       idMap[n.id] = newId;
       const newValues = n.values?.map((val) => val);
@@ -214,7 +257,7 @@ export const useNodeSystem = (
 
     copyOffset.current = copyOffset.current + 30;
 
-    const newEdges = copiedEdges.map((e) => ({
+    const newEdges = copiedEdgesRef.current.map((e) => ({
       ...e,
       id: createEdgeId(),
       fromNodeId: idMap[e.fromNodeId],
@@ -224,7 +267,7 @@ export const useNodeSystem = (
     setNodes((prevNodes) => [...prevNodes, ...newNodes]);
     setEdges((prevEdges) => [...prevEdges, ...newEdges]);
     setSelectedNodeIds(newNodes.map((n) => n.id));
-  }, [copiedEdges, copiedNodes]);
+  }, []);
 
   const registerNodeSlot = useCallback((slotData: NodeSlot) => {
     setNodeSlots((prev) => {
@@ -245,15 +288,15 @@ export const useNodeSystem = (
       wasDragging.current = false;
 
       const worldPos = screenToWorld(e.clientX, e.clientY);
-      const node = nodes.find((n) => n.id === nodeId);
+      const node = nodesRef.current.find((n) => n.id === nodeId);
       if (!node) return;
 
-      const isMulti = selectedNodeIds.includes(nodeId);
-      const dragTargets = isMulti ? selectedNodeIds : [nodeId];
+      const isMulti = selectedNodeIdsRef.current.includes(nodeId);
+      const dragTargets = isMulti ? selectedNodeIdsRef.current : [nodeId];
 
       const newDraggingNodes = dragTargets
         .map((id) => {
-          const n = nodes.find((n) => n.id === id);
+          const n = nodesRef.current.find((n) => n.id === id);
           if (!n) return null;
           return {
             id,
@@ -265,30 +308,27 @@ export const useNodeSystem = (
 
       setDraggingNodes(newDraggingNodes);
     },
-    [nodes, screenToWorld, selectedNodeIds],
+    [screenToWorld],
   );
 
-  const getSlotCenter = useCallback(
-    (element: SVGSVGElement) => {
-      const slot = nodeSlots.find((s) => s.el === element);
-      if (slot) {
-        const node = nodes.find((n) => n.id === slot.nodeId);
-        if (node) {
-          const iconX = node.x + slot.relativeX;
-          const iconY = node.y + slot.relativeY;
-          return { iconX, iconY };
-        }
+  const getSlotCenter = useCallback((element: SVGSVGElement) => {
+    const slot = nodeSlotsRef.current.find((s) => s.el === element);
+    if (slot) {
+      const node = nodesRef.current.find((n) => n.id === slot.nodeId);
+      if (node) {
+        const iconX = node.x + slot.relativeX;
+        const iconY = node.y + slot.relativeY;
+        return { iconX, iconY };
       }
-      return { iconX: 0, iconY: 0 };
-    },
-    [nodeSlots, nodes],
-  );
+    }
+    return { iconX: 0, iconY: 0 };
+  }, []);
 
   const startConnecting = useCallback(
     (nodeId: string, slotId: number) => {
       setConnectingToNode(null);
       setConnectingFromNode({ nodeId, slotId });
-      const slotIcon = nodeSlots.find(
+      const slotIcon = nodeSlotsRef.current.find(
         (slot) => slot.nodeId === nodeId && slot.slotId === slotId,
       )?.el;
       if (!slotIcon) return;
@@ -301,7 +341,7 @@ export const useNodeSystem = (
         y2: iconY,
       });
     },
-    [nodeSlots, getSlotCenter],
+    [getSlotCenter],
   );
 
   const finishConnecting = useCallback(
@@ -312,21 +352,24 @@ export const useNodeSystem = (
     [],
   );
 
-  const addEdge = (
-    fromNodeId: string,
-    fromSlotId: number,
-    toNodeId: string,
-    toSlotId: number,
-  ) => {
-    const newEdge: NodeEdgeType = {
-      id: createEdgeId(),
-      fromNodeId,
-      fromSlotId,
-      toNodeId,
-      toSlotId,
-    };
-    setEdges((prevEdges) => [...prevEdges, newEdge]);
-  };
+  const addEdge = useCallback(
+    (
+      fromNodeId: string,
+      fromSlotId: number,
+      toNodeId: string,
+      toSlotId: number,
+    ) => {
+      const newEdge: NodeEdgeType = {
+        id: createEdgeId(),
+        fromNodeId,
+        fromSlotId,
+        toNodeId,
+        toSlotId,
+      };
+      setEdges((prevEdges) => [...prevEdges, newEdge]);
+    },
+    [],
+  );
 
   const deleteEdge = useCallback((edgeId: string) => {
     setEdges((prevEdges) => {
@@ -343,19 +386,21 @@ export const useNodeSystem = (
     (e: KeyboardEvent) => {
       if (e.key === "Delete") {
         setNodes((prevNodes) => {
-          return prevNodes.filter((n) => !selectedNodeIds.includes(n.id));
+          return prevNodes.filter(
+            (n) => !selectedNodeIdsRef.current.includes(n.id),
+          );
         });
 
         setNodeSlots((prevSlots) => {
           return prevSlots.filter(
-            (slot) => !selectedNodeIds.includes(slot.nodeId),
+            (slot) => !selectedNodeIdsRef.current.includes(slot.nodeId),
           );
         });
 
         setNodeDivs((prevNodeDivs) => {
           const prevNodeDivsArr = Object.entries(prevNodeDivs);
           const newNodeDivs = prevNodeDivsArr.filter(
-            ([id, _]) => !selectedNodeIds.includes(id),
+            ([id, _]) => !selectedNodeIdsRef.current.includes(id),
           );
           return Object.fromEntries(newNodeDivs);
         });
@@ -363,8 +408,8 @@ export const useNodeSystem = (
         setEdges((prevEdges) => {
           return prevEdges.filter((edge) => {
             return (
-              !selectedNodeIds.includes(edge.fromNodeId) &&
-              !selectedNodeIds.includes(edge.toNodeId)
+              !selectedNodeIdsRef.current.includes(edge.fromNodeId) &&
+              !selectedNodeIdsRef.current.includes(edge.toNodeId)
             );
           });
         });
@@ -376,7 +421,7 @@ export const useNodeSystem = (
         pasteCopiedNodes();
       }
     },
-    [copySelectedNodes, pasteCopiedNodes, selectedNodeIds],
+    [copySelectedNodes, pasteCopiedNodes],
   );
 
   const handleMouseMove = useCallback(
@@ -385,16 +430,16 @@ export const useNodeSystem = (
 
       wasDragging.current = true;
 
-      if (isPanning) {
-        const newX = e.clientX - panStart.x;
-        const newY = e.clientY - panStart.y;
+      if (isPanningRef.current) {
+        const newX = e.clientX - panStartRef.current.x;
+        const newY = e.clientY - panStartRef.current.y;
         setViewTransform((prev) => ({ ...prev, x: newX, y: newY }));
         return;
       }
 
       const worldPos = screenToWorld(e.clientX, e.clientY);
 
-      if (selectionRect) {
+      if (selectionRectRef.current) {
         const boundingRect = editorRef.current.getBoundingClientRect();
         setSelectionRect((prevRect) => {
           if (!prevRect) return null;
@@ -407,10 +452,12 @@ export const useNodeSystem = (
         });
       }
 
-      if (draggingNodes.length > 0) {
+      if (draggingNodesRef.current.length > 0) {
         setNodes((prevNodes) =>
           prevNodes.map((n) => {
-            const draggingInfo = draggingNodes.find((d) => d.id === n.id);
+            const draggingInfo = draggingNodesRef.current.find(
+              (d) => d.id === n.id,
+            );
             if (draggingInfo) {
               return {
                 ...n,
@@ -423,11 +470,11 @@ export const useNodeSystem = (
         );
       }
 
-      if (connectingFromNode) {
-        const sourceIcon = nodeSlots.find(
+      if (connectingFromNodeRef.current) {
+        const sourceIcon = nodeSlotsRef.current.find(
           (slot) =>
-            slot.nodeId === connectingFromNode.nodeId &&
-            slot.slotId === connectingFromNode.slotId,
+            slot.nodeId === connectingFromNodeRef.current!.nodeId &&
+            slot.slotId === connectingFromNodeRef.current!.slotId,
         )?.el;
         if (sourceIcon) {
           const { iconX, iconY } = getSlotCenter(sourceIcon);
@@ -440,31 +487,24 @@ export const useNodeSystem = (
         }
       }
     },
-    [
-      selectionRect,
-      isPanning,
-      screenToWorld,
-      draggingNodes,
-      connectingFromNode,
-      panStart.x,
-      panStart.y,
-      nodeSlots,
-      getSlotCenter,
-    ],
+    [getSlotCenter, screenToWorld],
   );
 
   const handleMouseUp = useCallback(() => {
-    if (connectingToNode && connectingFromNode) {
+    if (connectingToNodeRef.current && connectingFromNodeRef.current) {
       addEdge(
-        connectingFromNode.nodeId,
-        connectingFromNode.slotId,
-        connectingToNode.nodeId,
-        connectingToNode.slotId,
+        connectingFromNodeRef.current.nodeId,
+        connectingFromNodeRef.current.slotId,
+        connectingToNodeRef.current.nodeId,
+        connectingToNodeRef.current.slotId,
       );
     }
 
-    if (draggingNodes.length === 1 && wasDragging.current === false) {
-      setSelectedNodeIds([draggingNodes[0].id]);
+    if (
+      draggingNodesRef.current.length === 1 &&
+      wasDragging.current === false
+    ) {
+      setSelectedNodeIds([draggingNodesRef.current[0].id]);
       setDraggingNodes([]);
       return;
     }
@@ -475,24 +515,30 @@ export const useNodeSystem = (
 
     wasDragging.current = false;
 
-    if (!!selectionRect) {
+    if (!!selectionRectRef.current) {
       if (!editorRef.current) return;
       const editorBoundingRect = editorRef.current.getBoundingClientRect();
       const editorOffsetX = editorBoundingRect.left;
       const editorOffsetY = editorBoundingRect.top;
 
-      const upperLeftSelectionX = Math.min(selectionRect.x1, selectionRect.x2);
-      const upperLeftSelectionY = Math.min(selectionRect.y1, selectionRect.y2);
+      const upperLeftSelectionX = Math.min(
+        selectionRectRef.current.x1,
+        selectionRectRef.current.x2,
+      );
+      const upperLeftSelectionY = Math.min(
+        selectionRectRef.current.y1,
+        selectionRectRef.current.y2,
+      );
       const bottomRightSelectionX = Math.max(
-        selectionRect.x1,
-        selectionRect.x2,
+        selectionRectRef.current.x1,
+        selectionRectRef.current.x2,
       );
       const bottomRightSelectionY = Math.max(
-        selectionRect.y1,
-        selectionRect.y2,
+        selectionRectRef.current.y1,
+        selectionRectRef.current.y2,
       );
 
-      const selectedIds = Object.entries(nodeDivs)
+      const selectedIds = Object.entries(nodeDivsRef.current)
         .filter(([_, div]) => {
           const boundingRect = div.getBoundingClientRect();
 
@@ -513,13 +559,7 @@ export const useNodeSystem = (
       setSelectedNodeIds(selectedIds);
     }
     setSelectionRect(null);
-  }, [
-    connectingToNode,
-    connectingFromNode,
-    draggingNodes,
-    selectionRect,
-    nodeDivs,
-  ]);
+  }, [addEdge]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
@@ -546,7 +586,7 @@ export const useNodeSystem = (
         return newTransform;
       });
     },
-    [nodeNavigation, setViewTransform, editorRef],
+    [nodeNavigation],
   );
 
   const handleEditorMouseDown = useCallback(
@@ -557,8 +597,8 @@ export const useNodeSystem = (
         e.preventDefault();
         setIsPanning(true);
         setPanStart({
-          x: e.clientX - viewTransform.x,
-          y: e.clientY - viewTransform.y,
+          x: e.clientX - viewTransformRef.current.x,
+          y: e.clientY - viewTransformRef.current.y,
         });
         return;
       } else if (e.button === 0) {
@@ -576,12 +616,15 @@ export const useNodeSystem = (
         return;
       }
     },
-    [viewTransform, nodeNavigation],
+    [nodeNavigation],
   );
 
   useEffect(() => {
     const isInteracting =
-      (draggingNodes || connectingFromNode || isPanning || !!selectionRect) &&
+      (draggingNodes.length > 0 ||
+        connectingFromNode ||
+        isPanning ||
+        !!selectionRect) &&
       nodeNavigation;
 
     if (isInteracting) {
@@ -606,12 +649,16 @@ export const useNodeSystem = (
     isPanning,
     connectingFromNode,
     draggingNodes,
+    selectionRect,
+    nodeNavigation,
+    handleKeyDown,
     handleMouseMove,
     handleMouseUp,
-    nodeNavigation,
-    selectionRect,
-    handleKeyDown,
   ]);
+
+  const getViewTransformScale = useCallback(() => {
+    return viewTransformRef.current.scale;
+  }, []);
 
   return {
     saveNodeProject,
@@ -635,6 +682,7 @@ export const useNodeSystem = (
     selectionRect,
     setNodeDivs,
     selectedNodeIds,
+    getViewTransformScale,
   };
 };
 

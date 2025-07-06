@@ -5,6 +5,7 @@ import { CircleDot } from "lucide-react";
 import { Input } from "../ui/input";
 import {
   Dispatch,
+  memo,
   SetStateAction,
   useCallback,
   useEffect,
@@ -27,10 +28,10 @@ interface DraggableNodeProps {
   startConnecting: (nodeId: string, slotId: number) => void;
   finishConnecting: (nodeId: string, slotId: number, clear?: boolean) => void;
   nodeNavigation: boolean;
-  viewTransform: { x: number; y: number; scale: number };
+  getViewTransformScale: () => number;
   setNodeDivs: Dispatch<SetStateAction<Record<string, HTMLDivElement>>>;
 }
-const DraggableNode = ({
+const DraggableNode = memo(function DraggableNode({
   selected,
   node,
   startDraggingNode,
@@ -39,9 +40,10 @@ const DraggableNode = ({
   startConnecting,
   finishConnecting,
   nodeNavigation,
-  viewTransform,
+  getViewTransformScale,
   setNodeDivs,
-}: DraggableNodeProps) => {
+}: DraggableNodeProps) {
+  console.log(`DraggableNode rerender: ${node.id}`);
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const nodeRef = useRef<HTMLDivElement>(null);
   const changeThisNodeValues = changeNodeValue.bind(null, node.id);
@@ -50,25 +52,24 @@ const DraggableNode = ({
     setNodeDivs((prevDivs) => {
       return { ...prevDivs, [node.id]: nodeRef.current! };
     });
-  }, [node, setNodeDivs]);
+  }, [node.id, setNodeDivs]);
 
   const getSlotRelativePosition = useCallback(
     (
       nodeRef: React.RefObject<HTMLDivElement>,
       slotRef: React.RefObject<SVGSVGElement>,
     ) => {
-      const nodeRect = nodeRef.current.getBoundingClientRect();
-      const slotRect = slotRef.current.getBoundingClientRect();
+      const nodeRect = nodeRef.current!.getBoundingClientRect();
+      const slotRect = slotRef.current!.getBoundingClientRect();
+      const scale = getViewTransformScale();
       const relativeX =
-        (slotRect.left + slotRect.width / 2 - nodeRect.left) /
-        viewTransform.scale;
+        (slotRect.left + slotRect.width / 2 - nodeRect.left) / scale;
       const relativeY =
-        (slotRect.top + slotRect.height / 2 - nodeRect.top) /
-        viewTransform.scale;
+        (slotRect.top + slotRect.height / 2 - nodeRect.top) / scale;
 
       return { relativeX, relativeY };
     },
-    [viewTransform],
+    [getViewTransformScale],
   );
 
   return (
@@ -150,7 +151,7 @@ const DraggableNode = ({
       </div>
     </div>
   );
-};
+});
 
 export default DraggableNode;
 

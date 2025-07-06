@@ -49,6 +49,7 @@ const NodeEditor = ({
     selectionRect,
     setNodeDivs,
     selectedNodeIds,
+    getViewTransformScale,
   } = useNodeSystem(nodeNavigation, nodeMeshGroup);
 
   const fetchNodesWrapper = useCallback(async () => {
@@ -104,7 +105,7 @@ const NodeEditor = ({
             <DraggableNode
               selected={selected}
               setNodeDivs={setNodeDivs}
-              viewTransform={viewTransform}
+              getViewTransformScale={getViewTransformScale}
               nodeNavigation={nodeNavigation}
               finishConnecting={finishConnecting}
               startConnecting={startConnecting}
