@@ -88,11 +88,11 @@
     --radius: 0.5rem;
 
     /* nodes  */
-    --number-input: hsl(0 26% 53.9%);
-    --boolean-input: hsl(57 26% 53.9%);
-    --vector-input: hsl(103 26% 53.9%);
-    --linestring-input: hsl(163 26% 53.9%);
-    --mesh-input: hsl(222 26% 53.9%);
+    --number-input: hsl(0 50% 53.9%);
+    --boolean-input: hsl(57 50% 53.9%);
+    --vector-input: hsl(103 50% 53.9%);
+    --linestring-input: hsl(163 50% 53.9%);
+    --mesh-input: hsl(222 50% 53.9%);
   }
 
   .dark {
@@ -125,11 +125,11 @@
     --chart-5: hsl(0 3% 82.75%);
 
     /* nodes  */
-    --number-input: hsl(0 26% 53.9%);
-    --boolean-input: hsl(57 26% 53.9%);
-    --vector-input: hsl(103 26% 53.9%);
-    --linestring-input: hsl(163 26% 53.9%);
-    --mesh-input: hsl(222 26% 53.9%);
+    --number-input: hsl(0 50% 53.9%);
+    --boolean-input: hsl(57 50% 53.9%);
+    --vector-input: hsl(103 50% 53.9%);
+    --linestring-input: hsl(163 50% 53.9%);
+    --mesh-input: hsl(222 50% 53.9%);
   }
 }
 

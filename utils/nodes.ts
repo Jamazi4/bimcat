@@ -6,6 +6,7 @@ import { nodeDefinition } from "./nodeTypes";
 export const nodeDefinitions: nodeDefinition[] = [
   {
     nodeDefId: 1,
+    category: "general",
     type: "output",
     inputs: [
       { type: "slot", id: 0, name: "geometry", slotValueType: "geometry" },
@@ -45,6 +46,7 @@ export const nodeDefinitions: nodeDefinition[] = [
   },
   {
     nodeDefId: 2,
+    category: "variable",
     type: "number",
     inputs: [{ type: "number", id: 0, value: "0", name: "number" }],
     outputs: [{ type: "number", name: "number", id: 1 }],
@@ -54,6 +56,7 @@ export const nodeDefinitions: nodeDefinition[] = [
   },
   {
     nodeDefId: 3,
+    category: "variable",
     type: "vector",
     inputs: [
       { type: "slot", name: "X", id: 0, slotValueType: "number" },
@@ -77,7 +80,8 @@ export const nodeDefinitions: nodeDefinition[] = [
   },
   {
     nodeDefId: 4,
-    type: "edgeByPoints",
+    category: "generator",
+    type: "linestring",
     inputs: [
       { type: "slot", name: "start", id: 0, slotValueType: "vector" },
       { type: "slot", name: "end", id: 1, slotValueType: "vector" },
@@ -95,6 +99,7 @@ export const nodeDefinitions: nodeDefinition[] = [
   },
   {
     nodeDefId: 5,
+    category: "generator",
     type: "plane",
     inputs: [
       { type: "slot", name: "position", id: 0, slotValueType: "vector" },
@@ -146,7 +151,8 @@ export const nodeDefinitions: nodeDefinition[] = [
   },
   {
     nodeDefId: 6,
-    type: "extrude",
+    category: "modifier",
+    type: "extrude mesh",
     inputs: [
       { type: "slot", name: "vector", id: 0, slotValueType: "vector" },
       { type: "slot", name: "mesh", id: 1, slotValueType: "mesh" },
@@ -185,6 +191,7 @@ export const nodeDefinitions: nodeDefinition[] = [
   },
   {
     nodeDefId: 7,
+    category: "generator",
     type: "circle",
     inputs: [
       { type: "slot", name: "radius", id: 0, slotValueType: "number" },

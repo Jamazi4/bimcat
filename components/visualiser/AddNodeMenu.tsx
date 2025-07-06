@@ -2,12 +2,16 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { PlusIcon } from "lucide-react";
 import { nodeDefinitions } from "@/utils/nodes";
+import { nodeCategories } from "@/utils/nodeTypes";
 const AddNodeMenu = ({ addNode }: { addNode: (nodeDefId: number) => void }) => {
   return (
     <DropdownMenu>
@@ -17,15 +21,28 @@ const AddNodeMenu = ({ addNode }: { addNode: (nodeDefId: number) => void }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">
-        <DropdownMenuLabel>Add node</DropdownMenuLabel>
-        {nodeDefinitions.map((node) => {
+        {nodeCategories.map((cat, index) => {
+          const curCatNodeDefs = nodeDefinitions.filter(
+            (n) => n.category === cat,
+          );
           return (
-            <DropdownMenuItem
-              key={node.nodeDefId}
-              onClick={() => addNode(node.nodeDefId)}
-            >
-              {node.type}
-            </DropdownMenuItem>
+            <DropdownMenuSub key={index}>
+              <DropdownMenuSubTrigger>{cat}</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {curCatNodeDefs.map((n) => {
+                    return (
+                      <DropdownMenuItem
+                        key={n.nodeDefId}
+                        onClick={() => addNode(n.nodeDefId)}
+                      >
+                        {n.type}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
           );
         })}
       </DropdownMenuContent>

@@ -78,8 +78,17 @@ export type NodeOutputType = {
   id: number;
 };
 
+export const nodeCategories = [
+  "general",
+  "generator",
+  "modifier",
+  "variable",
+] as const;
+export type nodeCategory = (typeof nodeCategories)[number];
+
 export interface nodeDefinition {
   nodeDefId: number;
+  category: nodeCategory;
   type: string;
   inputs: NodeInputType[];
   outputs: NodeOutputType[];

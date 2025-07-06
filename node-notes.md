@@ -150,6 +150,10 @@ and update only when values or edges change
 so far - managed to stop recalculating them each time a node moves.
 also added support for multiple output nodes
 
+### --06-07-2025--
+
+color coded inputs, categorized the addNode menu
+
 the problems to solve can be divided into two categories:
 
 Runtime:
@@ -160,10 +164,10 @@ Runtime:
 UI:
 
 - highlight wrong links
-- icons/tooltips for input types
 - shift + click to select
 - categories for add node menu
 - lock node menu buttons
+- add boolean input - switch
 
 additionally some tools that might need adding
 
@@ -174,3 +178,4 @@ additionally some tools that might need adding
 done:
 
 - multiple outputs
+- icons/tooltips for input types // for now just color coded
