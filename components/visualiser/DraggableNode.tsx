@@ -11,7 +11,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { GeomNodeBackType, NodeSlot } from "@/utils/nodeTypes";
+import {
+  GeomNodeBackType,
+  NodeSlot,
+  SlotValues,
+  textColorClasses,
+} from "@/utils/nodeTypes";
 
 interface DraggableNodeProps {
   selected: boolean;
@@ -102,10 +107,11 @@ const DraggableNode = ({
               const partialSlotData: Partial<NodeSlot> = {
                 nodeId: node.id,
                 slotId: input.id,
-                slotType: "input",
+                slotIO: "input",
               };
               return (
                 <InputSlot
+                  slotValueType={input.slotValueType!}
                   getSlotRelativePosition={getSlotRelativePosition}
                   nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
                   finishConnecting={finishConnecting}
@@ -125,10 +131,11 @@ const DraggableNode = ({
             const partialSlotData: Partial<NodeSlot> = {
               nodeId: node.id,
               slotId: output.id,
-              slotType: "output",
+              slotIO: "output",
             };
             return (
               <OutputSlot
+                slotValueType={output.type}
                 getSlotRelativePosition={getSlotRelativePosition}
                 nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
                 startConnecting={startConnecting}
@@ -180,6 +187,7 @@ const InputNumber = ({
 };
 
 interface InputNodeSlotsProps {
+  slotValueType: SlotValues;
   name: string;
   partialSlotData: Partial<NodeSlot>;
   registerNodeSlot: (slotData: NodeSlot) => void;
@@ -195,6 +203,7 @@ interface InputNodeSlotsProps {
 }
 
 const InputSlot = ({
+  slotValueType,
   name,
   partialSlotData,
   registerNodeSlot,
@@ -202,7 +211,7 @@ const InputSlot = ({
   getSlotRelativePosition,
   nodeRef,
 }: InputNodeSlotsProps) => {
-  const { nodeId, slotId, slotType } = partialSlotData;
+  const { nodeId, slotId, slotIO: slotType } = partialSlotData;
   const ref = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -216,7 +225,7 @@ const InputSlot = ({
     const slotData: NodeSlot = {
       nodeId: nodeId!,
       slotId: slotId!,
-      slotType: slotType!,
+      slotIO: slotType!,
       el: ref.current,
       relativeX,
       relativeY,
@@ -237,13 +246,18 @@ const InputSlot = ({
       onMouseOver={() => finishConnecting(nodeId!, slotId!)}
       onMouseLeave={() => finishConnecting(nodeId!, slotId!, true)}
     >
-      <CircleDot ref={ref} size={16} className="bg-background rounded-full" />
+      <CircleDot
+        ref={ref}
+        size={16}
+        className={`bg-background rounded-full ${textColorClasses[slotValueType]} text-primary`}
+      />
       <p className="text-sm select-none">{name}</p>
     </div>
   );
 };
 
 interface OutputNodeSlotsProps {
+  slotValueType: SlotValues;
   name: string;
   partialSlotData: Partial<NodeSlot>;
   registerNodeSlot: (slotData: NodeSlot) => void;
@@ -259,6 +273,7 @@ interface OutputNodeSlotsProps {
 }
 
 const OutputSlot = ({
+  slotValueType,
   name,
   partialSlotData,
   registerNodeSlot,
@@ -266,7 +281,7 @@ const OutputSlot = ({
   nodeRef,
   getSlotRelativePosition,
 }: OutputNodeSlotsProps) => {
-  const { nodeId, slotId, slotType } = partialSlotData;
+  const { nodeId, slotId, slotIO: slotType } = partialSlotData;
   const ref = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -279,7 +294,7 @@ const OutputSlot = ({
     const slotData: NodeSlot = {
       nodeId: nodeId!,
       slotId: slotId!,
-      slotType: slotType!,
+      slotIO: slotType!,
       el: ref.current,
       relativeX,
       relativeY,
@@ -300,7 +315,11 @@ const OutputSlot = ({
       onMouseDown={() => startConnecting(nodeId!, slotId!)}
     >
       <p className="text-sm select-none">{name}</p>
-      <CircleDot ref={ref} size={16} className="bg-background rounded-full" />
+      <CircleDot
+        ref={ref}
+        size={16}
+        className={`bg-background rounded-full ${textColorClasses[slotValueType]} text-primary`}
+      />
     </div>
   );
 };

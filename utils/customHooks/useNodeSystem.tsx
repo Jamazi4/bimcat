@@ -148,7 +148,7 @@ export const useNodeSystem = (
     (nodeDefId: number) => {
       const nodeId = createNodeId();
       const nodeDefinition = nodeDefinitions.find(
-        (node) => node.nodeTypeId === nodeDefId,
+        (node) => node.nodeDefId === nodeDefId,
       );
       const nodeType = nodeDefinition?.type;
       const relInitPos = 200;
@@ -232,7 +232,7 @@ export const useNodeSystem = (
         (slot) =>
           slot.nodeId === slotData.nodeId &&
           slot.slotId === slotData.slotId &&
-          slot.slotType === slotData.slotType,
+          slot.slotIO === slotData.slotIO,
       );
       if (alreadyRegistered) return prev;
       return [...prev, slotData];

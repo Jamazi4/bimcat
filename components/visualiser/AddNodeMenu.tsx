@@ -21,8 +21,8 @@ const AddNodeMenu = ({ addNode }: { addNode: (nodeDefId: number) => void }) => {
         {nodeDefinitions.map((node) => {
           return (
             <DropdownMenuItem
-              key={node.nodeTypeId}
-              onClick={() => addNode(node.nodeTypeId)}
+              key={node.nodeDefId}
+              onClick={() => addNode(node.nodeDefId)}
             >
               {node.type}
             </DropdownMenuItem>

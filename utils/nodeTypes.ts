@@ -49,27 +49,37 @@ export type ASTNode = {
 };
 
 export type NodeEvalResult =
+  | { type: "boolean"; value: boolean }
   | { type: "number"; value: number }
   | { type: "vector"; value: THREE.Vector3 }
-  | { type: "linestring"; value: [THREE.Vector3, THREE.Vector3] }
+  | { type: "linestring"; value: THREE.Vector3[] }
   | { type: "mesh"; value: THREE.BufferGeometry }
-  | { type: "geometry"; value: THREE.Object3D };
+  | { type: "geometry"; value: THREE.Object3D }; // result of output node only
+
+export type SlotValues =
+  | "boolean"
+  | "number"
+  | "vector"
+  | "linestring"
+  | "mesh"
+  | "geometry";
 
 export type NodeInputType = {
   type: "slot" | "number" | "boolean";
+  slotValueType?: SlotValues;
   name: string;
   id: number;
   value?: string;
 };
 
 export type NodeOutputType = {
-  type: "mesh" | "vector" | "number" | "boolean";
+  type: SlotValues;
   name: string;
   id: number;
 };
 
 export interface nodeDefinition {
-  nodeTypeId: number;
+  nodeDefId: number;
   type: string;
   inputs: NodeInputType[];
   outputs: NodeOutputType[];
@@ -82,7 +92,7 @@ export interface nodeDefinition {
 export type NodeSlot = {
   nodeId: string;
   slotId: number;
-  slotType: "input" | "output";
+  slotIO: "input" | "output";
   el: SVGSVGElement;
   relativeX: number;
   relativeY: number;
@@ -92,4 +102,13 @@ export type RuntimeNode = {
   id: string;
   type: string;
   values: string[];
+};
+
+export const textColorClasses = {
+  number: "fill-number-input",
+  boolean: "fill-boolean-input",
+  vector: "fill-boolean-input",
+  linestring: "fill-linestring-input",
+  mesh: "fill-mesh-input",
+  geometry: "fill-geometry-input",
 };

@@ -75,12 +75,11 @@ const useNodesRuntime = ({
 
     for (const outputNode of outputNodes) {
       const edge = edges.find((e) => e.toNodeId === outputNode.id);
-      console.log(outputNode);
       if (!edge) {
         setOutputObjects((prevState) => {
           return { ...prevState, [outputNode.id]: null };
         });
-        return;
+        continue;
       }
 
       try {
