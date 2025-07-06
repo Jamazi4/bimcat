@@ -154,6 +154,10 @@ also added support for multiple output nodes
 
 color coded inputs, categorized the addNode menu
 
+gemini optimized rendering the
+
+## General
+
 the problems to solve can be divided into two categories:
 
 Runtime:
@@ -179,3 +183,4 @@ done:
 
 - multiple outputs
 - icons/tooltips for input types // for now just color coded
+- memoize draggable nodes to optimize rendering

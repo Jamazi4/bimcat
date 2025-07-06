@@ -67,6 +67,7 @@ export type SlotValues =
 export type NodeInputType = {
   type: "slot" | "number" | "boolean";
   slotValueType?: SlotValues;
+  defaultValue?: ASTNode;
   name: string;
   id: number;
   value?: string;
@@ -116,7 +117,7 @@ export type RuntimeNode = {
 export const textColorClasses = {
   number: "fill-number-input",
   boolean: "fill-boolean-input",
-  vector: "fill-boolean-input",
+  vector: "fill-vector-input",
   linestring: "fill-linestring-input",
   mesh: "fill-mesh-input",
   geometry: "fill-geometry-input",

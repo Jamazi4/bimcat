@@ -18,6 +18,7 @@ import {
   SlotValues,
   textColorClasses,
 } from "@/utils/nodeTypes";
+import { Switch } from "../ui/switch";
 
 interface DraggableNodeProps {
   selected: boolean;
@@ -43,7 +44,6 @@ const DraggableNode = memo(function DraggableNode({
   getViewTransformScale,
   setNodeDivs,
 }: DraggableNodeProps) {
-  console.log(`DraggableNode rerender: ${node.id}`);
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const nodeRef = useRef<HTMLDivElement>(null);
   const changeThisNodeValues = changeNodeValue.bind(null, node.id);
@@ -104,6 +104,16 @@ const DraggableNode = memo(function DraggableNode({
                   changeThisValue={changeThisValue}
                 />
               );
+            } else if (input.type === "boolean") {
+              const changeThisValue = changeThisNodeValues.bind(null, input.id);
+              if (!node.values) return;
+              return (
+                <InputBoolean
+                  key={input.id}
+                  value={node.values[input.id]}
+                  changeThisValue={changeThisValue}
+                />
+              );
             } else if (input.type === "slot") {
               const partialSlotData: Partial<NodeSlot> = {
                 nodeId: node.id,
@@ -154,6 +164,28 @@ const DraggableNode = memo(function DraggableNode({
 });
 
 export default DraggableNode;
+
+const InputBoolean = ({
+  value,
+  changeThisValue,
+}: {
+  value: string;
+  changeThisValue: (value: string) => void;
+}) => {
+  const [curVal, setCurVal] = useState(value);
+
+  const changeValue = (e: boolean) => {
+    setCurVal(e === true ? "true" : "false");
+    changeThisValue(e === true ? "true" : "false");
+  };
+
+  return (
+    <div className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
+      <Switch value={curVal} onCheckedChange={(e) => changeValue(e)} />
+      <div className="m-2">{value}</div>
+    </div>
+  );
+};
 
 const InputNumber = ({
   value,

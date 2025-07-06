@@ -1,7 +1,42 @@
 import * as THREE from "three";
 import { ConvexGeometry } from "three/addons/geometries/ConvexGeometry.js";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
-import { nodeDefinition } from "./nodeTypes";
+import { ASTNode, nodeDefinition, NodeEvalResult } from "./nodeTypes";
+import { createNodeId } from "./utilFunctions";
+
+export const defaultNumber: ASTNode = {
+  type: "number",
+  id: createNodeId(),
+  inputs: [],
+  values: ["0"],
+};
+
+export const defaultBoolean: ASTNode = {
+  type: "boolean",
+  id: createNodeId(),
+  inputs: [],
+  values: ["true"],
+};
+
+export const defaultVector: ASTNode = {
+  type: "vector",
+  id: createNodeId(),
+  inputs: [
+    {
+      inputId: 0,
+      ast: defaultNumber,
+    },
+    {
+      inputId: 1,
+      ast: defaultNumber,
+    },
+    {
+      inputId: 2,
+      ast: defaultNumber,
+    },
+  ],
+  values: [],
+};
 
 export const nodeDefinitions: nodeDefinition[] = [
   {
@@ -102,7 +137,13 @@ export const nodeDefinitions: nodeDefinition[] = [
     category: "generator",
     type: "plane",
     inputs: [
-      { type: "slot", name: "position", id: 0, slotValueType: "vector" },
+      {
+        type: "slot",
+        name: "position",
+        id: 0,
+        slotValueType: "vector",
+        defaultValue: defaultVector,
+      },
       { type: "slot", name: "width", id: 1, slotValueType: "number" },
       { type: "slot", name: "height", id: 2, slotValueType: "number" },
     ],
@@ -111,6 +152,9 @@ export const nodeDefinitions: nodeDefinition[] = [
       const p = evalFunction(node.inputs[0].ast);
       const dim1 = evalFunction(node.inputs[1].ast);
       const dim2 = evalFunction(node.inputs[2].ast);
+
+      console.log(node.inputs[0]);
+      console.log(p);
 
       if (
         p.type === "vector" &&
@@ -208,6 +252,19 @@ export const nodeDefinitions: nodeDefinition[] = [
         return { type: "mesh", value: geom };
       }
       throw new Error("Invalid inputs to circle node");
+    },
+  },
+  {
+    nodeDefId: 8,
+    category: "variable",
+    type: "boolean",
+    inputs: [{ type: "boolean", name: "boolean", id: 0, value: "false" }],
+    outputs: [{ type: "boolean", name: "boolean", id: 1 }],
+    function: (node, _) => {
+      return {
+        type: "boolean",
+        value: node.values[0] === "true" ? true : false,
+      };
     },
   },
 ];

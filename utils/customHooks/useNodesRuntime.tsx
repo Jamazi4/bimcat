@@ -35,17 +35,22 @@ const useNodesRuntime = ({
       const nodeDef = nodeDefinitions.find((nd) => nd.type === node.type);
       if (!nodeDef) throw new Error(`Unknown node type ${node.type}`);
 
-      const inputs = edges
-        .filter((e) => e.toNodeId === nodeId)
-        .map((e) => ({
-          inputId: e.toSlotId,
-          ast: buildAST(e.fromNodeId),
-        }));
+      const inputs = nodeDef.inputs.map((inputDef) => {
+        const edge = edges.find(
+          (edge) => edge.toNodeId === nodeId && edge.toSlotId === inputDef.id,
+        );
+
+        return {
+          inputId: inputDef.id,
+          ast: edge ? buildAST(edge.fromNodeId) : inputDef.defaultValue!,
+        };
+      });
 
       return {
         type: node.type,
         id: node.id,
-        inputs: [...inputs].sort((a, b) => a.inputId - b.inputId),
+        // inputs: [...inputs].sort((a, b) => a.inputId - b.inputId),
+        inputs,
         values: node.values ?? [],
       };
     },
