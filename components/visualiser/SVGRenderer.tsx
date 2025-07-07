@@ -1,5 +1,4 @@
-import { NodeSlot } from "@/utils/customHooks/useNodeSystem";
-import { NodeEdgeType } from "@/utils/schemas";
+import { NodeEdgeType, NodeSlot } from "@/utils/nodeTypes";
 import EdgeLine from "./EdgeLine";
 
 interface SVGRendererProps {
