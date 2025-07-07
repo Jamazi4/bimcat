@@ -25,14 +25,17 @@ export const defaultVector: ASTNode = {
     {
       inputId: 0,
       ast: defaultNumber,
+      fromOutputId: 1,
     },
     {
       inputId: 1,
       ast: defaultNumber,
+      fromOutputId: 1,
     },
     {
       inputId: 2,
       ast: defaultNumber,
+      fromOutputId: 1,
     },
   ],
   values: {},
@@ -48,7 +51,8 @@ export const nodeDefinitions: nodeDefinition[] = [
     ],
     outputs: [],
     function: (node, evalFunction) => {
-      const input = evalFunction(node.inputs[0].ast);
+      const outputInput = node.inputs[0];
+      const input = evalFunction(outputInput.ast)[outputInput.fromOutputId];
 
       switch (input.type) {
         case "vector": {
@@ -58,13 +62,13 @@ export const nodeDefinitions: nodeDefinition[] = [
             size: 0.05,
           });
           const mesh = new THREE.Points(geom, mat);
-          return { type: "geometry", value: mesh };
+          return { 1: { type: "geometry", value: mesh } };
         }
         case "linestring": {
           const geom = new THREE.BufferGeometry().setFromPoints(input.value);
           const mat = new THREE.LineBasicMaterial({ color: 0x7aadfa });
           const linestring = new THREE.Line(geom, mat);
-          return { type: "geometry", value: linestring };
+          return { 1: { type: "geometry", value: linestring } };
         }
         case "mesh": {
           const mat = new THREE.MeshStandardMaterial({
@@ -72,7 +76,7 @@ export const nodeDefinitions: nodeDefinition[] = [
             side: THREE.DoubleSide,
           });
           const mesh = new THREE.Mesh(input.value, mat);
-          return { type: "geometry", value: mesh };
+          return { 1: { type: "geometry", value: mesh } };
         }
         default:
           throw new Error("Unsupported input to output node");
@@ -86,7 +90,9 @@ export const nodeDefinitions: nodeDefinition[] = [
     inputs: [{ type: "number", id: 0, value: 0, name: "number" }],
     outputs: [{ type: "number", name: "number", id: 1 }],
     function: (node, _) => {
-      return { type: "number", value: (node.values["0"] as number) ?? 0 };
+      return {
+        1: { type: "number", value: (node.values["0"] as number) ?? 0 },
+      };
     },
   },
   {
@@ -100,14 +106,21 @@ export const nodeDefinitions: nodeDefinition[] = [
     ],
     outputs: [{ type: "vector", name: "vector", id: 3 }],
     function: (node, evalFunction) => {
-      const x = evalFunction(node.inputs[0].ast);
-      const y = evalFunction(node.inputs[1].ast);
-      const z = evalFunction(node.inputs[2].ast);
+      const xInput = node.inputs[0];
+      const x = evalFunction(xInput.ast)[xInput.fromOutputId];
+
+      const yInput = node.inputs[1];
+      const y = evalFunction(yInput.ast)[yInput.fromOutputId];
+
+      const zInput = node.inputs[2];
+      const z = evalFunction(zInput.ast)[zInput.fromOutputId];
 
       if (x.type === "number" && y.type === "number" && z.type === "number") {
         return {
-          type: "vector",
-          value: new THREE.Vector3(x.value, y.value, z.value),
+          3: {
+            type: "vector",
+            value: new THREE.Vector3(x.value, y.value, z.value),
+          },
         };
       }
       throw new Error("Invalid inputs to pointByXYZ");
@@ -123,11 +136,14 @@ export const nodeDefinitions: nodeDefinition[] = [
     ],
     outputs: [{ type: "linestring", name: "linestring", id: 2 }],
     function: (node, evalFunction) => {
-      const p1 = evalFunction(node.inputs[0].ast);
-      const p2 = evalFunction(node.inputs[1].ast);
+      const p1Input = node.inputs[0];
+      const p1 = evalFunction(p1Input.ast)[p1Input.fromOutputId];
+
+      const p2Input = node.inputs[1];
+      const p2 = evalFunction(p2Input.ast)[p2Input.fromOutputId];
 
       if (p1.type === "vector" && p2.type === "vector") {
-        return { type: "linestring", value: [p1.value, p2.value] };
+        return { 2: { type: "linestring", value: [p1.value, p2.value] } };
       }
       throw new Error("Invalid inputs to edgeByPoints");
     },
@@ -146,20 +162,20 @@ export const nodeDefinitions: nodeDefinition[] = [
         slotValueType: "vector",
         defaultValue: defaultVector,
       },
-      {
-        type: "boolean",
-        name: "closed",
-        value: false,
-        id: 3,
-        slotValueType: "boolean",
-      },
     ],
-    outputs: [{ type: "mesh", name: "mesh", id: 4 }],
+    outputs: [
+      { type: "mesh", name: "mesh", id: 4 },
+      { type: "linestring", name: "linestring", id: 5 },
+    ],
     function: (node, evalFunction) => {
-      const dim1 = evalFunction(node.inputs[0].ast);
-      const dim2 = evalFunction(node.inputs[1].ast);
-      const p = evalFunction(node.inputs[2].ast);
-      // const closed = node.values["3"];
+      const dim1Input = node.inputs[0];
+      const dim1 = evalFunction(dim1Input.ast)[dim1Input.fromOutputId];
+
+      const dim2Input = node.inputs[1];
+      const dim2 = evalFunction(dim2Input.ast)[dim2Input.fromOutputId];
+
+      const pInput = node.inputs[2];
+      const p = evalFunction(pInput.ast)[pInput.fromOutputId];
 
       if (
         p.type === "vector" &&
@@ -188,12 +204,24 @@ export const nodeDefinitions: nodeDefinition[] = [
         ]);
 
         const indices = [0, 1, 2, 2, 3, 0];
-        const geom = new THREE.BufferGeometry();
-        geom.setIndex(indices);
-        geom.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-        geom.computeVertexNormals();
+        const mesh = new THREE.BufferGeometry();
+        mesh.setIndex(indices);
+        mesh.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+        mesh.computeVertexNormals();
 
-        return { type: "mesh", value: geom };
+        const linestring = [
+          new THREE.Vector3(x, y, z),
+          new THREE.Vector3(x + w, y, z),
+          new THREE.Vector3(x + w, y, z + h),
+          new THREE.Vector3(x, y, z + h),
+
+          new THREE.Vector3(x, y, z),
+        ];
+
+        return {
+          4: { type: "mesh", value: mesh },
+          5: { type: "linestring", value: linestring },
+        };
       }
       throw new Error("Invalid inputs to plane node");
     },
@@ -208,8 +236,13 @@ export const nodeDefinitions: nodeDefinition[] = [
     ],
     outputs: [{ type: "mesh", name: "mesh", id: 2 }],
     function: (node, evalFunction) => {
-      const vector = evalFunction(node.inputs[0].ast);
-      const initGeom = evalFunction(node.inputs[1].ast);
+      const vectorInput = node.inputs[0];
+      const vector = evalFunction(vectorInput.ast)[vectorInput.fromOutputId];
+
+      const initGeomInput = node.inputs[1];
+      const initGeom = evalFunction(initGeomInput.ast)[
+        initGeomInput.fromOutputId
+      ];
 
       if (vector.type === "vector" && initGeom.type === "mesh") {
         const baseGeom = initGeom.value;
@@ -233,7 +266,7 @@ export const nodeDefinitions: nodeDefinition[] = [
         const geom = new ConvexGeometry(allVerts);
         const indexed = BufferGeometryUtils.mergeVertices(geom);
 
-        return { type: "mesh", value: indexed };
+        return { 2: { type: "mesh", value: indexed } };
       }
       throw new Error("Invalid inputs to extrude node");
     },
@@ -248,13 +281,20 @@ export const nodeDefinitions: nodeDefinition[] = [
     ],
     outputs: [{ type: "mesh", name: "mesh", id: 2 }],
     function: (node, evalFunction) => {
-      const radius = evalFunction(node.inputs[0].ast);
-      const segments = evalFunction(node.inputs[1].ast);
+      const radiusInput = node.inputs[0];
+      const radius = evalFunction(radiusInput.ast)[radiusInput.fromOutputId];
+
+      console.log(radius);
+      const segmentsInput = node.inputs[1];
+      const segments = evalFunction(segmentsInput.ast)[
+        segmentsInput.fromOutputId
+      ];
+      console.log(segments);
 
       if (radius.type === "number" && segments.type === "number") {
         const geom = new THREE.CircleGeometry(radius.value, segments.value);
 
-        return { type: "mesh", value: geom };
+        return { 2: { type: "mesh", value: geom } };
       }
       throw new Error("Invalid inputs to circle node");
     },
@@ -267,8 +307,10 @@ export const nodeDefinitions: nodeDefinition[] = [
     outputs: [{ type: "boolean", name: "boolean", id: 1 }],
     function: (node, _) => {
       return {
-        type: "boolean",
-        value: node.values["0"] as boolean,
+        1: {
+          type: "boolean",
+          value: node.values["0"] as boolean,
+        },
       };
     },
   },

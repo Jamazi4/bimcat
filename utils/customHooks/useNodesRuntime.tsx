@@ -46,10 +46,17 @@ const useNodesRuntime = ({
             throw new Error(`${node.type} needs ${inputDef.name}`);
           }
 
-          return {
+          const lastOutputId = edge
+            ? edge.fromSlotId
+            : nodeDef.inputs.length - 1 + nodeDef.outputs.length - 1;
+
+          const input = {
             inputId: inputDef.id,
             ast: edge ? buildAST(edge.fromNodeId) : inputDef.defaultValue!,
+            fromOutputId: lastOutputId,
           };
+
+          return input;
         });
 
       return {
@@ -94,7 +101,10 @@ const useNodesRuntime = ({
 
       try {
         const ast = buildAST(outputNode.id);
-        const result = evaluateAST(ast);
+        const result = evaluateAST(ast)[1];
+        console.log(result);
+        //TODO: above need to do last of the inputs if no fromOutputId
+        // const outputObject3D = result.value;
         const outputObject3D = result.value;
 
         if (!(outputObject3D instanceof THREE.Object3D)) {

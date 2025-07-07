@@ -44,17 +44,23 @@ export interface useNodesRuntimeProps {
 export type ASTNode = {
   type: string;
   id: string;
-  inputs: { inputId: number; ast: ASTNode }[];
+  inputs: { inputId: number; ast: ASTNode; fromOutputId: number }[];
   values: NodeValues;
 };
 
-export type NodeEvalResult =
+export type EvalValue =
   | { type: "boolean"; value: boolean }
   | { type: "number"; value: number }
   | { type: "vector"; value: THREE.Vector3 }
   | { type: "linestring"; value: THREE.Vector3[] }
   | { type: "mesh"; value: THREE.BufferGeometry }
   | { type: "geometry"; value: THREE.Object3D }; // result of output node only
+
+export type NodeEvalResult = Record<number, EvalValue>;
+// the number is the output that I want to be returned from function
+// I specify this in return from node's function. If I return key 3 from output
+// of id 3 and key 4 from output of id 4
+// TODO: Find a better way of specifying what the key means or smth
 
 export type SlotValues =
   | "boolean"

@@ -22,8 +22,11 @@ const EdgeLine = ({
   nodeNavigation,
 }: EdgeLineProps) => {
   const [hover, setHover] = useState(false);
-  const stroke = "var(--secondary-foreground)";
+  const stroke = "var(--background)";
   const hoverStroke = "var(--primary)";
+
+  const strokeInside = "var(--primary)";
+  const hoverStrokeInside = "var(--primary)";
 
   const applyHover = (isHovering: boolean) => {
     if (!nodeNavigation || isTemporary) return;
@@ -61,6 +64,16 @@ const EdgeLine = ({
         x2={x2}
         y2={y2}
         stroke={hover ? hoverStroke : stroke}
+        strokeWidth={5}
+        strokeDasharray={isTemporary ? "4 4" : undefined}
+        pointerEvents="none"
+      />
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke={hover ? hoverStrokeInside : strokeInside}
         strokeWidth={2}
         strokeDasharray={isTemporary ? "4 4" : undefined}
         pointerEvents="none"
