@@ -102,9 +102,8 @@ const useNodesRuntime = ({
       try {
         const ast = buildAST(outputNode.id);
         const result = evaluateAST(ast)[1];
-        console.log(result);
-        //TODO: above need to do last of the inputs if no fromOutputId
-        // const outputObject3D = result.value;
+        //because output always returns on slot 1
+
         const outputObject3D = result.value;
 
         if (!(outputObject3D instanceof THREE.Object3D)) {

@@ -279,22 +279,38 @@ export const nodeDefinitions: nodeDefinition[] = [
       { type: "slot", name: "radius", id: 0, slotValueType: "number" },
       { type: "slot", name: "resolution", id: 1, slotValueType: "number" },
     ],
-    outputs: [{ type: "mesh", name: "mesh", id: 2 }],
+    outputs: [
+      { type: "mesh", name: "mesh", id: 2 },
+      { type: "linestring", name: "linestring", id: 3 },
+    ],
     function: (node, evalFunction) => {
       const radiusInput = node.inputs[0];
       const radius = evalFunction(radiusInput.ast)[radiusInput.fromOutputId];
 
-      console.log(radius);
       const segmentsInput = node.inputs[1];
       const segments = evalFunction(segmentsInput.ast)[
         segmentsInput.fromOutputId
       ];
-      console.log(segments);
 
       if (radius.type === "number" && segments.type === "number") {
         const geom = new THREE.CircleGeometry(radius.value, segments.value);
+        const positionAttr = geom.getAttribute("position");
 
-        return { 2: { type: "mesh", value: geom } };
+        const linestring: THREE.Vector3[] = [];
+
+        for (let i = 0; i < positionAttr.count; i++) {
+          const x = positionAttr.getX(i);
+          const y = positionAttr.getY(i);
+          const z = positionAttr.getZ(i);
+          linestring.push(new THREE.Vector3(x, y, z));
+        }
+
+        const linestringClean = linestring.slice(1);
+
+        return {
+          2: { type: "mesh", value: geom },
+          3: { type: "linestring", value: linestringClean },
+        };
       }
       throw new Error("Invalid inputs to circle node");
     },

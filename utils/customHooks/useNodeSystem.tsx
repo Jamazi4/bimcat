@@ -123,7 +123,7 @@ export const useNodeSystem = (
       } else {
         toast("Unknown error");
       }
-      console.log(error);
+      console.warn(error);
     }
   }, [startNodeRuntime]);
 

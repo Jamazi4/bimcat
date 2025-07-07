@@ -178,6 +178,18 @@ two main challanges now are:
 
 ### --07-07-2025--
 
+now multiple inputs are possible (plane can also output a string), types a bit
+more strict and edges with a better visibility
+
+now ideally I'd lock input conditionally or change it when I switch a bool or
+sth. The idea is to have one extrude that can work both for mesh and linestring
+
+also want to add color picker for output and position for circle,
+evenutaly create a transform node that will be taken for plane and circle
+that will contain rotation, scale and translate.
+
+Maybe plane middle should be plane center?
+
 ## General
 
 the problems to solve can be divided into two categories:

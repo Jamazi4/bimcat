@@ -52,15 +52,11 @@ export type EvalValue =
   | { type: "boolean"; value: boolean }
   | { type: "number"; value: number }
   | { type: "vector"; value: THREE.Vector3 }
-  | { type: "linestring"; value: THREE.Vector3[] }
+  | { type: "linestring"; value: THREE.Vector3[] } //consider switching to buffergeom
   | { type: "mesh"; value: THREE.BufferGeometry }
   | { type: "geometry"; value: THREE.Object3D }; // result of output node only
 
-export type NodeEvalResult = Record<number, EvalValue>;
-// the number is the output that I want to be returned from function
-// I specify this in return from node's function. If I return key 3 from output
-// of id 3 and key 4 from output of id 4
-// TODO: Find a better way of specifying what the key means or smth
+export type NodeEvalResult = { [outputSlotId: number]: EvalValue };
 
 export type SlotValues =
   | "boolean"
@@ -70,14 +66,23 @@ export type SlotValues =
   | "mesh"
   | "geometry";
 
-export type NodeInputType = {
-  type: "slot" | "number" | "boolean" | "string";
-  slotValueType?: SlotValues;
-  defaultValue?: ASTNode;
-  name: string;
-  id: number;
-  value?: number | boolean | string;
-};
+export type NodeInputType =
+  | {
+      type: "slot";
+      slotValueType: SlotValues;
+      defaultValue?: ASTNode;
+      name: string;
+      id: number;
+      value?: number | boolean | string;
+    }
+  | {
+      type: "number" | "boolean" | "string";
+      slotValueType?: undefined;
+      defaultValue?: ASTNode;
+      name: string;
+      id: number;
+      value?: number | boolean | string;
+    };
 
 export type NodeOutputType = {
   type: SlotValues;
