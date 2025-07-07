@@ -157,6 +157,20 @@ gemini optimized rendering the draggable node
 boolean switches now supported
 now I can do default values for nodes
 
+changed node values to be objects and now it supports values "inline" along
+slots within one node
+
+Now I want to control the output type of plane if user selects closed: false
+so that output changes from mesh to linestring
+
+plan to do it is following:
+add optional field to NodeInputType and define it in the nodeDefinition -
+it will be smth like "controlsOutput" and it will be an object like:
+{"true" : 5, "false": 6}
+then I will conditionally render (in DraggableNode) either output with
+index 5 or 6.
+separately this value will be used to change processing of nodeDef function
+
 two main challanges now are:
 
 - adding more inputs to things like linestring

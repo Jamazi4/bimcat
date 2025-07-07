@@ -193,7 +193,7 @@ const InputBoolean = ({
 
   return (
     <div className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
-      <Switch value={String(curVal)} onCheckedChange={(e) => changeValue(e)} />
+      <Switch checked={curVal} onCheckedChange={(e) => changeValue(e)} />
       <div className="m-2 text-sm">{displayName}</div>
     </div>
   );
