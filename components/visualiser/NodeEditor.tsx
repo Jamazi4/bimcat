@@ -13,6 +13,7 @@ import { LoadingSpinnerFixed } from "../global/LoadingSpinner";
 import * as THREE from "three";
 import NodeMenu from "./NodeMenu";
 import SVGRenderer from "./SVGRenderer";
+import { useTheme } from "next-themes";
 
 const NodeEditor = ({
   nodeNavigation,
@@ -23,6 +24,8 @@ const NodeEditor = ({
   setNodeNavigation: Dispatch<SetStateAction<boolean>>;
   nodeMeshGroup: THREE.Group;
 }) => {
+  const { theme, systemTheme } = useTheme();
+  const curTheme = theme === "system" ? systemTheme : theme;
   const [pendingSave, setPendingSave] = useState(false);
   const [pendingFetch, setPendingFetch] = useState(true);
   const searchParams = useSearchParams();
@@ -70,7 +73,7 @@ const NodeEditor = ({
     setPendingSave(false);
   };
 
-  if (!nodes) return;
+  if (!nodes && !curTheme) return;
 
   if (pendingFetch) return <LoadingSpinnerFixed />;
 
@@ -103,6 +106,7 @@ const NodeEditor = ({
           const selected = selectedNodeIds.includes(node.id);
           return (
             <DraggableNode
+              curTheme={curTheme!}
               selected={selected}
               setNodeDivs={setNodeDivs}
               getViewTransformScale={getViewTransformScale}

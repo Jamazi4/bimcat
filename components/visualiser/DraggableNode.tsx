@@ -40,6 +40,7 @@ interface DraggableNodeProps {
   nodeNavigation: boolean;
   getViewTransformScale: () => number;
   setNodeDivs: Dispatch<SetStateAction<Record<string, HTMLDivElement>>>;
+  curTheme: string;
 }
 const DraggableNode = memo(function DraggableNode({
   selected,
@@ -52,6 +53,7 @@ const DraggableNode = memo(function DraggableNode({
   nodeNavigation,
   getViewTransformScale,
   setNodeDivs,
+  curTheme,
 }: DraggableNodeProps) {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -81,6 +83,8 @@ const DraggableNode = memo(function DraggableNode({
     [getViewTransformScale],
   );
 
+  const highlight = curTheme === "dark" ? "brightness-120" : "brightness-70";
+
   return (
     <div
       ref={nodeRef}
@@ -88,14 +92,14 @@ const DraggableNode = memo(function DraggableNode({
         transform: `translate(${node.x}px, ${node.y}px)`,
         pointerEvents: `${nodeNavigation ? "auto" : "none"}`,
       }}
-      className={`draggable-node w-50 min-h-15 bg-accent absolute z-20 border-2 rounded-lg transition-colors cursor-grab ${selected ? "border-primary" : "hover:border-primary "}`}
+      className={`draggable-node border-accent w-50 min-h-15 bg-accent absolute shadow-xl z-20 border-1 rounded-md transition-colors cursor-grab ${selected ? `border-primary ${highlight}` : "hover:border-primary "}`}
       onMouseDown={(e) => {
         if ((e.target as HTMLDivElement).closest(".connect-slot")) return;
         startDraggingNode(node.id, e);
       }}
     >
       {/* title  */}
-      <div className="flex justify-center bg-accent-foreground text-background rounded-tl-md rounded-tr-md font-bold select-none">
+      <div className="flex justify-center text-secondary border-b-1 rounded-tl-md rounded-tr-md font-bold select-none mx-2">
         {node.type}
       </div>
 
