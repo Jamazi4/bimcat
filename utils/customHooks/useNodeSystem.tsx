@@ -108,6 +108,10 @@ export const useNodeSystem = (
 
   const runtimeNodes = useRuntimeNodes(nodes);
 
+  const shiftPressed = useRef(false);
+
+  const curClickedNodeId = useRef<string>("");
+
   const { startNodeRuntime, renderNodeOutput } = useNodesRuntime({
     runtimeNodes,
     edges,
@@ -305,6 +309,7 @@ export const useNodeSystem = (
 
   const startDraggingNode = useCallback(
     (nodeId: string, e: React.MouseEvent) => {
+      curClickedNodeId.current = nodeId;
       if (!editorRef.current) return;
       wasDragging.current = false;
 
@@ -328,6 +333,7 @@ export const useNodeSystem = (
         .filter(Boolean) as { id: string; offsetX: number; offsetY: number }[];
 
       setDraggingNodes(newDraggingNodes);
+      // draggingNodesRef.current = newDraggingNodes;
     },
     [screenToWorld],
   );
@@ -447,10 +453,19 @@ export const useNodeSystem = (
       } else if ((e.metaKey || e.ctrlKey) && e.key === "v") {
         e.preventDefault();
         pasteCopiedNodes();
+      } else if (e.shiftKey) {
+        e.preventDefault();
+        shiftPressed.current = true;
       }
     },
     [copySelectedNodes, pasteCopiedNodes],
   );
+
+  const handleKeyUp = (e: KeyboardEvent) => {
+    if (e.key === "Shift") {
+      shiftPressed.current = false;
+    }
+  };
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -532,7 +547,25 @@ export const useNodeSystem = (
       draggingNodesRef.current.length === 1 &&
       wasDragging.current === false
     ) {
-      setSelectedNodeIds([draggingNodesRef.current[0].id]);
+      if (shiftPressed.current === true) {
+        setSelectedNodeIds([
+          ...selectedNodeIdsRef.current,
+          draggingNodesRef.current[0].id,
+        ]);
+      } else {
+        setSelectedNodeIds([draggingNodesRef.current[0].id]);
+      }
+      setDraggingNodes([]);
+      return;
+    } else if (
+      draggingNodesRef.current.length > 1 &&
+      shiftPressed.current === true &&
+      wasDragging.current === false
+    ) {
+      const newSelectedNodeIds = selectedNodeIdsRef.current.filter(
+        (nid) => nid !== curClickedNodeId.current,
+      );
+      setSelectedNodeIds(newSelectedNodeIds);
       setDraggingNodes([]);
       return;
     }
@@ -584,7 +617,21 @@ export const useNodeSystem = (
         })
         .map(([id, _]) => id);
 
-      setSelectedNodeIds(selectedIds);
+      if (shiftPressed.current === false) {
+        setSelectedNodeIds(selectedIds);
+      } else {
+        const subtractiveSelection = [
+          ...selectedNodeIdsRef.current,
+          ...selectedIds,
+        ].filter(
+          (id) =>
+            !(
+              selectedIds.includes(id) &&
+              selectedNodeIdsRef.current.includes(id)
+            ),
+        );
+        setSelectedNodeIds(subtractiveSelection);
+      }
     }
     setSelectionRect(null);
   }, [addEdge]);
@@ -665,13 +712,16 @@ export const useNodeSystem = (
 
     if (nodeNavigation) {
       document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keyup", handleKeyUp);
     } else {
       document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
     }
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
       document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
     };
   }, [
     isPanning,

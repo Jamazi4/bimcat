@@ -190,6 +190,11 @@ that will contain rotation, scale and translate.
 
 Maybe plane middle should be plane center?
 
+### --08-07-2025--
+
+cosmetics and removing edge that leads to the same slot
+shift select
+
 ## General
 
 the problems to solve can be divided into two categories:
@@ -197,24 +202,27 @@ the problems to solve can be divided into two categories:
 Runtime:
 
 - cache node outputs
-- solidify, get normal,
+- solidify node, transform node with translate/scale/angles or quaternion,
 - change/lock inputs conditionally
+- pick reference from 3D
 
 UI:
 
 - highlight wrong links
-- shift + click to select
 - lock node menu buttons
 - for extrude remove buffer positions ending up as not a part of indices
 - color picker in output node
 - left click in node editor to pan, hide context menu
 - addNode menu to have search
+- ctrl-z and ctrl-r
+- switching node type in real time (euler-quaternion and extrude mesh/linestring)
+- combo slot/input = input locks on connection
 
 additionally some tools that might need adding
 
 - measure tool
-- expose var (so it's adjustable in the browser)
-- lock editing nodes if it's not author
+- expose var (so it's adjustable in the browser) and dynamic props
+- don't allow to open node editor/don't fetch node project if not author
 
 done:
 
@@ -225,3 +233,4 @@ done:
 - memoize draggable nodes to optimize rendering
 - categories for add node menu
 - add boolean input - switch
+- shift + click to select and shift box select
