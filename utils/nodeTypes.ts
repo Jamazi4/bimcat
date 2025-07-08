@@ -66,23 +66,20 @@ export type SlotValues =
   | "mesh"
   | "geometry";
 
-export type NodeInputType =
+export type NodeInputType = (
+  | { type: "slot"; slotValueType: SlotValues }
   | {
-      type: "slot";
+      type: "combo";
       slotValueType: SlotValues;
-      defaultValue?: ASTNode;
-      name: string;
-      id: number;
-      value?: number | boolean | string;
+      value: number | boolean | string;
     }
-  | {
-      type: "number" | "boolean" | "string";
-      slotValueType?: undefined;
-      defaultValue?: ASTNode;
-      name: string;
-      id: number;
-      value?: number | boolean | string;
-    };
+  | { type: "number" | "boolean" | "string"; slotValueType?: undefined }
+) & {
+  defaultValue?: ASTNode;
+  name: string;
+  id: number;
+  value?: number | boolean | string;
+};
 
 export type NodeOutputType = {
   type: SlotValues;

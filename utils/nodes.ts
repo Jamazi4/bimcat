@@ -98,7 +98,7 @@ export const nodeDefinitions: nodeDefinition[] = [
   {
     nodeDefId: 3,
     category: "variable",
-    type: "vector",
+    type: "oldvector",
     inputs: [
       { type: "slot", name: "X", id: 0, slotValueType: "number" },
       { type: "slot", name: "Y", id: 1, slotValueType: "number" },
@@ -328,6 +328,56 @@ export const nodeDefinitions: nodeDefinition[] = [
           value: node.values["0"] as boolean,
         },
       };
+    },
+  },
+  {
+    nodeDefId: 9,
+    category: "variable",
+    type: "vector",
+    inputs: [
+      { type: "combo", value: 0, name: "X", id: 0, slotValueType: "number" },
+      { type: "combo", value: 0, name: "Y", id: 1, slotValueType: "number" },
+      { type: "combo", value: 0, name: "Z", id: 2, slotValueType: "number" },
+    ],
+    outputs: [{ type: "vector", name: "vector", id: 3 }],
+    function: (node, evalFunction) => {
+      const xInput = node.inputs[0];
+      let x: number;
+      if (!xInput) {
+        x = node.values["0"] as number;
+      } else {
+        x = evalFunction(xInput.ast)[xInput.fromOutputId].value as number;
+      }
+
+      const yInput = node.inputs[1];
+      let y: number;
+      if (!yInput) {
+        y = node.values["1"] as number;
+      } else {
+        y = evalFunction(yInput.ast)[yInput.fromOutputId].value as number;
+      }
+
+      const zInput = node.inputs[2];
+      let z: number;
+      if (!zInput) {
+        z = node.values["2"] as number;
+      } else {
+        z = evalFunction(zInput.ast)[zInput.fromOutputId].value as number;
+      }
+
+      if (
+        typeof x === "number" &&
+        typeof y === "number" &&
+        typeof z === "number"
+      ) {
+        return {
+          3: {
+            type: "vector",
+            value: new THREE.Vector3(x, y, z),
+          },
+        };
+      }
+      throw new Error("Invalid inputs to pointByXYZ");
     },
   },
 ];

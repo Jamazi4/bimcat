@@ -195,6 +195,13 @@ Maybe plane middle should be plane center?
 cosmetics and removing edge that leads to the same slot
 shift select
 
+combo slot -
+
+- new react element in draggableNode
+- new state tracking for connected node slots to potentially lock input field
+- in ast builder - if not edge - suck input value instead of defaultValue
+- combo inputs!
+
 ## General
 
 the problems to solve can be divided into two categories:
@@ -216,7 +223,6 @@ UI:
 - addNode menu to have search
 - ctrl-z and ctrl-r
 - switching node type in real time (euler-quaternion and extrude mesh/linestring)
-- combo slot/input = input locks on connection
 
 additionally some tools that might need adding
 
@@ -234,3 +240,4 @@ done:
 - categories for add node menu
 - add boolean input - switch
 - shift + click to select and shift box select
+- combo slot/input = input locks on connection

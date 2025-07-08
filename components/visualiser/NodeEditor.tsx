@@ -103,9 +103,17 @@ const NodeEditor = ({
         }}
       >
         {nodes.map((node) => {
+          const connectedSlotIds = edges
+            .filter((e) => {
+              return e.toNodeId === node.id;
+            })
+            .map((e) => {
+              return e.toSlotId;
+            });
           const selected = selectedNodeIds.includes(node.id);
           return (
             <DraggableNode
+              connectedSlotIds={connectedSlotIds}
               curTheme={curTheme!}
               selected={selected}
               setNodeDivs={setNodeDivs}

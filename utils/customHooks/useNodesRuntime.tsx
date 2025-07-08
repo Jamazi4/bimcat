@@ -36,28 +36,35 @@ const useNodesRuntime = ({
       if (!nodeDef) throw new Error(`Unknown node type ${node.type}`);
 
       const inputs = nodeDef.inputs
-        .filter((inputDef) => inputDef.type === "slot")
-        .map((inputDef) => {
+        .filter(
+          (inputDef) => inputDef.type === "slot" || inputDef.type === "combo",
+        )
+        .flatMap((inputDef) => {
           const edge = edges.find(
             (edge) => edge.toNodeId === nodeId && edge.toSlotId === inputDef.id,
           );
+
+          if (inputDef.type === "combo" && !edge) {
+            return [];
+          }
 
           if (!inputDef.defaultValue && !edge) {
             throw new Error(`${node.type} needs ${inputDef.name}`);
           }
 
-          const lastOutputId = edge
+          const lastSlotInNodeId = edge
             ? edge.fromSlotId
             : nodeDef.inputs.length - 1 + nodeDef.outputs.length - 1;
 
           const input = {
             inputId: inputDef.id,
             ast: edge ? buildAST(edge.fromNodeId) : inputDef.defaultValue!,
-            fromOutputId: lastOutputId,
+            fromOutputId: lastSlotInNodeId,
           };
 
           return input;
-        });
+        })
+        .filter(Boolean);
 
       return {
         type: node.type,
