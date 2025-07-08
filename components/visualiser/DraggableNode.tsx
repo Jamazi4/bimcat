@@ -32,7 +32,11 @@ interface DraggableNodeProps {
   ) => void;
   registerNodeSlot: (slotData: NodeSlot) => void;
   startConnecting: (nodeId: string, slotId: number) => void;
-  finishConnecting: (nodeId: string, slotId: number, clear?: boolean) => void;
+  finishConnecting: (
+    nodeId: string,
+    slotId: number,
+    clearConnectingToNode?: boolean,
+  ) => void;
   nodeNavigation: boolean;
   getViewTransformScale: () => number;
   setNodeDivs: Dispatch<SetStateAction<Record<string, HTMLDivElement>>>;
@@ -238,7 +242,11 @@ interface InputNodeSlotsProps {
   name: string;
   partialSlotData: Partial<NodeSlot>;
   registerNodeSlot: (slotData: NodeSlot) => void;
-  finishConnecting: (nodeId: string, slotId: number, clear?: boolean) => void;
+  finishConnecting: (
+    nodeId: string,
+    slotId: number,
+    clearConnectingToNode?: boolean,
+  ) => void;
   nodeRef: React.RefObject<HTMLDivElement>;
   getSlotRelativePosition: (
     nodeRef: React.RefObject<HTMLDivElement>,

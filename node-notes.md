@@ -197,13 +197,18 @@ the problems to solve can be divided into two categories:
 Runtime:
 
 - cache node outputs
-- capped/uncapped shapes, solidify, get normal,
+- solidify, get normal,
+- change/lock inputs conditionally
 
 UI:
 
 - highlight wrong links
 - shift + click to select
 - lock node menu buttons
+- for extrude remove buffer positions ending up as not a part of indices
+- color picker in output node
+- left click in node editor to pan, hide context menu
+- addNode menu to have search
 
 additionally some tools that might need adding
 
@@ -213,6 +218,8 @@ additionally some tools that might need adding
 
 done:
 
+- capped/uncapped shapes
+- remove edge if another is connected to the same slot
 - multiple outputs
 - icons/tooltips for input types // for now just color coded
 - memoize draggable nodes to optimize rendering

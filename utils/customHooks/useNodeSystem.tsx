@@ -366,8 +366,8 @@ export const useNodeSystem = (
   );
 
   const finishConnecting = useCallback(
-    (nodeId: string, slotId: number, clear?: boolean) => {
-      if (clear) setConnectingToNode(null);
+    (nodeId: string, slotId: number, clearConnectingToNode?: boolean) => {
+      if (clearConnectingToNode) setConnectingToNode(null);
       else setConnectingToNode({ nodeId, slotId });
     },
     [],
@@ -387,7 +387,14 @@ export const useNodeSystem = (
         toNodeId,
         toSlotId,
       };
-      setEdges((prevEdges) => [...prevEdges, newEdge]);
+
+      const curEdges = edgesRef.current;
+      const newEdges = curEdges.filter((edge) => {
+        return !(edge.toNodeId === toNodeId && edge.toSlotId === toSlotId);
+      });
+
+      setEdges([...newEdges, newEdge]);
+      edgesRef.current = [...newEdges, newEdge];
     },
     [],
   );
