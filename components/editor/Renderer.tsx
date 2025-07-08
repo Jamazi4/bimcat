@@ -44,7 +44,7 @@ const Renderer = ({
           size="icon"
           variant="ghost"
           asChild
-          className="absolute top-2 right-2 z-50 cursor-pointer "
+          className="absolute top-2 right-2 z-10 cursor-pointer "
           onClick={handleOpenEditor}
         >
           <Workflow className="p-1" />

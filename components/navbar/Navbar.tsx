@@ -7,7 +7,7 @@ import { NavbarMenu } from "./NavbarMenu";
 
 const Navbar = () => {
   return (
-    <nav className=" mx-auto px-4 py-4 top-0 border-b bg-background h-[72px] fixed w-full z-10">
+    <nav className="z-50 mx-auto px-4 py-4 top-0 border-b bg-background h-[72px] fixed w-full z-10">
       <div className="flex justify-between  mx-auto items-center">
         <h1 className="font-black text-3xl text-primary hover:brightness-150 w-20">
           <Link href="/">

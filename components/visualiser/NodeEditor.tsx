@@ -9,7 +9,7 @@ import {
 import { useNodeSystem } from "@/utils/customHooks/useNodeSystem";
 import { useSearchParams } from "next/navigation";
 import DraggableNode from "./DraggableNode";
-import LoadingSpinner from "../global/LoadingSpinner";
+import LoadingSpinner, { LoadingSpinnerFixed } from "../global/LoadingSpinner";
 import * as THREE from "three";
 import NodeMenu from "./NodeMenu";
 import SVGRenderer from "./SVGRenderer";
@@ -72,7 +72,7 @@ const NodeEditor = ({
 
   if (!nodes) return;
 
-  if (pendingFetch) return <LoadingSpinner />;
+  if (pendingFetch) return <LoadingSpinnerFixed />;
 
   return (
     <div

@@ -102,14 +102,14 @@ const ManageGuestsButton = ({
                   <p>{guest.name}</p>
                   {!isComposite && (
                     <p className="flex">
-                      - {guest.numAuthoredCompositeLibraries}
-                      <SquareLibrary className="ml-2 w-5 h-5" />
+                      <SquareLibrary className="ml-5 mr-2 w-5 h-5" />
+                      {guest.numAuthoredCompositeLibraries}
                     </p>
                   )}
                   {isComposite && (
                     <p className="flex">
-                      - {guest.numMergedLibraries}
-                      <Book className="ml-2 w-5 h-5" />
+                      <Book className="ml-5 mr-2 w-5 h-5" />
+                      {guest.numMergedLibraries}
                     </p>
                   )}
                   {/* TODO: Show number of libraries if in composite  */}
