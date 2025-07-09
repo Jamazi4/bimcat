@@ -101,13 +101,13 @@ const DraggableNode = memo(function DraggableNode({
       }}
     >
       {/* title  */}
-      <div className="flex justify-center text-secondary border-b-1 rounded-tl-md rounded-tr-md font-bold select-none mx-2">
+      <div className="flex justify-center text-secondary border-b-1 rounded-tl-md rounded-tr-md font-bold select-none mx-2 py-2">
         {node.type}
       </div>
 
       {/* inputs  */}
-      <div className="grid grid-cols-[2fr_1fr] items-center h-full my-auto py-2">
-        <div className="space-y-1">
+      <div className="grid grid-cols-[2fr_1fr] space-x-4 items-center h-full my-auto py-4">
+        <div className="space-y-4">
           {nodeDef.inputs.map((input, i) => {
             if (input.type === "number") {
               const changeThisValue = changeThisNodeValues.bind(null, input.id);
@@ -179,7 +179,7 @@ const DraggableNode = memo(function DraggableNode({
         </div>
 
         {/* outputs */}
-        <div className="space-y-1">
+        <div className="space-y-4">
           {nodeDef.outputs.map((output, i) => {
             const partialSlotData: Partial<NodeSlot> = {
               nodeId: node.id,

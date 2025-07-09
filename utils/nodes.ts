@@ -1,7 +1,12 @@
 import * as THREE from "three";
 import { ConvexGeometry } from "three/addons/geometries/ConvexGeometry.js";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
-import { ASTNode, nodeDefinition } from "./nodeTypes";
+import {
+  ASTNode,
+  ASTNodeInput,
+  nodeDefinition,
+  NodeEvalResult,
+} from "./nodeTypes";
 import { createNodeId } from "./utilFunctions";
 
 export const defaultNumber: ASTNode = {
@@ -153,8 +158,20 @@ export const nodeDefinitions: nodeDefinition[] = [
     category: "generator",
     type: "plane",
     inputs: [
-      { type: "slot", name: "width", id: 0, slotValueType: "number" },
-      { type: "slot", name: "height", id: 1, slotValueType: "number" },
+      {
+        type: "combo",
+        value: 1,
+        name: "width",
+        id: 0,
+        slotValueType: "number",
+      },
+      {
+        type: "combo",
+        value: 1,
+        name: "height",
+        id: 1,
+        slotValueType: "number",
+      },
       {
         type: "slot",
         name: "position",
@@ -168,26 +185,20 @@ export const nodeDefinitions: nodeDefinition[] = [
       { type: "linestring", name: "linestring", id: 5 },
     ],
     function: (node, evalFunction) => {
-      const dim1Input = node.inputs[0];
-      const dim1 = evalFunction(dim1Input.ast)[dim1Input.fromOutputId];
-
-      const dim2Input = node.inputs[1];
-      const dim2 = evalFunction(dim2Input.ast)[dim2Input.fromOutputId];
-
-      const pInput = node.inputs[2];
-      const p = evalFunction(pInput.ast)[pInput.fromOutputId];
+      const [dim1, dim2] = getComboValues(node, evalFunction, [0, 1]);
+      const [p] = getInputValues(node.inputs, evalFunction, [2]);
 
       if (
         p.type === "vector" &&
-        dim1.type === "number" &&
-        dim2.type === "number"
+        typeof dim1 === "number" &&
+        typeof dim2 === "number"
       ) {
         const x = p.value.x;
         const y = p.value.y;
         const z = p.value.z;
 
-        const w = dim1.value;
-        const h = dim2.value;
+        const w = dim1;
+        const h = dim2;
         const vertices = new Float32Array([
           x,
           y,
@@ -276,24 +287,30 @@ export const nodeDefinitions: nodeDefinition[] = [
     category: "generator",
     type: "circle",
     inputs: [
-      { type: "slot", name: "radius", id: 0, slotValueType: "number" },
-      { type: "slot", name: "resolution", id: 1, slotValueType: "number" },
+      {
+        type: "combo",
+        value: 1,
+        name: "radius",
+        id: 0,
+        slotValueType: "number",
+      },
+      {
+        type: "combo",
+        value: 16,
+        name: "resolution",
+        id: 1,
+        slotValueType: "number",
+      },
     ],
     outputs: [
       { type: "mesh", name: "mesh", id: 2 },
       { type: "linestring", name: "linestring", id: 3 },
     ],
     function: (node, evalFunction) => {
-      const radiusInput = node.inputs[0];
-      const radius = evalFunction(radiusInput.ast)[radiusInput.fromOutputId];
+      const [radius, segments] = getComboValues(node, evalFunction, [0, 1]);
 
-      const segmentsInput = node.inputs[1];
-      const segments = evalFunction(segmentsInput.ast)[
-        segmentsInput.fromOutputId
-      ];
-
-      if (radius.type === "number" && segments.type === "number") {
-        const geom = new THREE.CircleGeometry(radius.value, segments.value);
+      if (typeof radius === "number" && typeof segments === "number") {
+        const geom = new THREE.CircleGeometry(radius, segments);
         const positionAttr = geom.getAttribute("position");
 
         const linestring: THREE.Vector3[] = [];
@@ -341,29 +358,7 @@ export const nodeDefinitions: nodeDefinition[] = [
     ],
     outputs: [{ type: "vector", name: "vector", id: 3 }],
     function: (node, evalFunction) => {
-      const xInput = node.inputs[0];
-      let x: number;
-      if (!xInput) {
-        x = node.values["0"] as number;
-      } else {
-        x = evalFunction(xInput.ast)[xInput.fromOutputId].value as number;
-      }
-
-      const yInput = node.inputs[1];
-      let y: number;
-      if (!yInput) {
-        y = node.values["1"] as number;
-      } else {
-        y = evalFunction(yInput.ast)[yInput.fromOutputId].value as number;
-      }
-
-      const zInput = node.inputs[2];
-      let z: number;
-      if (!zInput) {
-        z = node.values["2"] as number;
-      } else {
-        z = evalFunction(zInput.ast)[zInput.fromOutputId].value as number;
-      }
+      const [x, y, z] = getComboValues(node, evalFunction, [0, 1, 2]);
 
       if (
         typeof x === "number" &&
@@ -377,7 +372,38 @@ export const nodeDefinitions: nodeDefinition[] = [
           },
         };
       }
-      throw new Error("Invalid inputs to pointByXYZ");
+      throw new Error("Invalid inputs to vector");
     },
   },
 ];
+
+const getComboValues = (
+  node: ASTNode,
+  evalFunction: (node: ASTNode) => NodeEvalResult,
+  inputIds: number[],
+) => {
+  const inputs = node.inputs;
+  const values = inputIds.map((id) => {
+    const curInput = inputs.find((i) => i.inputId === id);
+    if (!curInput) return node.values[id];
+    else return evalFunction(curInput.ast)[curInput.fromOutputId].value;
+  });
+  return values;
+};
+
+const getInputValues = (
+  inputs: ASTNodeInput[],
+  evalFunction: (node: ASTNode) => NodeEvalResult,
+  inputIds: number[],
+) => {
+  const values = inputs
+    .flatMap((i) => {
+      if (inputIds.includes(i.inputId)) {
+        return evalFunction(i.ast)[i.fromOutputId];
+      }
+      return [];
+    })
+    .filter(Boolean);
+
+  return values;
+};

@@ -194,13 +194,7 @@ Maybe plane middle should be plane center?
 
 cosmetics and removing edge that leads to the same slot
 shift select
-
-combo slot -
-
-- new react element in draggableNode
-- new state tracking for connected node slots to potentially lock input field
-- in ast builder - if not edge - suck input value instead of defaultValue
-- combo inputs!
+combo inputs are working in new vector node!
 
 ## General
 

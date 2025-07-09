@@ -41,10 +41,16 @@ export interface useNodesRuntimeProps {
   meshGroup: THREE.Group;
 }
 
+export type ASTNodeInput = {
+  inputId: number;
+  ast: ASTNode;
+  fromOutputId: number;
+};
+
 export type ASTNode = {
   type: string;
   id: string;
-  inputs: { inputId: number; ast: ASTNode; fromOutputId: number }[];
+  inputs: ASTNodeInput[];
   values: NodeValues;
 };
 
