@@ -668,7 +668,7 @@ export const useNodeSystem = (
     (e: React.MouseEvent) => {
       if (!nodeNavigation) return;
 
-      if (e.button === 1) {
+      if (e.button === 2) {
         e.preventDefault();
         setIsPanning(true);
         setPanStart({
@@ -713,15 +713,24 @@ export const useNodeSystem = (
     if (nodeNavigation) {
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("keyup", handleKeyUp);
+      document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+      });
     } else {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
+      document.removeEventListener("contextmenu", function (e) {
+        e.preventDefault();
+      });
     }
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
+      document.removeEventListener("contextmenu", function (e) {
+        e.preventDefault();
+      });
     };
   }, [
     isPanning,

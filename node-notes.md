@@ -196,6 +196,11 @@ cosmetics and removing edge that leads to the same slot
 shift select
 combo inputs are working in new vector node!
 
+### --09-07-2025--
+
+combo added to vector and plane, some more cosmetics making nodes bigger.
+two burning things are - transform node and conditional input slot
+
 ## General
 
 the problems to solve can be divided into two categories:
