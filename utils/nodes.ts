@@ -102,37 +102,6 @@ export const nodeDefinitions: nodeDefinition[] = [
   },
   {
     nodeDefId: 3,
-    category: "variable",
-    type: "oldvector",
-    inputs: [
-      { type: "slot", name: "X", id: 0, slotValueType: "number" },
-      { type: "slot", name: "Y", id: 1, slotValueType: "number" },
-      { type: "slot", name: "Z", id: 2, slotValueType: "number" },
-    ],
-    outputs: [{ type: "vector", name: "vector", id: 3 }],
-    function: (node, evalFunction) => {
-      const xInput = node.inputs[0];
-      const x = evalFunction(xInput.ast)[xInput.fromOutputId];
-
-      const yInput = node.inputs[1];
-      const y = evalFunction(yInput.ast)[yInput.fromOutputId];
-
-      const zInput = node.inputs[2];
-      const z = evalFunction(zInput.ast)[zInput.fromOutputId];
-
-      if (x.type === "number" && y.type === "number" && z.type === "number") {
-        return {
-          3: {
-            type: "vector",
-            value: new THREE.Vector3(x.value, y.value, z.value),
-          },
-        };
-      }
-      throw new Error("Invalid inputs to pointByXYZ");
-    },
-  },
-  {
-    nodeDefId: 4,
     category: "generator",
     type: "linestring",
     inputs: [
@@ -154,7 +123,7 @@ export const nodeDefinitions: nodeDefinition[] = [
     },
   },
   {
-    nodeDefId: 5,
+    nodeDefId: 4,
     category: "generator",
     type: "plane",
     inputs: [
@@ -238,7 +207,7 @@ export const nodeDefinitions: nodeDefinition[] = [
     },
   },
   {
-    nodeDefId: 6,
+    nodeDefId: 5,
     category: "modifier",
     type: "extrude mesh",
     inputs: [
@@ -283,7 +252,7 @@ export const nodeDefinitions: nodeDefinition[] = [
     },
   },
   {
-    nodeDefId: 7,
+    nodeDefId: 6,
     category: "generator",
     type: "circle",
     inputs: [
@@ -333,7 +302,7 @@ export const nodeDefinitions: nodeDefinition[] = [
     },
   },
   {
-    nodeDefId: 8,
+    nodeDefId: 7,
     category: "variable",
     type: "boolean",
     inputs: [{ type: "boolean", name: "boolean", id: 0, value: false }],
@@ -348,7 +317,7 @@ export const nodeDefinitions: nodeDefinition[] = [
     },
   },
   {
-    nodeDefId: 9,
+    nodeDefId: 8,
     category: "variable",
     type: "vector",
     inputs: [
@@ -373,6 +342,62 @@ export const nodeDefinitions: nodeDefinition[] = [
         };
       }
       throw new Error("Invalid inputs to vector");
+    },
+  },
+  {
+    nodeDefId: 9,
+    category: "general",
+    type: "extrudeTest",
+    inputs: [
+      {
+        type: "group",
+        name: "test1",
+        id: 0,
+        slotValueType: "mesh",
+        groupIndex: 0,
+        value: true,
+      },
+      {
+        type: "group",
+        name: "test2",
+        id: 1,
+        slotValueType: "linestring",
+        groupIndex: 0,
+        defaultValue: defaultBoolean,
+        value: false,
+      },
+      {
+        type: "group",
+        name: "test4",
+        id: 2,
+        slotValueType: "mesh",
+        groupIndex: 1,
+        value: false,
+      },
+      {
+        type: "group",
+        name: "test3",
+        id: 3,
+        slotValueType: "linestring",
+        groupIndex: 1,
+        defaultValue: defaultBoolean,
+        value: true,
+      },
+    ],
+    outputs: [{ type: "mesh", name: "mesh", id: 4 }],
+    function: (node, evalFunction) => {
+      const activeInputs = Object.entries(node.values)
+        .filter(([_, val]) => val === true)
+        .map(([key, _]) => parseInt(key));
+
+      console.log(`in eval ${activeInputs}`);
+
+      const [v1, v2] = getInputValues(node.inputs, evalFunction, activeInputs);
+
+      console.log(activeInputs);
+      console.log(v1, v2);
+
+      return { 4: { type: "number", value: 0 } };
     },
   },
 ];

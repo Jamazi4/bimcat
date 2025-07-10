@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { nodeDefinitions } from "../nodes";
 import { ASTNode, NodeEvalResult, useNodesRuntimeProps } from "../nodeTypes";
 import * as THREE from "three";
+import { group } from "console";
 
 const useNodesRuntime = ({
   runtimeNodes,
@@ -35,31 +36,49 @@ const useNodesRuntime = ({
       const nodeDef = nodeDefinitions.find((nd) => nd.type === node.type);
       if (!nodeDef) throw new Error(`Unknown node type ${node.type}`);
 
+      const seenGroupIds = [];
+
       const inputs = nodeDef.inputs
         .filter(
-          (inputDef) => inputDef.type === "slot" || inputDef.type === "combo",
+          (inputDef) =>
+            inputDef.type === "slot" ||
+            inputDef.type === "combo" ||
+            inputDef.type === "group",
         )
         .flatMap((inputDef) => {
+          const inputId =
+            inputDef.type === "group" ? inputDef.groupIndex : inputDef.id;
           const edge = edges.find(
-            (edge) => edge.toNodeId === nodeId && edge.toSlotId === inputDef.id,
+            (edge) => edge.toNodeId === nodeId && edge.toSlotId === inputId,
           );
 
           if (inputDef.type === "combo" && !edge) {
             return [];
           }
 
+          if (inputDef.type === "group") {
+            const activeInputs = Object.entries(node.values)
+              .filter(([_, val]) => val === true)
+              .map(([key, _]) => parseInt(key));
+
+            if (!activeInputs.includes(inputDef.id)) return [];
+            console.log(`in astbldr ${activeInputs}`);
+          }
+
           if (!inputDef.defaultValue && !edge) {
             throw new Error(`${node.type} needs ${inputDef.name}`);
           }
 
-          const lastSlotInNodeId = edge
+          //TODO: errors coming up here in processing group inputs
+
+          const fromOutputId = edge
             ? edge.fromSlotId
             : nodeDef.inputs.length - 1 + nodeDef.outputs.length - 1;
 
           const input = {
             inputId: inputDef.id,
             ast: edge ? buildAST(edge.fromNodeId) : inputDef.defaultValue!,
-            fromOutputId: lastSlotInNodeId,
+            fromOutputId: fromOutputId,
           };
 
           return input;

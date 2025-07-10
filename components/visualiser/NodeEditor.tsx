@@ -4,6 +4,7 @@ import {
   SetStateAction,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useNodeSystem } from "@/utils/customHooks/useNodeSystem";
@@ -25,7 +26,7 @@ const NodeEditor = ({
   nodeMeshGroup: THREE.Group;
 }) => {
   const { theme, systemTheme } = useTheme();
-  const curTheme = theme === "system" ? systemTheme : theme;
+  const curTheme = useRef(theme === "system" ? systemTheme : theme);
   const [pendingSave, setPendingSave] = useState(false);
   const [pendingFetch, setPendingFetch] = useState(true);
   const searchParams = useSearchParams();
@@ -73,7 +74,7 @@ const NodeEditor = ({
     setPendingSave(false);
   };
 
-  if (!nodes && !curTheme) return;
+  if (!nodes && !curTheme.current) return;
 
   if (pendingFetch) return <LoadingSpinnerFixed />;
 
@@ -103,18 +104,11 @@ const NodeEditor = ({
         }}
       >
         {nodes.map((node) => {
-          const connectedSlotIds = edges
-            .filter((e) => {
-              return e.toNodeId === node.id;
-            })
-            .map((e) => {
-              return e.toSlotId;
-            });
           const selected = selectedNodeIds.includes(node.id);
           return (
             <DraggableNode
-              connectedSlotIds={connectedSlotIds}
-              curTheme={curTheme!}
+              edges={edges}
+              curTheme={curTheme.current!}
               selected={selected}
               setNodeDivs={setNodeDivs}
               getViewTransformScale={getViewTransformScale}

@@ -650,7 +650,7 @@ export const useNodeSystem = (
         const delta = e.deltaY > 0 ? -1 : 1;
         const newScale =
           prevTransform.scale + delta * zoomIntensity * prevTransform.scale;
-        const clampedScale = Math.max(0.2, Math.min(3, newScale));
+        const clampedScale = Math.max(0.1, Math.min(3, newScale));
 
         const worldX = (mouseX - prevTransform.x) / prevTransform.scale;
         const worldY = (mouseY - prevTransform.y) / prevTransform.scale;

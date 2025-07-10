@@ -9,20 +9,30 @@ import {
   SetStateAction,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import {
   GeomNodeBackType,
+  NodeEdgeType,
+  NodeInputType,
   NodeSlot,
   SlotValues,
   backgroundColorClasses,
   fillColorClasses,
 } from "@/utils/nodeTypes";
 import { Switch } from "../ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 interface DraggableNodeProps {
-  connectedSlotIds: number[];
+  edges: NodeEdgeType[];
   selected: boolean;
   node: GeomNodeBackType;
   startDraggingNode: (nodeId: string, e: React.MouseEvent) => void;
@@ -44,7 +54,7 @@ interface DraggableNodeProps {
   curTheme: string;
 }
 const DraggableNode = memo(function DraggableNode({
-  connectedSlotIds,
+  edges,
   selected,
   node,
   startDraggingNode,
@@ -60,6 +70,10 @@ const DraggableNode = memo(function DraggableNode({
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const nodeRef = useRef<HTMLDivElement>(null);
   const changeThisNodeValues = changeNodeValue.bind(null, node.id);
+
+  const connectedSlotIds = useMemo(() => {
+    return edges.filter((e) => e.toNodeId === node.id).map((e) => e.toSlotId);
+  }, [edges, node.id]);
 
   useEffect(() => {
     setNodeDivs((prevDivs) => {
@@ -87,6 +101,17 @@ const DraggableNode = memo(function DraggableNode({
 
   const highlight = curTheme === "dark" ? "brightness-120" : "brightness-70";
 
+  const groupSlots = nodeDef.inputs.reduce(
+    (acc, cur) => {
+      if (cur.type == "group") {
+        if (!acc[cur.groupIndex]) acc[cur.groupIndex] = [];
+        acc[cur.groupIndex].push(cur);
+      }
+      return acc;
+    },
+    {} as Record<number, typeof nodeDef.inputs>,
+  );
+
   return (
     <div
       ref={nodeRef}
@@ -94,24 +119,51 @@ const DraggableNode = memo(function DraggableNode({
         transform: `translate(${node.x}px, ${node.y}px)`,
         pointerEvents: `${nodeNavigation ? "auto" : "none"}`,
       }}
-      className={`draggable-node border-accent min-w-50 min-h-15 bg-accent absolute shadow-xl z-20 border-1 rounded-md transition-colors cursor-grab ${selected ? `border-primary ${highlight}` : "hover:border-primary "}`}
+      className={`draggable-node min-w-50 min-h-15 bg-accent absolute shadow-xl z-20 border-1 rounded-md transition-colors cursor-grab ${selected ? `border-primary ${highlight}` : "hover:border-primary border-secondary-foreground/20 "}`}
       onMouseDown={(e) => {
         if ((e.target as HTMLDivElement).closest(".connect-slot")) return;
         startDraggingNode(node.id, e);
       }}
     >
       {/* title  */}
-      <div className="flex justify-center text-secondary border-b-1 rounded-tl-md rounded-tr-md font-bold select-none mx-2 py-2">
+      <div className="flex justify-center text-secondary border-b-1 rounded-tl-md rounded-tr-md font-bold select-none mx-2 py-2 text-xl">
         {node.type}
       </div>
 
       {/* inputs  */}
-      <div className="grid grid-cols-[2fr_1fr] space-x-4 items-center h-full my-auto py-4">
+      <div className="grid grid-cols-[2fr_1fr] space-x-10 items-center h-full my-auto py-4">
         <div className="space-y-4">
+          {Object.entries(groupSlots).map(([key, inputs]) => {
+            let activeIndex: number = inputs[0].id;
+            if (node.values) {
+              activeIndex = Object.entries(node.values)
+                .flatMap(([key, val]) => {
+                  if (val === true) return parseInt(key);
+                  else return [];
+                })
+                .filter(Boolean)[0];
+            }
+            return (
+              <InputGroup
+                activeIndex={activeIndex}
+                changeThisNodeValues={changeThisNodeValues}
+                nodeId={node.id}
+                groupIndex={parseInt(key)}
+                registerNodeSlot={registerNodeSlot}
+                key={key}
+                inputs={inputs}
+                getSlotRelativePosition={getSlotRelativePosition}
+                nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
+                finishConnecting={finishConnecting}
+              />
+            );
+          })}
+
           {nodeDef.inputs.map((input, i) => {
             if (input.type === "number") {
               const changeThisValue = changeThisNodeValues.bind(null, input.id);
               if (!node.values) return;
+
               return (
                 <InputNumber
                   key={input.id}
@@ -122,6 +174,7 @@ const DraggableNode = memo(function DraggableNode({
             } else if (input.type === "boolean") {
               const changeThisValue = changeThisNodeValues.bind(null, input.id);
               if (!node.values) return;
+
               return (
                 <InputBoolean
                   name={input.name}
@@ -137,6 +190,7 @@ const DraggableNode = memo(function DraggableNode({
                 slotId: input.id,
                 slotIO: "input",
               };
+
               return (
                 <InputSlot
                   optional={optional}
@@ -159,6 +213,7 @@ const DraggableNode = memo(function DraggableNode({
                 slotIO: "input",
               };
               const connected = connectedSlotIds.includes(input.id);
+
               return (
                 <ComboSlot
                   connected={connected}
@@ -186,6 +241,7 @@ const DraggableNode = memo(function DraggableNode({
               slotId: output.id,
               slotIO: "output",
             };
+
             return (
               <OutputSlot
                 slotValueType={output.type}
@@ -228,7 +284,7 @@ const InputBoolean = ({
   return (
     <div className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
       <Switch checked={curVal} onCheckedChange={(e) => changeValue(e)} />
-      <div className="m-2 text-sm">{displayName}</div>
+      <div className="m-2 text-lg">{displayName}</div>
     </div>
   );
 };
@@ -260,7 +316,7 @@ const InputNumber = ({
         type="text"
         value={curVal}
         onChange={(e) => handleChange(e)}
-        className={`${!isValidValue && "text-destructive border-destructive"} w-30`}
+        className={`${!isValidValue && "text-destructive border-destructive"} w-30 !text-lg`}
       />
     </div>
   );
@@ -346,23 +402,23 @@ const ComboSlot = ({
 
   return (
     <div
-      className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-8px] connect-slot"
+      className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
       onMouseOver={() => finishConnecting(nodeId!, slotId!)}
       onMouseLeave={() => finishConnecting(nodeId!, slotId!, true)}
     >
       <CircleDotDashed
         ref={ref}
-        size={16}
+        size={24}
         className={`bg-background rounded-full ${backgroundColorClasses[slotValueType]} text-primary`}
       />
       <Input
         type="text"
         value={curVal}
         onChange={(e) => handleChange(e)}
-        className={`${!isValidValue && "text-destructive border-destructive"} w-30`}
+        className={`${!isValidValue && "text-destructive border-destructive"} w-30 !text-lg`}
         disabled={connected}
       />
-      <p className="text-sm select-none ml-2">{name}</p>
+      <p className="text-lg select-none ml-2">{name}</p>
     </div>
   );
 };
@@ -429,24 +485,166 @@ const InputSlot = ({
 
   return (
     <div
-      className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-8px] connect-slot"
+      className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
       onMouseOver={() => finishConnecting(nodeId!, slotId!)}
       onMouseLeave={() => finishConnecting(nodeId!, slotId!, true)}
     >
       {!optional ? (
         <CircleDot
           ref={ref}
-          size={16}
+          size={24}
           className={`bg-background rounded-full ${fillColorClasses[slotValueType]} text-primary`}
         />
       ) : (
         <CircleDotDashed
           ref={ref}
-          size={16}
+          size={24}
           className={`bg-background rounded-full ${backgroundColorClasses[slotValueType]} text-primary`}
         />
       )}
-      <p className="text-sm select-none">{name}</p>
+      <p className="text-lg select-none">{name}</p>
+    </div>
+  );
+};
+
+interface InputNodeGroupProps {
+  activeIndex: number;
+  changeThisNodeValues: (
+    inputId: number,
+    value: string | number | boolean,
+  ) => void;
+  inputs: NodeInputType[];
+  groupIndex: number;
+  nodeId: string;
+  registerNodeSlot: (slotData: NodeSlot) => void;
+  finishConnecting: (
+    nodeId: string,
+    slotId: number,
+    clearConnectingToNode?: boolean,
+  ) => void;
+  nodeRef: React.RefObject<HTMLDivElement>;
+  getSlotRelativePosition: (
+    nodeRef: React.RefObject<HTMLDivElement>,
+    slotRef: React.RefObject<SVGSVGElement>,
+  ) => {
+    relativeX: number;
+    relativeY: number;
+  };
+}
+
+const InputGroup = ({
+  activeIndex,
+  changeThisNodeValues,
+  inputs,
+  groupIndex,
+  nodeId,
+  registerNodeSlot,
+  finishConnecting,
+  getSlotRelativePosition,
+  nodeRef,
+}: InputNodeGroupProps) => {
+  const ref = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    const { relativeY, relativeX } = getSlotRelativePosition(
+      nodeRef,
+      ref as React.RefObject<SVGSVGElement>,
+    );
+
+    const slotData: NodeSlot = {
+      nodeId: nodeId!,
+      slotId: groupIndex!,
+      slotIO: "input"!,
+      el: ref.current,
+      relativeX,
+      relativeY,
+    };
+    registerNodeSlot(slotData);
+  }, [nodeId, registerNodeSlot, groupIndex, nodeRef, getSlotRelativePosition]);
+
+  const nameIndexMap = inputs.reduce(
+    (acc, cur) => {
+      acc[cur.name] = cur.id;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  const [selectedInput, setSelectedInput] = useState(
+    inputs.find((i) => i.id === activeIndex)?.name || inputs[0].name,
+  );
+
+  const optional =
+    inputs.find((i) => i.name === selectedInput)?.defaultValue !== undefined;
+
+  const slotColors = inputs.reduce(
+    (acc, cur) => {
+      if (cur.type !== "group") return acc;
+      if (cur.defaultValue) {
+        acc[cur.id] = backgroundColorClasses[cur.slotValueType];
+      } else {
+        acc[cur.id] = fillColorClasses[cur.slotValueType];
+      }
+      return acc;
+    },
+    {} as Record<number, string>,
+  );
+
+  const handleChangeInputState = (value: string) => {
+    setSelectedInput(value);
+
+    inputs.forEach((input) => {
+      changeThisNodeValues(input.id, value === input.name);
+    });
+  };
+
+  return (
+    <div
+      className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
+      onMouseOver={() => finishConnecting(nodeId!, groupIndex!)}
+      onMouseLeave={() => finishConnecting(nodeId!, groupIndex!, true)}
+    >
+      {!optional ? (
+        <CircleDot
+          ref={ref}
+          size={24}
+          className={`bg-background rounded-full ${slotColors[nameIndexMap[selectedInput]]} text-primary`}
+        />
+      ) : (
+        <CircleDotDashed
+          ref={ref}
+          size={24}
+          className={`bg-background rounded-full ${slotColors[nameIndexMap[selectedInput]]} text-primary`}
+        />
+      )}
+
+      <Select
+        value={selectedInput}
+        onValueChange={(value) => handleChangeInputState(value)}
+      >
+        <SelectTrigger className="text-lg w-30">
+          <SelectValue defaultValue={selectedInput} className="text-lg" />
+        </SelectTrigger>
+        <SelectContent
+          defaultValue={inputs[0].name}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          {inputs.map((i) => {
+            return (
+              <SelectItem
+                value={i.name}
+                key={`${nodeId}${groupIndex}${i.id}group`}
+              >
+                {i.name}
+              </SelectItem>
+            );
+          })}
+        </SelectContent>
+      </Select>
     </div>
   );
 };
@@ -506,13 +704,13 @@ const OutputSlot = ({
 
   return (
     <div
-      className="flex space-x-1 justify-end items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-8px] connect-slot"
+      className="flex space-x-1 justify-end items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
       onMouseDown={() => startConnecting(nodeId!, slotId!)}
     >
-      <p className="text-sm select-none">{name}</p>
+      <p className="text-lg select-none">{name}</p>
       <CircleDot
         ref={ref}
-        size={16}
+        size={24}
         className={`bg-background rounded-full ${fillColorClasses[slotValueType]} text-primary`}
       />
     </div>

@@ -201,6 +201,32 @@ combo inputs are working in new vector node!
 combo added to vector and plane, some more cosmetics making nodes bigger.
 two burning things are - transform node and conditional input slot
 
+now panning is on rmb
+
+REFACTORED THE FUNCS TO GET VALS - UPDATE REST OF NODES
+
+added extrudeTest to test out interchangeable inputs.
+slot now has optional input groupIndex.
+slots with the same groupIndex will be rendered
+
+### --10-07-2025--
+
+before anything else: finish group input - go back to combo and add support for
+bool
+
+solved issue where I broke rerendering stability of nodes by calculating
+connectedSlotIds.
+
+I need to think about all possible situations
+
+- default value for switch input (should be handled out of the box).
+- other switch inputs than slots?
+- automatic output switch?
+
+unfortunately the switch input can only be slot for now, as it saves active
+input as node value where key is inputId and value is bool indicating if slot
+is active
+
 ## General
 
 the problems to solve can be divided into two categories:
@@ -214,11 +240,12 @@ Runtime:
 
 UI:
 
-- highlight wrong links
+- combo needs to support boolean
+- highlight wrong links - at least to wrong input type will be easy - then also
+  eval errors
 - lock node menu buttons
 - for extrude remove buffer positions ending up as not a part of indices
 - color picker in output node
-- left click in node editor to pan, hide context menu
 - addNode menu to have search
 - ctrl-z and ctrl-r
 - switching node type in real time (euler-quaternion and extrude mesh/linestring)
@@ -240,3 +267,12 @@ done:
 - add boolean input - switch
 - shift + click to select and shift box select
 - combo slot/input = input locks on connection
+- left click in node editor to pan, hide context menu
+
+AI reverse engineering geometry to nodes
+
+matrix X (node type hot encoded) x Y (number of nodes) let's say max 20? x
+Z (Z dim = Y dim = connectivity)
+above idea doesn't capture values in nodes...
+
+loss based on both generated geom accuracy(not differentiable?) and node scheme

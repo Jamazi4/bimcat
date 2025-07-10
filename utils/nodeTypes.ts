@@ -73,18 +73,20 @@ export type SlotValues =
   | "geometry";
 
 export type NodeInputType = (
+  | { type: "group"; slotValueType: SlotValues; groupIndex: number }
   | { type: "slot"; slotValueType: SlotValues }
   | {
       type: "combo";
       slotValueType: SlotValues;
       value: number | boolean | string;
     }
-  | { type: "number" | "boolean" | "string"; slotValueType?: undefined }
+  | { type: "number" | "boolean" | "string" }
 ) & {
   defaultValue?: ASTNode;
   name: string;
   id: number;
   value?: number | boolean | string;
+  //for group input value is boolean and it defines which input is active
 };
 
 export type NodeOutputType = {
