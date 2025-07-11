@@ -227,6 +227,17 @@ unfortunately the switch input can only be slot for now, as it saves active
 input as node value where key is inputId and value is bool indicating if slot
 is active
 
+### --11-07-2025--
+
+So now the group input works. Only for slots but works.
+
+Implemented extrude node again and gemini did the manual indexing as
+ConvexGeometry closed all faces. This is not a good long term approach.
+Need to come up with custom method for doing a standardized approach to
+triangulation.
+
+Also currently the switch works even if I connect the wrong type.
+
 ## General
 
 the problems to solve can be divided into two categories:

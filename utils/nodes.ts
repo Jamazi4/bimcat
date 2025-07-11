@@ -346,58 +346,127 @@ export const nodeDefinitions: nodeDefinition[] = [
   },
   {
     nodeDefId: 9,
-    category: "general",
-    type: "extrudeTest",
+    category: "modifier",
+    type: "extrude",
     inputs: [
       {
-        type: "group",
-        name: "test1",
+        type: "slot",
+        name: "vector",
         id: 0,
-        slotValueType: "mesh",
-        groupIndex: 0,
-        value: true,
+        slotValueType: "vector",
       },
       {
         type: "group",
-        name: "test2",
+        name: "mesh",
         id: 1,
-        slotValueType: "linestring",
-        groupIndex: 0,
-        defaultValue: defaultBoolean,
-        value: false,
-      },
-      {
-        type: "group",
-        name: "test4",
-        id: 2,
         slotValueType: "mesh",
         groupIndex: 1,
-        value: false,
+        value: true,
       },
       {
         type: "group",
-        name: "test3",
-        id: 3,
+        name: "linestring",
+        id: 2,
         slotValueType: "linestring",
         groupIndex: 1,
-        defaultValue: defaultBoolean,
-        value: true,
+        value: false,
       },
     ],
-    outputs: [{ type: "mesh", name: "mesh", id: 4 }],
+    outputs: [{ type: "mesh", name: "mesh", id: 3 }],
     function: (node, evalFunction) => {
       const activeInputs = Object.entries(node.values)
-        .filter(([_, val]) => val === true)
+        .filter(([key, val]) => val === true && (key === "1" || key === "2"))
         .map(([key, _]) => parseInt(key));
 
-      console.log(`in eval ${activeInputs}`);
+      const [initGeom] = getInputValues(
+        node.inputs,
+        evalFunction,
+        activeInputs,
+      );
 
-      const [v1, v2] = getInputValues(node.inputs, evalFunction, activeInputs);
+      const vector = getInputValues(node.inputs, evalFunction, [0])[0];
 
-      console.log(activeInputs);
-      console.log(v1, v2);
+      if (vector.type !== "vector") {
+        throw new Error("Invalid type in vector input for extrude node");
+      }
 
-      return { 4: { type: "number", value: 0 } };
+      if (initGeom.type === "mesh") {
+        const baseGeom = initGeom.value;
+        if (!baseGeom.index) throw new Error("Input geometry must be indexed.");
+        baseGeom.computeVertexNormals();
+
+        const position = baseGeom.attributes.position;
+        const vertexCount = position.count;
+        const vertices = [];
+        for (let i = 0; i < vertexCount; i++) {
+          vertices.push(new THREE.Vector3().fromBufferAttribute(position, i));
+        }
+
+        const extrudedVertices = vertices.map((v) =>
+          v.clone().add(vector.value),
+        );
+        const allVerts = [...vertices, ...extrudedVertices];
+
+        const geom = new ConvexGeometry(allVerts);
+        const indexed = BufferGeometryUtils.mergeVertices(geom);
+        return { 3: { type: "mesh", value: indexed } };
+      } else if (initGeom.type === "linestring") {
+        const points = initGeom.value;
+        if (points.length < 2) {
+          throw new Error(
+            "Linestring must have at least 2 points to be extruded.",
+          );
+        }
+
+        const extrudedPoints = points.map((p) => p.clone().add(vector.value));
+
+        const finalPositions = [];
+        const finalNormals = [];
+
+        const isClosed = points[0].equals(points[points.length - 1]);
+        const loopCount = isClosed ? points.length - 1 : points.length;
+
+        for (let i = 0; i < loopCount; i++) {
+          const p1 = points[i];
+          const p2 = points[(i + 1) % points.length];
+          const p1_extruded = extrudedPoints[i];
+          const p2_extruded = extrudedPoints[(i + 1) % points.length];
+
+          // Skip zero-length segments
+          if (p1.equals(p2)) continue;
+
+          const normal = new THREE.Vector3()
+            .crossVectors(p2.clone().sub(p1), p1_extruded.clone().sub(p1))
+            .normalize();
+
+          // Triangle 1: p1, p2, p2_extruded
+          finalPositions.push(p1.x, p1.y, p1.z);
+          finalPositions.push(p2.x, p2.y, p2.z);
+          finalPositions.push(p2_extruded.x, p2_extruded.y, p2_extruded.z);
+
+          // Triangle 2: p1, p2_extruded, p1_extruded
+          finalPositions.push(p1.x, p1.y, p1.z);
+          finalPositions.push(p2_extruded.x, p2_extruded.y, p2_extruded.z);
+          finalPositions.push(p1_extruded.x, p1_extruded.y, p1_extruded.z);
+
+          for (let j = 0; j < 6; j++) {
+            finalNormals.push(normal.x, normal.y, normal.z);
+          }
+        }
+
+        const geom = new THREE.BufferGeometry();
+        geom.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(finalPositions, 3),
+        );
+        geom.setAttribute(
+          "normal",
+          new THREE.Float32BufferAttribute(finalNormals, 3),
+        );
+
+        return { 3: { type: "mesh", value: geom } };
+      }
+      throw new Error("Invalid input geometry type for extrude node");
     },
   },
 ];

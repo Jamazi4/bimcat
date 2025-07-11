@@ -172,6 +172,26 @@ export const useNodeSystem = (
     [meshGroup.children],
   );
 
+  const switchGroupInputActive = useCallback(
+    (nodeId: string, groupIndices: number[], activeIndex: number) => {
+      const node = nodesRef.current.find((n) => n.id === nodeId);
+      if (!node) return;
+      if (!node.values) return;
+
+      const newValues = { ...node.values };
+      groupIndices.forEach((id) => {
+        newValues[id] = id === activeIndex;
+      });
+
+      setNodes((prevNodes) =>
+        prevNodes.map((n) =>
+          n.id === nodeId ? { ...n, values: newValues } : n,
+        ),
+      );
+    },
+    [],
+  );
+
   const changeNodeValue = useCallback(
     (nodeId: string, inputId: number, value: string | number | boolean) => {
       const node = nodesRef.current.find((node) => node.id === nodeId);
@@ -183,12 +203,7 @@ export const useNodeSystem = (
 
       setNodes((prevNodes) =>
         prevNodes.map((n) =>
-          n.id === nodeId
-            ? {
-                ...n,
-                values: newValues,
-              }
-            : n,
+          n.id === nodeId ? { ...n, values: newValues } : n,
         ),
       );
     },
@@ -748,6 +763,7 @@ export const useNodeSystem = (
   }, []);
 
   return {
+    switchGroupInputActive,
     saveNodeProject,
     fetchNodes,
     addNode,

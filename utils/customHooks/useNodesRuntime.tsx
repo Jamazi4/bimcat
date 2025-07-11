@@ -62,14 +62,11 @@ const useNodesRuntime = ({
               .map(([key, _]) => parseInt(key));
 
             if (!activeInputs.includes(inputDef.id)) return [];
-            console.log(`in astbldr ${activeInputs}`);
           }
 
           if (!inputDef.defaultValue && !edge) {
             throw new Error(`${node.type} needs ${inputDef.name}`);
           }
-
-          //TODO: errors coming up here in processing group inputs
 
           const fromOutputId = edge
             ? edge.fromSlotId

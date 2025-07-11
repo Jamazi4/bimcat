@@ -32,6 +32,11 @@ import {
 } from "../ui/select";
 
 interface DraggableNodeProps {
+  switchGroupInputActive: (
+    nodeId: string,
+    groupIndices: number[],
+    activeIndex: number,
+  ) => void;
   edges: NodeEdgeType[];
   selected: boolean;
   node: GeomNodeBackType;
@@ -54,6 +59,7 @@ interface DraggableNodeProps {
   curTheme: string;
 }
 const DraggableNode = memo(function DraggableNode({
+  switchGroupInputActive,
   edges,
   selected,
   node,
@@ -132,25 +138,26 @@ const DraggableNode = memo(function DraggableNode({
 
       {/* inputs  */}
       <div className="grid grid-cols-[2fr_1fr] space-x-10 items-center h-full my-auto py-4">
-        <div className="space-y-4">
-          {Object.entries(groupSlots).map(([key, inputs]) => {
+        <div className="space-y-6">
+          {Object.entries(groupSlots).map(([groupId, inputs]) => {
             let activeIndex: number = inputs[0].id;
+            const curInputIds = inputs.map((input) => input.id);
             if (node.values) {
-              activeIndex = Object.entries(node.values)
-                .flatMap(([key, val]) => {
-                  if (val === true) return parseInt(key);
-                  else return [];
-                })
-                .filter(Boolean)[0];
+              Object.entries(node.values).forEach(([inputId, val]) => {
+                const inputIdParsed = parseInt(inputId);
+                if (val === true && curInputIds.includes(inputIdParsed)) {
+                  activeIndex = parseInt(inputId);
+                }
+              });
             }
             return (
               <InputGroup
                 activeIndex={activeIndex}
-                changeThisNodeValues={changeThisNodeValues}
+                switchGroupInputActive={switchGroupInputActive}
                 nodeId={node.id}
-                groupIndex={parseInt(key)}
+                groupIndex={parseInt(groupId)}
                 registerNodeSlot={registerNodeSlot}
-                key={key}
+                key={groupId}
                 inputs={inputs}
                 getSlotRelativePosition={getSlotRelativePosition}
                 nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
@@ -234,7 +241,7 @@ const DraggableNode = memo(function DraggableNode({
         </div>
 
         {/* outputs */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {nodeDef.outputs.map((output, i) => {
             const partialSlotData: Partial<NodeSlot> = {
               nodeId: node.id,
@@ -282,7 +289,7 @@ const InputBoolean = ({
   const displayName = name === "boolean" ? `${value}` : `${name}`;
 
   return (
-    <div className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
+    <div className="h-12 w-30 flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
       <Switch checked={curVal} onCheckedChange={(e) => changeValue(e)} />
       <div className="m-2 text-lg">{displayName}</div>
     </div>
@@ -311,7 +318,7 @@ const InputNumber = ({
     }
   };
   return (
-    <div className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
+    <div className="h-12 flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
       <Input
         type="text"
         value={curVal}
@@ -402,7 +409,7 @@ const ComboSlot = ({
 
   return (
     <div
-      className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
+      className="h-12 flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
       onMouseOver={() => finishConnecting(nodeId!, slotId!)}
       onMouseLeave={() => finishConnecting(nodeId!, slotId!, true)}
     >
@@ -485,7 +492,7 @@ const InputSlot = ({
 
   return (
     <div
-      className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
+      className="h-12 flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
       onMouseOver={() => finishConnecting(nodeId!, slotId!)}
       onMouseLeave={() => finishConnecting(nodeId!, slotId!, true)}
     >
@@ -508,11 +515,12 @@ const InputSlot = ({
 };
 
 interface InputNodeGroupProps {
-  activeIndex: number;
-  changeThisNodeValues: (
-    inputId: number,
-    value: string | number | boolean,
+  switchGroupInputActive: (
+    nodeId: string,
+    groupIndices: number[],
+    activeIndex: number,
   ) => void;
+  activeIndex: number;
   inputs: NodeInputType[];
   groupIndex: number;
   nodeId: string;
@@ -533,8 +541,8 @@ interface InputNodeGroupProps {
 }
 
 const InputGroup = ({
+  switchGroupInputActive,
   activeIndex,
-  changeThisNodeValues,
   inputs,
   groupIndex,
   nodeId,
@@ -573,8 +581,10 @@ const InputGroup = ({
   );
 
   const [selectedInput, setSelectedInput] = useState(
-    inputs.find((i) => i.id === activeIndex)?.name || inputs[0].name,
+    inputs.find((i) => i.id === activeIndex)?.name,
   );
+
+  if (!selectedInput) return;
 
   const optional =
     inputs.find((i) => i.name === selectedInput)?.defaultValue !== undefined;
@@ -593,16 +603,18 @@ const InputGroup = ({
   );
 
   const handleChangeInputState = (value: string) => {
-    setSelectedInput(value);
+    switchGroupInputActive(
+      nodeId,
+      Object.values(nameIndexMap),
+      nameIndexMap[value],
+    );
 
-    inputs.forEach((input) => {
-      changeThisNodeValues(input.id, value === input.name);
-    });
+    setSelectedInput(value);
   };
 
   return (
     <div
-      className="flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
+      className="h-12 flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
       onMouseOver={() => finishConnecting(nodeId!, groupIndex!)}
       onMouseLeave={() => finishConnecting(nodeId!, groupIndex!, true)}
     >
@@ -624,8 +636,8 @@ const InputGroup = ({
         value={selectedInput}
         onValueChange={(value) => handleChangeInputState(value)}
       >
-        <SelectTrigger className="text-lg w-30">
-          <SelectValue defaultValue={selectedInput} className="text-lg" />
+        <SelectTrigger className="text-lg w-40">
+          <SelectValue className="text-lg" />
         </SelectTrigger>
         <SelectContent
           defaultValue={inputs[0].name}
@@ -704,7 +716,7 @@ const OutputSlot = ({
 
   return (
     <div
-      className="flex space-x-1 justify-end items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
+      className="h-12 flex space-x-1 justify-end items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
       onMouseDown={() => startConnecting(nodeId!, slotId!)}
     >
       <p className="text-lg select-none">{name}</p>
