@@ -50,20 +50,12 @@ export function planeNode(nodeDefId: number): nodeDefinition {
 
         const w = dim1;
         const h = dim2;
-        const vertices = new Float32Array([
-          x,
-          y,
-          z,
-          x + w,
-          y,
-          z,
-          x + w,
-          y + h,
-          z,
-          x,
-          y + h,
-          z,
-        ]);
+
+        const p1 = [x, y, z];
+        const p2 = [x + w, y, z];
+        const p3 = [x + w, y + h, z];
+        const p4 = [x, y + h, z];
+        const vertices = new Float32Array([...p1, ...p2, ...p3, ...p4]);
 
         const indices = [0, 1, 2, 2, 3, 0];
         const mesh = new THREE.BufferGeometry();
@@ -72,11 +64,11 @@ export function planeNode(nodeDefId: number): nodeDefinition {
         mesh.computeVertexNormals();
 
         const linestring = [
-          new THREE.Vector3(x, y, z),
-          new THREE.Vector3(x + w, y, z),
-          new THREE.Vector3(x + w, y + h, z),
-          new THREE.Vector3(x, y, z),
-          new THREE.Vector3(x, y + h, z),
+          new THREE.Vector3(...p1),
+          new THREE.Vector3(...p2),
+          new THREE.Vector3(...p3),
+          new THREE.Vector3(...p4),
+          new THREE.Vector3(...p1),
         ];
 
         return {
