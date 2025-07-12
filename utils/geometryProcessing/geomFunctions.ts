@@ -147,8 +147,6 @@ export function createSideGeometry(
     }
   }
 
-  console.log(`Total sides created: ${vertexIndex / 4}`);
-
   if (sideVertices.length > 0) {
     sideGeometry.setAttribute(
       "position",

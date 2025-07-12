@@ -245,6 +245,10 @@ nodes, nodes file now serves only as a collector.
 
 extrude is all messed up all the time.
 
+extrude is all good now. Now I need to implement conditional output.
+it will output linestring as a second output from extrude when input is
+linestring and will output mesh when input is mesh
+
 ## General
 
 the problems to solve can be divided into two categories:

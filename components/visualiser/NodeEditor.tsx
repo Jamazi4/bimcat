@@ -27,6 +27,10 @@ const NodeEditor = ({
 }) => {
   const { theme, systemTheme } = useTheme();
   const curTheme = useRef(theme === "system" ? systemTheme : theme);
+  useEffect(() => {
+    curTheme.current = theme === "system" ? systemTheme : theme;
+  }, [theme, systemTheme]);
+
   const [pendingSave, setPendingSave] = useState(false);
   const [pendingFetch, setPendingFetch] = useState(true);
   const searchParams = useSearchParams();

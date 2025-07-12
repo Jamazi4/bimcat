@@ -80,9 +80,11 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           : extrudedGeom;
 
         const finalGeometry = createExtrudedMesh(baseGeom, extruded, isIndexed);
+        const finalMergedGeometry =
+          BufferGeometryUtils.mergeVertices(finalGeometry);
 
         return {
-          3: { type: "mesh", value: finalGeometry },
+          3: { type: "mesh", value: finalMergedGeometry },
         };
       }
       throw new Error("Invalid inputs to extrude node");
