@@ -259,7 +259,6 @@ UI:
 - color picker in output node
 - addNode menu to have search
 - ctrl-z and ctrl-r
-- switching node type in real time (euler-quaternion and extrude mesh/linestring)
 
 additionally some tools that might need adding
 
@@ -279,6 +278,7 @@ done:
 - shift + click to select and shift box select
 - combo slot/input = input locks on connection
 - left click in node editor to pan, hide context menu
+- switching node type in real time (euler-quaternion and extrude mesh/linestring)
 
 AI reverse engineering geometry to nodes
 

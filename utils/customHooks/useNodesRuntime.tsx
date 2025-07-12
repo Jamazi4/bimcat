@@ -36,8 +36,6 @@ const useNodesRuntime = ({
       const nodeDef = nodeDefinitions.find((nd) => nd.type === node.type);
       if (!nodeDef) throw new Error(`Unknown node type ${node.type}`);
 
-      // const seenGroupIds = [];
-
       const inputs = nodeDef.inputs
         .filter(
           (inputDef) =>
