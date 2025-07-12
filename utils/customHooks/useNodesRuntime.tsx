@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { nodeDefinitions } from "../nodes";
 import { ASTNode, NodeEvalResult, useNodesRuntimeProps } from "../nodeTypes";
 import * as THREE from "three";
-import { group } from "console";
 
 const useNodesRuntime = ({
   runtimeNodes,
