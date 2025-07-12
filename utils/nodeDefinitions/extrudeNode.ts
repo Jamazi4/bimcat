@@ -1,9 +1,8 @@
 import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
 import { getInputValues } from "./nodeUtilFunctions";
-import { ConvexGeometry } from "three/examples/jsm/geometries/ConvexGeometry.js";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
-import { removeCapsFromConvex } from "../geometryProcessing/geomFunctions";
+import { createExtrudedMesh } from "../geometryProcessing/geomFunctions";
 
 export function extrudeNode(nodeDefId: number): nodeDefinition {
   return {
@@ -39,53 +38,52 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
       const activeInputs = Object.entries(node.values)
         .filter(([key, val]) => val === true && (key === "1" || key === "2"))
         .map(([key, _]) => parseInt(key));
-
       const [initGeom] = getInputValues(
         node.inputs,
         evalFunction,
         activeInputs,
       );
-
       const vector = getInputValues(node.inputs, evalFunction, [0])[0];
 
       if (vector.type === "vector") {
         let baseGeom: THREE.BufferGeometry<THREE.NormalBufferAttributes>;
+        let isIndexed = false;
 
         if (initGeom.type === "mesh" && activeInputs.includes(1)) {
           baseGeom = initGeom.value;
-          if (!baseGeom.index) throw new Error("lost original geom");
+          isIndexed = !!baseGeom.index;
+          if (!isIndexed) throw new Error("lost original geom");
         } else if (initGeom.type === "linestring" && activeInputs.includes(2)) {
           baseGeom = new THREE.BufferGeometry();
           baseGeom.setFromPoints(initGeom.value);
+          isIndexed = false;
         } else {
           throw new Error("Invalid geometry input");
         }
 
-        baseGeom.computeVertexNormals();
-        baseGeom.computeBoundingBox();
-        const position = baseGeom.attributes.position;
-        const vertexCount = position.count;
-
-        const vertices = [];
-        const extrudedVertices = [];
-
-        for (let i = 0; i < vertexCount; i++) {
-          const v = new THREE.Vector3().fromBufferAttribute(position, i);
-          vertices.push(v);
-          extrudedVertices.push(v.clone().add(vector.value));
+        if (
+          isNaN(vector.value.x) ||
+          isNaN(vector.value.y) ||
+          isNaN(vector.value.z)
+        ) {
+          throw new Error(
+            `Invalid vector values: x=${vector.value.x}, y=${vector.value.y}, z=${vector.value.z}`,
+          );
         }
-        const allVerts = [...vertices, ...extrudedVertices];
 
-        const geom = new ConvexGeometry(allVerts);
-        // const geom = buildExtrudedGeometry(allVerts);
-        const indexed = BufferGeometryUtils.mergeVertices(geom);
+        const extrudedGeom = baseGeom.clone();
+        extrudedGeom.translate(vector.value.x, vector.value.y, vector.value.z);
+        extrudedGeom.computeBoundingBox();
 
-        const final =
-          initGeom.type === "linestring"
-            ? removeCapsFromConvex(indexed, vertices, extrudedVertices)
-            : indexed;
+        const extruded = isIndexed
+          ? BufferGeometryUtils.mergeVertices(extrudedGeom)
+          : extrudedGeom;
 
-        return { 3: { type: "mesh", value: final } };
+        const finalGeometry = createExtrudedMesh(baseGeom, extruded, isIndexed);
+
+        return {
+          3: { type: "mesh", value: finalGeometry },
+        };
       }
       throw new Error("Invalid inputs to extrude node");
     },

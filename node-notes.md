@@ -238,6 +238,13 @@ triangulation.
 
 Also currently the switch works even if I connect the wrong type.
 
+### --12-07-2025--
+
+Refactored all node inputs and outputs to separate files. Did the same with
+nodes, nodes file now serves only as a collector.
+
+extrude is all messed up all the time.
+
 ## General
 
 the problems to solve can be divided into two categories:
