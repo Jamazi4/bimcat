@@ -44,7 +44,7 @@ const Page = () => {
   return (
     <div className="relative w-full h-[calc(100vh-72px)] overflow-hidden">
       {selected && displayPsets && displayPsets.length > 0 && (
-        <div className="absolute right-4 top-22 z-10 bg-background-transparent rounded p-4 w-xs border max-h-1/2 overflow-scroll overflow-x-hidden">
+        <div className="absolute right-4 top-22 z-10 bg-background-transparent rounded p-4 w-xs border max-h-1/2 overflow-x-hidden">
           <PsetAccordion edit={false} psets={displayPsets} />
         </div>
       )}
@@ -56,7 +56,7 @@ const Page = () => {
       />
       <Canvas
         className={`${nodeNavigation === true && "pointer-events-none"}`}
-        camera={{ position: [0, 1, 0] }}
+        camera={{ position: [0, 0, 1], up: [0, 0, 1] }}
         onPointerMissed={handlePointerMissed}
       >
         <ambientLight intensity={0.2} />
@@ -71,6 +71,7 @@ const Page = () => {
           sectionColor={"#8b8b8b"}
           fadeDistance={40}
           infiniteGrid={true}
+          rotation={[Math.PI / 2, 0, 0]}
         />
         {file && (
           <IFCModel

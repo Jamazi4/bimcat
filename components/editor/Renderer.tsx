@@ -50,7 +50,10 @@ const Renderer = ({
           <Workflow className="p-1" />
         </Button>
       )}
-      <Canvas camera={{ position: [0, 1, 0] }} className=" h-1/2">
+      <Canvas
+        camera={{ position: [0, 0, 1], up: [0, 0, 1] }}
+        className=" h-1/2"
+      >
         <ambientLight intensity={2} />
         <directionalLight position={[-100, 100, -100]} intensity={0.5} />
         <Grid
@@ -61,6 +64,7 @@ const Renderer = ({
           sectionColor={"#8b8b8b"}
           fadeDistance={40}
           infiniteGrid={true}
+          rotation={[Math.PI / 2, 0, 0]}
         />
 
         <Bounds fit clip margin={1.2}>
@@ -68,7 +72,7 @@ const Renderer = ({
             {geometries.map((geom, index) => {
               for (let index = 0; index < 2; index++) {}
               return (
-                <group key={index}>
+                <group key={index} rotation={[Math.PI / 2, 0, 0]}>
                   <mesh geometry={geom} scale={1}>
                     <meshStandardMaterial
                       color="orange"

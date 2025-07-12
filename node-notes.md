@@ -249,6 +249,10 @@ extrude is all good now. Now I need to implement conditional output.
 it will output linestring as a second output from extrude when input is
 linestring and will output mesh when input is mesh
 
+solved issue with extruding circle
+
+tomorrow work on this conditional output and then straight to transform
+
 ## General
 
 the problems to solve can be divided into two categories:

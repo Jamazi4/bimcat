@@ -79,7 +79,11 @@ export const useNodeSystem = (
   const connectingToNodeRef = useRef(connectingToNode);
   connectingToNodeRef.current = connectingToNode;
 
-  const [viewTransform, setViewTransform] = useState({ x: 0, y: 0, scale: 1 });
+  const [viewTransform, setViewTransform] = useState({
+    x: 0,
+    y: 0,
+    scale: 0.6,
+  });
   const viewTransformRef = useRef(viewTransform);
   viewTransformRef.current = viewTransform;
 

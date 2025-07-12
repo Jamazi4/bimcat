@@ -28,6 +28,7 @@ const IFCModel = ({
 
   useEffect(() => {
     const loadModel = async () => {
+      console.log("entered");
       const components = new OBC.Components();
       const loader = components.get(OBC.IfcLoader);
       const indexer = components.get(OBC.IfcRelationsIndexer);
@@ -56,6 +57,7 @@ const IFCModel = ({
 
     return () => {
       if (cleanup) cleanup();
+      console.log("exited");
     };
   }, [file, scene]);
 
@@ -89,7 +91,7 @@ const IFCModel = ({
   };
 
   return (
-    <>
+    <group rotation={[Math.PI / 2, 0, 0]}>
       {fragments.items.map((obj, index) => (
         <MeshItem
           key={index}
@@ -102,7 +104,7 @@ const IFCModel = ({
           colorHighlighted={colorHighlighted}
         />
       ))}
-    </>
+    </group>
   );
 };
 export default IFCModel;

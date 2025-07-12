@@ -58,11 +58,11 @@ export function planeNode(nodeDefId: number): nodeDefinition {
           y,
           z,
           x + w,
-          y,
-          z + h,
+          y + h,
+          z,
           x,
-          y,
-          z + h,
+          y + h,
+          z,
         ]);
 
         const indices = [0, 1, 2, 2, 3, 0];
@@ -74,9 +74,9 @@ export function planeNode(nodeDefId: number): nodeDefinition {
         const linestring = [
           new THREE.Vector3(x, y, z),
           new THREE.Vector3(x + w, y, z),
-          new THREE.Vector3(x + w, y, z + h),
-          new THREE.Vector3(x, y, z + h),
+          new THREE.Vector3(x + w, y + h, z),
           new THREE.Vector3(x, y, z),
+          new THREE.Vector3(x, y + h, z),
         ];
 
         return {

@@ -207,14 +207,28 @@ export function extractBoundaryEdges(
   return boundaryEdges;
 }
 
+function stripUV(geometry: THREE.BufferGeometry) {
+  if (geometry.getAttribute("uv")) {
+    geometry.deleteAttribute("uv");
+  }
+}
+
 export function createExtrudedMesh(
   baseGeom: THREE.BufferGeometry<THREE.NormalBufferAttributes>,
   extrudedGeom: THREE.BufferGeometry<THREE.NormalBufferAttributes>,
   isIndexed: boolean,
 ): THREE.BufferGeometry<THREE.NormalBufferAttributes> {
+  if (isIndexed) {
+    baseGeom = BufferGeometryUtils.mergeVertices(baseGeom);
+    extrudedGeom = BufferGeometryUtils.mergeVertices(extrudedGeom);
+  }
+
   // Create side faces connecting the two geometries
   const sideGeometry = createSideGeometry(baseGeom, extrudedGeom, isIndexed);
 
+  stripUV(baseGeom);
+  stripUV(extrudedGeom);
+  stripUV(sideGeometry);
   // Combine all geometries
   const geometriesToMerge: THREE.BufferGeometry<THREE.NormalBufferAttributes>[] =
     [];
