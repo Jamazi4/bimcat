@@ -33,21 +33,26 @@ const EdgeLine = ({
     setHover(isHovering);
   };
 
+  const dx = Math.abs(x2 - x1);
+  const controlOffsetX = Math.max(dx * 0.5, 40);
+  const controlPoint1 = { x: x1 + controlOffsetX, y: y1 };
+  const controlPoint2 = { x: x2 - controlOffsetX, y: y2 };
+
+  const pathD = `M ${x1},${y1} C ${controlPoint1.x},${controlPoint1.y} ${controlPoint2.x},${controlPoint2.y} ${x2},${y2}`;
+
   return (
     <>
+      {/* Invisible stroke for interactivity */}
       {!isTemporary && (
-        <line
-          x1={x1}
-          y1={y1}
-          x2={x2}
-          y2={y2}
+        <path
+          d={pathD}
           stroke="transparent"
           strokeWidth={12}
+          fill="none"
           onMouseEnter={() => applyHover(true)}
           onMouseLeave={() => applyHover(false)}
           onClick={() => {
-            if (deleteEdge) {
-              if (!nodeNavigation) return;
+            if (deleteEdge && nodeNavigation) {
               deleteEdge();
             }
           }}
@@ -58,23 +63,22 @@ const EdgeLine = ({
         />
       )}
 
-      <line
-        x1={x1}
-        y1={y1}
-        x2={x2}
-        y2={y2}
+      {/* Outer stroke */}
+      <path
+        d={pathD}
         stroke={hover ? hoverStroke : stroke}
         strokeWidth={5}
+        fill="none"
         strokeDasharray={isTemporary ? "4 4" : undefined}
         pointerEvents="none"
       />
-      <line
-        x1={x1}
-        y1={y1}
-        x2={x2}
-        y2={y2}
+
+      {/* Inner stroke */}
+      <path
+        d={pathD}
         stroke={hover ? hoverStrokeInside : strokeInside}
         strokeWidth={2}
+        fill="none"
         strokeDasharray={isTemporary ? "4 4" : undefined}
         pointerEvents="none"
       />
