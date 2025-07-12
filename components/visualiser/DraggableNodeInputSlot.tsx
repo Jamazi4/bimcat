@@ -86,7 +86,7 @@ const DraggableNodeInputSlot = ({
           className={`bg-background rounded-full ${backgroundColorClasses[slotValueType]} text-primary`}
         />
       )}
-      <p className="text-lg select-none">{name}</p>
+      <p className="text-2xl select-none">{name}</p>
     </div>
   );
 };

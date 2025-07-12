@@ -24,7 +24,7 @@ const DraggableNodeInputBoolean = ({
   return (
     <div className="h-12 w-30 flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
       <Switch checked={curVal} onCheckedChange={(e) => changeValue(e)} />
-      <div className="m-2 text-lg">{displayName}</div>
+      <div className="m-2 text-2xl">{displayName}</div>
     </div>
   );
 };

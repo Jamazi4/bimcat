@@ -47,7 +47,7 @@ const EdgeLine = ({
         <path
           d={pathD}
           stroke="transparent"
-          strokeWidth={12}
+          strokeWidth={18}
           fill="none"
           onMouseEnter={() => applyHover(true)}
           onMouseLeave={() => applyHover(false)}
@@ -67,7 +67,7 @@ const EdgeLine = ({
       <path
         d={pathD}
         stroke={hover ? hoverStroke : stroke}
-        strokeWidth={5}
+        strokeWidth={12}
         fill="none"
         strokeDasharray={isTemporary ? "4 4" : undefined}
         pointerEvents="none"
@@ -77,7 +77,7 @@ const EdgeLine = ({
       <path
         d={pathD}
         stroke={hover ? hoverStrokeInside : strokeInside}
-        strokeWidth={2}
+        strokeWidth={5}
         fill="none"
         strokeDasharray={isTemporary ? "4 4" : undefined}
         pointerEvents="none"

@@ -28,7 +28,7 @@ const DraggableNodeInputNumber = ({
         type="text"
         value={curVal}
         onChange={(e) => handleChange(e)}
-        className={`${!isValidValue && "text-destructive border-destructive"} w-30 !text-lg`}
+        className={`${!isValidValue && " text-destructive border-destructive"} w-30 !text-2xl`}
       />
     </div>
   );

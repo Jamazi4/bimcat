@@ -137,7 +137,7 @@ const DraggableNodeInputGroup = ({
         value={selectedInput}
         onValueChange={(value) => handleChangeInputState(value)}
       >
-        <SelectTrigger className="text-lg w-40">
+        <SelectTrigger className="text-2xl w-40">
           <SelectValue className="text-lg" />
         </SelectTrigger>
         <SelectContent

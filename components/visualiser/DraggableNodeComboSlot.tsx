@@ -100,10 +100,10 @@ const DraggableNodeComboSlot = ({
         type="text"
         value={curVal}
         onChange={(e) => handleChange(e)}
-        className={`${!isValidValue && "text-destructive border-destructive"} w-30 !text-lg`}
+        className={`${!isValidValue && "text-destructive border-destructive"} w-30 !text-2xl`}
         disabled={connected}
       />
-      <p className="text-lg select-none ml-2">{name}</p>
+      <p className="text-2xl select-none ml-2">{name}</p>
     </div>
   );
 };

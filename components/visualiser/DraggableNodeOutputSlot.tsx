@@ -60,7 +60,7 @@ const DraggableNodeOutputSlot = ({
       className="h-12 flex space-x-1 justify-end items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
       onMouseDown={() => startConnecting(nodeId!, slotId!)}
     >
-      <p className="text-lg select-none">{name}</p>
+      <p className="text-2xl select-none">{name}</p>
       <CircleDot
         ref={ref}
         size={24}
