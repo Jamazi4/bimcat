@@ -2,10 +2,11 @@ import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
 import { defaultTransformContructor } from "./defaultNodes";
 import { getComboValues, getInputValues } from "./nodeUtilFunctions";
+import { composeTransformMatrix } from "../geometryProcessing/geometryHelpers";
 import {
-  composeTransformMatrix,
-  getLinestringFromGeom,
-} from "../geometryProcessing/geometryHelpers";
+  extractBoundaryEdges,
+  orderBoundaryEdges,
+} from "../geometryProcessing/geomFunctions";
 
 export function planeNode(nodeDefId: number): nodeDefinition {
   return {
@@ -54,8 +55,12 @@ export function planeNode(nodeDefId: number): nodeDefinition {
 
         geom.applyMatrix4(transformMatrix);
 
-        const linestring = getLinestringFromGeom(geom);
-
+        const boundaryEdges = extractBoundaryEdges(geom);
+        const orderedIndices = orderBoundaryEdges(boundaryEdges);
+        const positions = geom.attributes.position.array;
+        const linestring = orderedIndices.map((index) => {
+          return new THREE.Vector3().fromArray(positions, index * 3);
+        });
         return {
           3: { type: "mesh", value: geom },
           4: { type: "linestring", value: linestring },

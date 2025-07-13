@@ -43,16 +43,3 @@ export function composeTransformMatrix(transform: TransformObject) {
   );
   return matrix;
 }
-
-export function getLinestringFromGeom(geom: THREE.BufferGeometry) {
-  const positionAttr = geom.getAttribute("position");
-  const linestring: THREE.Vector3[] = [];
-
-  for (let i = 0; i < positionAttr.count; i++) {
-    const x = positionAttr.getX(i);
-    const y = positionAttr.getY(i);
-    const z = positionAttr.getZ(i);
-    linestring.push(new THREE.Vector3(x, y, z));
-  }
-  return linestring;
-}
