@@ -29,7 +29,7 @@ const MeshItem = ({
 
   const material = useMemo(
     () =>
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshLambertMaterial({
         color: curColor,
         side: THREE.DoubleSide,
       }),

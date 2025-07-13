@@ -1,8 +1,9 @@
-import { nodeDefinition } from "../nodeTypes";
+import { nodeDefinition, NodeEvalResult } from "../nodeTypes";
 import * as THREE from "three";
 import { getInputValues } from "./nodeUtilFunctions";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 import { createExtrudedMesh } from "../geometryProcessing/geomFunctions";
+import { groupBy3Vector } from "../geometryProcessing/geometryHelpers";
 
 export function extrudeNode(nodeDefId: number): nodeDefinition {
   return {
@@ -33,7 +34,11 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         value: false,
       },
     ],
-    outputs: [{ type: "mesh", name: "mesh", id: 3 }],
+    outputs: [
+      { type: "mesh", name: "final", id: 3 },
+      { type: "mesh", name: "extrusion", id: 4, onInputSelected: 1 },
+      { type: "linestring", name: "extrusion", id: 5, onInputSelected: 2 },
+    ],
     function: (node, evalFunction) => {
       const activeInputs = Object.entries(node.values)
         .filter(([key, val]) => val === true && (key === "1" || key === "2"))
@@ -83,8 +88,21 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         const finalMergedGeometry =
           BufferGeometryUtils.mergeVertices(finalGeometry);
 
+        let extrusionOutput: NodeEvalResult;
+        if (isIndexed) {
+          extrusionOutput = { 4: { type: "mesh", value: extruded } };
+        } else {
+          extrusionOutput = {
+            5: {
+              type: "linestring",
+              value: groupBy3Vector(extruded.attributes.position.array),
+            },
+          };
+        }
+
         return {
           3: { type: "mesh", value: finalMergedGeometry },
+          ...extrusionOutput,
         };
       }
       throw new Error("Invalid inputs to extrude node");

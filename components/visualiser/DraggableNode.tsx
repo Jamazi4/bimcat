@@ -128,7 +128,8 @@ const DraggableNode = memo(function DraggableNode({
       <div className="grid grid-cols-[2fr_1fr] space-x-10 items-center h-full my-auto py-4">
         <div className="space-y-6">
           {Object.entries(groupSlots).map(([groupId, inputs]) => {
-            let activeIndex: number = inputs[0].id;
+            let activeIndex: number = inputs.filter((i) => i.value === true)[0]
+              .id;
             const curInputIds = inputs.map((input) => input.id);
             if (node.values) {
               Object.entries(node.values).forEach(([inputId, val]) => {
@@ -231,6 +232,17 @@ const DraggableNode = memo(function DraggableNode({
         {/* outputs */}
         <div className="space-y-6">
           {nodeDef.outputs.map((output, i) => {
+            let tiedInputActive = true;
+            if (output.onInputSelected !== undefined) {
+              const tiedInputId = output.onInputSelected;
+
+              tiedInputActive =
+                (node.values?.[tiedInputId] as boolean) ??
+                (nodeDef.inputs[tiedInputId].value as boolean) ??
+                false;
+
+              if (!tiedInputActive) return null;
+            }
             const partialSlotData: Partial<NodeSlot> = {
               nodeId: node.id,
               slotId: output.id,

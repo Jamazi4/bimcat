@@ -93,6 +93,9 @@ export type NodeOutputType = {
   type: SlotValues;
   name: string;
   id: number;
+  onInputSelected?: number;
+  //used for conditional rendering if the group input selection state influences
+  //the output type
 };
 
 export const nodeCategories = [
