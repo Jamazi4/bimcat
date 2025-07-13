@@ -28,7 +28,11 @@ const MeshItem = ({
   );
 
   const material = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: curColor }),
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: curColor,
+        side: THREE.DoubleSide,
+      }),
     [curColor],
   );
 

@@ -159,7 +159,12 @@ export const useNodeSystem = (
       const geometry: ComponentGeometry[] = meshGroup.children
         .filter((mesh): mesh is THREE.Mesh => mesh instanceof THREE.Mesh)
         .map((mesh) => {
-          const bufferGeom = mesh.geometry;
+          const bufferGeom = mesh.geometry.clone();
+          const rotationMatrix = new THREE.Matrix4().makeRotationX(
+            -Math.PI / 2,
+          );
+          bufferGeom.applyMatrix4(rotationMatrix);
+          bufferGeom.computeVertexNormals();
           return {
             position: Array.from(bufferGeom.attributes.position.array),
             indices: Array.from(bufferGeom.index?.array || []),

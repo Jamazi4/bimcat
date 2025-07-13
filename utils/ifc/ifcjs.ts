@@ -133,12 +133,15 @@ export const getIfcGeometryById = async (
 
     if (itemId === id) {
       let transform = item.get(itemId).transforms[0];
+
+      // Scale to meters
       const scaleMatrix = new THREE.Matrix4().makeScale(1000, 1000, 1000);
       if (!isMili) transform = transform.multiply(scaleMatrix);
 
       item.mesh.geometry.applyMatrix4(transform);
 
       item.mesh.geometry.attributes.position.needsUpdate = true;
+
       return true;
     }
     return itemId === id;
