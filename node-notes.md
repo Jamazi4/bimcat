@@ -253,6 +253,18 @@ solved issue with extruding circle
 
 tomorrow work on this conditional output and then straight to transform
 
+### --13-07-2025--
+
+conditional and transform implemented
+added capped bool to extrude to allow for capped/uncapped
+
+error when switching capped and the extrusion output is switching
+
+now add group node to group all extrusion chains
+add math nodes
+expose controls to UI and implement dynamic props
+boolean
+
 ## General
 
 the problems to solve can be divided into two categories:
@@ -260,7 +272,6 @@ the problems to solve can be divided into two categories:
 Runtime:
 
 - cache node outputs
-- solidify node, transform node with translate/scale/angles or quaternion,
 - change/lock inputs conditionally
 - pick reference from 3D
 
@@ -270,7 +281,6 @@ UI:
 - highlight wrong links - at least to wrong input type will be easy - then also
   eval errors
 - lock node menu buttons
-- for extrude remove buffer positions ending up as not a part of indices
 - color picker in output node
 - addNode menu to have search
 - ctrl-z and ctrl-r
@@ -294,6 +304,9 @@ done:
 - combo slot/input = input locks on connection
 - left click in node editor to pan, hide context menu
 - switching node type in real time (euler-quaternion and extrude mesh/linestring)
+- for extrude remove buffer positions ending up as not a part of indices
+- solidify(can do with extrude) node, transform node with
+  translate/scale/angles or quaternion,
 
 AI reverse engineering geometry to nodes
 

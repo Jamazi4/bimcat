@@ -31,6 +31,15 @@ export const defaultBoolean: ASTNode = {
   values: { "0": true },
 };
 
+export const defaultBooleanContructor = (value: boolean) => {
+  return {
+    type: "boolean",
+    id: createNodeId(),
+    inputs: [],
+    values: { "0": value },
+  };
+};
+
 export const defaultVector: ASTNode = {
   type: "vector",
   id: createNodeId(),

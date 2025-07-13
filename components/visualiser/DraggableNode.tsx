@@ -173,6 +173,7 @@ const DraggableNode = memo(function DraggableNode({
 
               return (
                 <DraggableNodeInputBoolean
+                  nodeId={node.id}
                   name={input.name}
                   key={input.id}
                   value={node.values[input.id] as boolean}
@@ -233,8 +234,8 @@ const DraggableNode = memo(function DraggableNode({
         <div className="space-y-6">
           {nodeDef.outputs.map((output, i) => {
             let tiedInputActive = true;
-            if (output.onInputSelected !== undefined) {
-              const tiedInputId = output.onInputSelected;
+            if (output.onInputSelectedId !== undefined) {
+              const tiedInputId = output.onInputSelectedId;
 
               tiedInputActive =
                 (node.values?.[tiedInputId] as boolean) ??
@@ -243,6 +244,22 @@ const DraggableNode = memo(function DraggableNode({
 
               if (!tiedInputActive) return null;
             }
+
+            if (output.onBooleanTrueId !== undefined) {
+              const tiedInputId = output.onBooleanTrueId;
+
+              tiedInputActive =
+                (node.values?.[tiedInputId] as boolean) ??
+                (nodeDef.inputs[tiedInputId].value as boolean) ??
+                false;
+
+              const shouldDisplay = output.onBooleanInverted
+                ? !tiedInputActive
+                : tiedInputActive;
+
+              if (!shouldDisplay) return null;
+            }
+
             const partialSlotData: Partial<NodeSlot> = {
               nodeId: node.id,
               slotId: output.id,

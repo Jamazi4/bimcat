@@ -45,6 +45,8 @@ export type ASTNodeInput = {
   inputId: number;
   ast: ASTNode;
   fromOutputId: number;
+  //used to allow for multiple outputs. only needs to be specified when
+  //building AST by hand
 };
 
 export type ASTNode = {
@@ -65,7 +67,7 @@ export type EvalValue =
   | { type: "boolean"; value: boolean }
   | { type: "number"; value: number }
   | { type: "vector"; value: THREE.Vector3 }
-  | { type: "linestring"; value: THREE.Vector3[] } //consider switching to buffergeom
+  | { type: "linestring"; value: THREE.Vector3[] }
   | { type: "mesh"; value: THREE.BufferGeometry }
   | { type: "geometry"; value: THREE.Object3D }; // result of output node only
 
@@ -101,9 +103,13 @@ export type NodeOutputType = {
   type: SlotValues;
   name: string;
   id: number;
-  onInputSelected?: number;
+  onInputSelectedId?: number;
   //used for conditional rendering if the group input selection state influences
-  //the output type
+  //the output type, value is the input id of tied input
+  onBooleanTrueId?: number;
+  //same as onInputSelected but controlled by one boolean input
+  onBooleanInverted?: boolean;
+  //only if onBooleanTrue exists - invert condition for rendering
 };
 
 export const nodeCategories = [

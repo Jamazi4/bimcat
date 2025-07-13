@@ -217,6 +217,8 @@ export function createExtrudedMesh(
   baseGeom: THREE.BufferGeometry<THREE.NormalBufferAttributes>,
   extrudedGeom: THREE.BufferGeometry<THREE.NormalBufferAttributes>,
   isIndexed: boolean,
+  includeBase: boolean,
+  includeTop: boolean,
 ): THREE.BufferGeometry<THREE.NormalBufferAttributes> {
   if (isIndexed) {
     baseGeom = BufferGeometryUtils.mergeVertices(baseGeom);
@@ -238,13 +240,16 @@ export function createExtrudedMesh(
     geometriesToMerge.push(sideGeometry);
   }
 
-  // Only add caps for indexed (closed) geometries
-  if (isIndexed) {
-    geometriesToMerge.push(baseGeom, extrudedGeom);
+  if (includeBase) {
+    geometriesToMerge.push(baseGeom);
+  }
+  if (includeTop) {
+    geometriesToMerge.push(extrudedGeom);
   }
 
   if (geometriesToMerge.length === 0) {
-    throw new Error("No geometry to merge");
+    // Return an empty geometry if there's nothing to merge
+    return new THREE.BufferGeometry();
   }
 
   const finalGeometry = BufferGeometryUtils.mergeGeometries(geometriesToMerge);
@@ -253,4 +258,78 @@ export function createExtrudedMesh(
   }
 
   return finalGeometry;
+}
+
+export function orderBoundaryEdges(edges: [number, number][]): number[] {
+  if (edges.length === 0) {
+    return [];
+  }
+
+  const edgeMap = new Map<number, number[]>();
+  const allVertices = new Set<number>();
+  for (const [v1, v2] of edges) {
+    if (!edgeMap.has(v1)) edgeMap.set(v1, []);
+    if (!edgeMap.has(v2)) edgeMap.set(v2, []);
+    edgeMap.get(v1)!.push(v2);
+    edgeMap.get(v2)!.push(v1);
+    allVertices.add(v1);
+    allVertices.add(v2);
+  }
+
+  const orderedPath: number[] = [];
+  const visited = new Set<number>();
+
+  // For a closed loop, all vertices will have 2 connections (in the context of the boundary).
+  // If we find a node with one connection, it must be an open path.
+  let startNode = -1;
+  for (const [vertex, neighbors] of edgeMap.entries()) {
+    if (neighbors.length === 1) {
+      startNode = vertex;
+      break;
+    }
+  }
+
+  // If no node has only one neighbor, it's a closed loop (or multiple). Pick any.
+  if (startNode === -1) {
+    startNode = edges[0][0];
+  }
+
+  let current = startNode;
+
+  while (visited.size < allVertices.size) {
+    if (visited.has(current)) break; // Should not happen in a simple path/loop
+    orderedPath.push(current);
+    visited.add(current);
+
+    const neighbors = edgeMap.get(current)!;
+    let next = -1;
+    for (const neighbor of neighbors) {
+      if (!visited.has(neighbor)) {
+        next = neighbor;
+        break;
+      }
+    }
+
+    if (next === -1) {
+      // Reached end of a path
+      break;
+    }
+    current = next;
+  }
+
+  // After the loop, check if it's a closed loop that needs closing.
+  const last = orderedPath[orderedPath.length - 1];
+  const first = orderedPath[0];
+  const lastNeighbors = edgeMap.get(last);
+
+  if (
+    lastNeighbors &&
+    lastNeighbors.includes(first) &&
+    orderedPath.length === allVertices.size
+  ) {
+    // This confirms it's a closed loop and we've traversed all vertices.
+    orderedPath.push(first);
+  }
+
+  return orderedPath;
 }

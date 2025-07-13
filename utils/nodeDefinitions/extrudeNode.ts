@@ -1,9 +1,17 @@
+import earcut from "earcut";
 import { nodeDefinition, NodeEvalResult } from "../nodeTypes";
 import * as THREE from "three";
 import { getInputValues } from "./nodeUtilFunctions";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
-import { createExtrudedMesh } from "../geometryProcessing/geomFunctions";
-import { groupBy3Vector } from "../geometryProcessing/geometryHelpers";
+import {
+  createExtrudedMesh,
+  extractBoundaryEdges,
+  orderBoundaryEdges,
+} from "../geometryProcessing/geomFunctions";
+import {
+  composeTransformMatrix,
+  groupBy3Vector,
+} from "../geometryProcessing/geometryHelpers";
 
 export function extrudeNode(nodeDefId: number): nodeDefinition {
   return {
@@ -13,9 +21,9 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
     inputs: [
       {
         type: "slot",
-        name: "vector",
+        name: "transform",
         id: 0,
-        slotValueType: "vector",
+        slotValueType: "transform",
       },
       {
         type: "group",
@@ -33,11 +41,23 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         groupIndex: 1,
         value: false,
       },
+      {
+        type: "boolean",
+        name: "capped",
+        id: 3,
+        value: false,
+      },
     ],
     outputs: [
-      { type: "mesh", name: "final", id: 3 },
-      { type: "mesh", name: "extrusion", id: 4, onInputSelected: 1 },
-      { type: "linestring", name: "extrusion", id: 5, onInputSelected: 2 },
+      { type: "mesh", name: "final", id: 4 },
+      { type: "mesh", name: "extrusion", id: 5, onBooleanTrueId: 3 },
+      {
+        type: "linestring",
+        name: "extrusion",
+        id: 6,
+        onBooleanTrueId: 3,
+        onBooleanInverted: true,
+      },
     ],
     function: (node, evalFunction) => {
       const activeInputs = Object.entries(node.values)
@@ -48,60 +68,82 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         evalFunction,
         activeInputs,
       );
-      const vector = getInputValues(node.inputs, evalFunction, [0])[0];
+      const [transform] = getInputValues(node.inputs, evalFunction, [0]);
+      const capped = node.values[3];
 
-      if (vector.type === "vector") {
+      if (transform.type === "transform" && typeof capped === "boolean") {
         let baseGeom: THREE.BufferGeometry<THREE.NormalBufferAttributes>;
-        let isIndexed = false;
+        const isInputMesh =
+          initGeom.type === "mesh" && activeInputs.includes(1);
 
-        if (initGeom.type === "mesh" && activeInputs.includes(1)) {
+        if (isInputMesh) {
           baseGeom = initGeom.value;
-          isIndexed = !!baseGeom.index;
-          if (!isIndexed) throw new Error("lost original geom");
         } else if (initGeom.type === "linestring" && activeInputs.includes(2)) {
           baseGeom = new THREE.BufferGeometry();
           baseGeom.setFromPoints(initGeom.value);
-          isIndexed = false;
         } else {
           throw new Error("Invalid geometry input");
         }
 
-        if (
-          isNaN(vector.value.x) ||
-          isNaN(vector.value.y) ||
-          isNaN(vector.value.z)
-        ) {
-          throw new Error(
-            `Invalid vector values: x=${vector.value.x}, y=${vector.value.y}, z=${vector.value.z}`,
+        const extrudedGeom = baseGeom.clone();
+        const transformMatrix = composeTransformMatrix(transform.value);
+        extrudedGeom.applyMatrix4(transformMatrix);
+
+        const includeBase = isInputMesh;
+        const includeTop = capped;
+
+        // If we need a top cap and the base was a linestring, create faces for the top
+        if (includeTop && !extrudedGeom.index) {
+          const extrudedIndices = earcut(
+            extrudedGeom.attributes.position.array,
+            [],
+            3,
           );
+          extrudedGeom.setIndex(extrudedIndices);
+          extrudedGeom.computeVertexNormals();
         }
 
-        const extrudedGeom = baseGeom.clone();
-        extrudedGeom.translate(vector.value.x, vector.value.y, vector.value.z);
-        extrudedGeom.computeBoundingBox();
-
-        const extruded = isIndexed
-          ? BufferGeometryUtils.mergeVertices(extrudedGeom)
-          : extrudedGeom;
-
-        const finalGeometry = createExtrudedMesh(baseGeom, extruded, isIndexed);
+        const finalGeometry = createExtrudedMesh(
+          baseGeom,
+          extrudedGeom,
+          isInputMesh, // isIndexed for sides generation
+          includeBase,
+          includeTop,
+        );
         const finalMergedGeometry =
           BufferGeometryUtils.mergeVertices(finalGeometry);
 
         let extrusionOutput: NodeEvalResult;
-        if (isIndexed) {
-          extrusionOutput = { 4: { type: "mesh", value: extruded } };
+        if (capped) {
+          // When capped, the top is always a mesh.
+          // `extrudedGeom` has been given indices if it was from a linestring.
+          extrusionOutput = { 5: { type: "mesh", value: extrudedGeom } };
         } else {
+          let extrusionLine: THREE.Vector3[];
+          if (isInputMesh) {
+            const mergedGeom = BufferGeometryUtils.mergeVertices(extrudedGeom);
+            const boundaryEdges = extractBoundaryEdges(mergedGeom);
+            const orderedIndices = orderBoundaryEdges(boundaryEdges);
+            const positions = mergedGeom.attributes.position.array;
+            extrusionLine = orderedIndices.map((index) => {
+              return new THREE.Vector3().fromArray(positions, index * 3);
+            });
+          } else {
+            extrusionLine = groupBy3Vector(
+              extrudedGeom.attributes.position.array,
+            );
+          }
+          // When not capped, the extrusion is a linestring.
           extrusionOutput = {
-            5: {
+            6: {
               type: "linestring",
-              value: groupBy3Vector(extruded.attributes.position.array),
+              value: extrusionLine,
             },
           };
         }
 
         return {
-          3: { type: "mesh", value: finalMergedGeometry },
+          4: { type: "mesh", value: finalMergedGeometry },
           ...extrusionOutput,
         };
       }

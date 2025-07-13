@@ -1,21 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 
 const DraggableNodeInputBoolean = ({
   name,
   value,
   changeThisValue,
+  nodeId,
 }: {
   name: string;
   value: boolean;
   changeThisValue: (value: boolean) => void;
+  nodeId: string;
 }) => {
-  const [curVal, setCurVal] = useState(value);
-
   const changeValue = (e: boolean) => {
-    setCurVal(e);
     changeThisValue(e);
   };
 
@@ -23,8 +22,16 @@ const DraggableNodeInputBoolean = ({
 
   return (
     <div className="h-12 w-30 flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
-      <Switch checked={curVal} onCheckedChange={(e) => changeValue(e)} />
-      <div className="m-2 text-2xl">{displayName}</div>
+      <Switch
+        id={`${nodeId}-${name}`}
+        checked={value}
+        onCheckedChange={(e) => changeValue(e)}
+      />
+      <div className="m-2 text-2xl">
+        <Label className="text-2xl" htmlFor={`${nodeId}-${name}`}>
+          {displayName}
+        </Label>
+      </div>
     </div>
   );
 };
