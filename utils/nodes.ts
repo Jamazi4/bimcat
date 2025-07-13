@@ -6,7 +6,8 @@ import { circleNode } from "./nodeDefinitions/circleNode";
 import { vectorNode } from "./nodeDefinitions/vectorNode";
 import { extrudeNode } from "./nodeDefinitions/extrudeNode";
 import { nodeDefinition } from "./nodeTypes";
-import booleanNode from "./nodeDefinitions/booleanNode";
+import { transformNode } from "./nodeDefinitions/transformNode";
+import { booleanNode } from "./nodeDefinitions/booleanNode";
 
 export const nodeDefinitions: nodeDefinition[] = [
   outputNode(1),
@@ -17,4 +18,5 @@ export const nodeDefinitions: nodeDefinition[] = [
   vectorNode(6),
   extrudeNode(7),
   booleanNode(8),
+  transformNode(9),
 ];

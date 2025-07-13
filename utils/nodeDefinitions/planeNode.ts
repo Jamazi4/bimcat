@@ -1,7 +1,11 @@
 import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
-import { defaultVector } from "./defaultNodes";
+import { defaultTransformContructor } from "./defaultNodes";
 import { getComboValues, getInputValues } from "./nodeUtilFunctions";
+import {
+  composeTransformMatrix,
+  getLinestringFromGeom,
+} from "../geometryProcessing/geometryHelpers";
 
 export function planeNode(nodeDefId: number): nodeDefinition {
   return {
@@ -25,55 +29,36 @@ export function planeNode(nodeDefId: number): nodeDefinition {
       },
       {
         type: "slot",
-        name: "position",
+        name: "transform",
         id: 2,
-        slotValueType: "vector",
-        defaultValue: defaultVector,
+        slotValueType: "transform",
+        defaultValue: defaultTransformContructor(),
       },
     ],
     outputs: [
-      { type: "mesh", name: "mesh", id: 4 },
-      { type: "linestring", name: "linestring", id: 5 },
+      { type: "mesh", name: "mesh", id: 3 },
+      { type: "linestring", name: "linestring", id: 4 },
     ],
     function: (node, evalFunction) => {
       const [dim1, dim2] = getComboValues(node, evalFunction, [0, 1]);
-      const [p] = getInputValues(node.inputs, evalFunction, [2]);
+      const [transform] = getInputValues(node.inputs, evalFunction, [2]);
 
       if (
-        p.type === "vector" &&
+        transform.type === "transform" &&
         typeof dim1 === "number" &&
         typeof dim2 === "number"
       ) {
-        const x = p.value.x;
-        const y = p.value.y;
-        const z = p.value.z;
+        const geom = new THREE.PlaneGeometry(dim1, dim2);
 
-        const w = dim1;
-        const h = dim2;
+        const transformMatrix = composeTransformMatrix(transform.value);
 
-        const p1 = [x, y, z];
-        const p2 = [x + w, y, z];
-        const p3 = [x + w, y + h, z];
-        const p4 = [x, y + h, z];
-        const vertices = new Float32Array([...p1, ...p2, ...p3, ...p4]);
+        geom.applyMatrix4(transformMatrix);
 
-        const indices = [0, 1, 2, 2, 3, 0];
-        const mesh = new THREE.BufferGeometry();
-        mesh.setIndex(indices);
-        mesh.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-        mesh.computeVertexNormals();
-
-        const linestring = [
-          new THREE.Vector3(...p1),
-          new THREE.Vector3(...p2),
-          new THREE.Vector3(...p3),
-          new THREE.Vector3(...p4),
-          new THREE.Vector3(...p1),
-        ];
+        const linestring = getLinestringFromGeom(geom);
 
         return {
-          4: { type: "mesh", value: mesh },
-          5: { type: "linestring", value: linestring },
+          3: { type: "mesh", value: geom },
+          4: { type: "linestring", value: linestring },
         };
       }
       throw new Error("Invalid inputs to plane node");

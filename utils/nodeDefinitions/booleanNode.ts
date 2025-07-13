@@ -17,5 +17,3 @@ export function booleanNode(nodeDefId: number): nodeDefinition {
     },
   };
 }
-
-export default booleanNode;

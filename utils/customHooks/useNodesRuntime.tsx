@@ -67,7 +67,9 @@ const useNodesRuntime = ({
 
           const fromOutputId = edge
             ? edge.fromSlotId
-            : nodeDef.inputs.length - 1 + nodeDef.outputs.length - 1;
+            : nodeDef.inputs.length - 1 + (nodeDef.outputs.length - 1 || 1);
+          //for virtual nodes we assume output is the next index after inputs
+          //but if there is only one output we need to add 1 anyway
 
           const input = {
             inputId: inputDef.id,

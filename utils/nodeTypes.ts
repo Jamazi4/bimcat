@@ -54,7 +54,14 @@ export type ASTNode = {
   values: NodeValues;
 };
 
+export type TransformObject = {
+  position: THREE.Vector3;
+  scale: THREE.Vector3;
+  rotation: THREE.Vector3;
+};
+
 export type EvalValue =
+  | { type: "transform"; value: TransformObject }
   | { type: "boolean"; value: boolean }
   | { type: "number"; value: number }
   | { type: "vector"; value: THREE.Vector3 }
@@ -65,6 +72,7 @@ export type EvalValue =
 export type NodeEvalResult = { [outputSlotId: number]: EvalValue };
 
 export type SlotValues =
+  | "transform"
   | "boolean"
   | "number"
   | "vector"
@@ -142,6 +150,7 @@ export const fillColorClasses = {
   linestring: "fill-linestring-input",
   mesh: "fill-mesh-input",
   geometry: "fill-geometry-input",
+  transform: "fill-transform-input",
 };
 
 export const backgroundColorClasses = {
@@ -151,4 +160,5 @@ export const backgroundColorClasses = {
   linestring: "bg-linestring-input",
   mesh: "bg-mesh-input",
   geometry: "bg-geometry-input",
+  transform: "bg-transform-input",
 };

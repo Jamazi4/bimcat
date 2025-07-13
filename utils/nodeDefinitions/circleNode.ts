@@ -1,6 +1,11 @@
 import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
-import { getComboValues } from "./nodeUtilFunctions";
+import { getComboValues, getInputValues } from "./nodeUtilFunctions";
+import { defaultTransformContructor } from "./defaultNodes";
+import {
+  composeTransformMatrix,
+  getLinestringFromGeom,
+} from "../geometryProcessing/geometryHelpers";
 
 export function circleNode(nodeDefId: number): nodeDefinition {
   return {
@@ -22,32 +27,39 @@ export function circleNode(nodeDefId: number): nodeDefinition {
         id: 1,
         slotValueType: "number",
       },
+      {
+        type: "slot",
+        name: "transform",
+        id: 2,
+        slotValueType: "transform",
+        defaultValue: defaultTransformContructor(),
+      },
     ],
     outputs: [
-      { type: "mesh", name: "mesh", id: 2 },
-      { type: "linestring", name: "linestring", id: 3 },
+      { type: "mesh", name: "mesh", id: 3 },
+      { type: "linestring", name: "linestring", id: 4 },
     ],
     function: (node, evalFunction) => {
       const [radius, segments] = getComboValues(node, evalFunction, [0, 1]);
+      const [transform] = getInputValues(node.inputs, evalFunction, [2]);
 
-      if (typeof radius === "number" && typeof segments === "number") {
+      if (
+        typeof radius === "number" &&
+        typeof segments === "number" &&
+        transform.type === "transform"
+      ) {
         const geom = new THREE.CircleGeometry(radius, segments);
-        const positionAttr = geom.getAttribute("position");
 
-        const linestring: THREE.Vector3[] = [];
+        const transformMatrix = composeTransformMatrix(transform.value);
+        geom.applyMatrix4(transformMatrix);
 
-        for (let i = 0; i < positionAttr.count; i++) {
-          const x = positionAttr.getX(i);
-          const y = positionAttr.getY(i);
-          const z = positionAttr.getZ(i);
-          linestring.push(new THREE.Vector3(x, y, z));
-        }
+        const linestring = getLinestringFromGeom(geom);
 
         const linestringClean = linestring.slice(1);
 
         return {
-          2: { type: "mesh", value: geom },
-          3: { type: "linestring", value: linestringClean },
+          3: { type: "mesh", value: geom },
+          4: { type: "linestring", value: linestringClean },
         };
       }
       throw new Error("Invalid inputs to circle node");
