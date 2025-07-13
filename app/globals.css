@@ -54,6 +54,18 @@
   --color-linestring-input: var(--linestring-input);
   --color-mesh-input: var(--mesh-input);
   --color-geometry-input: var(--background);
+
+  --hue-number-input: 0;
+  --hue-boolean-input: 57;
+  --hue-vector-input: 103;
+  --hue-linestring-input: 270;
+  --hue-mesh-input: 222;
+
+  --sat-light-inputs: 50%;
+  --sat-dark-inputs: 90%;
+
+  --ltns-light-inputs: 52.9%;
+  --ltns-dark-inputs: 30%;
 }
 
 @layer base {
@@ -88,11 +100,22 @@
     --radius: 0.5rem;
 
     /* nodes  */
-    --number-input: hsl(0 50% 53.9%);
-    --boolean-input: hsl(57 50% 53.9%);
-    --vector-input: hsl(103 50% 53.9%);
-    --linestring-input: hsl(163 50% 53.9%);
-    --mesh-input: hsl(222 50% 53.9%);
+    --number-input: hsl(
+      var(--hue-number-input) var(--sat-light-inputs) var(--ltns-light-inputs)
+    );
+    --boolean-input: hsl(
+      var(--hue-boolean-input) var(--sat-light-inputs) var(--ltns-light-inputs)
+    );
+    --vector-input: hsl(
+      var(--hue-vector-input) var(--sat-light-inputs) var(--ltns-light-inputs)
+    );
+    --linestring-input: hsl(
+      var(--hue-linestring-input) var(--sat-light-inputs)
+        var(--ltns-light-inputs)
+    );
+    --mesh-input: hsl(
+      var(--hue-mesh-input) var(--sat-light-inputs) var(--ltns-light-inputs)
+    );
   }
 
   .dark {
@@ -125,11 +148,21 @@
     --chart-5: hsl(0 3% 82.75%);
 
     /* nodes  */
-    --number-input: hsl(0 90% 30%);
-    --boolean-input: hsl(57 90% 30%);
-    --vector-input: hsl(103 90% 30%);
-    --linestring-input: hsl(163 90% 30%);
-    --mesh-input: hsl(222 90% 30%);
+    --number-input: hsl(
+      var(--hue-number-input) var(--sat-dark-inputs) var(--ltns-dark-inputs)
+    );
+    --boolean-input: hsl(
+      var(--hue-boolean-input) var(--sat-dark-inputs) var(--ltns-dark-inputs)
+    );
+    --vector-input: hsl(
+      var(--hue-vector-input) var(--sat-dark-inputs) var(--ltns-dark-inputs)
+    );
+    --linestring-input: hsl(
+      var(--hue-linestring-input) var(--sat-dark-inputs) var(--ltns-dark-inputs)
+    );
+    --mesh-input: hsl(
+      var(--hue-mesh-input) var(--sat-dark-inputs) var(--ltns-dark-inputs)
+    );
   }
 }
 
