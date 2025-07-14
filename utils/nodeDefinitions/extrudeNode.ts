@@ -155,12 +155,12 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
             }
 
             extrudedGeom.deleteAttribute("normal");
-            extrudedGeom = BufferGeometryUtils.mergeVertices(extrudedGeom);
             extrudedGeom.computeVertexNormals();
             extrudedGeom = BufferGeometryUtils.toCreasedNormals(
               extrudedGeom,
               0.01,
             );
+            extrudedGeom = BufferGeometryUtils.mergeVertices(extrudedGeom);
           }
           extrusionOutput = { 5: { type: "mesh", value: extrudedGeom } };
         } else {

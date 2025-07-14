@@ -274,13 +274,22 @@ now need to think about the output of linestring. Because it can output two
 linestrings from extrude. Right now they are connected by an edge. (example of
 pipe extruded inwards and linestring extrusion output.)
 
+--this needs fixing--
 okay extrusion still a bit bugged: when extruding from capped and rotation
 applied - one wall in circle is not rendered
 
-think about applying transform because now it doesn't make sense? probably
-correct way is to multiply the transform by normal vector of prev face
+uncapped mesh based extrusion output gives additional edge in cylinder insides
+probably needs multiple linestrings output
 
-the extrude geometry seems not to be indexed for some reason
+lighting
+--this needs fixing--
+
+think about applying transform because now it doesn't make sense? probably
+correct way is to multiply the transform by normal vector of prev face -
+correct now because now I'm transforming to the global coords, I can
+output normal from extrusion and multiply the transform to get local
+
+the extrude geometry seems not to be indexed for some reason- fixed
 
 ## General
 
@@ -305,6 +314,7 @@ UI:
 - ctrl-z and ctrl-shift-r
 - ctrl-r or something to switch between node and 3d navigation
 - error when switching capped and the extrusion output is switching
+- ctrl-c not working in input fields
 
   additionally some tools that might need adding
 
