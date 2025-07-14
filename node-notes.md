@@ -258,6 +258,10 @@ tomorrow work on this conditional output and then straight to transform
 conditional and transform implemented
 added capped bool to extrude to allow for capped/uncapped
 
+!!When extruding inside of cylinder - it creates faces for every edge!!
+
+transform and scale point of reference is broken
+
 error when switching capped and the extrusion output is switching
 
 now add group node to group all extrusion chains
@@ -282,8 +286,9 @@ UI:
   eval errors
 - lock node menu buttons
 - color picker in output node
-- addNode menu to have search
-- ctrl-z and ctrl-r
+- addNode menu to have search - and display under right click
+- ctrl-z and ctrl-shift-r
+- ctrl-r or something to switch between node and 3d navigation
 
 additionally some tools that might need adding
 
