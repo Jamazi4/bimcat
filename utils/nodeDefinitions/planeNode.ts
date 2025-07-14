@@ -58,7 +58,7 @@ export function planeNode(nodeDefId: number): nodeDefinition {
         const boundaryEdges = extractBoundaryEdges(geom);
         const orderedIndices = orderBoundaryEdges(boundaryEdges);
         const positions = geom.attributes.position.array;
-        const linestring = orderedIndices.map((index) => {
+        const linestring = orderedIndices[0].map((index) => {
           return new THREE.Vector3().fromArray(positions, index * 3);
         });
         return {

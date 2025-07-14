@@ -269,6 +269,13 @@ add math nodes
 expose controls to UI and implement dynamic props
 boolean
 
+### --14-07-2025--
+
+extrusion finally debugged and transform scale point of reference too.
+now need to think about the output of linestring. Because it can output two
+linestrings from extrude. Right now they are connected by an edge. (example of
+pipe extruded inwards and linestring extrusion output.)
+
 ## General
 
 the problems to solve can be divided into two categories:
