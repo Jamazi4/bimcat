@@ -153,7 +153,6 @@ export function createSideGeometry(
       new THREE.Float32BufferAttribute(sideVertices, 3),
     );
     sideGeometry.setIndex(sideIndices);
-    sideGeometry.computeVertexNormals();
   }
 
   return sideGeometry;
@@ -207,12 +206,6 @@ export function extractBoundaryEdges(
   return boundaryEdges;
 }
 
-function stripUV(geometry: THREE.BufferGeometry) {
-  if (geometry.getAttribute("uv")) {
-    geometry.deleteAttribute("uv");
-  }
-}
-
 export function createExtrudedMesh(
   baseGeom: THREE.BufferGeometry<THREE.NormalBufferAttributes>,
   extrudedGeom: THREE.BufferGeometry<THREE.NormalBufferAttributes>,
@@ -220,38 +213,39 @@ export function createExtrudedMesh(
   includeBase: boolean,
   includeTop: boolean,
 ): THREE.BufferGeometry<THREE.NormalBufferAttributes> {
-  if (isIndexed) {
-    baseGeom = BufferGeometryUtils.mergeVertices(baseGeom);
-    extrudedGeom = BufferGeometryUtils.mergeVertices(extrudedGeom);
-  }
-
-  // Create side faces connecting the two geometries
-  const sideGeometry = createSideGeometry(baseGeom, extrudedGeom, isIndexed);
-
-  stripUV(baseGeom);
-  stripUV(extrudedGeom);
-  stripUV(sideGeometry);
-  // Combine all geometries
   const geometriesToMerge: THREE.BufferGeometry<THREE.NormalBufferAttributes>[] =
     [];
 
-  // Add side geometry if it has vertices
+  // Create and prepare side geometry
+  const sideGeometry = createSideGeometry(baseGeom, extrudedGeom, isIndexed);
   if (sideGeometry.attributes.position) {
+    sideGeometry.computeVertexNormals();
     geometriesToMerge.push(sideGeometry);
   }
 
-  if (includeBase) {
-    geometriesToMerge.push(baseGeom);
+  // Create and prepare bottom cap (flipped base)
+  if (includeBase && baseGeom.index) {
+    const baseCap = baseGeom.clone();
+    const indices = baseCap.index!.array;
+    for (let i = 0; i < indices.length; i += 3) {
+      [indices[i], indices[i + 2]] = [indices[i + 2], indices[i]]; // Flip face
+    }
+    baseCap.computeVertexNormals();
+    geometriesToMerge.push(baseCap);
   }
-  if (includeTop) {
-    geometriesToMerge.push(extrudedGeom);
+
+  // Create and prepare top cap
+  if (includeTop && extrudedGeom.index) {
+    const topCap = extrudedGeom.clone();
+    topCap.computeVertexNormals();
+    geometriesToMerge.push(topCap);
   }
 
   if (geometriesToMerge.length === 0) {
-    // Return an empty geometry if there's nothing to merge
     return new THREE.BufferGeometry();
   }
 
+  // Merge the prepared parts
   const finalGeometry = BufferGeometryUtils.mergeGeometries(geometriesToMerge);
   if (!finalGeometry) {
     throw new Error("Failed to merge geometries");

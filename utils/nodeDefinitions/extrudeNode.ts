@@ -10,7 +10,6 @@ import {
 } from "../geometryProcessing/geomFunctions";
 import {
   composeRelativeTransformMatrix,
-  composeTransformMatrix,
   groupBy3Vector,
 } from "../geometryProcessing/geometryHelpers";
 
@@ -78,7 +77,10 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           initGeom.type === "mesh" && activeInputs.includes(1);
 
         if (isInputMesh) {
-          baseGeom = initGeom.value;
+          // Aggressively clean the input mesh for robust modeling
+          const cleanGeom = initGeom.value.clone();
+          cleanGeom.deleteAttribute("normal");
+          baseGeom = BufferGeometryUtils.mergeVertices(cleanGeom);
         } else if (initGeom.type === "linestring" && activeInputs.includes(2)) {
           baseGeom = new THREE.BufferGeometry();
           baseGeom.setFromPoints(initGeom.value);
@@ -91,7 +93,7 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           transform.value,
         );
 
-        // 6. Apply to a copy of the geometry
+        // Apply to a copy of the geometry
         const extrudedGeom = new THREE.BufferGeometry();
         extrudedGeom.copy(baseGeom);
         extrudedGeom.applyMatrix4(transformMatrix);
@@ -107,7 +109,6 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
             3,
           );
           extrudedGeom.setIndex(extrudedIndices);
-          extrudedGeom.computeVertexNormals();
         }
 
         const finalGeometry = createExtrudedMesh(
@@ -117,8 +118,6 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           includeBase,
           includeTop,
         );
-        const finalMergedGeometry =
-          BufferGeometryUtils.mergeVertices(finalGeometry);
 
         let extrusionOutput: NodeEvalResult;
         if (capped) {
@@ -150,7 +149,7 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         }
 
         return {
-          4: { type: "mesh", value: finalMergedGeometry },
+          4: { type: "mesh", value: finalGeometry },
           ...extrusionOutput,
         };
       }
@@ -158,4 +157,3 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
     },
   };
 }
-

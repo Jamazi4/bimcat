@@ -52,24 +52,20 @@ export function composeRelativeTransformMatrix(
   const center = new THREE.Vector3();
   baseGeom.boundingBox?.getCenter(center);
 
-  // 2. Create a translation matrix to move the geometry to origin
   const toOrigin = new THREE.Matrix4().makeTranslation(
     -center.x,
     -center.y,
     -center.z,
   );
 
-  // 3. Your transformation matrix (e.g., scale, rotation, etc.)
   const transformMatrix = composeTransformMatrix(transform);
 
-  // 4. Create a matrix to move it back to original position
   const backToPosition = new THREE.Matrix4().makeTranslation(
     center.x,
     center.y,
     center.z,
   );
 
-  // 5. Combine the matrices: move to origin → transform → move back
   const finalMatrix = new THREE.Matrix4()
     .multiply(backToPosition)
     .multiply(transformMatrix)
