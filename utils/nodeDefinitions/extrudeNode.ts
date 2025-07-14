@@ -9,6 +9,7 @@ import {
   orderBoundaryEdges,
 } from "../geometryProcessing/geomFunctions";
 import {
+  composeRelativeTransformMatrix,
   composeTransformMatrix,
   groupBy3Vector,
 } from "../geometryProcessing/geometryHelpers";
@@ -85,8 +86,14 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           throw new Error("Invalid geometry input");
         }
 
-        const extrudedGeom = baseGeom.clone();
-        const transformMatrix = composeTransformMatrix(transform.value);
+        const transformMatrix = composeRelativeTransformMatrix(
+          baseGeom,
+          transform.value,
+        );
+
+        // 6. Apply to a copy of the geometry
+        const extrudedGeom = new THREE.BufferGeometry();
+        extrudedGeom.copy(baseGeom);
         extrudedGeom.applyMatrix4(transformMatrix);
 
         const includeBase = isInputMesh;
@@ -151,3 +158,4 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
     },
   };
 }
+
