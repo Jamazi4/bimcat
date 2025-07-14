@@ -84,7 +84,6 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           baseGeom = BufferGeometryUtils.mergeVertices(cleanGeom);
         } else if (initGeom.type === "linestring" && activeInputs.includes(2)) {
           const points = initGeom.value as THREE.Vector3[];
-          // Ensure the linestring is counter-clockwise for correct normal generation.
           // This affects both the side walls and the triangulated cap.
           let area = 0;
           for (let i = 0; i < points.length; i++) {
@@ -110,7 +109,6 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           transform.value,
         );
 
-        // Apply to a copy of the geometry
         let extrudedGeom = new THREE.BufferGeometry();
         extrudedGeom.copy(baseGeom);
         extrudedGeom.applyMatrix4(transformMatrix);
@@ -118,8 +116,6 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         const includeBase = isInputMesh;
         const includeTop = capped;
 
-        // If we need a top cap and the base was a linestring, create faces for the top.
-        // This now works correctly because the points are guaranteed to be CCW.
         if (includeTop && !extrudedGeom.index) {
           const extrudedIndices = earcut(
             extrudedGeom.attributes.position.array,
@@ -130,7 +126,7 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           extrudedGeom.computeVertexNormals();
         }
 
-        const finalGeometry = createExtrudedMesh(
+        let finalGeometry = createExtrudedMesh(
           baseGeom,
           extrudedGeom,
           isInputMesh, // isIndexed for sides generation
@@ -138,44 +134,33 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           includeTop,
         );
         finalGeometry.computeVertexNormals();
+        if (!finalGeometry.getIndex()) {
+          finalGeometry = BufferGeometryUtils.mergeVertices(finalGeometry);
+        }
 
         let extrusionOutput: NodeEvalResult;
         if (capped) {
-          // When capped, the top is always a mesh.
-          // If the input was a mesh, its normals might be incorrect after transformation.
-          // Recompute normals for the 'extrusion' output mesh, preserving sharp edges.
           if (isInputMesh) {
-            // Ensure normals exist before creasing them
+            // Check if flipped
+            const determinant = transformMatrix.determinant();
+            if (determinant < 0) {
+              const indices = extrudedGeom.index!.array;
+              for (let i = 0; i < indices.length; i += 3) {
+                // Swap two vertices in each triangle to flip the face
+                [indices[i + 1], indices[i + 2]] = [
+                  indices[i + 2],
+                  indices[i + 1],
+                ];
+              }
+            }
+
+            extrudedGeom.deleteAttribute("normal");
+            extrudedGeom = BufferGeometryUtils.mergeVertices(extrudedGeom);
             extrudedGeom.computeVertexNormals();
             extrudedGeom = BufferGeometryUtils.toCreasedNormals(
               extrudedGeom,
-              0.01, // Force very sharp edges
+              0.01,
             );
-
-            // Check if normals are consistently pointing inwards (e.g., average Y component is negative)
-            // This is a heuristic and might need adjustment based on expected geometry orientation.
-            const normalAttribute = extrudedGeom.attributes.normal;
-            if (normalAttribute) {
-              let sumY = 0;
-              for (let i = 0; i < normalAttribute.count; i++) {
-                sumY += normalAttribute.getY(i);
-              }
-              // If the average Y normal is negative, it suggests normals are flipped downwards.
-              // This heuristic assumes the extrusion is generally upwards.
-              if (sumY < 0) {
-                const indices = extrudedGeom.index!.array;
-                for (let i = 0; i < indices.length; i += 3) {
-                  // Swap two vertices in each triangle to flip the face
-                  [indices[i], indices[i + 1]] = [indices[i + 1], indices[i]];
-                }
-                // Recompute normals after flipping faces
-                extrudedGeom.computeVertexNormals();
-                extrudedGeom = BufferGeometryUtils.toCreasedNormals(
-                  extrudedGeom,
-                  0.01, // Force very sharp edges
-                );
-              }
-            }
           }
           extrusionOutput = { 5: { type: "mesh", value: extrudedGeom } };
         } else {
@@ -196,7 +181,6 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
               extrudedGeom.attributes.position.array,
             );
           }
-          // When not capped, the extrusion is a set of linestrings.
           extrusionOutput = {
             6: {
               type: "linestring",

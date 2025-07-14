@@ -22,7 +22,6 @@ export function createSideGeometry(
     for (const edge of edges) {
       const [v1, v2] = edge;
 
-      // Validate indices
       if (
         v1 * 3 + 2 >= basePositions.length ||
         v2 * 3 + 2 >= basePositions.length ||
@@ -32,7 +31,6 @@ export function createSideGeometry(
         continue;
       }
 
-      // Base vertices
       const base1 = [
         basePositions[v1 * 3],
         basePositions[v1 * 3 + 1],
@@ -44,7 +42,6 @@ export function createSideGeometry(
         basePositions[v2 * 3 + 2],
       ];
 
-      // Extruded vertices
       const ext1 = [
         extrudedPositions[v1 * 3],
         extrudedPositions[v1 * 3 + 1],
@@ -56,7 +53,6 @@ export function createSideGeometry(
         extrudedPositions[v2 * 3 + 2],
       ];
 
-      // Check for NaN values
       if (
         base1.some(isNaN) ||
         base2.some(isNaN) ||
@@ -66,10 +62,8 @@ export function createSideGeometry(
         continue;
       }
 
-      // Add vertices for quad (two triangles)
       sideVertices.push(...base1, ...base2, ...ext1, ...ext2);
 
-      // Create two triangles for the quad
       const offset = vertexIndex;
       sideIndices.push(
         offset,
@@ -90,7 +84,6 @@ export function createSideGeometry(
       const v1 = i;
       const v2 = (i + 1) % vertexCount;
 
-      // Base vertices
       const base1 = [
         basePositions[v1 * 3],
         basePositions[v1 * 3 + 1],
@@ -102,7 +95,6 @@ export function createSideGeometry(
         basePositions[v2 * 3 + 2],
       ];
 
-      // Extruded vertices
       const ext1 = [
         extrudedPositions[v1 * 3],
         extrudedPositions[v1 * 3 + 1],
@@ -114,7 +106,6 @@ export function createSideGeometry(
         extrudedPositions[v2 * 3 + 2],
       ];
 
-      // Check for NaN values
       if (
         base1.some(isNaN) ||
         base2.some(isNaN) ||
@@ -129,10 +120,8 @@ export function createSideGeometry(
         continue;
       }
 
-      // Add vertices for quad
       sideVertices.push(...base1, ...base2, ...ext1, ...ext2);
 
-      // Create two triangles for the quad
       const offset = vertexIndex;
       sideIndices.push(
         offset,

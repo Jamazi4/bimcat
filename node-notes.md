@@ -262,8 +262,6 @@ added capped bool to extrude to allow for capped/uncapped
 
 transform and scale point of reference is broken
 
-error when switching capped and the extrusion output is switching
-
 now add group node to group all extrusion chains
 add math nodes
 expose controls to UI and implement dynamic props
@@ -276,6 +274,14 @@ now need to think about the output of linestring. Because it can output two
 linestrings from extrude. Right now they are connected by an edge. (example of
 pipe extruded inwards and linestring extrusion output.)
 
+okay extrusion still a bit bugged: when extruding from capped and rotation
+applied - one wall in circle is not rendered
+
+think about applying transform because now it doesn't make sense? probably
+correct way is to multiply the transform by normal vector of prev face
+
+the extrude geometry seems not to be indexed for some reason
+
 ## General
 
 the problems to solve can be divided into two categories:
@@ -285,6 +291,8 @@ Runtime:
 - cache node outputs
 - change/lock inputs conditionally
 - pick reference from 3D
+- group node
+-
 
 UI:
 
@@ -296,8 +304,9 @@ UI:
 - addNode menu to have search - and display under right click
 - ctrl-z and ctrl-shift-r
 - ctrl-r or something to switch between node and 3d navigation
+- error when switching capped and the extrusion output is switching
 
-additionally some tools that might need adding
+  additionally some tools that might need adding
 
 - measure tool
 - expose var (so it's adjustable in the browser) and dynamic props
