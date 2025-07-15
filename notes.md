@@ -520,6 +520,12 @@ privateComposite/doorsLib
 
 above error fixed but not the one from prod - check it
 
+### --15-07-2025--
+
+search bar on landing page with user become
+advanced search is current search
+maybe no table but card list with all types - components, libs and composite
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite

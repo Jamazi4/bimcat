@@ -291,6 +291,21 @@ output normal from extrusion and multiply the transform to get local
 
 the extrude geometry seems not to be indexed for some reason- fixed
 
+### --15-07-2025--
+
+extrude debugging -
+component :
+
+--Linestring-Extrusion-Bugs--
+has bugs in planes and cylinder:
+
+make use of three-mesh-bvh and replace orderBoundaryEdges and
+extractBoundaryEdges.
+
+mess with merging vertices.
+
+a lot of redundant code and flags done by gemini - tidy it up
+
 ## General
 
 the problems to solve can be divided into two categories:
