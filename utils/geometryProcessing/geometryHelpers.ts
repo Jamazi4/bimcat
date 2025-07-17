@@ -73,3 +73,8 @@ export function composeRelativeTransformMatrix(
 
   return finalMatrix;
 }
+
+export function isClosedLoop(points: THREE.Vector3[]): boolean {
+  if (points.length < 3) return false;
+  return points[0].distanceToSquared(points[points.length - 1]) < 1e-6;
+}

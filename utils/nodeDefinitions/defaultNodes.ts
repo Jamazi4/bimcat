@@ -1,4 +1,3 @@
-import { ASTNode } from "../nodeTypes";
 import { createNodeId } from "../utilFunctions";
 
 export const defaultNumberContructor = (value: number) => {

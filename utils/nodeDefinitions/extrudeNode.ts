@@ -3,15 +3,16 @@ import { nodeDefinition, NodeEvalResult } from "../nodeTypes";
 import * as THREE from "three";
 import { getInputValues } from "./nodeUtilFunctions";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
-import {
-  createExtrudedMesh,
-  extractBoundaryEdges,
-  orderBoundaryEdges,
-} from "../geometryProcessing/geomFunctions";
+import { createExtrudedMesh } from "../geometryProcessing/geomFunctions";
 import {
   composeRelativeTransformMatrix,
   groupBy3Vector,
+  isClosedLoop,
 } from "../geometryProcessing/geometryHelpers";
+import {
+  createSideGeometry,
+  extractOrderedBoundaryLoop,
+} from "../geometryProcessing/extrusion";
 
 export function extrudeNode(nodeDefId: number): nodeDefinition {
   return {
@@ -50,13 +51,11 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
     ],
     outputs: [
       { type: "mesh", name: "final", id: 4 },
-      { type: "mesh", name: "extrusion", id: 5, onBooleanTrueId: 3 },
+      { type: "mesh", name: "extrusion", id: 5 },
       {
         type: "linestring",
         name: "extrusion",
         id: 6,
-        onBooleanTrueId: 3,
-        onBooleanInverted: true,
       },
     ],
     function: (node, evalFunction) => {
@@ -71,127 +70,90 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
       const [transform] = getInputValues(node.inputs, evalFunction, [0]);
       const capped = node.values[3];
 
+      //Now doesn't shout whatever I insert
+      let baseGeom = new THREE.BufferGeometry();
+      let baseLinestring: THREE.Vector3[] = [];
+      const meshExtrusionOutput = new THREE.BufferGeometry();
+      const linestringExtrusionOutput: THREE.Vector3[] = [];
+      const finalOutput = new THREE.BufferGeometry();
+      let isBaseClosed: boolean = true;
+      let isInputMesh: boolean = activeInputs.includes(1);
+
       if (transform.type === "transform" && typeof capped === "boolean") {
-        let baseGeom: THREE.BufferGeometry<THREE.NormalBufferAttributes>;
-        const isInputMesh =
-          initGeom.type === "mesh" && activeInputs.includes(1);
+        if (initGeom.type === "linestring") {
+          isInputMesh = false;
 
-        if (isInputMesh) {
-          // Aggressively clean the input mesh for robust modeling
-          const cleanGeom = initGeom.value.clone();
-          cleanGeom.deleteAttribute("normal");
-          cleanGeom.deleteAttribute("uv");
-          baseGeom = BufferGeometryUtils.mergeVertices(cleanGeom);
-        } else if (initGeom.type === "linestring" && activeInputs.includes(2)) {
-          const points = initGeom.value as THREE.Vector3[];
-          // This affects both the side walls and the triangulated cap.
-          let area = 0;
-          for (let i = 0; i < points.length; i++) {
-            const p1 = points[i];
-            const p2 = points[(i + 1) % points.length];
-            // Using X and Y for the 2D shoelace formula. Assumes shape is mostly flat on XY plane.
-            area += p1.x * p2.y - p2.x * p1.y;
+          baseLinestring = initGeom.value;
+          isBaseClosed = isClosedLoop(baseLinestring);
+
+          baseGeom.setFromPoints(baseLinestring);
+          if (baseLinestring.length === 2) {
+            baseGeom.setIndex([0, 1]);
+          } else {
+            const indices = earcut(baseGeom.attributes.position.array, [], 3);
+            baseGeom.setIndex(indices);
           }
-
-          if (area < 0) {
-            // If clockwise, reverse the points to make it counter-clockwise.
-            points.reverse();
-          }
-
-          baseGeom = new THREE.BufferGeometry();
-          baseGeom.setFromPoints(points);
-        } else {
-          throw new Error("Invalid geometry input");
+        } else if (initGeom.type === "mesh") {
+          isInputMesh = true;
+          baseGeom = initGeom.value.clone();
+          baseLinestring = extractOrderedBoundaryLoop(baseGeom).flat();
+          //assume for now that it's always indexed
         }
 
+        baseGeom = BufferGeometryUtils.mergeVertices(baseGeom);
+        baseGeom.computeVertexNormals();
         const transformMatrix = composeRelativeTransformMatrix(
           baseGeom,
           transform.value,
         );
 
-        let extrudedGeom = new THREE.BufferGeometry();
-        extrudedGeom.copy(baseGeom);
-        extrudedGeom.applyMatrix4(transformMatrix);
+        const tempMesh = baseGeom.clone();
+        tempMesh.applyMatrix4(transformMatrix);
 
-        const includeBase = isInputMesh;
-        const includeTop = capped;
-
-        if (includeTop && !extrudedGeom.index) {
-          const extrudedIndices = earcut(
-            extrudedGeom.attributes.position.array,
-            [],
-            3,
+        //1. just for not capped extrusion output
+        if (baseLinestring.length === 2) {
+          //if input was a sigle edge
+          groupBy3Vector(tempMesh.attributes.position.array).forEach((v) =>
+            linestringExtrusionOutput.push(v),
           );
-          extrudedGeom.setIndex(extrudedIndices);
-          extrudedGeom.computeVertexNormals();
-        }
-
-        let finalGeometry = createExtrudedMesh(
-          baseGeom,
-          extrudedGeom,
-          isInputMesh, // isIndexed for sides generation
-          includeBase,
-          includeTop,
-        );
-        finalGeometry.computeVertexNormals();
-        if (!finalGeometry.getIndex()) {
-          finalGeometry = BufferGeometryUtils.mergeVertices(finalGeometry);
-        }
-
-        let extrusionOutput: NodeEvalResult;
-        if (capped) {
-          if (isInputMesh) {
-            // Check if flipped
-            const determinant = transformMatrix.determinant();
-            if (determinant < 0) {
-              const indices = extrudedGeom.index!.array;
-              for (let i = 0; i < indices.length; i += 3) {
-                // Swap two vertices in each triangle to flip the face
-                [indices[i + 1], indices[i + 2]] = [
-                  indices[i + 2],
-                  indices[i + 1],
-                ];
-              }
-            }
-
-            extrudedGeom.deleteAttribute("normal");
-            extrudedGeom.computeVertexNormals();
-            extrudedGeom = BufferGeometryUtils.toCreasedNormals(
-              extrudedGeom,
-              0.01,
-            );
-            extrudedGeom = BufferGeometryUtils.mergeVertices(extrudedGeom);
-          }
-          extrusionOutput = { 5: { type: "mesh", value: extrudedGeom } };
         } else {
-          let extrusionLines: THREE.Vector3[];
-          if (isInputMesh) {
-            const mergedGeom = BufferGeometryUtils.mergeVertices(extrudedGeom);
-            const boundaryEdges = extractBoundaryEdges(mergedGeom);
-            const orderedIndexPaths = orderBoundaryEdges(boundaryEdges);
-            const positions = mergedGeom.attributes.position.array;
-            // Flatten the array of paths into a single linestring array
-            extrusionLines = orderedIndexPaths.flatMap((path) =>
-              path.map((index) =>
-                new THREE.Vector3().fromArray(positions, index * 3),
-              ),
+          //if input was normal linestring
+          if (!isInputMesh) {
+            linestringExtrusionOutput.push(
+              ...groupBy3Vector(tempMesh.attributes.position.array),
             );
           } else {
-            extrusionLines = groupBy3Vector(
-              extrudedGeom.attributes.position.array,
+            linestringExtrusionOutput.push(
+              ...extractOrderedBoundaryLoop(tempMesh).flat(),
             );
           }
-          extrusionOutput = {
-            6: {
-              type: "linestring",
-              value: extrusionLines,
-            },
-          };
+          if (isBaseClosed && !isClosedLoop(linestringExtrusionOutput)) {
+            linestringExtrusionOutput.push(linestringExtrusionOutput[0]);
+          }
+
+          const indices = earcut(tempMesh.attributes.position.array, [], 3);
+          meshExtrusionOutput.copy(tempMesh);
+          meshExtrusionOutput.setIndex(indices);
+          meshExtrusionOutput.computeVertexNormals();
+        }
+        //2. for capped extrusion output
+        if (isInputMesh) {
+          meshExtrusionOutput.copy(tempMesh);
         }
 
+        const sideGeom = createSideGeometry(
+          baseLinestring,
+          linestringExtrusionOutput,
+          isBaseClosed,
+        );
+
+        //3. for uncapped final with mesh input
+        //4. for capped final with mesh input
+
         return {
-          4: { type: "mesh", value: finalGeometry },
-          ...extrusionOutput,
+          4: { type: "mesh", value: sideGeom },
+          5: { type: "mesh", value: meshExtrusionOutput },
+          6: { type: "linestring", value: linestringExtrusionOutput },
         };
       }
       throw new Error("Invalid inputs to extrude node");

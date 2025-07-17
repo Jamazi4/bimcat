@@ -121,7 +121,7 @@ const DraggableNode = memo(function DraggableNode({
     >
       {/* title  */}
       <div className="flex justify-center text-secondary border-b-1 rounded-tl-md rounded-tr-md font-bold select-none mx-2 py-2 text-3xl">
-        {node.type}
+        {node.type.toUpperCase()}
       </div>
 
       {/* inputs  */}
