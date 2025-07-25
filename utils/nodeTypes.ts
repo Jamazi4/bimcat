@@ -67,7 +67,7 @@ export type EvalValue =
   | { type: "boolean"; value: boolean }
   | { type: "number"; value: number }
   | { type: "vector"; value: THREE.Vector3 }
-  | { type: "linestring"; value: THREE.Vector3[] }
+  | { type: "linestring"; value: THREE.Vector3[][] }
   | { type: "mesh"; value: THREE.BufferGeometry }
   | { type: "geometry"; value: THREE.Object3D }; // result of output node only
 
@@ -86,10 +86,10 @@ export type NodeInputType = (
   | { type: "group"; slotValueType: SlotValues; groupIndex: number }
   | { type: "slot"; slotValueType: SlotValues }
   | {
-      type: "combo";
-      slotValueType: SlotValues;
-      value: number | boolean | string;
-    }
+    type: "combo";
+    slotValueType: SlotValues;
+    value: number | boolean | string;
+  }
   | { type: "number" | "boolean" | "string" }
 ) & {
   defaultValue?: ASTNode;

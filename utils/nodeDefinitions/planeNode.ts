@@ -56,7 +56,7 @@ export function planeNode(nodeDefId: number): nodeDefinition {
         linestring.push(linestring[0]);
         return {
           3: { type: "mesh", value: geom },
-          4: { type: "linestring", value: linestring },
+          4: { type: "linestring", value: [linestring] },
         };
       }
       throw new Error("Invalid inputs to plane node");

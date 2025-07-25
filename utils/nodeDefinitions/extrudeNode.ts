@@ -5,6 +5,7 @@ import { getInputValues } from "./nodeUtilFunctions";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 import { createExtrudedMesh } from "../geometryProcessing/geomFunctions";
 import {
+  closeLinestrings,
   composeRelativeTransformMatrix,
   groupBy3Vector,
   isClosedLoop,
@@ -13,6 +14,8 @@ import {
   createSideGeometry,
   extractOrderedBoundaryLoop,
 } from "../geometryProcessing/extrusion";
+import { isLastDayOfMonth } from "date-fns";
+import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
 
 export function extrudeNode(nodeDefId: number): nodeDefinition {
   return {
@@ -72,32 +75,50 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
 
       //Now doesn't shout whatever I insert
       let baseGeom = new THREE.BufferGeometry();
-      let baseLinestring: THREE.Vector3[] = [];
+      let baseLinestrings: THREE.Vector3[][] = [];
       const meshExtrusionOutput = new THREE.BufferGeometry();
-      const linestringExtrusionOutput: THREE.Vector3[] = [];
+      const linestringExtrusionOutput: THREE.Vector3[][] = [];
       const finalOutput = new THREE.BufferGeometry();
-      let isBaseClosed: boolean = true;
+      let isBaseClosed: boolean[] = [];
       let isInputMesh: boolean = activeInputs.includes(1);
 
       if (transform.type === "transform" && typeof capped === "boolean") {
         if (initGeom.type === "linestring") {
           isInputMesh = false;
 
-          baseLinestring = initGeom.value;
-          isBaseClosed = isClosedLoop(baseLinestring);
+          baseLinestrings = initGeom.value;
+          isBaseClosed = baseLinestrings.map((l) => isClosedLoop(l))
 
-          baseGeom.setFromPoints(baseLinestring);
-          if (baseLinestring.length === 2) {
+          baseGeom.setFromPoints(baseLinestrings.flat());
+          if (baseLinestrings.length === 2) {
             baseGeom.setIndex([0, 1]);
           } else {
-            const indices = earcut(baseGeom.attributes.position.array, [], 3);
-            baseGeom.setIndex(indices);
+            const positions: number[] = []
+            const indices: number[] = []
+            let vertexOffset = 0;
+
+            for (const polygon of baseLinestrings) {
+              const flat3D: number[] = []
+              for (const v of polygon) {
+                flat3D.push(v.x, v.y, v.z);
+                positions.push(v.x, v.y, v.z)
+              }
+
+              const tris = earcut(flat3D, [], 3)
+              for (const idx of tris) {
+                indices.push(idx + vertexOffset)
+              }
+              vertexOffset += polygon.length;
+            }
           }
         } else if (initGeom.type === "mesh") {
           isInputMesh = true;
           baseGeom = initGeom.value.clone();
-          baseLinestring = extractOrderedBoundaryLoop(baseGeom).flat();
-          //assume for now that it's always indexed
+          baseLinestrings = extractOrderedBoundaryLoop(baseGeom);
+
+          isBaseClosed = Array(baseLinestrings.length).fill(true)
+          //mesh boundaries always closed
+          closeLinestrings(baseLinestrings, isBaseClosed)
         }
 
         baseGeom = BufferGeometryUtils.mergeVertices(baseGeom);
@@ -111,39 +132,46 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         tempMesh.applyMatrix4(transformMatrix);
 
         //1. just for not capped extrusion output
-        if (baseLinestring.length === 2) {
-          //if input was a sigle edge
-          groupBy3Vector(tempMesh.attributes.position.array).forEach((v) =>
-            linestringExtrusionOutput.push(v),
-          );
-        } else {
-          //if input was normal linestring
-          if (!isInputMesh) {
-            linestringExtrusionOutput.push(
-              ...groupBy3Vector(tempMesh.attributes.position.array),
-            );
-          } else {
-            linestringExtrusionOutput.push(
-              ...extractOrderedBoundaryLoop(tempMesh).flat(),
-            );
-          }
-          if (isBaseClosed && !isClosedLoop(linestringExtrusionOutput)) {
-            linestringExtrusionOutput.push(linestringExtrusionOutput[0]);
-          }
+        //if input was normal linestring
+        if (!isInputMesh) {
+          baseLinestrings.forEach((linestring) => {
+            const temp: THREE.Vector3[] = []
+            linestring.forEach((v) => {
+              const newVector = v.clone().applyMatrix4(transformMatrix)
+              temp.push(newVector)
+            })
+            linestringExtrusionOutput.push(temp)
+          })
 
-          const indices = earcut(tempMesh.attributes.position.array, [], 3);
-          meshExtrusionOutput.copy(tempMesh);
-          meshExtrusionOutput.setIndex(indices);
-          meshExtrusionOutput.computeVertexNormals();
+        } else {
+          linestringExtrusionOutput.push(
+            ...extractOrderedBoundaryLoop(tempMesh),
+          );
         }
+
+        closeLinestrings(linestringExtrusionOutput, isBaseClosed)
+
+        for (let i = 0; i < baseLinestrings.length; i++) {
+          const base = [...baseLinestrings[i]]
+          if (base.length < 2) continue
+
+          if (isBaseClosed[i] && isClosedLoop(base)) {
+            base.push(base[0].clone())
+          }
+        }
+
+        const indices = earcut(tempMesh.attributes.position.array, [], 3);
+        meshExtrusionOutput.copy(tempMesh);
+        meshExtrusionOutput.setIndex(indices);
+        meshExtrusionOutput.computeVertexNormals();
         //2. for capped extrusion output
         if (isInputMesh) {
           meshExtrusionOutput.copy(tempMesh);
         }
 
         const sideGeom = createSideGeometry(
-          baseLinestring,
-          linestringExtrusionOutput,
+          baseLinestrings,
+          transformMatrix,
           isBaseClosed,
         );
 

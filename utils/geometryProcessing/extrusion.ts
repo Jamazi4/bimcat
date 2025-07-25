@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { Halfedge, HalfedgeDS } from "three-mesh-halfedge";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
-import { groupBy3Vector, isClosedLoop } from "./geometryHelpers";
+import { isClosedLoop } from "./geometryHelpers";
 
 export function extractOrderedBoundaryLoop(
   geometry: THREE.BufferGeometry,
@@ -44,55 +44,60 @@ export function extractOrderedBoundaryLoop(
 
   return loops;
 }
-
 export function createSideGeometry(
-  baseLinestring: THREE.Vector3[],
-  extrudedLinestring: THREE.Vector3[],
-  isBaseClosed: boolean,
+  baseLinestrings: THREE.Vector3[][],
+  transformMatrix: THREE.Matrix4,
+  isBaseClosed: boolean[],
 ) {
-  if (isBaseClosed && !isClosedLoop(extrudedLinestring)) {
-    console.log("added to base");
-    extrudedLinestring.push(extrudedLinestring[0]);
+  const sideGeometries: THREE.BufferGeometry[] = [];
+
+  for (let i = 0; i < baseLinestrings.length; i++) {
+    const base = [...baseLinestrings[i]];
+    if (base.length < 2) continue;
+
+
+    if (isBaseClosed[i] && !isClosedLoop(base)) {
+      base.push(base[0].clone());
+    }
+
+    const count = base.length;
+    const sideVertices: number[] = [];
+    const sideIndices: number[] = [];
+
+    for (let j = 0; j < count - 1; j++) {
+      const offset = sideVertices.length / 3;
+
+      const b1 = base[j].toArray();
+      const b2 = base[j + 1].toArray();
+
+      const e1 = base[j].clone().applyMatrix4(transformMatrix).toArray();
+      const e2 = base[j + 1].clone().applyMatrix4(transformMatrix).toArray();
+
+      sideVertices.push(...b1, ...b2, ...e1, ...e2);
+
+      sideIndices.push(
+        offset,
+        offset + 1,
+        offset + 2, // Triangle 1
+        offset + 1,
+        offset + 3,
+        offset + 2, // Triangle 2
+      );
+    }
+
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.Float32BufferAttribute(sideVertices, 3));
+    geom.setIndex(sideIndices);
+    sideGeometries.push(geom);
   }
-  if (isBaseClosed && !isClosedLoop(baseLinestring)) {
-    console.log("added to extruded");
-    baseLinestring.push(baseLinestring[0]);
-  }
 
-  const sideGeometry = new THREE.BufferGeometry<THREE.NormalBufferAttributes>();
-  const sideVertices: number[] = [];
-  const sideIndices: number[] = [];
+  if (sideGeometries.length === 0) return null;
 
-  const count = baseLinestring.length;
-
-  for (let i = 0; i < count - 1; i += 1) {
-    const offset = sideVertices.length / 3;
-    const b1 = baseLinestring[i].toArray();
-    const b2 = baseLinestring[i + 1].toArray();
-
-    const e1 = extrudedLinestring[i].toArray();
-    const e2 = extrudedLinestring[i + 1].toArray();
-
-    sideVertices.push(...b1, ...b2, ...e1, ...e2);
-
-    sideIndices.push(
-      offset,
-      offset + 1,
-      offset + 2, // Triangle 1
-      offset + 1,
-      offset + 3,
-      offset + 2, // Triangle 2
-    );
-  }
-
-  sideGeometry.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute(sideVertices, 3),
-  );
-  sideGeometry.setIndex(sideIndices);
-  let final = BufferGeometryUtils.mergeVertices(sideGeometry);
+  let final = BufferGeometryUtils.mergeGeometries(sideGeometries, true);
+  final = BufferGeometryUtils.mergeVertices(final);
   final.computeVertexNormals();
   final = BufferGeometryUtils.toCreasedNormals(final, 0.01);
+
   return final;
 }
 

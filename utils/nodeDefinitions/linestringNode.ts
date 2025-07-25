@@ -18,7 +18,7 @@ export function linestringNode(nodeDefId: number): nodeDefinition {
       const p2 = evalFunction(p2Input.ast)[p2Input.fromOutputId];
 
       if (p1.type === "vector" && p2.type === "vector") {
-        return { 2: { type: "linestring", value: [p1.value, p2.value] } };
+        return { 2: { type: "linestring", value: [[p1.value, p2.value]] } };
       }
       throw new Error("Invalid inputs to edgeByPoints");
     },

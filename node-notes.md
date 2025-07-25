@@ -306,6 +306,21 @@ mess with merging vertices.
 
 a lot of redundant code and flags done by gemini - tidy it up
 
+### --19-07-2025--
+
+Still redoing extrude node from scratch. A lot of logic works, but just changed
+linestring type to be a list of lists of vectors. Need to refactor extrusion
+logic to handle that.
+
+### --20-07-2025--
+
+it's still in progress -
+
+### --26-07-2025--
+
+Seems like working - now complete extrude node with correct outputs under
+correct conditions
+
 ## General
 
 the problems to solve can be divided into two categories:

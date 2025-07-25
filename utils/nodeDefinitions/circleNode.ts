@@ -64,7 +64,7 @@ export function circleNode(nodeDefId: number): nodeDefinition {
 
         return {
           3: { type: "mesh", value: geom },
-          4: { type: "linestring", value: linestringClean },
+          4: { type: "linestring", value: [linestringClean] },
         };
       }
       throw new Error("Invalid inputs to circle node");

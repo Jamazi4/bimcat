@@ -28,10 +28,14 @@ export function outputNode(nodeDefId: number): nodeDefinition {
           return { 1: { type: "geometry", value: mesh } };
         }
         case "linestring": {
-          const geom = new THREE.BufferGeometry().setFromPoints(input.value);
+
+          const geoms = input.value.map((string) => {
+            return new THREE.BufferGeometry().setFromPoints(string)
+          })
           const mat = new THREE.LineBasicMaterial({ color: 0x7aadfa });
-          const linestring = new THREE.Line(geom, mat);
-          return { 1: { type: "geometry", value: linestring } };
+          const lineGroup = new THREE.Group()
+          geoms.forEach((geom) => lineGroup.add(new THREE.Line(geom, mat)))
+          return { 1: { type: "geometry", value: lineGroup } };
         }
         case "mesh": {
           const mat = new THREE.MeshStandardMaterial({
