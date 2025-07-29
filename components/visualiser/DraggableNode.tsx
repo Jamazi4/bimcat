@@ -44,6 +44,7 @@ interface DraggableNodeProps {
   getViewTransformScale: () => number;
   setNodeDivs: Dispatch<SetStateAction<Record<string, HTMLDivElement>>>;
   curTheme: string;
+  removeEdgeToSlot: (toNodeId: string, toSlotId: number) => void
 }
 
 const DraggableNode = memo(function DraggableNode({
@@ -60,6 +61,7 @@ const DraggableNode = memo(function DraggableNode({
   getViewTransformScale,
   setNodeDivs,
   curTheme,
+  removeEdgeToSlot
 }: DraggableNodeProps) {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -141,6 +143,7 @@ const DraggableNode = memo(function DraggableNode({
             }
             return (
               <DraggableNodeInputGroup
+                removeEdgeToSlot={removeEdgeToSlot}
                 activeIndex={activeIndex}
                 switchGroupInputActive={switchGroupInputActive}
                 nodeId={node.id}
@@ -210,6 +213,7 @@ const DraggableNode = memo(function DraggableNode({
                 slotIO: "input",
               };
               const connected = connectedSlotIds.includes(input.id);
+
 
               return (
                 <DraggableNodeComboSlot

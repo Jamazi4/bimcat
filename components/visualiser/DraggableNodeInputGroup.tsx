@@ -40,6 +40,7 @@ interface InputNodeGroupProps {
     relativeX: number;
     relativeY: number;
   };
+  removeEdgeToSlot: (nodeId: string, toSlotId: number) => void
 }
 const DraggableNodeInputGroup = ({
   switchGroupInputActive,
@@ -51,6 +52,7 @@ const DraggableNodeInputGroup = ({
   finishConnecting,
   getSlotRelativePosition,
   nodeRef,
+  removeEdgeToSlot
 }: InputNodeGroupProps) => {
   const ref = useRef<SVGSVGElement>(null);
 
@@ -109,7 +111,7 @@ const DraggableNodeInputGroup = ({
       Object.values(nameIndexMap),
       nameIndexMap[value],
     );
-
+    removeEdgeToSlot(nodeId, groupIndex)
     setSelectedInput(value);
   };
 

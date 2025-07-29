@@ -58,6 +58,7 @@ const DraggableNodeComboSlot = ({
     if (valid) {
       changeThisValue(num);
     }
+
   };
   useEffect(() => {
     if (!ref.current) return;

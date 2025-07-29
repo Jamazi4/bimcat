@@ -1,21 +1,17 @@
 import earcut from "earcut";
-import { nodeDefinition, NodeEvalResult } from "../nodeTypes";
+import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
 import { getInputValues } from "./nodeUtilFunctions";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
-import { createExtrudedMesh } from "../geometryProcessing/geomFunctions";
 import {
   closeLinestrings,
   composeRelativeTransformMatrix,
-  groupBy3Vector,
   isClosedLoop,
 } from "../geometryProcessing/geometryHelpers";
 import {
   createSideGeometry,
   extractOrderedBoundaryLoop,
 } from "../geometryProcessing/extrusion";
-import { isLastDayOfMonth } from "date-fns";
-import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
 
 export function extrudeNode(nodeDefId: number): nodeDefinition {
   return {
@@ -78,7 +74,7 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
       let baseLinestrings: THREE.Vector3[][] = [];
       const meshExtrusionOutput = new THREE.BufferGeometry();
       const linestringExtrusionOutput: THREE.Vector3[][] = [];
-      const finalOutput = new THREE.BufferGeometry();
+      let finalOutput = new THREE.BufferGeometry();
       let isBaseClosed: boolean[] = [];
       let isInputMesh: boolean = activeInputs.includes(1);
 
@@ -123,6 +119,7 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
 
         baseGeom = BufferGeometryUtils.mergeVertices(baseGeom);
         baseGeom.computeVertexNormals();
+        baseGeom.deleteAttribute('uv')
         const transformMatrix = composeRelativeTransformMatrix(
           baseGeom,
           transform.value,
@@ -131,8 +128,6 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         const tempMesh = baseGeom.clone();
         tempMesh.applyMatrix4(transformMatrix);
 
-        //1. just for not capped extrusion output
-        //if input was normal linestring
         if (!isInputMesh) {
           baseLinestrings.forEach((linestring) => {
             const temp: THREE.Vector3[] = []
@@ -164,22 +159,28 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         meshExtrusionOutput.copy(tempMesh);
         meshExtrusionOutput.setIndex(indices);
         meshExtrusionOutput.computeVertexNormals();
-        //2. for capped extrusion output
-        if (isInputMesh) {
-          meshExtrusionOutput.copy(tempMesh);
-        }
+
 
         const sideGeom = createSideGeometry(
           baseLinestrings,
           transformMatrix,
           isBaseClosed,
         );
+        if (!sideGeom) throw new Error("Could not create side geometries")
 
-        //3. for uncapped final with mesh input
-        //4. for capped final with mesh input
+        if (isInputMesh) {
+          meshExtrusionOutput.copy(tempMesh);
+          finalOutput = BufferGeometryUtils.mergeGeometries([sideGeom, baseGeom])
+        } else {
+          finalOutput = sideGeom
+        }
+
+        if (capped) {
+          finalOutput = BufferGeometryUtils.mergeGeometries([finalOutput, meshExtrusionOutput])
+        }
 
         return {
-          4: { type: "mesh", value: sideGeom },
+          4: { type: "mesh", value: finalOutput },
           5: { type: "mesh", value: meshExtrusionOutput },
           6: { type: "linestring", value: linestringExtrusionOutput },
         };

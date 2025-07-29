@@ -154,6 +154,7 @@ export const useNodeSystem = (
     setEdges(nodeProject.edges);
   }, []);
 
+
   const saveNodeProject = useCallback(
     async (componentId: string) => {
       const geometry: ComponentGeometry[] = meshGroup.children
@@ -200,6 +201,16 @@ export const useNodeSystem = (
     },
     [],
   );
+
+
+  const removeEdgeToSlot = useCallback((toNodeId: string, toSlotId: number
+  ) => {
+    const edge = edgesRef.current.find((e) => e.toNodeId === toNodeId && e.toSlotId === toSlotId)
+    if (edge) {
+      setEdges((prevEdges) => prevEdges.filter((e) => e.id !== edge.id))
+    }
+
+  }, [])
 
   const changeNodeValue = useCallback(
     (nodeId: string, inputId: number, value: string | number | boolean) => {
@@ -795,6 +806,7 @@ export const useNodeSystem = (
     setNodeDivs,
     selectedNodeIds,
     getViewTransformScale,
+    removeEdgeToSlot
   };
 };
 

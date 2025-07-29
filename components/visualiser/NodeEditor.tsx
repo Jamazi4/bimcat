@@ -59,6 +59,7 @@ const NodeEditor = ({
     selectedNodeIds,
     getViewTransformScale,
     switchGroupInputActive,
+    removeEdgeToSlot
   } = useNodeSystem(nodeNavigation, nodeMeshGroup);
 
   const fetchNodesWrapper = useCallback(async () => {
@@ -112,6 +113,7 @@ const NodeEditor = ({
           const selected = selectedNodeIds.includes(node.id);
           return (
             <DraggableNode
+              removeEdgeToSlot={removeEdgeToSlot}
               switchGroupInputActive={switchGroupInputActive}
               edges={edges}
               curTheme={curTheme.current!}

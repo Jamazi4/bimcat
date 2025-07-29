@@ -13,7 +13,7 @@ export function extractOrderedBoundaryLoop(
   const loops: THREE.Vector3[][] = [];
 
   for (const he of struct.halfedges) {
-    // Only start from boundary halfedges
+
     if (!he.face && !visited.has(he)) {
       const loop: THREE.Vector3[] = [];
       const start = he;
@@ -44,6 +44,7 @@ export function extractOrderedBoundaryLoop(
 
   return loops;
 }
+
 export function createSideGeometry(
   baseLinestrings: THREE.Vector3[][],
   transformMatrix: THREE.Matrix4,
@@ -93,61 +94,12 @@ export function createSideGeometry(
 
   if (sideGeometries.length === 0) return null;
 
-  let final = BufferGeometryUtils.mergeGeometries(sideGeometries, true);
-  final = BufferGeometryUtils.mergeVertices(final);
+  let final = BufferGeometryUtils.mergeGeometries(sideGeometries, false);
   final.computeVertexNormals();
   final = BufferGeometryUtils.toCreasedNormals(final, 0.01);
+  final = BufferGeometryUtils.mergeVertices(final);
+  final.deleteAttribute('uv')
 
   return final;
 }
 
-export function orderBoundaryEdges(edges: [number, number][]): number[][] {
-  const adj = new Map<number, Set<number>>();
-  for (const [u, v] of edges) {
-    if (!adj.has(u)) adj.set(u, new Set());
-    if (!adj.has(v)) adj.set(v, new Set());
-    adj.get(u)!.add(v);
-    adj.get(v)!.add(u);
-  }
-
-  const paths: number[][] = [];
-  const visited = new Set<number>();
-
-  for (const startNode of adj.keys()) {
-    if (visited.has(startNode)) {
-      continue;
-    }
-
-    const path = [startNode];
-    visited.add(startNode);
-    let current = startNode;
-
-    while (true) {
-      const neighbors = adj.get(current);
-      if (!neighbors) break;
-
-      let nextNode = -1;
-      for (const neighbor of neighbors) {
-        if (!visited.has(neighbor)) {
-          nextNode = neighbor;
-          break;
-        }
-      }
-
-      if (nextNode !== -1) {
-        visited.add(nextNode);
-        path.push(nextNode);
-        current = nextNode;
-      } else {
-        // No more unvisited neighbors. Check if we can close the loop.
-        if (neighbors.has(startNode) && path.length > 2) {
-          path.push(startNode);
-        }
-        break;
-      }
-    }
-    paths.push(path);
-  }
-
-  return paths;
-}
