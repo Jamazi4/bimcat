@@ -690,7 +690,7 @@ export const useNodeSystem = (
 
       } else {
         cancelConnecting()
-        console.log("no add edge done")
+        console.log("Exited without adding edge.")
         return
       }
     }

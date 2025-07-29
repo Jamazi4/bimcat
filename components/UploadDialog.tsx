@@ -43,7 +43,6 @@ function UploadDialog() {
         setPsets(result.psets);
       }
 
-      console.log("geom setup");
     } catch (error) {
       console.error("Error processing IFC file:", error);
     }

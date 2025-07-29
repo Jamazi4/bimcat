@@ -33,9 +33,6 @@ const Page = () => {
 
   if (!frontendComponents) return <div>No components found.</div>;
 
-  {
-    console.log(libraryInfo.isEditable);
-  }
   return (
     <main className="w-full px-4 justify-center mx-auto">
       <LibraryBreadCrumbs libraryName={libraryInfo.name} />

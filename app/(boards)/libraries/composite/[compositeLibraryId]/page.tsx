@@ -42,7 +42,6 @@ const Page = () => {
   const { tableData, libraryInfo } = data;
   const libraryName = libraryInfo.name;
 
-  console.log(libraryInfo);
   return (
     <main>
       <Breadcrumbs libraryName={libraryName} />
