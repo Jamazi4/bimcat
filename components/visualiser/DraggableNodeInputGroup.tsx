@@ -5,6 +5,7 @@ import {
   fillColorClasses,
   NodeInputType,
   NodeSlot,
+  NodeValues,
 } from "@/utils/nodeTypes";
 import { CircleDot, CircleDotDashed } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -86,6 +87,13 @@ const DraggableNodeInputGroup = ({
   const [selectedInput, setSelectedInput] = useState(
     inputs.find((i) => i.id === activeIndex)?.name,
   );
+
+  useEffect(() => {
+    setSelectedInput(
+
+      inputs.find((i) => i.id === activeIndex)?.name,
+    )
+  }, [activeIndex, inputs])
 
   if (!selectedInput) return;
 

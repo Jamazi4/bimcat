@@ -1,7 +1,7 @@
 import earcut from "earcut";
 import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
-import { getInputValues } from "./nodeUtilFunctions";
+import { getActiveInputIds, getInputValues } from "./nodeUtilFunctions";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 import {
   closeLinestrings,
@@ -58,9 +58,8 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
       },
     ],
     function: (node, evalFunction) => {
-      const activeInputs = Object.entries(node.values)
-        .filter(([key, val]) => val === true && (key === "1" || key === "2"))
-        .map(([key, _]) => parseInt(key));
+
+      const activeInputs = getActiveInputIds(node.values, [1, 2])
       const [initGeom] = getInputValues(
         node.inputs,
         evalFunction,
@@ -69,7 +68,6 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
       const [transform] = getInputValues(node.inputs, evalFunction, [0]);
       const capped = node.values[3];
 
-      //Now doesn't shout whatever I insert
       let baseGeom = new THREE.BufferGeometry();
       let baseLinestrings: THREE.Vector3[][] = [];
       const meshExtrusionOutput = new THREE.BufferGeometry();

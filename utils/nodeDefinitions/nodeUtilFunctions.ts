@@ -1,4 +1,4 @@
-import { ASTNode, ASTNodeInput, NodeEvalResult } from "../nodeTypes";
+import { ASTNode, ASTNodeInput, NodeEvalResult, NodeValues } from "../nodeTypes";
 
 export const getComboValues = (
   node: ASTNode,
@@ -30,3 +30,12 @@ export const getInputValues = (
 
   return values;
 };
+
+export const getActiveInputIds = (nodeValues: NodeValues, groupInputIds: number[]) => {
+
+  return Object.entries(nodeValues)
+    .filter(([key, val]) => val === true && groupInputIds.includes(parseInt(key)))
+    .map(([key, _]) => parseInt(key));
+
+}
+

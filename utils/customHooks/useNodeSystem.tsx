@@ -15,9 +15,11 @@ import useRuntimeNodes from "./useRuntimeNodes";
 import {
   GeomNodeBackType,
   NodeEdgeType,
+  NodeInputType,
   NodeSlot,
   NodeValues,
 } from "../nodeTypes";
+import { getActiveInputIds } from "../nodeDefinitions/nodeUtilFunctions";
 
 export const useNodeSystem = (
   nodeNavigation: boolean,
@@ -570,12 +572,127 @@ export const useNodeSystem = (
 
   const handleMouseUp = useCallback(() => {
     if (connectingToNodeRef.current && connectingFromNodeRef.current) {
-      addEdge(
-        connectingFromNodeRef.current.nodeId,
-        connectingFromNodeRef.current.slotId,
-        connectingToNodeRef.current.nodeId,
-        connectingToNodeRef.current.slotId,
-      );
+      const toNode = nodesRef.current.find((n) => n.id === connectingToNodeRef.current?.nodeId)
+
+      const toNodeDef = nodeDefinitions.find((def) => toNode?.type === def.type)
+
+      if (!toNodeDef) {
+        cancelConnecting()
+        throw new Error("Could not find correct node definition")
+      }
+      const inputSlot = toNodeDef?.inputs.find((o) => o.id === connectingToNodeRef.current?.slotId)
+
+      const inputType = inputSlot?.type
+      const slotTypes = ['group', 'slot', 'combo']
+      const inputValueType =
+        inputSlot
+          && slotTypes.includes(inputSlot.type)
+          ? (inputSlot as Extract<NodeInputType, { type: 'group' | 'slot' | 'combo' }>).slotValueType
+          : null
+
+      const fromNode = nodesRef.current
+        .find((n) => n.id === connectingFromNodeRef.current?.nodeId)
+      const outputType = nodeDefinitions
+        .find((def) => fromNode?.type === def.type)?.outputs
+        .find((o) => o.id === connectingFromNodeRef.current?.slotId)?.type
+
+
+      if (inputType === "group") {
+        if (!toNode || !toNode.values) {
+          cancelConnecting()
+          throw new Error("Could not find node values for active group input")
+        }
+
+        const groupInputIds = toNodeDef?.inputs
+          .filter(
+            (input) =>
+              input.type === "group"
+              && input.groupIndex === connectingToNodeRef.current?.slotId
+          )
+          .map((input) => input.id)
+
+        if (!groupInputIds) {
+          cancelConnecting()
+          throw new Error("Could not find group input Ids")
+        }
+
+        const activeInputIds = getActiveInputIds(toNode?.values, groupInputIds)
+        const allowedInputTypes = toNodeDef
+          ?.inputs.filter((input) => input.type === "group")
+          .map((group) => group.slotValueType)
+
+        const activeInputType = (
+          toNodeDef?.inputs
+            .find(
+              (input) =>
+                input.id === activeInputIds[0]
+            ) as Extract<NodeInputType, { type: 'group' }>
+        ).slotValueType
+
+        if (!inputValueType) {
+          cancelConnecting()
+          throw new Error("Could not find group input value type")
+        }
+
+        if (activeInputType !== outputType && allowedInputTypes?.includes(inputValueType)) {
+          const newActiveInputId = toNodeDef.inputs
+            .find((input) =>
+              input.type === "group"
+              && groupInputIds.includes(input.id)
+              && input.slotValueType === outputType)
+            ?.id
+
+          if (!newActiveInputId) {
+            cancelConnecting()
+            throw new Error("Could not establish new active input id")
+          }
+
+          switchGroupInputActive(toNode.id, groupInputIds, newActiveInputId)
+
+          addEdge(
+            connectingFromNodeRef.current.nodeId,
+            connectingFromNodeRef.current.slotId,
+            connectingToNodeRef.current.nodeId,
+            connectingToNodeRef.current.slotId,
+          );
+          cancelConnecting();
+          return
+        } else if (activeInputType === outputType) {
+          addEdge(
+            connectingFromNodeRef.current.nodeId,
+            connectingFromNodeRef.current.slotId,
+            connectingToNodeRef.current.nodeId,
+            connectingToNodeRef.current.slotId,
+          );
+          cancelConnecting();
+          return
+        }
+      }
+
+      const isSameType = outputType === inputValueType
+      const isOutputNode =
+        inputValueType === "geometry"
+        && (
+          outputType === "mesh"
+          || outputType === "linestring"
+          || outputType === "vector"
+        )
+
+      if (isSameType || isOutputNode) {
+        addEdge(
+          connectingFromNodeRef.current.nodeId,
+          connectingFromNodeRef.current.slotId,
+          connectingToNodeRef.current.nodeId,
+          connectingToNodeRef.current.slotId,
+        );
+        cancelConnecting()
+        return
+
+      } else {
+        cancelConnecting()
+        console.log("no add edge done")
+        return
+      }
     }
 
     if (
@@ -669,7 +786,7 @@ export const useNodeSystem = (
       }
     }
     setSelectionRect(null);
-  }, [addEdge]);
+  }, [addEdge, switchGroupInputActive]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {

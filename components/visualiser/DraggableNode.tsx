@@ -18,6 +18,7 @@ import DraggableNodeInputBoolean from "./DraggableNodeInputBoolean";
 import DraggableNodeInputNumber from "./DraggableNodeInputNumber";
 import DraggableNodeComboSlot from "./DraggableNodeComboSlot";
 
+
 interface DraggableNodeProps {
   switchGroupInputActive: (
     nodeId: string,
@@ -143,6 +144,7 @@ const DraggableNode = memo(function DraggableNode({
             }
             return (
               <DraggableNodeInputGroup
+                nodeValues={node.values!}
                 removeEdgeToSlot={removeEdgeToSlot}
                 activeIndex={activeIndex}
                 switchGroupInputActive={switchGroupInputActive}
