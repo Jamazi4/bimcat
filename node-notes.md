@@ -321,6 +321,12 @@ it's still in progress -
 Seems like working - now complete extrude node with correct outputs under
 correct conditions
 
+### --29-07-2025--
+
+last extrusion error - earcut not working for 90 degree linestring cap
+
+now group input changes it's type automatically if allowed output is connected
+
 ## General
 
 the problems to solve can be divided into two categories:

@@ -399,7 +399,7 @@ export const updatePsetsAction = async (
   const psetTitle = formData.get("psetTitle") as string;
   const keysToRemove = ["componentId", "psetTitle"];
   const newPsetData = Object.fromEntries(
-    formData.entries().filter(([key]) => !keysToRemove.includes(key)),
+    Array.from(formData.entries()).filter(([key]) => !keysToRemove.includes(key)),
   );
 
   try {
@@ -605,9 +605,8 @@ export const deleteComponentAction = async (componentIds: string[]) => {
 
     revalidatePath(`/components/browse`);
     return {
-      message: `Successfully removed ${components.length} component${
-        components.length > 1 ? "s" : ""
-      }.`,
+      message: `Successfully removed ${components.length} component${components.length > 1 ? "s" : ""
+        }.`,
     };
   } catch (error) {
     return renderError(error);
@@ -642,8 +641,8 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
     const affectedLibraries =
       publicComponents.length > 0
         ? publicComponents.flatMap((component) => {
-            return component.libraries.filter((library) => library.public);
-          })
+          return component.libraries.filter((library) => library.public);
+        })
         : [];
 
     const affectedLibrariesUnique = Object.values(
@@ -700,9 +699,8 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
     revalidatePath(`/components/browse`);
 
     return {
-      message: `Successfully toggled private for ${
-        components.length
-      } component${components.length > 1 ? "s" : ""}.`,
+      message: `Successfully toggled private for ${components.length
+        } component${components.length > 1 ? "s" : ""}.`,
     };
   } catch (error) {
     return renderError(error);

@@ -5,7 +5,6 @@ import {
   fillColorClasses,
   NodeInputType,
   NodeSlot,
-  NodeValues,
 } from "@/utils/nodeTypes";
 import { CircleDot, CircleDotDashed } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
