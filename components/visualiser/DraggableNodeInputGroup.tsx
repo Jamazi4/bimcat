@@ -88,10 +88,7 @@ const DraggableNodeInputGroup = ({
   );
 
   useEffect(() => {
-    setSelectedInput(
-
-      inputs.find((i) => i.id === activeIndex)?.name,
-    )
+    setSelectedInput(inputs.find((i) => i.id === activeIndex)?.name)
   }, [activeIndex, inputs])
 
   if (!selectedInput) return;

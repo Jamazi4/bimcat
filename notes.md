@@ -526,6 +526,13 @@ search bar on landing page with user become
 advanced search is current search
 maybe no table but card list with all types - components, libs and composite
 
+### --31-07-2025--
+
+additionally to the points above:
+
+- if library is inside composite libraries - list those libraries in library view.
+- po-pup component 3d preview.
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite

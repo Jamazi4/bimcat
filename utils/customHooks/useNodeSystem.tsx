@@ -201,7 +201,6 @@ export const useNodeSystem = (
     [],
   );
 
-
   const removeEdgeToSlot = useCallback((toNodeId: string, toSlotId: number
   ) => {
     const edge = edgesRef.current.find((e) => e.toNodeId === toNodeId && e.toSlotId === toSlotId)
@@ -425,6 +424,7 @@ export const useNodeSystem = (
   }, []);
 
   const { handleEditorMouseDown, handleWheel } = useNodeNavigation(
+    changeNodeValue,
     setNodes,
     selectedNodeIdsRef,
     setNodeSlots,
@@ -461,7 +461,8 @@ export const useNodeSystem = (
     draggingNodes,
     connectingFromNode,
     isPanning,
-    selectionRect)
+    selectionRect,
+  )
 
   return {
     switchGroupInputActive,

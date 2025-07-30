@@ -17,6 +17,7 @@ export function groupNode(nodeDefId: number): nodeDefinition {
         name: "linestring",
         id: 0,
         value: true,
+        isList: true,
       },
       {
         type: "group",
@@ -25,6 +26,7 @@ export function groupNode(nodeDefId: number): nodeDefinition {
         name: "mesh",
         id: 1,
         value: false,
+        isList: true,
       },
     ],
     outputs: [

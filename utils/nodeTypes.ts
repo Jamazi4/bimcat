@@ -97,6 +97,10 @@ export type NodeInputType = (
   id: number;
   value?: number | boolean | string;
   //for group input value is boolean and it defines which input is active
+  isList?: boolean;
+  //for list inputs - each new list input will have id n + 100. connecting to 
+  //main list input will add to node.values 100: true; 101: false. connecting 
+  //to 101 will make 101: true; 102: false and so on...
 };
 
 export type NodeOutputType = {

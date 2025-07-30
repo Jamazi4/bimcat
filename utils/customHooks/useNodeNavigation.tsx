@@ -5,6 +5,7 @@ import { getActiveInputIds } from "../nodeDefinitions/nodeUtilFunctions";
 import { createEdgeId } from "../utilFunctions";
 
 export const useNodeNavigation = (
+  changeNodeValue: (nodeId: string, inputId: number, value: string | number | boolean) => void,
   setNodes: Dispatch<SetStateAction<GeomNodeBackType[]>>,
   selectedNodeIdsRef: RefObject<string[]>,
   setNodeSlots: Dispatch<SetStateAction<NodeSlot[]>>,
@@ -120,8 +121,28 @@ export const useNodeNavigation = (
 
       setEdges([...newEdges, newEdge]);
       edgesRef.current = [...newEdges, newEdge];
+
+      const curNodeType = nodesRef.current.find((n) => n.id === toNodeId)?.type
+      const curNodeDef = nodeDefinitions.find((nd) => nd.type === curNodeType)
+
+      const isListMaster = curNodeDef?.inputs[toSlotId].isList === true
+      const isListChild = toSlotId >= 100
+
+      if (isListMaster) {
+        changeNodeValue(toNodeId, 100, false)
+      } else if (isListChild) {
+        changeNodeValue(toNodeId, toSlotId, true)
+        changeNodeValue(toNodeId, toSlotId + 1, false)
+      }
+      //this bugs out and doesn't switch group input active anymore, because 
+      //at the same time it changes at DraggableNodeInputGroup:113 the active
+      //input - this submits the new value based on old version of values.
+      //after solving this - check if draggableNode needs to render additional
+      //inputs (if there are any >= 100 input ids)
+      //TODO: Here is cur progress
+
     },
-    [edgesRef, setEdges],
+    [changeNodeValue, edgesRef, nodesRef, setEdges],
   );
 
 

@@ -142,6 +142,8 @@ const DraggableNode = memo(function DraggableNode({
                 }
               });
             }
+
+            console.log(node.values)
             return (
               <DraggableNodeInputGroup
                 removeEdgeToSlot={removeEdgeToSlot}
@@ -214,7 +216,6 @@ const DraggableNode = memo(function DraggableNode({
                 slotIO: "input",
               };
               const connected = connectedSlotIds.includes(input.id);
-
 
               return (
                 <DraggableNodeComboSlot
