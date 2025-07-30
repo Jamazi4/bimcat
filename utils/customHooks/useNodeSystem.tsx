@@ -580,7 +580,7 @@ export const useNodeSystem = (
         cancelConnecting()
         throw new Error("Could not find correct node definition")
       }
-      const inputSlot = toNodeDef?.inputs.find((o) => o.id === connectingToNodeRef.current?.slotId)
+      const inputSlot = toNodeDef?.inputs.find((i) => i.id === connectingToNodeRef.current?.slotId)
 
       const inputType = inputSlot?.type
       const slotTypes = ['group', 'slot', 'combo']
@@ -634,7 +634,10 @@ export const useNodeSystem = (
           throw new Error("Could not find group input value type")
         }
 
-        if (activeInputType !== outputType && allowedInputTypes?.includes(inputValueType)) {
+        if (
+          activeInputType !== outputType
+          && allowedInputTypes?.includes(inputValueType)
+        ) {
           const newActiveInputId = toNodeDef.inputs
             .find((input) =>
               input.type === "group"
@@ -642,7 +645,7 @@ export const useNodeSystem = (
               && input.slotValueType === outputType)
             ?.id
 
-          if (!newActiveInputId) {
+          if (newActiveInputId === undefined) {
             cancelConnecting()
             throw new Error("Could not establish new active input id")
           }

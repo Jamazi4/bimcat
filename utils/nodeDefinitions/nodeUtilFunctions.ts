@@ -32,10 +32,9 @@ export const getInputValues = (
 };
 
 export const getActiveInputIds = (nodeValues: NodeValues, groupInputIds: number[]) => {
-
   return Object.entries(nodeValues)
     .filter(([key, val]) => val === true && groupInputIds.includes(parseInt(key)))
     .map(([key, _]) => parseInt(key));
-
 }
+
 

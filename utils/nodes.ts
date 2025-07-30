@@ -8,6 +8,7 @@ import { extrudeNode } from "./nodeDefinitions/extrudeNode";
 import { nodeDefinition } from "./nodeTypes";
 import { transformNode } from "./nodeDefinitions/transformNode";
 import { booleanNode } from "./nodeDefinitions/booleanNode";
+import { groupNode } from "./nodeDefinitions/groupNode";
 
 export const nodeDefinitions: nodeDefinition[] = [
   outputNode(1),
@@ -19,4 +20,5 @@ export const nodeDefinitions: nodeDefinition[] = [
   extrudeNode(7),
   booleanNode(8),
   transformNode(9),
+  groupNode(10)
 ];

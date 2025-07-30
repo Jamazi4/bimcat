@@ -327,14 +327,26 @@ last extrusion error - earcut not working for 90 degree linestring cap
 
 now group input changes it's type automatically if allowed output is connected
 
+you can't connect wrong inputs to outputs anymore
+
+### --30-07-2025--
+
+Start working on group node
+
 ## General
 
 the problems to solve can be divided into two categories:
 
+BUGS:
+
+- left-click on node
+- enabled node menu buttons when not in node navigation
+- ctrl-c not working in input fields
+- delete component doesn't delete node project?
+
 Runtime:
 
 - cache node outputs
-- change/lock inputs conditionally
 - pick reference from 3D
 - group node
 -
@@ -349,8 +361,6 @@ UI:
 - addNode menu to have search - and display under right click
 - ctrl-z and ctrl-shift-r
 - ctrl-r or something to switch between node and 3d navigation
-- error when switching capped and the extrusion output is switching
-- ctrl-c not working in input fields
 
   additionally some tools that might need adding
 
@@ -373,7 +383,9 @@ done:
 - switching node type in real time (euler-quaternion and extrude mesh/linestring)
 - for extrude remove buffer positions ending up as not a part of indices
 - solidify(can do with extrude) node, transform node with
-  translate/scale/angles or quaternion,
+- translate/scale/angles or quaternion,
+- change/lock inputs conditionally
+- error when switching capped and the extrusion output is switching
 
 AI reverse engineering geometry to nodes
 

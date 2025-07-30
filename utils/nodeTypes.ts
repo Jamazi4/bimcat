@@ -105,7 +105,8 @@ export type NodeOutputType = {
   id: number;
   onInputSelectedId?: number;
   //used for conditional rendering if the group input selection state influences
-  //the output type, value is the input id of tied input
+  //the output type, value is the input id of tied input, this needs a value
+  //field with boolean for initially active input
   onBooleanTrueId?: number;
   //same as onInputSelected but controlled by one boolean input
   onBooleanInverted?: boolean;

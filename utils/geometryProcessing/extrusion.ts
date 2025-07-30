@@ -96,7 +96,7 @@ export function createSideGeometry(
 
   let final = BufferGeometryUtils.mergeGeometries(sideGeometries, false);
   final.computeVertexNormals();
-  final = BufferGeometryUtils.toCreasedNormals(final, 0.01);
+  final = BufferGeometryUtils.toCreasedNormals(final, 1e-6);
   final = BufferGeometryUtils.mergeVertices(final);
   final.deleteAttribute('uv')
 
