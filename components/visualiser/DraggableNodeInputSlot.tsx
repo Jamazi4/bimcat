@@ -4,10 +4,12 @@ import {
   NodeSlot,
   SlotValues,
 } from "@/utils/nodeTypes";
-import { CircleDot, CircleDotDashed } from "lucide-react";
+import { CircleDot, CircleDotDashed, X } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { Button } from "../ui/button";
 
 interface InputNodeSlotsProps {
+  isList: boolean;
   optional: boolean;
   slotValueType: SlotValues;
   name: string;
@@ -26,9 +28,12 @@ interface InputNodeSlotsProps {
     relativeX: number;
     relativeY: number;
   };
+  nodeValues: Record<string, string | number | boolean> | undefined;
+  removeListSlot: (nodeId: string, slotId: number) => void
 }
 
 const DraggableNodeInputSlot = ({
+  isList,
   optional,
   slotValueType,
   name,
@@ -37,6 +42,8 @@ const DraggableNodeInputSlot = ({
   finishConnecting,
   getSlotRelativePosition,
   nodeRef,
+  nodeValues,
+  removeListSlot
 }: InputNodeSlotsProps) => {
   const { nodeId, slotId, slotIO: slotType } = partialSlotData;
   const ref = useRef<SVGSVGElement>(null);
@@ -58,14 +65,14 @@ const DraggableNodeInputSlot = ({
       relativeY,
     };
     registerNodeSlot(slotData);
-  }, [
-    nodeId,
-    registerNodeSlot,
-    slotType,
-    slotId,
-    nodeRef,
-    getSlotRelativePosition,
-  ]);
+    if (!nodeValues) return
+  }, [nodeId, registerNodeSlot, slotType, slotId, nodeRef, getSlotRelativePosition, nodeValues]);
+
+  const handleRemoveSlot = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    removeListSlot(nodeId!, slotId!)
+  }
 
   return (
     <div
@@ -87,6 +94,13 @@ const DraggableNodeInputSlot = ({
         />
       )}
       <p className="text-2xl select-none">{name}</p>
+      {isList &&
+        <Button
+          variant='ghost'
+          className="text-destructive text-2xl"
+          onClick={(e) => handleRemoveSlot(e)}>
+          <X className="size-[24px] hover:cursor-pointer" />
+        </Button>}
     </div>
   );
 };

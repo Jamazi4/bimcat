@@ -3,6 +3,7 @@
 import { nodeDefinitions } from "@/utils/nodes";
 import {
   Dispatch,
+  JSX,
   memo,
   SetStateAction,
   useCallback,
@@ -10,13 +11,14 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { GeomNodeBackType, NodeEdgeType, NodeSlot } from "@/utils/nodeTypes";
+import { GeomNodeBackType, NodeEdgeType, NodeInputType, NodeSlot } from "@/utils/nodeTypes";
 import DraggableNodeInputGroup from "./DraggableNodeInputGroup";
 import DraggableNodeOutputSlot from "./DraggableNodeOutputSlot";
 import DraggableNodeInputSlot from "./DraggableNodeInputSlot";
 import DraggableNodeInputBoolean from "./DraggableNodeInputBoolean";
 import DraggableNodeInputNumber from "./DraggableNodeInputNumber";
 import DraggableNodeComboSlot from "./DraggableNodeComboSlot";
+import DraggableNodeInputListAddButton from "./DraggableNodeInputListAddButton";
 
 
 interface DraggableNodeProps {
@@ -33,6 +35,7 @@ interface DraggableNodeProps {
     nodeId: string,
     inputId: number,
     value: number | boolean | string,
+    removeValue?: boolean,
   ) => void;
   registerNodeSlot: (slotData: NodeSlot) => void;
   startConnecting: (nodeId: string, slotId: number) => void;
@@ -45,7 +48,8 @@ interface DraggableNodeProps {
   getViewTransformScale: () => number;
   setNodeDivs: Dispatch<SetStateAction<Record<string, HTMLDivElement>>>;
   curTheme: string;
-  removeEdgeToSlot: (toNodeId: string, toSlotId: number) => void
+  removeEdgeToSlot: (toNodeId: string, toSlotId: number) => void;
+  removeListSlot: (nodeId: string, slotId: number) => void
 }
 
 const DraggableNode = memo(function DraggableNode({
@@ -62,7 +66,8 @@ const DraggableNode = memo(function DraggableNode({
   getViewTransformScale,
   setNodeDivs,
   curTheme,
-  removeEdgeToSlot
+  removeEdgeToSlot,
+  removeListSlot
 }: DraggableNodeProps) {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -143,21 +148,56 @@ const DraggableNode = memo(function DraggableNode({
               });
             }
 
-            console.log(node.values)
+            const listSlots: JSX.Element[] = []
+            if (node.values) {
+              Object.entries(node.values).forEach(([vInputId, _]) => {
+                const vInputIdParsed = parseInt(vInputId)
+                if (vInputIdParsed >= 100) {
+                  const curInputType =
+                    (inputs.find((i) => i.id === activeIndex) as Extract<NodeInputType, { type: 'group' }>).slotValueType
+                  const partialSlotData: Partial<NodeSlot> = {
+                    nodeId: node.id,
+                    slotId: vInputIdParsed,
+                    slotIO: "input",
+                  };
+                  listSlots.push(
+                    <DraggableNodeInputSlot
+                      removeListSlot={removeListSlot}
+                      nodeValues={node.values}
+                      isList={true}
+                      optional={true}
+                      slotValueType={curInputType}
+                      getSlotRelativePosition={getSlotRelativePosition}
+                      nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
+                      finishConnecting={finishConnecting}
+                      partialSlotData={partialSlotData}
+                      registerNodeSlot={registerNodeSlot}
+                      key={vInputIdParsed}
+                      name="asdf"
+                    />
+                  )
+                }
+              })
+            }
+
             return (
-              <DraggableNodeInputGroup
-                removeEdgeToSlot={removeEdgeToSlot}
-                activeIndex={activeIndex}
-                switchGroupInputActive={switchGroupInputActive}
-                nodeId={node.id}
-                groupIndex={parseInt(groupId)}
-                registerNodeSlot={registerNodeSlot}
-                key={groupId}
-                inputs={inputs}
-                getSlotRelativePosition={getSlotRelativePosition}
-                nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
-                finishConnecting={finishConnecting}
-              />
+              <div key={`${groupId}${node.id}`}>
+                <DraggableNodeInputGroup
+                  nodeValues={node.values}
+                  removeEdgeToSlot={removeEdgeToSlot}
+                  activeIndex={activeIndex}
+                  switchGroupInputActive={switchGroupInputActive}
+                  nodeId={node.id}
+                  groupIndex={parseInt(groupId)}
+                  registerNodeSlot={registerNodeSlot}
+                  key={groupId}
+                  inputs={inputs}
+                  getSlotRelativePosition={getSlotRelativePosition}
+                  nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
+                  finishConnecting={finishConnecting}
+                />
+                {listSlots}
+              </div>
             );
           })}
 
@@ -196,6 +236,9 @@ const DraggableNode = memo(function DraggableNode({
 
               return (
                 <DraggableNodeInputSlot
+                  removeListSlot={removeListSlot}
+                  nodeValues={node.values}
+                  isList={false}
                   optional={optional}
                   slotValueType={input.slotValueType!}
                   getSlotRelativePosition={getSlotRelativePosition}
@@ -234,6 +277,13 @@ const DraggableNode = memo(function DraggableNode({
               );
             }
           })}
+
+          {nodeDef.inputs.find((i) => i.isList) &&
+            <DraggableNodeInputListAddButton
+              nodeValues={node.values}
+              changeThisNodeValues={changeThisNodeValues}
+            />
+          }
         </div>
 
         {/* outputs */}
@@ -274,6 +324,7 @@ const DraggableNode = memo(function DraggableNode({
 
             return (
               <DraggableNodeOutputSlot
+                nodeValues={node.values}
                 slotValueType={output.type}
                 getSlotRelativePosition={getSlotRelativePosition}
                 nodeRef={nodeRef as React.RefObject<HTMLDivElement>}

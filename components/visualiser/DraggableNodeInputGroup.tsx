@@ -17,6 +17,7 @@ import {
 } from "../ui/select";
 
 interface InputNodeGroupProps {
+  nodeValues?: Record<string, number | boolean | string>;
   switchGroupInputActive: (
     nodeId: string,
     groupIndices: number[],
@@ -43,6 +44,7 @@ interface InputNodeGroupProps {
   removeEdgeToSlot: (nodeId: string, toSlotId: number) => void
 }
 const DraggableNodeInputGroup = ({
+  nodeValues,
   switchGroupInputActive,
   activeIndex,
   inputs,
@@ -116,6 +118,14 @@ const DraggableNodeInputGroup = ({
       nameIndexMap[value],
     );
     removeEdgeToSlot(nodeId, groupIndex)
+    if (nodeValues) {
+      Object.entries(nodeValues).map(([key, _]) => {
+        const parsedKey = parseInt(key)
+        if (parsedKey >= 100) {
+          removeEdgeToSlot(nodeId, parsedKey)
+        }
+      })
+    }
     setSelectedInput(value);
   };
 

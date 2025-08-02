@@ -16,6 +16,7 @@ interface OutputNodeSlotsProps {
     relativeX: number;
     relativeY: number;
   };
+  nodeValues?: Record<string, string | number | boolean>;
 }
 
 const DraggableNodeOutputSlot = ({
@@ -26,6 +27,7 @@ const DraggableNodeOutputSlot = ({
   startConnecting,
   nodeRef,
   getSlotRelativePosition,
+  nodeValues
 }: OutputNodeSlotsProps) => {
   const { nodeId, slotId, slotIO: slotType } = partialSlotData;
   const ref = useRef<SVGSVGElement>(null);
@@ -53,6 +55,7 @@ const DraggableNodeOutputSlot = ({
     slotId,
     nodeRef,
     getSlotRelativePosition,
+    nodeValues
   ]);
 
   return (

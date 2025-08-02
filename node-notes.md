@@ -333,6 +333,24 @@ you can't connect wrong inputs to outputs anymore
 
 Start working on group node
 
+### --31-07-2025--
+
+Group node progress. Now list inputs work in frontend. Need to allow user to
+delete additional slots by hand or remove automatically?
+
+### --02-08-2025--
+
+adding delete button to group node dynamic virtual slots
+
+Things to remember now: group input only works for group slots right now.
+
+current plan:
+
+- finish group node
+- apply list inputs to linestring node
+- math nodes
+- ui/pset nodes and component view integration
+
 ## General
 
 the problems to solve can be divided into two categories:
@@ -343,6 +361,7 @@ BUGS:
 - enabled node menu buttons when not in node navigation
 - ctrl-c not working in input fields
 - delete component doesn't delete node project?
+- earcut doesn't work for completely vertical polygons
 
 Runtime:
 

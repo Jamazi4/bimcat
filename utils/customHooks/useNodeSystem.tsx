@@ -184,10 +184,12 @@ export const useNodeSystem = (
   const switchGroupInputActive = useCallback(
     (nodeId: string, groupIndices: number[], activeIndex: number) => {
       const node = nodesRef.current.find((n) => n.id === nodeId);
-      if (!node) return;
-      if (!node.values) return;
+      if (!node || !node.values) return;
 
-      const newValues = { ...node.values };
+      // Get the freshest values directly from the ref
+      const currentValues = nodesRef.current.find((n) => n.id === nodeId)?.values || {};
+      const newValues = { ...currentValues };
+
       groupIndices.forEach((id) => {
         newValues[id] = id === activeIndex;
       });
@@ -211,13 +213,19 @@ export const useNodeSystem = (
   }, [])
 
   const changeNodeValue = useCallback(
-    (nodeId: string, inputId: number, value: string | number | boolean) => {
+    (nodeId: string, inputId: number, value: string | number | boolean, removeValue?: boolean) => {
+
       const node = nodesRef.current.find((node) => node.id === nodeId);
       if (!node) return;
       if (!node?.values) return;
 
       const newValues = { ...node.values };
-      newValues[inputId] = value;
+      if (!removeValue) {
+
+        newValues[inputId] = value;
+      } else {
+        delete newValues[inputId]
+      }
 
       setNodes((prevNodes) =>
         prevNodes.map((n) =>
@@ -227,6 +235,70 @@ export const useNodeSystem = (
     },
     [],
   );
+
+  const removeListSlot = useCallback((nodeId: string, slotId: number) => {
+    if (slotId < 100) return; // Only handle list slots
+
+    const node = nodesRef.current.find((n) => n.id === nodeId);
+    if (!node?.values) return;
+
+    // Remove the edge first
+    setEdges((prevEdges) => prevEdges.filter(
+      (e) => !(e.toNodeId === nodeId && e.toSlotId === slotId)
+    ));
+
+    // Get all list values and sort them
+    const listEntries = Object.entries(node.values)
+      .filter(([key]) => parseInt(key) >= 100)
+      .sort(([a], [b]) => parseInt(a) - parseInt(b));
+
+    // Find the index of the slot to remove
+    const removeIndex = listEntries.findIndex(([key]) => parseInt(key) === slotId);
+    if (removeIndex === -1) return;
+
+    // Remove the slot from the list
+    listEntries.splice(removeIndex, 1);
+
+    // Create new values object
+    const newValues = { ...node.values };
+
+    // Clear all list values
+    Object.keys(newValues).forEach(key => {
+      if (parseInt(key) >= 100) {
+        delete newValues[parseInt(key)];
+      }
+    });
+
+    // Re-add remaining list values with sequential IDs
+    listEntries.forEach(([_, val], index) => {
+      newValues[100 + index] = val;
+    });
+
+    // Update edges to point to new slot IDs
+    setEdges((prevEdges) =>
+      prevEdges.map((edge) => {
+        if (edge.toNodeId === nodeId && edge.toSlotId >= 100) {
+          // Find the old slot index
+          const oldIndex = edge.toSlotId - 100;
+          if (oldIndex > removeIndex) {
+            // This edge was pointing to a slot after the removed one
+            return {
+              ...edge,
+              toSlotId: edge.toSlotId - 1
+            };
+          }
+        }
+        return edge;
+      })
+    );
+
+    // Update node values
+    setNodes((prevNodes) =>
+      prevNodes.map((n) =>
+        n.id === nodeId ? { ...n, values: newValues } : n,
+      ),
+    );
+  }, []);
 
   const screenToWorld = useCallback((screenX: number, screenY: number) => {
     if (!editorRef.current) return { x: 0, y: 0 };
@@ -329,16 +401,31 @@ export const useNodeSystem = (
 
   const registerNodeSlot = useCallback((slotData: NodeSlot) => {
     setNodeSlots((prev) => {
+      if (slotData.slotIO === "output") {
+        const filteredSlots = prev.filter(
+          (slot) => !(
+            slot.nodeId === slotData.nodeId &&
+            slot.slotId === slotData.slotId &&
+            slot.slotIO === "output"
+          )
+        );
+        return [...filteredSlots, slotData];
+      }
+
       const alreadyRegistered = prev.some(
         (slot) =>
           slot.nodeId === slotData.nodeId &&
           slot.slotId === slotData.slotId &&
-          slot.slotIO === slotData.slotIO,
+          slot.slotIO === slotData.slotIO &&
+          Math.abs(slot.relativeX - slotData.relativeX) < 1 &&
+          Math.abs(slot.relativeY - slotData.relativeY) < 1
       );
+
       if (alreadyRegistered) return prev;
       return [...prev, slotData];
     });
   }, []);
+
 
   const startDraggingNode = useCallback(
     (nodeId: string, e: React.MouseEvent) => {
@@ -424,7 +511,6 @@ export const useNodeSystem = (
   }, []);
 
   const { handleEditorMouseDown, handleWheel } = useNodeNavigation(
-    changeNodeValue,
     setNodes,
     selectedNodeIdsRef,
     setNodeSlots,
@@ -488,7 +574,8 @@ export const useNodeSystem = (
     setNodeDivs,
     selectedNodeIds,
     getViewTransformScale,
-    removeEdgeToSlot
+    removeEdgeToSlot,
+    removeListSlot,
   };
 };
 

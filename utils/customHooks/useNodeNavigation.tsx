@@ -1,11 +1,10 @@
 import { Dispatch, RefObject, SetStateAction, useCallback, useEffect, useRef } from "react";
-import { GeomNodeBackType, NodeEdgeType, NodeInputType, NodeSlot } from "../nodeTypes";
+import { GeomNodeBackType, nodeDefinition, NodeEdgeType, NodeInputType, NodeOutputType, NodeSlot, SlotValues } from "../nodeTypes";
 import { nodeDefinitions } from "../nodes";
-import { getActiveInputIds } from "../nodeDefinitions/nodeUtilFunctions";
+import { getActiveInputIds, getActiveInputType, getGroupInputIds } from "../nodeDefinitions/nodeUtilFunctions";
 import { createEdgeId } from "../utilFunctions";
 
 export const useNodeNavigation = (
-  changeNodeValue: (nodeId: string, inputId: number, value: string | number | boolean) => void,
   setNodes: Dispatch<SetStateAction<GeomNodeBackType[]>>,
   selectedNodeIdsRef: RefObject<string[]>,
   setNodeSlots: Dispatch<SetStateAction<NodeSlot[]>>,
@@ -122,29 +121,84 @@ export const useNodeNavigation = (
       setEdges([...newEdges, newEdge]);
       edgesRef.current = [...newEdges, newEdge];
 
-      const curNodeType = nodesRef.current.find((n) => n.id === toNodeId)?.type
-      const curNodeDef = nodeDefinitions.find((nd) => nd.type === curNodeType)
-
-      const isListMaster = curNodeDef?.inputs[toSlotId].isList === true
-      const isListChild = toSlotId >= 100
-
-      if (isListMaster) {
-        changeNodeValue(toNodeId, 100, false)
-      } else if (isListChild) {
-        changeNodeValue(toNodeId, toSlotId, true)
-        changeNodeValue(toNodeId, toSlotId + 1, false)
-      }
-      //this bugs out and doesn't switch group input active anymore, because 
-      //at the same time it changes at DraggableNodeInputGroup:113 the active
-      //input - this submits the new value based on old version of values.
-      //after solving this - check if draggableNode needs to render additional
-      //inputs (if there are any >= 100 input ids)
-      //TODO: Here is cur progress
-
     },
-    [changeNodeValue, edgesRef, nodesRef, setEdges],
+    [edgesRef, setEdges],
   );
 
+  const cancelConnecting = useCallback(
+    () => {
+      setConnectingFromNode(null);
+      setTempEdgePosition(null);
+    }, [setConnectingFromNode, setTempEdgePosition]
+  )
+
+  const addEdgeToGroupInput = useCallback(
+    (
+      toNode: GeomNodeBackType | undefined,
+      toNodeDef: nodeDefinition,
+      inputValueType: SlotValues | null,
+      outputType: SlotValues | undefined
+    ) => {
+
+
+      if (!connectingToNodeRef.current) throw new Error("No active to node ref")
+
+      const groupInputIds = getGroupInputIds(toNodeDef, connectingToNodeRef.current?.slotId)
+
+      if (!groupInputIds) {
+        cancelConnecting()
+        throw new Error("Could not find group input Ids")
+      }
+
+      const activeInputIds = getActiveInputIds(toNode!.values!, groupInputIds)
+      const allowedInputTypes = toNodeDef
+        ?.inputs.filter((input) => input.type === "group")
+        .map((group) => group.slotValueType)
+
+      const activeInputType = getActiveInputType(toNodeDef, activeInputIds)
+
+      if (!inputValueType) {
+        cancelConnecting()
+        throw new Error("Could not find group input value type")
+      }
+
+      if (
+        activeInputType !== outputType
+        && allowedInputTypes?.includes(inputValueType)
+      ) {
+        const newActiveInputId = toNodeDef.inputs
+          .find((input) =>
+            input.type === "group"
+            && groupInputIds.includes(input.id)
+            && input.slotValueType === outputType)
+          ?.id
+
+        if (newActiveInputId === undefined) {
+          cancelConnecting()
+          throw new Error("Could not establish new active input id")
+        }
+
+        switchGroupInputActive(toNode!.id, groupInputIds, newActiveInputId)
+
+        addEdge(
+          connectingFromNodeRef.current!.nodeId,
+          connectingFromNodeRef.current!.slotId,
+          connectingToNodeRef.current!.nodeId,
+          connectingToNodeRef.current!.slotId,
+        );
+        cancelConnecting();
+        return
+      } else if (activeInputType === outputType) {
+        addEdge(
+          connectingFromNodeRef.current!.nodeId,
+          connectingFromNodeRef.current!.slotId,
+          connectingToNodeRef.current!.nodeId,
+          connectingToNodeRef.current!.slotId,
+        );
+        cancelConnecting();
+        return
+      }
+    }, [addEdge, cancelConnecting, connectingFromNodeRef, connectingToNodeRef, switchGroupInputActive])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -263,16 +317,10 @@ export const useNodeNavigation = (
     [connectingFromNodeRef, draggingNodesRef, editorRef, getSlotCenter, isPanningRef, nodeSlotsRef, panStartRef, screenToWorld, selectionRectRef, setNodes, setSelectionRect, setTempEdgePosition, setViewTransform, wasDragging],
   );
 
-  const cancelConnecting = useCallback(
-    () => {
-      setConnectingFromNode(null);
-      setTempEdgePosition(null);
-    }, [setConnectingFromNode, setTempEdgePosition]
-  )
-
   const handleMouseUp = useCallback(() => {
     if (connectingToNodeRef.current && connectingFromNodeRef.current) {
       const toNode = nodesRef.current.find((n) => n.id === connectingToNodeRef.current?.nodeId)
+
 
       const toNodeDef = nodeDefinitions.find((def) => toNode?.type === def.type)
 
@@ -280,6 +328,7 @@ export const useNodeNavigation = (
         cancelConnecting()
         throw new Error("Could not find correct node definition")
       }
+
       const inputSlot = toNodeDef?.inputs.find((i) => i.id === connectingToNodeRef.current?.slotId)
 
       const inputType = inputSlot?.type
@@ -296,80 +345,47 @@ export const useNodeNavigation = (
         .find((def) => fromNode?.type === def.type)?.outputs
         .find((o) => o.id === connectingFromNodeRef.current?.slotId)?.type
 
+      const toSlotId = connectingToNodeRef.current.slotId
+
+      const isListChild = toSlotId >= 100
+
+      if (isListChild) {
+        console.log("i'm parent")
+        let listParentValueType: SlotValues = "number";
+
+        const listParentSlots =
+          toNodeDef.inputs.filter((i) => i.isList === true)
+
+        if (listParentSlots.length > 1) {
+          listParentSlots.forEach((slot) => {
+            if (toNode?.values?.[slot.id] === true) {
+              listParentValueType = (slot as Extract<NodeInputType, { type: 'group' | 'slot' | 'combo' }>).slotValueType
+            }
+          })
+        } else {
+
+          listParentValueType =
+            (listParentSlots[0] as Extract<NodeInputType, { type: 'group' | 'slot' | 'combo' }>).slotValueType
+        }
+
+        if (outputType !== listParentValueType) {
+          cancelConnecting();
+          return
+        }
+
+        addEdge(
+          connectingFromNodeRef.current.nodeId,
+          connectingFromNodeRef.current.slotId,
+          connectingToNodeRef.current.nodeId,
+          connectingToNodeRef.current.slotId,
+        );
+
+        cancelConnecting();
+        return
+      }
 
       if (inputType === "group") {
-        if (!toNode || !toNode.values) {
-          cancelConnecting()
-          throw new Error("Could not find node values for active group input")
-        }
-
-        const groupInputIds = toNodeDef?.inputs
-          .filter(
-            (input) =>
-              input.type === "group"
-              && input.groupIndex === connectingToNodeRef.current?.slotId
-          )
-          .map((input) => input.id)
-
-        if (!groupInputIds) {
-          cancelConnecting()
-          throw new Error("Could not find group input Ids")
-        }
-
-        const activeInputIds = getActiveInputIds(toNode?.values, groupInputIds)
-        const allowedInputTypes = toNodeDef
-          ?.inputs.filter((input) => input.type === "group")
-          .map((group) => group.slotValueType)
-
-        const activeInputType = (
-          toNodeDef?.inputs
-            .find(
-              (input) =>
-                input.id === activeInputIds[0]
-            ) as Extract<NodeInputType, { type: 'group' }>
-        ).slotValueType
-
-        if (!inputValueType) {
-          cancelConnecting()
-          throw new Error("Could not find group input value type")
-        }
-
-        if (
-          activeInputType !== outputType
-          && allowedInputTypes?.includes(inputValueType)
-        ) {
-          const newActiveInputId = toNodeDef.inputs
-            .find((input) =>
-              input.type === "group"
-              && groupInputIds.includes(input.id)
-              && input.slotValueType === outputType)
-            ?.id
-
-          if (newActiveInputId === undefined) {
-            cancelConnecting()
-            throw new Error("Could not establish new active input id")
-          }
-
-          switchGroupInputActive(toNode.id, groupInputIds, newActiveInputId)
-
-          addEdge(
-            connectingFromNodeRef.current.nodeId,
-            connectingFromNodeRef.current.slotId,
-            connectingToNodeRef.current.nodeId,
-            connectingToNodeRef.current.slotId,
-          );
-          cancelConnecting();
-          return
-        } else if (activeInputType === outputType) {
-          addEdge(
-            connectingFromNodeRef.current.nodeId,
-            connectingFromNodeRef.current.slotId,
-            connectingToNodeRef.current.nodeId,
-            connectingToNodeRef.current.slotId,
-          );
-          cancelConnecting();
-          return
-        }
+        addEdgeToGroupInput(toNode, toNodeDef, inputValueType, outputType)
       }
 
       const isSameType = outputType === inputValueType
@@ -393,7 +409,6 @@ export const useNodeNavigation = (
 
       } else {
         cancelConnecting()
-        console.log("Exited without adding edge.")
         return
       }
     }
@@ -489,7 +504,7 @@ export const useNodeNavigation = (
       }
     }
     setSelectionRect(null);
-  }, [addEdge, cancelConnecting, connectingFromNodeRef, connectingToNodeRef, curClickedNodeId, draggingNodesRef, editorRef, nodeDivsRef, nodesRef, selectedNodeIdsRef, selectionRectRef, setDraggingNodes, setIsPanning, setSelectedNodeIds, setSelectionRect, switchGroupInputActive, wasDragging]);
+  }, [addEdge, addEdgeToGroupInput, cancelConnecting, connectingFromNodeRef, connectingToNodeRef, curClickedNodeId, draggingNodesRef, editorRef, nodeDivsRef, nodesRef, selectedNodeIdsRef, selectionRectRef, setDraggingNodes, setIsPanning, setSelectedNodeIds, setSelectionRect, wasDragging]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
