@@ -188,10 +188,12 @@ export const useNodeNavigation = (
                   .map(Number)
                   .filter((k) => k >= 100)
                   .sort((a, b) => a - b);
+
                 const maxSlot =
                   currentListSlots.length > 0
                     ? Math.max(...currentListSlots)
                     : 99;
+
                 const nextSlotId = maxSlot + 1;
                 currentValues[nextSlotId] = false;
               } else if (isParentList) {

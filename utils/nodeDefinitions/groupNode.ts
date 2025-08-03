@@ -1,6 +1,6 @@
-import { EvalValue, nodeDefinition, NodeEvalResult } from "../nodeTypes";
+import { EvalValue, nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
-import { getComboValues, getInputValues } from "./nodeUtilFunctions";
+import { getInputValues } from "./nodeUtilFunctions";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 export function groupNode(nodeDefId: number): nodeDefinition {

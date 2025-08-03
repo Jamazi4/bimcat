@@ -350,7 +350,9 @@ now start on making the logic for group node work
 
 so group node is done and it works automatically.
 
-THE EXTRUDE CAPPING FOR LINESTRINGS DOES NOT WORK CORRECTLY FOR GROUP
+[O] THE EXTRUDE CAPPING FOR LINESTRINGS DOES NOT WORK CORRECTLY FOR GROUP
+[X] and the edges are deleted from non-list inputs on switchGroupInputActive
+[O] copied group node needs to clear it's values
 
 current plan:
 
