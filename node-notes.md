@@ -344,9 +344,13 @@ adding delete button to group node dynamic virtual slots
 
 Things to remember now: group input only works for group slots right now.
 
+now start on making the logic for group node work
+
 ### --03-08-2025--
 
-now start on making the logic for group node work
+so group node is done and it works automatically.
+
+THE EXTRUDE CAPPING FOR LINESTRINGS DOES NOT WORK CORRECTLY FOR GROUP
 
 current plan:
 

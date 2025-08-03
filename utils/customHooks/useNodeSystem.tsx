@@ -185,11 +185,23 @@ export const useNodeSystem = (
       const node = nodesRef.current.find((n) => n.id === nodeId);
       if (!node || !node.values) return;
 
-      setEdges((prevEdges) =>
-        prevEdges.filter(
-          (e) => e.toNodeId !== nodeId && e.fromNodeId !== nodeId,
-        ),
+      setEdges((prevEdges) => prevEdges.filter((e) => e.toNodeId !== nodeId));
+
+      const nodeDef = nodeDefinitions.find((nd) => nd.type === node.type);
+
+      const dynamicOutputs = nodeDef?.outputs.filter(
+        (o) => o.onInputSelectedId !== undefined,
       );
+
+      dynamicOutputs?.forEach((output) => {
+        if (groupIndices.includes(output.onInputSelectedId!)) {
+          setEdges((prevEdges) =>
+            prevEdges.filter(
+              (e) => !(e.fromNodeId === nodeId && e.fromSlotId === output.id),
+            ),
+          );
+        }
+      });
 
       const currentValues = { ...node.values };
 

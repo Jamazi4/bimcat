@@ -98,7 +98,7 @@ const useNodesRuntime = ({
             ? edge.fromSlotId
             : nodeDef.inputs.length - 1 + (nodeDef.outputs.length - 1 || 1);
 
-          if (!edge) throw new Error("no edge to list input");
+          if (!edge) return [];
 
           const input = {
             inputId: id,
