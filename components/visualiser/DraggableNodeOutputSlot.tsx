@@ -27,7 +27,7 @@ const DraggableNodeOutputSlot = ({
   startConnecting,
   nodeRef,
   getSlotRelativePosition,
-  nodeValues
+  nodeValues,
 }: OutputNodeSlotsProps) => {
   const { nodeId, slotId, slotIO: slotType } = partialSlotData;
   const ref = useRef<SVGSVGElement>(null);
@@ -55,7 +55,7 @@ const DraggableNodeOutputSlot = ({
     slotId,
     nodeRef,
     getSlotRelativePosition,
-    nodeValues
+    nodeValues,
   ]);
 
   return (

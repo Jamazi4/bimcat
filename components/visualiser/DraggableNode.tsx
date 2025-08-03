@@ -11,15 +11,18 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { GeomNodeBackType, NodeEdgeType, NodeInputType, NodeSlot } from "@/utils/nodeTypes";
+import {
+  GeomNodeBackType,
+  inputWithSlotValueType,
+  NodeEdgeType,
+  NodeSlot,
+} from "@/utils/nodeTypes";
 import DraggableNodeInputGroup from "./DraggableNodeInputGroup";
 import DraggableNodeOutputSlot from "./DraggableNodeOutputSlot";
 import DraggableNodeInputSlot from "./DraggableNodeInputSlot";
 import DraggableNodeInputBoolean from "./DraggableNodeInputBoolean";
 import DraggableNodeInputNumber from "./DraggableNodeInputNumber";
 import DraggableNodeComboSlot from "./DraggableNodeComboSlot";
-import DraggableNodeInputListAddButton from "./DraggableNodeInputListAddButton";
-
 
 interface DraggableNodeProps {
   switchGroupInputActive: (
@@ -34,7 +37,7 @@ interface DraggableNodeProps {
   changeNodeValue: (
     nodeId: string,
     inputId: number,
-    value: number | boolean | string,
+    value: string | number | boolean,
     removeValue?: boolean,
   ) => void;
   registerNodeSlot: (slotData: NodeSlot) => void;
@@ -49,7 +52,6 @@ interface DraggableNodeProps {
   setNodeDivs: Dispatch<SetStateAction<Record<string, HTMLDivElement>>>;
   curTheme: string;
   removeEdgeToSlot: (toNodeId: string, toSlotId: number) => void;
-  removeListSlot: (nodeId: string, slotId: number) => void
 }
 
 const DraggableNode = memo(function DraggableNode({
@@ -67,7 +69,6 @@ const DraggableNode = memo(function DraggableNode({
   setNodeDivs,
   curTheme,
   removeEdgeToSlot,
-  removeListSlot
 }: DraggableNodeProps) {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -148,13 +149,16 @@ const DraggableNode = memo(function DraggableNode({
               });
             }
 
-            const listSlots: JSX.Element[] = []
+            const listSlots: JSX.Element[] = [];
             if (node.values) {
               Object.entries(node.values).forEach(([vInputId, _]) => {
-                const vInputIdParsed = parseInt(vInputId)
+                const vInputIdParsed = parseInt(vInputId);
                 if (vInputIdParsed >= 100) {
-                  const curInputType =
-                    (inputs.find((i) => i.id === activeIndex) as Extract<NodeInputType, { type: 'group' }>).slotValueType
+                  const curInputType = (
+                    inputs.find(
+                      (i) => i.id === activeIndex,
+                    ) as inputWithSlotValueType
+                  ).slotValueType;
                   const partialSlotData: Partial<NodeSlot> = {
                     nodeId: node.id,
                     slotId: vInputIdParsed,
@@ -162,9 +166,7 @@ const DraggableNode = memo(function DraggableNode({
                   };
                   listSlots.push(
                     <DraggableNodeInputSlot
-                      removeListSlot={removeListSlot}
                       nodeValues={node.values}
-                      isList={true}
                       optional={true}
                       slotValueType={curInputType}
                       getSlotRelativePosition={getSlotRelativePosition}
@@ -174,10 +176,10 @@ const DraggableNode = memo(function DraggableNode({
                       registerNodeSlot={registerNodeSlot}
                       key={vInputIdParsed}
                       name="asdf"
-                    />
-                  )
+                    />,
+                  );
                 }
-              })
+              });
             }
 
             return (
@@ -236,9 +238,7 @@ const DraggableNode = memo(function DraggableNode({
 
               return (
                 <DraggableNodeInputSlot
-                  removeListSlot={removeListSlot}
                   nodeValues={node.values}
-                  isList={false}
                   optional={optional}
                   slotValueType={input.slotValueType!}
                   getSlotRelativePosition={getSlotRelativePosition}
@@ -277,13 +277,6 @@ const DraggableNode = memo(function DraggableNode({
               );
             }
           })}
-
-          {nodeDef.inputs.find((i) => i.isList) &&
-            <DraggableNodeInputListAddButton
-              nodeValues={node.values}
-              changeThisNodeValues={changeThisNodeValues}
-            />
-          }
         </div>
 
         {/* outputs */}

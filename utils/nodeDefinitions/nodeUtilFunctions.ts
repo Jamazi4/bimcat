@@ -1,4 +1,11 @@
-import { ASTNode, ASTNodeInput, nodeDefinition, NodeEvalResult, NodeInputType, NodeValues } from "../nodeTypes";
+import {
+  ASTNode,
+  ASTNodeInput,
+  nodeDefinition,
+  NodeEvalResult,
+  NodeInputType,
+  NodeValues,
+} from "../nodeTypes";
 
 export const getComboValues = (
   node: ASTNode,
@@ -33,32 +40,31 @@ export const getInputValues = (
 
 export const getActiveInputIds = (
   nodeValues: NodeValues,
-  groupInputIds: number[]
+  groupInputIds: number[],
 ) => {
-
   return Object.entries(nodeValues)
-    .filter(([key, val]) => val === true && groupInputIds.includes(parseInt(key)))
-    .map(([key, _]) => parseInt(key));
-}
-
-export const getGroupInputIds = (toNodeDef: nodeDefinition, groupId: number) => {
-
-  return toNodeDef?.inputs
     .filter(
-      (input) =>
-        input.type === "group"
-        && input.groupIndex === groupId
+      ([key, val]) => val === true && groupInputIds.includes(parseInt(key)),
     )
-    .map((input) => input.id)
-}
+    .map(([key, _]) => parseInt(key));
+};
 
-export const getActiveInputType = (toNodeDef: nodeDefinition, activeInputIds: number[]) => {
+export const getGroupInputIds = (
+  toNodeDef: nodeDefinition,
+  groupId: number,
+) => {
+  return toNodeDef?.inputs
+    .filter((input) => input.type === "group" && input.groupIndex === groupId)
+    .map((input) => input.id);
+};
 
+export const getActiveGroupInputType = (
+  toNodeDef: nodeDefinition,
+  activeInputIds: number[],
+) => {
   return (
-    toNodeDef?.inputs
-      .find(
-        (input) =>
-          input.id === activeInputIds[0]
-      ) as Extract<NodeInputType, { type: 'group' }>
-  ).slotValueType
-}
+    toNodeDef?.inputs.find(
+      (input) => input.id === activeInputIds[0],
+    ) as Extract<NodeInputType, { type: "group" }>
+  ).slotValueType;
+};

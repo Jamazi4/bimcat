@@ -1,7 +1,25 @@
-import { Dispatch, RefObject, SetStateAction, useCallback, useEffect, useRef } from "react";
-import { GeomNodeBackType, nodeDefinition, NodeEdgeType, NodeInputType, NodeOutputType, NodeSlot, SlotValues } from "../nodeTypes";
+import {
+  Dispatch,
+  RefObject,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
+import {
+  GeomNodeBackType,
+  inputWithSlotValueType,
+  nodeDefinition,
+  NodeEdgeType,
+  NodeSlot,
+  SlotValues,
+} from "../nodeTypes";
 import { nodeDefinitions } from "../nodes";
-import { getActiveInputIds, getActiveInputType, getGroupInputIds } from "../nodeDefinitions/nodeUtilFunctions";
+import {
+  getActiveInputIds,
+  getActiveGroupInputType,
+  getGroupInputIds,
+} from "../nodeDefinitions/nodeUtilFunctions";
 import { createEdgeId } from "../utilFunctions";
 
 export const useNodeNavigation = (
@@ -15,64 +33,91 @@ export const useNodeNavigation = (
   wasDragging: RefObject<boolean>,
   editorRef: RefObject<HTMLDivElement | null>,
   isPanningRef: RefObject<boolean>,
-  panStartRef: RefObject<{ x: number, y: number }>,
-  setViewTransform: Dispatch<SetStateAction<{ x: number, y: number, scale: number }>>,
-  screenToWorld: (screenX: number, screenY: number) => {
+  panStartRef: RefObject<{ x: number; y: number }>,
+  setViewTransform: Dispatch<
+    SetStateAction<{ x: number; y: number; scale: number }>
+  >,
+  screenToWorld: (
+    screenX: number,
+    screenY: number,
+  ) => {
     x: number;
     y: number;
-  }, selectionRectRef: RefObject<{
+  },
+  selectionRectRef: RefObject<{
     x1: number;
     y1: number;
     x2: number;
     y2: number;
-  } | null>, setSelectionRect: Dispatch<SetStateAction<{
-    x1: number;
-    y1: number;
-    x2: number;
-    y2: number;
-  } | null>>,
-  draggingNodesRef: RefObject<{
-    id: string;
-    offsetX: number;
-    offsetY: number;
-  }[]>,
+  } | null>,
+  setSelectionRect: Dispatch<
+    SetStateAction<{
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+    } | null>
+  >,
+  draggingNodesRef: RefObject<
+    {
+      id: string;
+      offsetX: number;
+      offsetY: number;
+    }[]
+  >,
   connectingFromNodeRef: RefObject<{
     nodeId: string;
     slotId: number;
   } | null>,
-  nodeSlotsRef: RefObject<NodeSlot[]>, getSlotCenter: (element: SVGSVGElement) => {
+  nodeSlotsRef: RefObject<NodeSlot[]>,
+  getSlotCenter: (element: SVGSVGElement) => {
     iconX: number;
     iconY: number;
-  }, setTempEdgePosition: Dispatch<SetStateAction<{
-    x1: number;
-    y1: number;
-    x2: number;
-    y2: number;
-  } | null>>,
+  },
+  setTempEdgePosition: Dispatch<
+    SetStateAction<{
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+    } | null>
+  >,
   connectingToNodeRef: RefObject<{
     nodeId: string;
     slotId: number;
   } | null>,
   nodesRef: RefObject<GeomNodeBackType[]>,
-  setConnectingFromNode: Dispatch<SetStateAction<{
-    nodeId: string;
-    slotId: number;
-  } | null>>,
-  switchGroupInputActive: (nodeId: string, groupIndices: number[], activeIndex: number) => void, edgesRef: RefObject<NodeEdgeType[]>,
+  setConnectingFromNode: Dispatch<
+    SetStateAction<{
+      nodeId: string;
+      slotId: number;
+    } | null>
+  >,
+  switchGroupInputActive: (
+    nodeId: string,
+    groupIndices: number[],
+    activeIndex: number,
+  ) => void,
   setSelectedNodeIds: Dispatch<SetStateAction<string[]>>,
-  setDraggingNodes: Dispatch<SetStateAction<{
-    id: string;
-    offsetX: number;
-    offsetY: number;
-  }[]>>,
+  setDraggingNodes: Dispatch<
+    SetStateAction<
+      {
+        id: string;
+        offsetX: number;
+        offsetY: number;
+      }[]
+    >
+  >,
   curClickedNodeId: RefObject<string>,
   setIsPanning: Dispatch<SetStateAction<boolean>>,
   nodeDivsRef: RefObject<Record<string, HTMLDivElement>>,
   nodeNavigation: boolean,
-  setPanStart: Dispatch<SetStateAction<{
-    x: number;
-    y: number;
-  }>>,
+  setPanStart: Dispatch<
+    SetStateAction<{
+      x: number;
+      y: number;
+    }>
+  >,
   viewTransformRef: RefObject<{
     x: number;
     y: number;
@@ -93,9 +138,8 @@ export const useNodeNavigation = (
     y1: number;
     x2: number;
     y2: number;
-  } | null
+  } | null,
 ) => {
-
   const shiftPressed = useRef(false);
 
   const addEdge = useCallback(
@@ -113,72 +157,111 @@ export const useNodeNavigation = (
         toSlotId,
       };
 
-      const curEdges = edgesRef.current;
-      const newEdges = curEdges.filter((edge) => {
-        return !(edge.toNodeId === toNodeId && edge.toSlotId === toSlotId);
+      const isListSlot = toSlotId >= 100;
+
+      const toNode = nodesRef.current.find((n) => n.id === toNodeId);
+      const nodeDef = nodeDefinitions.find((nd) => nd.type === toNode?.type);
+
+      const inputDef = nodeDef?.inputs.find((i) => i.id === toSlotId);
+      const isParentList = inputDef?.isList;
+
+      setEdges((prevEdges) => {
+        const newEdges = prevEdges.filter(
+          (edge) => !(edge.toNodeId === toNodeId && edge.toSlotId === toSlotId),
+        );
+        return [...newEdges, newEdge];
       });
 
-      setEdges([...newEdges, newEdge]);
-      edgesRef.current = [...newEdges, newEdge];
+      if (isListSlot || isParentList) {
+        setNodes((prevNodes) =>
+          prevNodes.map((node) => {
+            if (node.id !== toNodeId) return node;
 
+            const currentListSlots = Object.keys(node.values ?? {})
+              .map(Number)
+              .filter((k) => k >= 100)
+              .sort((a, b) => a - b);
+
+            const maxSlot =
+              currentListSlots.length > 0 ? Math.max(...currentListSlots) : 99;
+
+            const nextSlotId = maxSlot + 1;
+
+            if (!(nextSlotId in (node.values ?? {}))) {
+              return {
+                ...node,
+                values: {
+                  ...node.values,
+                  [nextSlotId]: null,
+                },
+              };
+            }
+
+            return node;
+          }),
+        );
+      }
     },
-    [edgesRef, setEdges],
+    [nodesRef, setEdges, setNodes],
   );
 
-  const cancelConnecting = useCallback(
-    () => {
-      setConnectingFromNode(null);
-      setTempEdgePosition(null);
-    }, [setConnectingFromNode, setTempEdgePosition]
-  )
+  const cancelConnecting = useCallback(() => {
+    setConnectingFromNode(null);
+    setTempEdgePosition(null);
+  }, [setConnectingFromNode, setTempEdgePosition]);
 
   const addEdgeToGroupInput = useCallback(
     (
       toNode: GeomNodeBackType | undefined,
       toNodeDef: nodeDefinition,
       inputValueType: SlotValues | null,
-      outputType: SlotValues | undefined
+      outputType: SlotValues | undefined,
     ) => {
+      if (!connectingToNodeRef.current)
+        throw new Error("No active to node ref");
 
-
-      if (!connectingToNodeRef.current) throw new Error("No active to node ref")
-
-      const groupInputIds = getGroupInputIds(toNodeDef, connectingToNodeRef.current?.slotId)
+      const groupInputIds = getGroupInputIds(
+        toNodeDef,
+        connectingToNodeRef.current?.slotId,
+      );
 
       if (!groupInputIds) {
-        cancelConnecting()
-        throw new Error("Could not find group input Ids")
+        cancelConnecting();
+        throw new Error("Could not find group input Ids");
       }
 
-      const activeInputIds = getActiveInputIds(toNode!.values!, groupInputIds)
-      const allowedInputTypes = toNodeDef
-        ?.inputs.filter((input) => input.type === "group")
-        .map((group) => group.slotValueType)
+      const activeInputIds = getActiveInputIds(toNode!.values!, groupInputIds);
+      const allowedInputTypes = toNodeDef?.inputs
+        .filter((input) => input.type === "group")
+        .map((group) => group.slotValueType);
 
-      const activeInputType = getActiveInputType(toNodeDef, activeInputIds)
+      const activeInputType = getActiveGroupInputType(
+        toNodeDef,
+        activeInputIds,
+      );
 
       if (!inputValueType) {
-        cancelConnecting()
-        throw new Error("Could not find group input value type")
+        cancelConnecting();
+        throw new Error("Could not find group input value type");
       }
 
       if (
-        activeInputType !== outputType
-        && allowedInputTypes?.includes(inputValueType)
+        activeInputType !== outputType &&
+        allowedInputTypes?.includes(inputValueType)
       ) {
-        const newActiveInputId = toNodeDef.inputs
-          .find((input) =>
-            input.type === "group"
-            && groupInputIds.includes(input.id)
-            && input.slotValueType === outputType)
-          ?.id
+        const newActiveInputId = toNodeDef.inputs.find(
+          (input) =>
+            input.type === "group" &&
+            groupInputIds.includes(input.id) &&
+            input.slotValueType === outputType,
+        )?.id;
 
         if (newActiveInputId === undefined) {
-          cancelConnecting()
-          throw new Error("Could not establish new active input id")
+          cancelConnecting();
+          throw new Error("Could not establish new active input id");
         }
 
-        switchGroupInputActive(toNode!.id, groupInputIds, newActiveInputId)
+        switchGroupInputActive(toNode!.id, groupInputIds, newActiveInputId);
 
         addEdge(
           connectingFromNodeRef.current!.nodeId,
@@ -187,7 +270,7 @@ export const useNodeNavigation = (
           connectingToNodeRef.current!.slotId,
         );
         cancelConnecting();
-        return
+        return;
       } else if (activeInputType === outputType) {
         addEdge(
           connectingFromNodeRef.current!.nodeId,
@@ -196,9 +279,17 @@ export const useNodeNavigation = (
           connectingToNodeRef.current!.slotId,
         );
         cancelConnecting();
-        return
+        return;
       }
-    }, [addEdge, cancelConnecting, connectingFromNodeRef, connectingToNodeRef, switchGroupInputActive])
+    },
+    [
+      addEdge,
+      cancelConnecting,
+      connectingFromNodeRef,
+      connectingToNodeRef,
+      switchGroupInputActive,
+    ],
+  );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -242,7 +333,15 @@ export const useNodeNavigation = (
         shiftPressed.current = true;
       }
     },
-    [copySelectedNodes, pasteCopiedNodes, selectedNodeIdsRef, setEdges, setNodeDivs, setNodeSlots, setNodes],
+    [
+      copySelectedNodes,
+      pasteCopiedNodes,
+      selectedNodeIdsRef,
+      setEdges,
+      setNodeDivs,
+      setNodeSlots,
+      setNodes,
+    ],
   );
 
   const handleKeyUp = (e: KeyboardEvent) => {
@@ -314,63 +413,83 @@ export const useNodeNavigation = (
         }
       }
     },
-    [connectingFromNodeRef, draggingNodesRef, editorRef, getSlotCenter, isPanningRef, nodeSlotsRef, panStartRef, screenToWorld, selectionRectRef, setNodes, setSelectionRect, setTempEdgePosition, setViewTransform, wasDragging],
+    [
+      connectingFromNodeRef,
+      draggingNodesRef,
+      editorRef,
+      getSlotCenter,
+      isPanningRef,
+      nodeSlotsRef,
+      panStartRef,
+      screenToWorld,
+      selectionRectRef,
+      setNodes,
+      setSelectionRect,
+      setTempEdgePosition,
+      setViewTransform,
+      wasDragging,
+    ],
   );
 
   const handleMouseUp = useCallback(() => {
     if (connectingToNodeRef.current && connectingFromNodeRef.current) {
-      const toNode = nodesRef.current.find((n) => n.id === connectingToNodeRef.current?.nodeId)
+      const toNode = nodesRef.current.find(
+        (n) => n.id === connectingToNodeRef.current?.nodeId,
+      );
 
-
-      const toNodeDef = nodeDefinitions.find((def) => toNode?.type === def.type)
+      const toNodeDef = nodeDefinitions.find(
+        (def) => toNode?.type === def.type,
+      );
 
       if (!toNodeDef) {
-        cancelConnecting()
-        throw new Error("Could not find correct node definition")
+        cancelConnecting();
+        throw new Error("Could not find correct node definition");
       }
 
-      const inputSlot = toNodeDef?.inputs.find((i) => i.id === connectingToNodeRef.current?.slotId)
+      const inputSlot = toNodeDef?.inputs.find(
+        (i) => i.id === connectingToNodeRef.current?.slotId,
+      );
 
-      const inputType = inputSlot?.type
-      const slotTypes = ['group', 'slot', 'combo']
+      const inputType = inputSlot?.type;
+      const slotTypes = ["group", "slot", "combo"];
       const inputValueType =
-        inputSlot
-          && slotTypes.includes(inputSlot.type)
-          ? (inputSlot as Extract<NodeInputType, { type: 'group' | 'slot' | 'combo' }>).slotValueType
-          : null
+        inputSlot && slotTypes.includes(inputSlot.type)
+          ? (inputSlot as inputWithSlotValueType).slotValueType
+          : null;
 
-      const fromNode = nodesRef.current
-        .find((n) => n.id === connectingFromNodeRef.current?.nodeId)
+      const fromNode = nodesRef.current.find(
+        (n) => n.id === connectingFromNodeRef.current?.nodeId,
+      );
       const outputType = nodeDefinitions
-        .find((def) => fromNode?.type === def.type)?.outputs
-        .find((o) => o.id === connectingFromNodeRef.current?.slotId)?.type
+        .find((def) => fromNode?.type === def.type)
+        ?.outputs.find(
+          (o) => o.id === connectingFromNodeRef.current?.slotId,
+        )?.type;
 
-      const toSlotId = connectingToNodeRef.current.slotId
+      const toSlotId = connectingToNodeRef.current.slotId;
 
-      const isListChild = toSlotId >= 100
+      const isListChild = toSlotId >= 100;
 
       if (isListChild) {
-        console.log("i'm parent")
         let listParentValueType: SlotValues = "number";
-
-        const listParentSlots =
-          toNodeDef.inputs.filter((i) => i.isList === true)
-
+        const listParentSlots = toNodeDef.inputs.filter(
+          (i) => i.isList === true,
+        );
         if (listParentSlots.length > 1) {
           listParentSlots.forEach((slot) => {
             if (toNode?.values?.[slot.id] === true) {
-              listParentValueType = (slot as Extract<NodeInputType, { type: 'group' | 'slot' | 'combo' }>).slotValueType
+              listParentValueType = (slot as inputWithSlotValueType)
+                .slotValueType;
             }
-          })
+          });
         } else {
-
-          listParentValueType =
-            (listParentSlots[0] as Extract<NodeInputType, { type: 'group' | 'slot' | 'combo' }>).slotValueType
+          listParentValueType = (listParentSlots[0] as inputWithSlotValueType)
+            .slotValueType;
         }
 
         if (outputType !== listParentValueType) {
           cancelConnecting();
-          return
+          return;
         }
 
         addEdge(
@@ -381,21 +500,19 @@ export const useNodeNavigation = (
         );
 
         cancelConnecting();
-        return
+        return;
       }
 
       if (inputType === "group") {
-        addEdgeToGroupInput(toNode, toNodeDef, inputValueType, outputType)
+        addEdgeToGroupInput(toNode, toNodeDef, inputValueType, outputType);
       }
 
-      const isSameType = outputType === inputValueType
+      const isSameType = outputType === inputValueType;
       const isOutputNode =
-        inputValueType === "geometry"
-        && (
-          outputType === "mesh"
-          || outputType === "linestring"
-          || outputType === "vector"
-        )
+        inputValueType === "geometry" &&
+        (outputType === "mesh" ||
+          outputType === "linestring" ||
+          outputType === "vector");
 
       if (isSameType || isOutputNode) {
         addEdge(
@@ -404,12 +521,11 @@ export const useNodeNavigation = (
           connectingToNodeRef.current.nodeId,
           connectingToNodeRef.current.slotId,
         );
-        cancelConnecting()
-        return
-
+        cancelConnecting();
+        return;
       } else {
-        cancelConnecting()
-        return
+        cancelConnecting();
+        return;
       }
     }
 
@@ -504,7 +620,25 @@ export const useNodeNavigation = (
       }
     }
     setSelectionRect(null);
-  }, [addEdge, addEdgeToGroupInput, cancelConnecting, connectingFromNodeRef, connectingToNodeRef, curClickedNodeId, draggingNodesRef, editorRef, nodeDivsRef, nodesRef, selectedNodeIdsRef, selectionRectRef, setDraggingNodes, setIsPanning, setSelectedNodeIds, setSelectionRect, wasDragging]);
+  }, [
+    addEdge,
+    addEdgeToGroupInput,
+    cancelConnecting,
+    connectingFromNodeRef,
+    connectingToNodeRef,
+    curClickedNodeId,
+    draggingNodesRef,
+    editorRef,
+    nodeDivsRef,
+    nodesRef,
+    selectedNodeIdsRef,
+    selectionRectRef,
+    setDraggingNodes,
+    setIsPanning,
+    setSelectedNodeIds,
+    setSelectionRect,
+    wasDragging,
+  ]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
@@ -561,7 +695,14 @@ export const useNodeNavigation = (
         return;
       }
     },
-    [editorRef, nodeNavigation, setIsPanning, setPanStart, setSelectionRect, viewTransformRef],
+    [
+      editorRef,
+      nodeNavigation,
+      setIsPanning,
+      setPanStart,
+      setSelectionRect,
+      viewTransformRef,
+    ],
   );
 
   useEffect(() => {
@@ -602,8 +743,16 @@ export const useNodeNavigation = (
         e.preventDefault();
       });
     };
-  }, [nodeNavigation, handleKeyDown, handleMouseMove, handleMouseUp, draggingNodes.length, connectingFromNode, isPanning, selectionRect]);
+  }, [
+    nodeNavigation,
+    handleKeyDown,
+    handleMouseMove,
+    handleMouseUp,
+    draggingNodes.length,
+    connectingFromNode,
+    isPanning,
+    selectionRect,
+  ]);
 
-  return { handleWheel, handleEditorMouseDown }
-
-}
+  return { handleWheel, handleEditorMouseDown };
+};

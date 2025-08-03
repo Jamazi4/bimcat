@@ -1,8 +1,6 @@
 import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
 import { getComboValues, getInputValues } from "./nodeUtilFunctions";
-import { composeTransformMatrix } from "../geometryProcessing/geometryHelpers";
-import { extractOrderedBoundaryLoop } from "../geometryProcessing/extrusion";
 
 export function groupNode(nodeDefId: number): nodeDefinition {
   return {
@@ -34,28 +32,25 @@ export function groupNode(nodeDefId: number): nodeDefinition {
       { type: "mesh", name: "mesh", id: 3, onInputSelectedId: 1 },
     ],
     function: (node, evalFunction) => {
-      const [dim1, dim2] = getComboValues(node, evalFunction, [0, 1]);
-      const [transform] = getInputValues(node.inputs, evalFunction, [2]);
+      const initLinestring = getInputValues(node.inputs, evalFunction, [0]);
+      const initMesh = getInputValues(node.inputs, evalFunction, [1]);
 
-      if (
-        transform.type === "transform" &&
-        typeof dim1 === "number" &&
-        typeof dim2 === "number"
-      ) {
-        const geom = new THREE.PlaneGeometry(dim1, dim2);
+      Object.entries(node.values).forEach(([key, _]) => {
+        const id = parseInt(key);
+        if (id >= 100) {
+          const data = getInputValues(node.inputs, evalFunction, [id]);
+          console.log(data);
+        }
+      });
 
-        const transformMatrix = composeTransformMatrix(transform.value);
+      console.log(node.values);
 
-        geom.applyMatrix4(transformMatrix);
+      console.log(initLinestring, initMesh);
 
-        const linestring = extractOrderedBoundaryLoop(geom)[0];
-        linestring.push(linestring[0]);
-        return {
-          3: { type: "mesh", value: geom },
-          4: { type: "linestring", value: [linestring] },
-        };
-      }
-      throw new Error("Invalid inputs to plane node");
+      return {
+        3: { type: "mesh", value: geom },
+        4: { type: "linestring", value: [linestring] },
+      };
     },
   };
 }

@@ -20,5 +20,5 @@ export const nodeDefinitions: nodeDefinition[] = [
   extrudeNode(7),
   booleanNode(8),
   transformNode(9),
-  groupNode(10)
+  groupNode(10),
 ];

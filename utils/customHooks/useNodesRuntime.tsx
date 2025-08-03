@@ -81,6 +81,35 @@ const useNodesRuntime = ({
         })
         .filter(Boolean);
 
+      const listInputsIds = Object.entries(node.values)
+        .flatMap(([key, _]) => {
+          const id = parseInt(key);
+          return !isNaN(id) && id >= 100 ? id : null;
+        })
+        .filter((id): id is number => id !== null);
+
+      if (listInputsIds) {
+        listInputsIds.forEach((id) => {
+          const edge = edges.find(
+            (edge) => edge.toNodeId === nodeId && edge.toSlotId === id,
+          );
+
+          const fromOutputId = edge
+            ? edge.fromSlotId
+            : nodeDef.inputs.length - 1 + (nodeDef.outputs.length - 1 || 1);
+
+          if (!edge) throw new Error("no edge to list input");
+
+          const input = {
+            inputId: id,
+            ast: buildAST(edge?.fromNodeId),
+            fromOutputId: fromOutputId,
+          };
+
+          inputs.push(input);
+        });
+      }
+
       return {
         type: node.type,
         id: node.id,

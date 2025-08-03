@@ -153,7 +153,6 @@ export const useNodeSystem = (
     setEdges(nodeProject.edges);
   }, []);
 
-
   const saveNodeProject = useCallback(
     async (componentId: string) => {
       const geometry: ComponentGeometry[] = meshGroup.children
@@ -186,12 +185,19 @@ export const useNodeSystem = (
       const node = nodesRef.current.find((n) => n.id === nodeId);
       if (!node || !node.values) return;
 
-      // Get the freshest values directly from the ref
-      const currentValues = nodesRef.current.find((n) => n.id === nodeId)?.values || {};
+      const currentValues =
+        nodesRef.current.find((n) => n.id === nodeId)?.values || {};
       const newValues = { ...currentValues };
 
       groupIndices.forEach((id) => {
         newValues[id] = id === activeIndex;
+      });
+
+      Object.keys(newValues).forEach((key) => {
+        const slotId = parseInt(key);
+        if (slotId >= 100) {
+          delete newValues[slotId];
+        }
       });
 
       setNodes((prevNodes) =>
@@ -203,28 +209,31 @@ export const useNodeSystem = (
     [],
   );
 
-  const removeEdgeToSlot = useCallback((toNodeId: string, toSlotId: number
-  ) => {
-    const edge = edgesRef.current.find((e) => e.toNodeId === toNodeId && e.toSlotId === toSlotId)
+  const removeEdgeToSlot = useCallback((toNodeId: string, toSlotId: number) => {
+    const edge = edgesRef.current.find(
+      (e) => e.toNodeId === toNodeId && e.toSlotId === toSlotId,
+    );
     if (edge) {
-      setEdges((prevEdges) => prevEdges.filter((e) => e.id !== edge.id))
+      setEdges((prevEdges) => prevEdges.filter((e) => e.id !== edge.id));
     }
-
-  }, [])
+  }, []);
 
   const changeNodeValue = useCallback(
-    (nodeId: string, inputId: number, value: string | number | boolean, removeValue?: boolean) => {
-
+    (
+      nodeId: string,
+      inputId: number,
+      value: string | number | boolean,
+      removeValue?: boolean,
+    ) => {
       const node = nodesRef.current.find((node) => node.id === nodeId);
       if (!node) return;
       if (!node?.values) return;
 
       const newValues = { ...node.values };
       if (!removeValue) {
-
         newValues[inputId] = value;
       } else {
-        delete newValues[inputId]
+        delete newValues[inputId];
       }
 
       setNodes((prevNodes) =>
@@ -237,66 +246,54 @@ export const useNodeSystem = (
   );
 
   const removeListSlot = useCallback((nodeId: string, slotId: number) => {
-    if (slotId < 100) return; // Only handle list slots
-
     const node = nodesRef.current.find((n) => n.id === nodeId);
     if (!node?.values) return;
 
-    // Remove the edge first
-    setEdges((prevEdges) => prevEdges.filter(
-      (e) => !(e.toNodeId === nodeId && e.toSlotId === slotId)
-    ));
+    setEdges((prevEdges) =>
+      prevEdges.filter(
+        (e) => !(e.toNodeId === nodeId && e.toSlotId === slotId),
+      ),
+    );
 
-    // Get all list values and sort them
     const listEntries = Object.entries(node.values)
       .filter(([key]) => parseInt(key) >= 100)
       .sort(([a], [b]) => parseInt(a) - parseInt(b));
 
-    // Find the index of the slot to remove
-    const removeIndex = listEntries.findIndex(([key]) => parseInt(key) === slotId);
+    const removeIndex = listEntries.findIndex(
+      ([key]) => parseInt(key) === slotId,
+    );
     if (removeIndex === -1) return;
 
-    // Remove the slot from the list
     listEntries.splice(removeIndex, 1);
-
-    // Create new values object
     const newValues = { ...node.values };
 
-    // Clear all list values
-    Object.keys(newValues).forEach(key => {
+    Object.keys(newValues).forEach((key) => {
       if (parseInt(key) >= 100) {
         delete newValues[parseInt(key)];
       }
     });
 
-    // Re-add remaining list values with sequential IDs
     listEntries.forEach(([_, val], index) => {
       newValues[100 + index] = val;
     });
 
-    // Update edges to point to new slot IDs
     setEdges((prevEdges) =>
       prevEdges.map((edge) => {
         if (edge.toNodeId === nodeId && edge.toSlotId >= 100) {
-          // Find the old slot index
           const oldIndex = edge.toSlotId - 100;
           if (oldIndex > removeIndex) {
-            // This edge was pointing to a slot after the removed one
             return {
               ...edge,
-              toSlotId: edge.toSlotId - 1
+              toSlotId: edge.toSlotId - 1,
             };
           }
         }
         return edge;
-      })
+      }),
     );
 
-    // Update node values
     setNodes((prevNodes) =>
-      prevNodes.map((n) =>
-        n.id === nodeId ? { ...n, values: newValues } : n,
-      ),
+      prevNodes.map((n) => (n.id === nodeId ? { ...n, values: newValues } : n)),
     );
   }, []);
 
@@ -403,11 +400,12 @@ export const useNodeSystem = (
     setNodeSlots((prev) => {
       if (slotData.slotIO === "output") {
         const filteredSlots = prev.filter(
-          (slot) => !(
-            slot.nodeId === slotData.nodeId &&
-            slot.slotId === slotData.slotId &&
-            slot.slotIO === "output"
-          )
+          (slot) =>
+            !(
+              slot.nodeId === slotData.nodeId &&
+              slot.slotId === slotData.slotId &&
+              slot.slotIO === "output"
+            ),
         );
         return [...filteredSlots, slotData];
       }
@@ -418,14 +416,13 @@ export const useNodeSystem = (
           slot.slotId === slotData.slotId &&
           slot.slotIO === slotData.slotIO &&
           Math.abs(slot.relativeX - slotData.relativeX) < 1 &&
-          Math.abs(slot.relativeY - slotData.relativeY) < 1
+          Math.abs(slot.relativeY - slotData.relativeY) < 1,
       );
 
       if (alreadyRegistered) return prev;
       return [...prev, slotData];
     });
   }, []);
-
 
   const startDraggingNode = useCallback(
     (nodeId: string, e: React.MouseEvent) => {
@@ -499,12 +496,26 @@ export const useNodeSystem = (
     [],
   );
 
-  const deleteEdge = useCallback((edgeId: string) => {
-    setEdges((prevEdges) => {
-      return prevEdges.filter((edge) => edge.id !== edgeId);
-    });
-  }, []);
+  const deleteEdge = useCallback(
+    (edgeId: string) => {
+      const edge = edgesRef.current.find((e) => e.id === edgeId);
 
+      const node = nodesRef.current.find((n) => n.id === edge?.toNodeId);
+      const isParentList = nodeDefinitions
+        .find((nd) => nd.type === node?.type)
+        ?.inputs.find((i) => i.id === edge?.toSlotId)?.isList;
+
+      if (edge && edge.toSlotId >= 100) {
+        removeListSlot(edge?.toNodeId, edge?.toSlotId);
+      } else if (edge && isParentList) {
+        removeListSlot(edge?.toNodeId, 100);
+      }
+      setEdges((prevEdges) => {
+        return prevEdges.filter((edge) => edge.id !== edgeId);
+      });
+    },
+    [removeListSlot],
+  );
 
   const getViewTransformScale = useCallback(() => {
     return viewTransformRef.current.scale;
@@ -535,7 +546,6 @@ export const useNodeSystem = (
     nodesRef,
     setConnectingFromNode,
     switchGroupInputActive,
-    edgesRef,
     setSelectedNodeIds,
     setDraggingNodes,
     curClickedNodeId,
@@ -548,7 +558,7 @@ export const useNodeSystem = (
     connectingFromNode,
     isPanning,
     selectionRect,
-  )
+  );
 
   return {
     switchGroupInputActive,

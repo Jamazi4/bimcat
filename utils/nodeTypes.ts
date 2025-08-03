@@ -86,10 +86,10 @@ export type NodeInputType = (
   | { type: "group"; slotValueType: SlotValues; groupIndex: number }
   | { type: "slot"; slotValueType: SlotValues }
   | {
-    type: "combo";
-    slotValueType: SlotValues;
-    value: number | boolean | string;
-  }
+      type: "combo";
+      slotValueType: SlotValues;
+      value: number | boolean | string;
+    }
   | { type: "number" | "boolean" | "string" }
 ) & {
   defaultValue?: ASTNode;
@@ -98,8 +98,8 @@ export type NodeInputType = (
   value?: number | boolean | string;
   //for group input value is boolean and it defines which input is active
   isList?: boolean;
-  //for list inputs - each new list input will have id n + 100. connecting to 
-  //main list input will add to node.values 100: true; 101: false. connecting 
+  //for list inputs - each new list input will have id n + 100. connecting to
+  //main list input will add to node.values 100: true; 101: false. connecting
   //to 101 will make 101: true; 102: false and so on...
 };
 
@@ -173,3 +173,8 @@ export const backgroundColorClasses = {
   geometry: "bg-geometry-input",
   transform: "bg-transform-input",
 };
+
+export type inputWithSlotValueType = Extract<
+  NodeInputType,
+  { type: "group" | "slot" | "combo" }
+>;

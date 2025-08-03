@@ -344,6 +344,10 @@ adding delete button to group node dynamic virtual slots
 
 Things to remember now: group input only works for group slots right now.
 
+### --03-08-2025--
+
+now start on making the logic for group node work
+
 current plan:
 
 - finish group node
