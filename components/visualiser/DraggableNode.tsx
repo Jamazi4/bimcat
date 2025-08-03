@@ -51,7 +51,6 @@ interface DraggableNodeProps {
   getViewTransformScale: () => number;
   setNodeDivs: Dispatch<SetStateAction<Record<string, HTMLDivElement>>>;
   curTheme: string;
-  removeEdgeToSlot: (toNodeId: string, toSlotId: number) => void;
 }
 
 const DraggableNode = memo(function DraggableNode({
@@ -68,7 +67,6 @@ const DraggableNode = memo(function DraggableNode({
   getViewTransformScale,
   setNodeDivs,
   curTheme,
-  removeEdgeToSlot,
 }: DraggableNodeProps) {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -175,7 +173,7 @@ const DraggableNode = memo(function DraggableNode({
                       partialSlotData={partialSlotData}
                       registerNodeSlot={registerNodeSlot}
                       key={vInputIdParsed}
-                      name="asdf"
+                      name={curInputType}
                     />,
                   );
                 }
@@ -185,8 +183,6 @@ const DraggableNode = memo(function DraggableNode({
             return (
               <div key={`${groupId}${node.id}`}>
                 <DraggableNodeInputGroup
-                  nodeValues={node.values}
-                  removeEdgeToSlot={removeEdgeToSlot}
                   activeIndex={activeIndex}
                   switchGroupInputActive={switchGroupInputActive}
                   nodeId={node.id}
@@ -282,6 +278,7 @@ const DraggableNode = memo(function DraggableNode({
         {/* outputs */}
         <div className="space-y-6">
           {nodeDef.outputs.map((output, i) => {
+            const outputKey = `${i}-${JSON.stringify(node.values ?? {})}`;
             let tiedInputActive = true;
             if (output.onInputSelectedId !== undefined) {
               const tiedInputId = output.onInputSelectedId;
@@ -324,7 +321,7 @@ const DraggableNode = memo(function DraggableNode({
                 startConnecting={startConnecting}
                 registerNodeSlot={registerNodeSlot}
                 partialSlotData={partialSlotData}
-                key={i}
+                key={outputKey}
                 name={output.name}
               />
             );

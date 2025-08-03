@@ -17,7 +17,6 @@ import {
 } from "../ui/select";
 
 interface InputNodeGroupProps {
-  nodeValues?: Record<string, number | boolean | string>;
   switchGroupInputActive: (
     nodeId: string,
     groupIndices: number[],
@@ -41,10 +40,8 @@ interface InputNodeGroupProps {
     relativeX: number;
     relativeY: number;
   };
-  removeEdgeToSlot: (nodeId: string, toSlotId: number) => void;
 }
 const DraggableNodeInputGroup = ({
-  nodeValues,
   switchGroupInputActive,
   activeIndex,
   inputs,
@@ -54,7 +51,6 @@ const DraggableNodeInputGroup = ({
   finishConnecting,
   getSlotRelativePosition,
   nodeRef,
-  removeEdgeToSlot,
 }: InputNodeGroupProps) => {
   const ref = useRef<SVGSVGElement>(null);
 
@@ -112,20 +108,8 @@ const DraggableNodeInputGroup = ({
   );
 
   const handleChangeInputState = (value: string) => {
-    switchGroupInputActive(
-      nodeId,
-      Object.values(nameIndexMap),
-      nameIndexMap[value],
-    );
-    removeEdgeToSlot(nodeId, groupIndex);
-    if (nodeValues) {
-      Object.entries(nodeValues).map(([key, _]) => {
-        const parsedKey = parseInt(key);
-        if (parsedKey >= 100) {
-          removeEdgeToSlot(nodeId, parsedKey);
-        }
-      });
-    }
+    const newActiveIndex = nameIndexMap[value];
+    switchGroupInputActive(nodeId, Object.values(nameIndexMap), newActiveIndex);
     setSelectedInput(value);
   };
 

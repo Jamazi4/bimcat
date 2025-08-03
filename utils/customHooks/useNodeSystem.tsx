@@ -185,24 +185,27 @@ export const useNodeSystem = (
       const node = nodesRef.current.find((n) => n.id === nodeId);
       if (!node || !node.values) return;
 
-      const currentValues =
-        nodesRef.current.find((n) => n.id === nodeId)?.values || {};
-      const newValues = { ...currentValues };
+      setEdges((prevEdges) =>
+        prevEdges.filter(
+          (e) => e.toNodeId !== nodeId && e.fromNodeId !== nodeId,
+        ),
+      );
+
+      const currentValues = { ...node.values };
 
       groupIndices.forEach((id) => {
-        newValues[id] = id === activeIndex;
+        currentValues[id] = id === activeIndex;
       });
 
-      Object.keys(newValues).forEach((key) => {
+      Object.keys(currentValues).forEach((key) => {
         const slotId = parseInt(key);
         if (slotId >= 100) {
-          delete newValues[slotId];
+          delete currentValues[slotId];
         }
       });
-
       setNodes((prevNodes) =>
         prevNodes.map((n) =>
-          n.id === nodeId ? { ...n, values: newValues } : n,
+          n.id === nodeId ? { ...n, values: currentValues } : n,
         ),
       );
     },
@@ -249,33 +252,35 @@ export const useNodeSystem = (
     const node = nodesRef.current.find((n) => n.id === nodeId);
     if (!node?.values) return;
 
-    setEdges((prevEdges) =>
-      prevEdges.filter(
-        (e) => !(e.toNodeId === nodeId && e.toSlotId === slotId),
-      ),
-    );
+    const currentValues = { ...node.values };
 
-    const listEntries = Object.entries(node.values)
+    const listEntries = Object.entries(currentValues)
       .filter(([key]) => parseInt(key) >= 100)
       .sort(([a], [b]) => parseInt(a) - parseInt(b));
 
     const removeIndex = listEntries.findIndex(
       ([key]) => parseInt(key) === slotId,
     );
+
     if (removeIndex === -1) return;
 
     listEntries.splice(removeIndex, 1);
-    const newValues = { ...node.values };
 
-    Object.keys(newValues).forEach((key) => {
+    Object.keys(currentValues).forEach((key) => {
       if (parseInt(key) >= 100) {
-        delete newValues[parseInt(key)];
+        delete currentValues[parseInt(key)];
       }
     });
 
     listEntries.forEach(([_, val], index) => {
-      newValues[100 + index] = val;
+      currentValues[100 + index] = val;
     });
+
+    const hasEmptySlot = listEntries.some(([_, val]) => val === false);
+    if (!hasEmptySlot) {
+      const nextEmptySlot = 100 + listEntries.length;
+      currentValues[nextEmptySlot] = false;
+    }
 
     setEdges((prevEdges) =>
       prevEdges.map((edge) => {
@@ -293,7 +298,9 @@ export const useNodeSystem = (
     );
 
     setNodes((prevNodes) =>
-      prevNodes.map((n) => (n.id === nodeId ? { ...n, values: newValues } : n)),
+      prevNodes.map((n) =>
+        n.id === nodeId ? { ...n, values: currentValues } : n,
+      ),
     );
   }, []);
 
@@ -450,7 +457,6 @@ export const useNodeSystem = (
         .filter(Boolean) as { id: string; offsetX: number; offsetY: number }[];
 
       setDraggingNodes(newDraggingNodes);
-      // draggingNodesRef.current = newDraggingNodes;
     },
     [screenToWorld],
   );
@@ -495,24 +501,95 @@ export const useNodeSystem = (
     },
     [],
   );
-
   const deleteEdge = useCallback(
     (edgeId: string) => {
       const edge = edgesRef.current.find((e) => e.id === edgeId);
+      if (!edge) return;
 
-      const node = nodesRef.current.find((n) => n.id === edge?.toNodeId);
-      const isParentList = nodeDefinitions
-        .find((nd) => nd.type === node?.type)
-        ?.inputs.find((i) => i.id === edge?.toSlotId)?.isList;
+      const node = nodesRef.current.find((n) => n.id === edge.toNodeId);
+      const nodeDef = nodeDefinitions.find((nd) => nd.type === node?.type);
+      const inputDef = nodeDef?.inputs.find((i) => i.id === edge.toSlotId);
+      const isParentList = inputDef?.isList;
 
-      if (edge && edge.toSlotId >= 100) {
-        removeListSlot(edge?.toNodeId, edge?.toSlotId);
-      } else if (edge && isParentList) {
-        removeListSlot(edge?.toNodeId, 100);
+      setEdges((prevEdges) => prevEdges.filter((e) => e.id !== edgeId));
+
+      if (edge.toSlotId >= 100) {
+        removeListSlot(edge.toNodeId, edge.toSlotId);
+      } else if (isParentList) {
+        const currentValues = { ...node?.values };
+
+        const listEdges = edgesRef.current
+          .filter((e) => e.toNodeId === edge.toNodeId && e.toSlotId >= 100)
+          .sort((a, b) => a.toSlotId - b.toSlotId);
+
+        if (listEdges.length > 0) {
+          const firstListEdge = listEdges[0];
+
+          setEdges((prevEdges) =>
+            prevEdges.map((e) => {
+              if (e.id === firstListEdge.id) {
+                return { ...e, toSlotId: edge.toSlotId };
+              }
+              return e;
+            }),
+          );
+
+          const remainingListEntries = Object.entries(currentValues)
+            .filter(([key]) => {
+              const keyNum = parseInt(key);
+              return keyNum >= 100 && keyNum !== firstListEdge.toSlotId;
+            })
+            .sort(([a], [b]) => parseInt(a) - parseInt(b));
+
+          Object.keys(currentValues).forEach((key) => {
+            if (parseInt(key) >= 100) {
+              delete currentValues[parseInt(key)];
+            }
+          });
+
+          const numRemaining = Math.max(0, remainingListEntries.length - 1);
+
+          for (let i = 0; i < numRemaining; i++) {
+            const [, val] = remainingListEntries[i];
+            currentValues[100 + i] = val;
+          }
+          currentValues[100 + numRemaining] = false;
+
+          setEdges((prevEdges) =>
+            prevEdges.map((e) => {
+              if (
+                e.toNodeId === edge.toNodeId &&
+                e.toSlotId > firstListEdge.toSlotId &&
+                e.id !== firstListEdge.id
+              ) {
+                return { ...e, toSlotId: e.toSlotId - 1 };
+              }
+              return e;
+            }),
+          );
+
+          setNodes((prevNodes) =>
+            prevNodes.map((n) =>
+              n.id === edge.toNodeId ? { ...n, values: currentValues } : n,
+            ),
+          );
+        } else {
+          const newValues = { ...currentValues };
+
+          Object.keys(newValues).forEach((key) => {
+            const keyNum = parseInt(key);
+            if (keyNum >= 100) {
+              delete newValues[keyNum];
+            }
+          });
+
+          setNodes((prevNodes) =>
+            prevNodes.map((n) =>
+              n.id === edge.toNodeId ? { ...n, values: newValues } : n,
+            ),
+          );
+        }
       }
-      setEdges((prevEdges) => {
-        return prevEdges.filter((edge) => edge.id !== edgeId);
-      });
     },
     [removeListSlot],
   );

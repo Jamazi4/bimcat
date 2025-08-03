@@ -156,16 +156,17 @@ export const useNodeNavigation = (
         toNodeId,
         toSlotId,
       };
-
       const isListSlot = toSlotId >= 100;
-
       const toNode = nodesRef.current.find((n) => n.id === toNodeId);
       const nodeDef = nodeDefinitions.find((nd) => nd.type === toNode?.type);
-
       const inputDef = nodeDef?.inputs.find((i) => i.id === toSlotId);
       const isParentList = inputDef?.isList;
 
+      let wasTargetSlotOccupied = false;
       setEdges((prevEdges) => {
+        wasTargetSlotOccupied = prevEdges.some(
+          (edge) => edge.toNodeId === toNodeId && edge.toSlotId === toSlotId,
+        );
         const newEdges = prevEdges.filter(
           (edge) => !(edge.toNodeId === toNodeId && edge.toSlotId === toSlotId),
         );
@@ -176,28 +177,45 @@ export const useNodeNavigation = (
         setNodes((prevNodes) =>
           prevNodes.map((node) => {
             if (node.id !== toNodeId) return node;
+            const currentValues = { ...node.values };
 
-            const currentListSlots = Object.keys(node.values ?? {})
-              .map(Number)
-              .filter((k) => k >= 100)
-              .sort((a, b) => a - b);
-
-            const maxSlot =
-              currentListSlots.length > 0 ? Math.max(...currentListSlots) : 99;
-
-            const nextSlotId = maxSlot + 1;
-
-            if (!(nextSlotId in (node.values ?? {}))) {
-              return {
-                ...node,
-                values: {
-                  ...node.values,
-                  [nextSlotId]: null,
-                },
-              };
+            if (
+              (isListSlot && !wasTargetSlotOccupied) ||
+              (isParentList && !wasTargetSlotOccupied)
+            ) {
+              if (isListSlot) {
+                const currentListSlots = Object.keys(currentValues)
+                  .map(Number)
+                  .filter((k) => k >= 100)
+                  .sort((a, b) => a - b);
+                const maxSlot =
+                  currentListSlots.length > 0
+                    ? Math.max(...currentListSlots)
+                    : 99;
+                const nextSlotId = maxSlot + 1;
+                currentValues[nextSlotId] = false;
+              } else if (isParentList) {
+                const hasListSlots = Object.keys(currentValues).some(
+                  (k) => parseInt(k) >= 100,
+                );
+                if (!hasListSlots) {
+                  const currentListSlots = Object.keys(currentValues)
+                    .map(Number)
+                    .filter((k) => k >= 100)
+                    .sort((a, b) => a - b);
+                  const maxSlot =
+                    currentListSlots.length > 0
+                      ? Math.max(...currentListSlots)
+                      : 99;
+                  const nextSlotId = maxSlot + 1;
+                  currentValues[nextSlotId] = false;
+                }
+              }
             }
-
-            return node;
+            return {
+              ...node,
+              values: currentValues,
+            };
           }),
         );
       }
