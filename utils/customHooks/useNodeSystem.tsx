@@ -396,7 +396,10 @@ export const useNodeSystem = (
     const newNodes = copiedNodesRef.current.map((n) => {
       const newId = createNodeId();
       idMap[n.id] = newId;
-      const newValues = { ...n.values };
+      let newValues = {};
+      if (n.type !== "group") {
+        newValues = { ...n.values };
+      }
 
       return {
         ...n,
