@@ -28,13 +28,11 @@ edge cases:
 
 1. You can create private or public component and toggle the private attribute
    at any time
-
    - If you change the component to private - it will be removed from your
      public library if it's in any
 
 2. you can create private or public library and toggle the private attribute
    at any time
-
    - If you change public library to private, all users that subscribed to the
      library will still be allowed to see it
 
@@ -43,7 +41,6 @@ edge cases:
 
 3. You can add both public and private components to your libraries, but only
    the ones you authored
-
    - If library is public, and you are adding your own private component -
      component will toggle to public(done).
 
@@ -51,7 +48,6 @@ edge cases:
      copy this component and provide your own name, then add normally
 
 4. You can share your private library by generating a private share link
-
    - You can disable the link at any time, and manage all subscribed users list
 
    - If the Library is switched to public when it already has link generated,
@@ -62,7 +58,6 @@ edge cases:
      them
 
 5. You can create private or public Composite Library
-
    - After creation of the composite library you can not change it's privacy,
      as you don't necessarily own the content.
 
@@ -135,13 +130,11 @@ plan for all that:
 if user clicks on shared link and:
 
 - a. is not logged in:
-
   - but has an account - logs in, I proceed
   - doesn't have an account - I need to create dbUser and then add them
     (problem here? it might take time before account gets created)
 
 - b. is logged in:
-
   - I proceed normally
 
 - user clicks share
@@ -532,6 +525,11 @@ additionally to the points above:
 
 - if library is inside composite libraries - list those libraries in library view.
 - po-pup component 3d preview.
+
+### --04-08-2025--
+
+- more over - browser needs to keep track of page I'm currently on and go back
+  to the page I was when entering an component
 
 ### Current task list
 

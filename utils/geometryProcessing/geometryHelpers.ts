@@ -78,10 +78,12 @@ export function isClosedLoop(points: THREE.Vector3[]): boolean {
   if (points.length < 3) return false;
   return points[0].distanceToSquared(points[points.length - 1]) < 1e-6;
 }
-export function closeLinestrings(linestrings: THREE.Vector3[][], isBaseClosed: boolean[]) {
+export function closeLinestrings(
+  linestrings: THREE.Vector3[][],
+  isBaseClosed: boolean[],
+) {
   for (let i = 0; i < linestrings.length; i++) {
-    const base = linestrings[i]
-    if (isBaseClosed[i] && !isClosedLoop(base))
-      base.push(base[0].clone())
+    const base = linestrings[i];
+    if (isBaseClosed[i] && !isClosedLoop(base)) base.push(base[0].clone());
   }
 }

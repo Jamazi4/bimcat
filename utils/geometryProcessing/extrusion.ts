@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import earcut from "earcut";
 import { Halfedge, HalfedgeDS } from "three-mesh-halfedge";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 import { isClosedLoop } from "./geometryHelpers";
@@ -13,7 +14,6 @@ export function extractOrderedBoundaryLoop(
   const loops: THREE.Vector3[][] = [];
 
   for (const he of struct.halfedges) {
-
     if (!he.face && !visited.has(he)) {
       const loop: THREE.Vector3[] = [];
       const start = he;
@@ -56,7 +56,6 @@ export function createSideGeometry(
     const base = [...baseLinestrings[i]];
     if (base.length < 2) continue;
 
-
     if (isBaseClosed[i] && !isClosedLoop(base)) {
       base.push(base[0].clone());
     }
@@ -87,7 +86,10 @@ export function createSideGeometry(
     }
 
     const geom = new THREE.BufferGeometry();
-    geom.setAttribute('position', new THREE.Float32BufferAttribute(sideVertices, 3));
+    geom.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(sideVertices, 3),
+    );
     geom.setIndex(sideIndices);
     sideGeometries.push(geom);
   }
@@ -98,8 +100,40 @@ export function createSideGeometry(
   final.computeVertexNormals();
   final = BufferGeometryUtils.toCreasedNormals(final, 1e-6);
   final = BufferGeometryUtils.mergeVertices(final);
-  final.deleteAttribute('uv')
+  final.deleteAttribute("uv");
 
   return final;
 }
 
+export function triangulateLinestrings(
+  linestrings: THREE.Vector3[][],
+): THREE.BufferGeometry | null {
+  const geometries: THREE.BufferGeometry[] = [];
+
+  for (const linestring of linestrings) {
+    if (linestring.length < 3) continue;
+
+    const vertices: number[] = [];
+    for (const v of linestring) {
+      vertices.push(v.x, v.y, v.z);
+    }
+
+    const indices = earcut(vertices, [], 3);
+
+    if (indices.length === 0) continue;
+
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(vertices, 3),
+    );
+    geom.setIndex(indices);
+    geometries.push(geom);
+  }
+
+  if (geometries.length === 0) return null;
+
+  const merged = BufferGeometryUtils.mergeGeometries(geometries, false);
+  merged.computeVertexNormals();
+  return merged;
+}

@@ -11,6 +11,7 @@ import {
 import {
   createSideGeometry,
   extractOrderedBoundaryLoop,
+  triangulateLinestrings,
 } from "../geometryProcessing/extrusion";
 
 export function extrudeNode(nodeDefId: number): nodeDefinition {
@@ -58,8 +59,7 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
       },
     ],
     function: (node, evalFunction) => {
-
-      const activeInputs = getActiveInputIds(node.values, [1, 2])
+      const activeInputs = getActiveInputIds(node.values, [1, 2]);
       const [initGeom] = getInputValues(
         node.inputs,
         evalFunction,
@@ -70,7 +70,7 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
 
       let baseGeom = new THREE.BufferGeometry();
       let baseLinestrings: THREE.Vector3[][] = [];
-      const meshExtrusionOutput = new THREE.BufferGeometry();
+      let meshExtrusionOutput = new THREE.BufferGeometry();
       const linestringExtrusionOutput: THREE.Vector3[][] = [];
       let finalOutput = new THREE.BufferGeometry();
       let isBaseClosed: boolean[] = [];
@@ -81,26 +81,26 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           isInputMesh = false;
 
           baseLinestrings = initGeom.value;
-          isBaseClosed = baseLinestrings.map((l) => isClosedLoop(l))
+          isBaseClosed = baseLinestrings.map((l) => isClosedLoop(l));
 
           baseGeom.setFromPoints(baseLinestrings.flat());
           if (baseLinestrings.length === 2) {
             baseGeom.setIndex([0, 1]);
           } else {
-            const positions: number[] = []
-            const indices: number[] = []
+            const positions: number[] = [];
+            const indices: number[] = [];
             let vertexOffset = 0;
 
             for (const polygon of baseLinestrings) {
-              const flat3D: number[] = []
+              const flat3D: number[] = [];
               for (const v of polygon) {
                 flat3D.push(v.x, v.y, v.z);
-                positions.push(v.x, v.y, v.z)
+                positions.push(v.x, v.y, v.z);
               }
 
-              const tris = earcut(flat3D, [], 3)
+              const tris = earcut(flat3D, [], 3);
               for (const idx of tris) {
-                indices.push(idx + vertexOffset)
+                indices.push(idx + vertexOffset);
               }
               vertexOffset += polygon.length;
             }
@@ -110,14 +110,14 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           baseGeom = initGeom.value.clone();
           baseLinestrings = extractOrderedBoundaryLoop(baseGeom);
 
-          isBaseClosed = Array(baseLinestrings.length).fill(true)
+          isBaseClosed = Array(baseLinestrings.length).fill(true);
           //mesh boundaries always closed
-          closeLinestrings(baseLinestrings, isBaseClosed)
+          closeLinestrings(baseLinestrings, isBaseClosed);
         }
 
         baseGeom = BufferGeometryUtils.mergeVertices(baseGeom);
         baseGeom.computeVertexNormals();
-        baseGeom.deleteAttribute('uv')
+        baseGeom.deleteAttribute("uv");
         const transformMatrix = composeRelativeTransformMatrix(
           baseGeom,
           transform.value,
@@ -128,53 +128,58 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
 
         if (!isInputMesh) {
           baseLinestrings.forEach((linestring) => {
-            const temp: THREE.Vector3[] = []
+            const temp: THREE.Vector3[] = [];
             linestring.forEach((v) => {
-              const newVector = v.clone().applyMatrix4(transformMatrix)
-              temp.push(newVector)
-            })
-            linestringExtrusionOutput.push(temp)
-          })
-
+              const newVector = v.clone().applyMatrix4(transformMatrix);
+              temp.push(newVector);
+            });
+            linestringExtrusionOutput.push(temp);
+          });
         } else {
           linestringExtrusionOutput.push(
             ...extractOrderedBoundaryLoop(tempMesh),
           );
         }
 
-        closeLinestrings(linestringExtrusionOutput, isBaseClosed)
+        closeLinestrings(linestringExtrusionOutput, isBaseClosed);
 
         for (let i = 0; i < baseLinestrings.length; i++) {
-          const base = [...baseLinestrings[i]]
-          if (base.length < 2) continue
+          const base = [...baseLinestrings[i]];
+          if (base.length < 2) continue;
 
           if (isBaseClosed[i] && isClosedLoop(base)) {
-            base.push(base[0].clone())
+            base.push(base[0].clone());
           }
         }
 
-        const indices = earcut(tempMesh.attributes.position.array, [], 3);
-        meshExtrusionOutput.copy(tempMesh);
-        meshExtrusionOutput.setIndex(indices);
-        meshExtrusionOutput.computeVertexNormals();
+        meshExtrusionOutput = triangulateLinestrings(
+          linestringExtrusionOutput,
+        )!;
 
+        if (!meshExtrusionOutput) throw new Error("Error creating caps");
 
         const sideGeom = createSideGeometry(
           baseLinestrings,
           transformMatrix,
           isBaseClosed,
         );
-        if (!sideGeom) throw new Error("Could not create side geometries")
+        if (!sideGeom) throw new Error("Could not create side geometries");
 
         if (isInputMesh) {
           meshExtrusionOutput.copy(tempMesh);
-          finalOutput = BufferGeometryUtils.mergeGeometries([sideGeom, baseGeom])
+          finalOutput = BufferGeometryUtils.mergeGeometries([
+            sideGeom,
+            baseGeom,
+          ]);
         } else {
-          finalOutput = sideGeom
+          finalOutput = sideGeom;
         }
 
         if (capped) {
-          finalOutput = BufferGeometryUtils.mergeGeometries([finalOutput, meshExtrusionOutput])
+          finalOutput = BufferGeometryUtils.mergeGeometries([
+            finalOutput,
+            meshExtrusionOutput,
+          ]);
         }
 
         return {
