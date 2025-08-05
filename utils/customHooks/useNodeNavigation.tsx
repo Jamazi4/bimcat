@@ -21,6 +21,8 @@ import {
   getGroupInputIds,
 } from "../nodeDefinitions/nodeUtilFunctions";
 import { createEdgeId } from "../utilFunctions";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { switchNodeNavigation } from "@/lib/features/visualiser/visualiserSlice";
 
 export const useNodeNavigation = (
   setNodes: Dispatch<SetStateAction<GeomNodeBackType[]>>,
@@ -111,7 +113,6 @@ export const useNodeNavigation = (
   curClickedNodeId: RefObject<string>,
   setIsPanning: Dispatch<SetStateAction<boolean>>,
   nodeDivsRef: RefObject<Record<string, HTMLDivElement>>,
-  nodeNavigation: boolean,
   setPanStart: Dispatch<
     SetStateAction<{
       x: number;
@@ -141,6 +142,10 @@ export const useNodeNavigation = (
   } | null,
 ) => {
   const shiftPressed = useRef(false);
+  const nodeNavigation = useAppSelector(
+    (state) => state.visualiserSlice.nodeNavigation,
+  );
+  const dispatch = useAppDispatch();
 
   const addEdge = useCallback(
     (
@@ -278,7 +283,7 @@ export const useNodeNavigation = (
 
         if (newActiveInputId === undefined) {
           cancelConnecting();
-          throw new Error("Could not establish new active input id");
+          return;
         }
 
         switchGroupInputActive(toNode!.id, groupInputIds, newActiveInputId);
@@ -362,6 +367,16 @@ export const useNodeNavigation = (
       setNodeSlots,
       setNodes,
     ],
+  );
+
+  const handleNavigationModeSwitch = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.altKey) {
+        e.preventDefault();
+        dispatch(switchNodeNavigation({ nodeNavigation: !nodeNavigation }));
+      }
+    },
+    [dispatch, nodeNavigation],
   );
 
   const handleKeyUp = (e: KeyboardEvent) => {
@@ -733,6 +748,8 @@ export const useNodeNavigation = (
         !!selectionRect) &&
       nodeNavigation;
 
+    document.addEventListener("keydown", handleNavigationModeSwitch);
+
     if (isInteracting) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
@@ -756,6 +773,7 @@ export const useNodeNavigation = (
     }
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("keydown", handleNavigationModeSwitch);
       document.removeEventListener("mouseup", handleMouseUp);
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
@@ -772,6 +790,7 @@ export const useNodeNavigation = (
     connectingFromNode,
     isPanning,
     selectionRect,
+    handleNavigationModeSwitch,
   ]);
 
   return { handleWheel, handleEditorMouseDown };

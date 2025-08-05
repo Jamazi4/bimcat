@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import componentBrowserReducer from "./features/browser/componentBrowserSlice";
 import libraryBrowserReducer from "./features/libraries/libraryBrowserSlice";
 import userStateReducer from "./features/user/userSlice";
+import visualiserStateReducer from "./features/visualiser/visualiserSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -9,6 +10,7 @@ export const makeStore = () => {
       componentBrowser: componentBrowserReducer,
       libraryBrowser: libraryBrowserReducer,
       userSlice: userStateReducer,
+      visualiserSlice: visualiserStateReducer,
     },
   });
 };

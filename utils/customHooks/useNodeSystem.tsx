@@ -20,10 +20,7 @@ import {
 } from "../nodeTypes";
 import { useNodeNavigation } from "./useNodeNavigation";
 
-export const useNodeSystem = (
-  nodeNavigation: boolean,
-  meshGroup: THREE.Group,
-) => {
+export const useNodeSystem = (meshGroup: THREE.Group) => {
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
   const nodesRef = useRef(nodes);
   nodesRef.current = nodes;
@@ -396,9 +393,13 @@ export const useNodeSystem = (
     const newNodes = copiedNodesRef.current.map((n) => {
       const newId = createNodeId();
       idMap[n.id] = newId;
-      let newValues = {};
-      if (n.type !== "group") {
-        newValues = { ...n.values };
+      const newValues = { ...n.values };
+      if (n.type === "group" && n.values) {
+        Object.entries(n.values).forEach(([key, _]) => {
+          if (parseInt(key) >= 100) {
+            delete newValues[key];
+          }
+        });
       }
 
       return {
@@ -649,7 +650,6 @@ export const useNodeSystem = (
     curClickedNodeId,
     setIsPanning,
     nodeDivsRef,
-    nodeNavigation,
     setPanStart,
     viewTransformRef,
     draggingNodes,

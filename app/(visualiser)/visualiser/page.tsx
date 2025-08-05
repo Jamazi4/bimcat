@@ -15,15 +15,19 @@ import IFCModel from "@/components/visualiser/IFCModel";
 import NodeEditor from "@/components/visualiser/NodeEditor";
 import { useSearchParams } from "next/navigation";
 import * as THREE from "three";
+import { RootState } from "@/lib/store";
+import { useAppSelector } from "@/lib/hooks";
 
 const Page = () => {
   const [file, setFile] = useState<File | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [displayPsets, setDisplayPsets] = useState<Pset[] | null>(null);
   const [nodeMode, setNodeMode] = useState(false);
-  const [nodeNavigation, setNodeNavigation] = useState(false);
   const [nodeMeshGroup, setNodeMeshGroup] = useState<THREE.Group | null>(null);
 
+  const nodeNavigation = useAppSelector(
+    (state: RootState) => state.visualiserSlice.nodeNavigation,
+  );
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -96,13 +100,7 @@ const Page = () => {
           />
         </GizmoHelper>
       </Canvas>
-      {nodeMode && (
-        <NodeEditor
-          nodeNavigation={nodeNavigation}
-          setNodeNavigation={setNodeNavigation}
-          nodeMeshGroup={nodeMeshGroup!}
-        />
-      )}
+      {nodeMode && <NodeEditor nodeMeshGroup={nodeMeshGroup!} />}
     </div>
   );
 };

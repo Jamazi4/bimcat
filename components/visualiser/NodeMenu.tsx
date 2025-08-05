@@ -1,32 +1,38 @@
-import { Dispatch, SetStateAction } from "react";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import AddNodeMenu from "./AddNodeMenu";
 import { Button } from "../ui/button";
 import { LoaderCircle, Save } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { switchNodeNavigation } from "@/lib/features/visualiser/visualiserSlice";
 
 interface NodeMenuProps {
-  nodeNavigation: boolean;
-  setNodeNavigation: Dispatch<SetStateAction<boolean>>;
   addNode: (nodeDefId: number) => void;
   pendingSave: boolean;
   handleSaveProject: () => Promise<void>;
 }
 
 const NodeMenu = ({
-  nodeNavigation,
-  setNodeNavigation,
   addNode,
   pendingSave,
   handleSaveProject,
 }: NodeMenuProps) => {
+  const dispatch = useAppDispatch();
+  const nodeNavigation = useAppSelector(
+    (state) => state.visualiserSlice.nodeNavigation,
+  );
+
+  const setNodeNavigation = (state: boolean) => {
+    dispatch(switchNodeNavigation({ nodeNavigation: state }));
+  };
+
   return (
     <>
       <div className="fixed flex w-40 space-x-2 top-24 right-4 z-20">
         <Switch
           id="nodeNavigation"
           checked={nodeNavigation}
-          onCheckedChange={() => setNodeNavigation((cur) => !cur)}
+          onCheckedChange={(checked) => setNodeNavigation(checked)}
           className="cursor-pointer pointer-events-auto"
         />
         <Label htmlFor="nodeNavigation">

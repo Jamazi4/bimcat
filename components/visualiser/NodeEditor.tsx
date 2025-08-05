@@ -1,12 +1,5 @@
 "use client";
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNodeSystem } from "@/utils/customHooks/useNodeSystem";
 import { useSearchParams } from "next/navigation";
 import DraggableNode from "./DraggableNode";
@@ -15,21 +8,18 @@ import * as THREE from "three";
 import NodeMenu from "./NodeMenu";
 import SVGRenderer from "./SVGRenderer";
 import { useTheme } from "next-themes";
+import { useAppSelector } from "@/lib/hooks";
 
-const NodeEditor = ({
-  nodeNavigation,
-  setNodeNavigation,
-  nodeMeshGroup,
-}: {
-  nodeNavigation: boolean;
-  setNodeNavigation: Dispatch<SetStateAction<boolean>>;
-  nodeMeshGroup: THREE.Group;
-}) => {
+const NodeEditor = ({ nodeMeshGroup }: { nodeMeshGroup: THREE.Group }) => {
   const { theme, systemTheme } = useTheme();
   const curTheme = useRef(theme === "system" ? systemTheme : theme);
   useEffect(() => {
     curTheme.current = theme === "system" ? systemTheme : theme;
   }, [theme, systemTheme]);
+
+  const nodeNavigation = useAppSelector(
+    (state) => state.visualiserSlice.nodeNavigation,
+  );
 
   const [pendingSave, setPendingSave] = useState(false);
   const [pendingFetch, setPendingFetch] = useState(true);
@@ -59,7 +49,7 @@ const NodeEditor = ({
     selectedNodeIds,
     getViewTransformScale,
     switchGroupInputActive,
-  } = useNodeSystem(nodeNavigation, nodeMeshGroup);
+  } = useNodeSystem(nodeMeshGroup);
 
   const fetchNodesWrapper = useCallback(async () => {
     if (!componentId) return;
@@ -131,8 +121,6 @@ const NodeEditor = ({
         })}
       </div>
       <NodeMenu
-        nodeNavigation={nodeNavigation}
-        setNodeNavigation={setNodeNavigation}
         addNode={addNode}
         pendingSave={pendingSave}
         handleSaveProject={handleSaveProject}
