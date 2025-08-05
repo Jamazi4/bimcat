@@ -16,6 +16,7 @@ import {
   inputWithSlotValueType,
   NodeEdgeType,
   NodeSlot,
+  SlotValues,
 } from "@/utils/nodeTypes";
 import DraggableNodeInputGroup from "./DraggableNodeInputGroup";
 import DraggableNodeOutputSlot from "./DraggableNodeOutputSlot";
@@ -113,6 +114,66 @@ const DraggableNode = memo(function DraggableNode({
     {} as Record<number, typeof nodeDef.inputs>,
   );
 
+  const inputs = nodeDef.inputs;
+  const listSlots: JSX.Element[] = [];
+  let activeGroupIndex: number;
+  {
+    //this part is for figuring out what will be the type of list inputs if
+    //parent list input is group
+    activeGroupIndex = inputs.filter(
+      (i) => i.value === true && i.type === "group",
+    )[0]?.id;
+    const curInputIds = inputs.map((input) => input.id);
+    if (node.values) {
+      Object.entries(node.values).forEach(([inputId, val]) => {
+        const inputIdParsed = parseInt(inputId);
+        if (
+          val === true &&
+          curInputIds.includes(inputIdParsed) &&
+          nodeDef.inputs[inputIdParsed].type === "group"
+        ) {
+          activeGroupIndex = parseInt(inputId);
+        }
+      });
+    }
+
+    //proceed with generating list inputs
+    if (node.values) {
+      const listInput = nodeDef.inputs.find((i) => i.isList === true);
+      let curInputType: SlotValues;
+      if (listInput && listInput.type === "group") {
+        curInputType = (
+          nodeDef.inputs[activeGroupIndex] as inputWithSlotValueType
+        ).slotValueType;
+      } else if (listInput) {
+        curInputType = (listInput as inputWithSlotValueType).slotValueType;
+      }
+      Object.entries(node.values).forEach(([vInputId, _]) => {
+        const vInputIdParsed = parseInt(vInputId);
+        if (vInputIdParsed >= 100) {
+          const partialSlotData: Partial<NodeSlot> = {
+            nodeId: node.id,
+            slotId: vInputIdParsed,
+            slotIO: "input",
+          };
+          listSlots.push(
+            <DraggableNodeInputSlot
+              nodeValues={node.values}
+              optional={true}
+              slotValueType={curInputType}
+              getSlotRelativePosition={getSlotRelativePosition}
+              nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
+              finishConnecting={finishConnecting}
+              partialSlotData={partialSlotData}
+              registerNodeSlot={registerNodeSlot}
+              key={vInputIdParsed}
+              name={curInputType}
+            />,
+          );
+        }
+      });
+    }
+  }
   return (
     <div
       ref={nodeRef}
@@ -135,55 +196,10 @@ const DraggableNode = memo(function DraggableNode({
       <div className="grid grid-cols-[2fr_1fr] space-x-10 items-center h-full my-auto py-4">
         <div className="space-y-6">
           {Object.entries(groupSlots).map(([groupId, inputs]) => {
-            let activeIndex: number = inputs.filter((i) => i.value === true)[0]
-              .id;
-            const curInputIds = inputs.map((input) => input.id);
-            if (node.values) {
-              Object.entries(node.values).forEach(([inputId, val]) => {
-                const inputIdParsed = parseInt(inputId);
-                if (val === true && curInputIds.includes(inputIdParsed)) {
-                  activeIndex = parseInt(inputId);
-                }
-              });
-            }
-
-            const listSlots: JSX.Element[] = [];
-            if (node.values) {
-              Object.entries(node.values).forEach(([vInputId, _]) => {
-                const vInputIdParsed = parseInt(vInputId);
-                if (vInputIdParsed >= 100) {
-                  const curInputType = (
-                    inputs.find(
-                      (i) => i.id === activeIndex,
-                    ) as inputWithSlotValueType
-                  ).slotValueType;
-                  const partialSlotData: Partial<NodeSlot> = {
-                    nodeId: node.id,
-                    slotId: vInputIdParsed,
-                    slotIO: "input",
-                  };
-                  listSlots.push(
-                    <DraggableNodeInputSlot
-                      nodeValues={node.values}
-                      optional={true}
-                      slotValueType={curInputType}
-                      getSlotRelativePosition={getSlotRelativePosition}
-                      nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
-                      finishConnecting={finishConnecting}
-                      partialSlotData={partialSlotData}
-                      registerNodeSlot={registerNodeSlot}
-                      key={vInputIdParsed}
-                      name={curInputType}
-                    />,
-                  );
-                }
-              });
-            }
-
             return (
               <div key={`${groupId}${node.id}`}>
                 <DraggableNodeInputGroup
-                  activeIndex={activeIndex}
+                  activeIndex={activeGroupIndex}
                   switchGroupInputActive={switchGroupInputActive}
                   nodeId={node.id}
                   groupIndex={parseInt(groupId)}
@@ -194,7 +210,6 @@ const DraggableNode = memo(function DraggableNode({
                   nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
                   finishConnecting={finishConnecting}
                 />
-                {listSlots}
               </div>
             );
           })}
@@ -273,6 +288,7 @@ const DraggableNode = memo(function DraggableNode({
               );
             }
           })}
+          {listSlots}
         </div>
 
         {/* outputs */}

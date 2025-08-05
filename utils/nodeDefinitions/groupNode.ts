@@ -1,6 +1,6 @@
-import { EvalValue, nodeDefinition } from "../nodeTypes";
+import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
-import { getInputValues } from "./nodeUtilFunctions";
+import { getInputValues, getListInputValues } from "./nodeUtilFunctions";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 export function groupNode(nodeDefId: number): nodeDefinition {
@@ -35,15 +35,12 @@ export function groupNode(nodeDefId: number): nodeDefinition {
     function: (node, evalFunction) => {
       const initLinestring = getInputValues(node.inputs, evalFunction, [0])[0];
       const initMesh = getInputValues(node.inputs, evalFunction, [1])[0];
-      const childGeoms: EvalValue[] = [];
 
-      Object.entries(node.values).forEach(([key, _]) => {
-        const id = parseInt(key);
-        if (id >= 100) {
-          const data = getInputValues(node.inputs, evalFunction, [id])[0];
-          childGeoms.push(data);
-        }
-      });
+      const childGeoms = getListInputValues(
+        node.values,
+        node.inputs,
+        evalFunction,
+      );
 
       let finalMesh: THREE.BufferGeometry = new THREE.BufferGeometry();
       if (initMesh && initMesh.type === "mesh") {

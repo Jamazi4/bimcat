@@ -1,6 +1,7 @@
 import {
   ASTNode,
   ASTNodeInput,
+  EvalValue,
   nodeDefinition,
   NodeEvalResult,
   NodeInputType,
@@ -35,6 +36,22 @@ export const getInputValues = (
     })
     .filter(Boolean);
 
+  return values;
+};
+
+export const getListInputValues = (
+  nodeValues: NodeValues,
+  inputs: ASTNodeInput[],
+  evalFunction: (node: ASTNode) => NodeEvalResult,
+) => {
+  const values: EvalValue[] = [];
+  Object.entries(nodeValues).forEach(([key, _]) => {
+    const id = parseInt(key);
+    if (id >= 100) {
+      const data = getInputValues(inputs, evalFunction, [id])[0];
+      values.push(data);
+    }
+  });
   return values;
 };
 
