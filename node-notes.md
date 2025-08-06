@@ -354,9 +354,21 @@ so group node is done and it works automatically.
 [X] and the edges are deleted from non-list inputs on switchGroupInputActive
 [X] copied group node needs to clear it's values
 
+### --05-08-2025--
+
+now math nodes!
+
+make sure the component copy also copies node project if there is any
+
+and fill polygon node (triangulate)
+
+also the nodeNavigation flag is now done using redux - move more state to redux
+
+### --06-08-2025--
+
 current plan:
 
-- finish group node
+- finish group node - done
 - apply list inputs to linestring node
 - math nodes
 - ui/pset nodes and component view integration
@@ -371,14 +383,13 @@ BUGS:
 - enabled node menu buttons when not in node navigation
 - ctrl-c not working in input fields
 - delete component doesn't delete node project?
+- copy component doesn't copy node project
 - earcut doesn't work for completely vertical polygons
 
 Runtime:
 
 - cache node outputs
 - pick reference from 3D
-- group node
--
 
 UI:
 
@@ -389,7 +400,6 @@ UI:
 - color picker in output node
 - addNode menu to have search - and display under right click
 - ctrl-z and ctrl-shift-r
-- ctrl-r or something to switch between node and 3d navigation
 
   additionally some tools that might need adding
 
@@ -399,6 +409,8 @@ UI:
 
 done:
 
+- group node
+- ctrl-r or something to switch between node and 3d navigation
 - capped/uncapped shapes
 - remove edge if another is connected to the same slot
 - multiple outputs

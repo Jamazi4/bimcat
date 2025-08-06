@@ -49,6 +49,7 @@ const NodeEditor = ({ nodeMeshGroup }: { nodeMeshGroup: THREE.Group }) => {
     selectedNodeIds,
     getViewTransformScale,
     switchGroupInputActive,
+    switchSelectInputValue,
   } = useNodeSystem(nodeMeshGroup);
 
   const fetchNodesWrapper = useCallback(async () => {
@@ -102,6 +103,7 @@ const NodeEditor = ({ nodeMeshGroup }: { nodeMeshGroup: THREE.Group }) => {
           const selected = selectedNodeIds.includes(node.id);
           return (
             <DraggableNode
+              switchSelectInputValue={switchSelectInputValue}
               switchGroupInputActive={switchGroupInputActive}
               edges={edges}
               curTheme={curTheme.current!}

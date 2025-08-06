@@ -24,8 +24,14 @@ import DraggableNodeInputSlot from "./DraggableNodeInputSlot";
 import DraggableNodeInputBoolean from "./DraggableNodeInputBoolean";
 import DraggableNodeInputNumber from "./DraggableNodeInputNumber";
 import DraggableNodeComboSlot from "./DraggableNodeComboSlot";
+import DraggableNodeSelectInput from "./DraggableNodeSelectInput";
 
 interface DraggableNodeProps {
+  switchSelectInputValue: (
+    nodeId: string,
+    inputId: number,
+    activeValueId: number,
+  ) => void;
   switchGroupInputActive: (
     nodeId: string,
     groupIndices: number[],
@@ -55,6 +61,7 @@ interface DraggableNodeProps {
 }
 
 const DraggableNode = memo(function DraggableNode({
+  switchSelectInputValue,
   switchGroupInputActive,
   edges,
   selected,
@@ -174,6 +181,24 @@ const DraggableNode = memo(function DraggableNode({
       });
     }
   }
+
+  const selectInputs: JSX.Element[] = [];
+
+  nodeDef.inputs.forEach((i) => {
+    if (i.type === "select") {
+      const activeIndex = node.values?.[i.id] as string;
+      selectInputs.push(
+        <DraggableNodeSelectInput
+          switchSelectInputValue={switchSelectInputValue}
+          activeIndex={parseInt(activeIndex)}
+          inputValues={i.options}
+          nodeId={node.id}
+          inputId={i.id}
+        />,
+      );
+    }
+  });
+
   return (
     <div
       ref={nodeRef}
@@ -191,6 +216,15 @@ const DraggableNode = memo(function DraggableNode({
       <div className="flex justify-center text-secondary border-b-1 rounded-tl-md rounded-tr-md font-bold select-none mx-2 py-2 text-3xl">
         {node.type.toUpperCase()}
       </div>
+
+      {/* selects */}
+      {selectInputs.length > 0 && (
+        <div className="relative flex flex-col items-center my-4 py-4">
+          {selectInputs.map((si, i) => {
+            return <div key={`${i}-${node.id}-select`}>{si}</div>;
+          })}
+        </div>
+      )}
 
       {/* inputs  */}
       <div className="grid grid-cols-[2fr_1fr] space-x-10 items-center h-full my-auto py-4">
@@ -288,6 +322,7 @@ const DraggableNode = memo(function DraggableNode({
               );
             }
           })}
+
           {listSlots}
         </div>
 

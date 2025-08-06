@@ -177,6 +177,21 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     [meshGroup.children],
   );
 
+  const switchSelectInputValue = useCallback(
+    (nodeId: string, inputId: number, activeValueId: number) => {
+      const node = nodesRef.current.find((n) => n.id === nodeId);
+      if (!node || !node.values) return;
+      setNodes((prevNodes) =>
+        prevNodes.map((n) =>
+          n.id === nodeId
+            ? { ...n, values: { ...n.values, [inputId]: activeValueId } }
+            : n,
+        ),
+      );
+    },
+    [],
+  );
+
   const switchGroupInputActive = useCallback(
     (nodeId: string, groupIndices: number[], activeIndex: number) => {
       const node = nodesRef.current.find((n) => n.id === nodeId);
@@ -684,6 +699,7 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     getViewTransformScale,
     removeEdgeToSlot,
     removeListSlot,
+    switchSelectInputValue,
   };
 };
 

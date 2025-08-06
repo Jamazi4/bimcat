@@ -140,7 +140,7 @@
     --primary-foreground: hsl(0 0% 20%);
     --secondary: hsl(223, 14%, 90%);
     --secondary-foreground: hsl(240, 2%, 46%);
-    --accent: hsl(220, 5%, 5%);
+    --accent: hsl(220, 5%, 8%);
     --accent-foreground: hsl(0 0% 82.75%);
     --destructive: hsl(1.58 47.5% 52.94%);
     --constructive: hsl(135, 66%, 36%);

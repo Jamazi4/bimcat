@@ -83,7 +83,12 @@ export type SlotValues =
   | "geometry";
 
 export type NodeInputType = (
-  | { type: "group"; slotValueType: SlotValues; groupIndex: number }
+  | { type: "select"; value: number; options: string[] }
+  | {
+      type: "group";
+      slotValueType: SlotValues;
+      groupIndex: number;
+    }
   | { type: "slot"; slotValueType: SlotValues }
   | {
       type: "combo";
@@ -122,6 +127,7 @@ export const nodeCategories = [
   "generator",
   "modifier",
   "variable",
+  "math",
 ] as const;
 export type nodeCategory = (typeof nodeCategories)[number];
 
