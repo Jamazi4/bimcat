@@ -55,7 +55,26 @@ const DraggableNodeComboSlot = ({
   const ref = useRef<SVGSVGElement>(null);
 
   const [curVal, setCurVal] = useState(String(value ?? ""));
+  const [savedLocalValue, setSavedLocalValue] = useState(String(value ?? ""));
   const [isValidValue, setIsValidValue] = useState(true);
+
+  useEffect(() => {
+    if (!connected) {
+      setCurVal(String(value ?? ""));
+      setSavedLocalValue((prev) => (prev === "" ? String(value ?? "") : prev));
+    }
+  }, [value, connected]);
+
+  useEffect(() => {
+    if (connected) {
+      setSavedLocalValue(curVal);
+    } else {
+      setCurVal(savedLocalValue ?? "");
+      const num = Number(savedLocalValue);
+      if (!isNaN(num)) changeThisValue(num);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connected]); // we intentionally only run when `connected` flips
 
   useEffect(() => {
     if (connected) {
