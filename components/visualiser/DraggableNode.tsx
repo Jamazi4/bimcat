@@ -304,9 +304,22 @@ const DraggableNode = memo(function DraggableNode({
                 slotIO: "input",
               };
               const connected = connectedSlotIds.includes(input.id);
+              let connectedNodeId: string = "";
+              let connectedOutputSlotId: number = -1;
+
+              edges
+                .filter((e) => e.toNodeId === node.id)
+                .forEach((e) => {
+                  if (e.toSlotId === input.id) {
+                    connectedNodeId = e.fromNodeId;
+                    connectedOutputSlotId = e.fromSlotId;
+                  }
+                });
 
               return (
                 <DraggableNodeComboSlot
+                  connectedNodeId={connectedNodeId}
+                  connectedOutputSlodId={connectedOutputSlotId}
                   connected={connected}
                   value={node.values[input.id] as number}
                   changeThisValue={changeThisValue}

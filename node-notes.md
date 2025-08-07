@@ -358,13 +358,28 @@ so group node is done and it works automatically.
 
 now math nodes!
 
-make sure the component copy also copies node project if there is any
-
-and fill polygon node (triangulate)
-
 also the nodeNavigation flag is now done using redux - move more state to redux
 
+### --07-08-2025--
+
+added scalar math node with new select input (no slot)
+Now work on displaying
+
 ### --06-08-2025--
+
+work on displaying connected value in combo input
+displaying now works: here's how.
+
+In the evaluateAST function I store the output values for all number outputs
+in redux as nodeId: {outputId: value}
+
+then in draggableNode under comboInput map I pass in connecting node and
+connecting slot (i get that from filtering edges)
+
+And if the slot is connected I switch the value to the one from redux
+
+tomorrow think of optimizing this and:
+also add slider node
 
 current plan:
 
@@ -390,6 +405,7 @@ Runtime:
 
 - cache node outputs
 - pick reference from 3D
+- fill polygon node (triangulate)
 
 UI:
 

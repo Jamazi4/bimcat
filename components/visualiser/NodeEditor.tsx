@@ -62,17 +62,19 @@ const NodeEditor = ({ nodeMeshGroup }: { nodeMeshGroup: THREE.Group }) => {
     fetchNodesWrapper();
   }, [fetchNodes, fetchNodesWrapper]);
 
-  if (!componentId) return; //TODO: handle error when no componentId
+  if (!componentId) throw new Error("Could not find componentId");
+
+  if (!nodes) throw new Error("Could not find node project");
+
+  if (!curTheme.current) throw new Error("Could not read theme settings");
+
+  if (pendingFetch) return <LoadingSpinnerFixed />;
 
   const handleSaveProject = async () => {
     setPendingSave(true);
     await saveNodeProject(componentId);
     setPendingSave(false);
   };
-
-  if (!nodes && !curTheme.current) return;
-
-  if (pendingFetch) return <LoadingSpinnerFixed />;
 
   return (
     <div

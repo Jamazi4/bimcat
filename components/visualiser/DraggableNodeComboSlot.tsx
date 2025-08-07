@@ -6,8 +6,11 @@ import {
 import { CircleDotDashed } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "../ui/input";
+import { useAppSelector } from "@/lib/hooks";
 
 interface ComboNodeSlotProps {
+  connectedNodeId: string;
+  connectedOutputSlodId: number;
   connected: boolean;
   value: number;
   changeThisValue: (value: number) => void;
@@ -31,6 +34,8 @@ interface ComboNodeSlotProps {
 }
 
 const DraggableNodeComboSlot = ({
+  connectedNodeId,
+  connectedOutputSlodId,
   connected,
   slotValueType,
   name,
@@ -42,11 +47,21 @@ const DraggableNodeComboSlot = ({
   value,
   changeThisValue,
 }: ComboNodeSlotProps) => {
+  const displayValue = useAppSelector(
+    (state) => state.visualiserSlice.nodeValues,
+  )[connectedNodeId]?.[connectedOutputSlodId];
+
   const { nodeId, slotId, slotIO: slotType } = partialSlotData;
   const ref = useRef<SVGSVGElement>(null);
 
-  const [curVal, setCurVal] = useState(String(value));
+  const [curVal, setCurVal] = useState(String(value ?? ""));
   const [isValidValue, setIsValidValue] = useState(true);
+
+  useEffect(() => {
+    if (connected) {
+      setCurVal(displayValue != null ? String(displayValue) : "");
+    }
+  }, [connected, displayValue]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;

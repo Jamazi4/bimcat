@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { nodeDefinitions } from "../nodes";
 import { ASTNode, NodeEvalResult, useNodesRuntimeProps } from "../nodeTypes";
 import * as THREE from "three";
+import { useAppDispatch } from "@/lib/hooks";
+import { setNodeOutputValues } from "@/lib/features/visualiser/visualiserSlice";
 
 const useNodesRuntime = ({
   runtimeNodes,
@@ -13,6 +15,7 @@ const useNodesRuntime = ({
   const [outputObjects, setOutputObjects] = useState<
     Record<string, THREE.Object3D | null>
   >({});
+  const dispatch = useAppDispatch();
 
   //clean up outputObjects when output node is deleted
   useEffect(() => {
@@ -120,18 +123,42 @@ const useNodesRuntime = ({
     [edges, runtimeNodes],
   );
 
-  const evaluateAST = useCallback((node: ASTNode): NodeEvalResult => {
-    const nodeDef = nodeDefinitions.find((def) => def.type === node.type);
-    try {
-      if (nodeDef?.function && nodeDef) {
-        return nodeDef.function(node, evaluateAST);
-      } else {
-        throw new Error("no function");
+  const evaluateAST = useCallback(
+    (node: ASTNode): NodeEvalResult => {
+      const nodeDef = nodeDefinitions.find((def) => def.type === node.type);
+      try {
+        if (nodeDef && nodeDef.function) {
+          const outputValue = nodeDef.function(node, evaluateAST);
+          if (nodeDef.outputs.find((o) => o.type === "number")) {
+            const numberOutputs = nodeDef.outputs.filter(
+              (o) => o.type === "number",
+            );
+            numberOutputs.forEach((o) => {
+              const payload = {
+                [node.id]: { [o.id]: outputValue[o.id].value as number },
+                //TODO: for combo values other than number edit here and
+                //maybe avoid doing that in a loop but all vals at once
+                //for this I will need to edit reducer
+              };
+              dispatch(setNodeOutputValues({ nodeValues: payload }));
+            });
+          }
+          return outputValue;
+        } else {
+          throw new Error("no function");
+        }
+      } catch (error) {
+        throw error;
       }
-    } catch (error) {
-      throw error;
-    }
-  }, []);
+    },
+    [dispatch],
+  );
+
+  const clearOutputObjects = (outputNodeId: string) => {
+    setOutputObjects((prevState) => {
+      return { ...prevState, [outputNodeId]: null };
+    });
+  };
 
   const startNodeRuntime = useCallback(() => {
     const outputNodes = runtimeNodes.filter((n) => n.type === "output");
@@ -144,9 +171,7 @@ const useNodesRuntime = ({
     for (const outputNode of outputNodes) {
       const edge = edges.find((e) => e.toNodeId === outputNode.id);
       if (!edge) {
-        setOutputObjects((prevState) => {
-          return { ...prevState, [outputNode.id]: null };
-        });
+        clearOutputObjects(outputNode.id);
         continue;
       }
 
@@ -167,14 +192,10 @@ const useNodesRuntime = ({
           });
         } else {
           console.warn("Result is not a renderable geometry:", result);
-          setOutputObjects((prevState) => {
-            return { ...prevState, [outputNode.id]: null };
-          });
+          clearOutputObjects(outputNode.id);
         }
       } catch (error) {
-        setOutputObjects((prevState) => {
-          return { ...prevState, [outputNode.id]: null };
-        });
+        clearOutputObjects(outputNode.id);
         throw error;
       }
     }
