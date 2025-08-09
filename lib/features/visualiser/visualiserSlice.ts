@@ -35,9 +35,19 @@ const visualiserSlice = createSlice({
         ...values,
       };
     },
+
+    deleteNodeOutputValue: (
+      state,
+      action: PayloadAction<{ nodeIds: string[] }>,
+    ) => {
+      action.payload.nodeIds.forEach((id) => delete state.nodeValues[id]);
+    },
   },
 });
 
-export const { switchNodeNavigation, setNodeOutputValues } =
-  visualiserSlice.actions;
+export const {
+  switchNodeNavigation,
+  setNodeOutputValues,
+  deleteNodeOutputValue,
+} = visualiserSlice.actions;
 export default visualiserSlice.reducer;

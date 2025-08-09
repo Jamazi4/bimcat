@@ -22,7 +22,10 @@ import {
 } from "../nodeDefinitions/nodeUtilFunctions";
 import { createEdgeId } from "../utilFunctions";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { switchNodeNavigation } from "@/lib/features/visualiser/visualiserSlice";
+import {
+  deleteNodeOutputValue,
+  switchNodeNavigation,
+} from "@/lib/features/visualiser/visualiserSlice";
 
 export const useNodeNavigation = (
   setNodes: Dispatch<SetStateAction<GeomNodeBackType[]>>,
@@ -320,6 +323,9 @@ export const useNodeNavigation = (
 
   const deleteNode = useCallback(() => {
     //TODO: move to useNodeSystem
+
+    dispatch(deleteNodeOutputValue({ nodeIds: selectedNodeIdsRef.current }));
+
     setNodes((prevNodes) => {
       return prevNodes.filter(
         (n) => !selectedNodeIdsRef.current.includes(n.id),
@@ -348,7 +354,14 @@ export const useNodeNavigation = (
         );
       });
     });
-  }, [selectedNodeIdsRef, setEdges, setNodeDivs, setNodeSlots, setNodes]);
+  }, [
+    dispatch,
+    selectedNodeIdsRef,
+    setEdges,
+    setNodeDivs,
+    setNodeSlots,
+    setNodes,
+  ]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
