@@ -1,7 +1,11 @@
 import earcut from "earcut";
 import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
-import { getActiveInputIds, getInputValues } from "./nodeUtilFunctions";
+import {
+  getActiveInputIds,
+  getComboValues,
+  getInputValues,
+} from "./nodeUtilFunctions";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 import {
   closeLinestrings,
@@ -43,10 +47,11 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         value: false,
       },
       {
-        type: "boolean",
+        type: "combo",
         name: "capped",
         id: 3,
-        value: false,
+        slotValueType: "boolean",
+        value: true,
       },
     ],
     outputs: [
@@ -66,7 +71,7 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         activeInputs,
       );
       const [transform] = getInputValues(node.inputs, evalFunction, [0]);
-      const capped = node.values[3];
+      const capped = getComboValues(node, evalFunction, [3])[0];
 
       let baseGeom = new THREE.BufferGeometry();
       let baseLinestrings: THREE.Vector3[][] = [];

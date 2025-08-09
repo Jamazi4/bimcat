@@ -58,7 +58,7 @@ const DraggableNodeSelectInput = ({
           value={selectedInput}
           onValueChange={(value) => handleChangeInputState(value)}
         >
-          <SelectTrigger className="text-2xl w-40">
+          <SelectTrigger className="text-2xl w-full">
             <SelectValue className="text-lg" />
           </SelectTrigger>
           <SelectContent
@@ -70,7 +70,7 @@ const DraggableNodeSelectInput = ({
             {inputValues.map((i, id) => {
               return (
                 <SelectItem value={i} key={`${nodeId}${id}select`}>
-                  {i}
+                  {i.toUpperCase()}
                 </SelectItem>
               );
             })}

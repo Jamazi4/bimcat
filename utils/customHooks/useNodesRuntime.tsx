@@ -2,10 +2,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { nodeDefinitions } from "../nodes";
-import { ASTNode, NodeEvalResult, useNodesRuntimeProps } from "../nodeTypes";
+import {
+  ASTNode,
+  nodeDefinition,
+  NodeEvalResult,
+  useNodesRuntimeProps,
+} from "../nodeTypes";
 import * as THREE from "three";
 import { useAppDispatch } from "@/lib/hooks";
-import { setNodeOutputValues } from "@/lib/features/visualiser/visualiserSlice";
+import {
+  deleteNodeOutputValue,
+  setNodeOutputValues,
+} from "@/lib/features/visualiser/visualiserSlice";
 
 const useNodesRuntime = ({
   runtimeNodes,
@@ -16,19 +24,26 @@ const useNodesRuntime = ({
     Record<string, THREE.Object3D | null>
   >({});
   const dispatch = useAppDispatch();
+  const [liveNodeIds, setLiveNodeIds] = useState<string[]>([]);
 
   //clean up outputObjects when output node is deleted
   useEffect(() => {
     const outputNodeIds = new Set(
       runtimeNodes.filter((n) => n.type === "output").map((n) => n.id),
     );
+
     setOutputObjects((prev) => {
       const filtered = Object.fromEntries(
         Object.entries(prev).filter(([key]) => outputNodeIds.has(key)),
       );
       return filtered;
     });
-  }, [runtimeNodes, meshGroup]);
+
+    const inactiveNodes = runtimeNodes
+      .filter((n) => !liveNodeIds.includes(n.id))
+      .map((n) => n.id);
+    dispatch(deleteNodeOutputValue({ nodeIds: inactiveNodes }));
+  }, [runtimeNodes, meshGroup, dispatch, liveNodeIds]);
 
   const buildAST = useCallback(
     (nodeId: string): ASTNode => {
@@ -123,32 +138,46 @@ const useNodesRuntime = ({
     [edges, runtimeNodes],
   );
 
+  const storeOutputToState = useCallback(
+    (nodeDef: nodeDefinition, node: ASTNode, outputValue: NodeEvalResult) => {
+      const isOutputingNumber = nodeDef.outputs.find(
+        (o) => o.type === "number" || o.type === "boolean",
+      );
+      const isVirtual = node.id.includes("virt");
+
+      if (isOutputingNumber && !isVirtual) {
+        const collectedOutputs = nodeDef.outputs.filter(
+          (o) => o.type === "number" || o.type === "boolean",
+        );
+
+        const payload: Record<
+          string,
+          Record<string, string | number | boolean>
+        > = { [node.id]: {} };
+
+        collectedOutputs.forEach((o) => {
+          payload[node.id][o.id] = outputValue[o.id].value as
+            | string
+            | number
+            | boolean;
+        });
+
+        if (Object.keys(payload[node.id]).length > 0) {
+          dispatch(setNodeOutputValues({ nodeValues: payload }));
+        }
+      }
+    },
+    [dispatch],
+  );
+
   const evaluateAST = useCallback(
     (node: ASTNode): NodeEvalResult => {
       const nodeDef = nodeDefinitions.find((def) => def.type === node.type);
+      setLiveNodeIds((prev) => [...prev, node.id]);
       try {
         if (nodeDef && nodeDef.function) {
           const outputValue = nodeDef.function(node, evaluateAST);
-
-          const isOutputingNumber = nodeDef.outputs.find(
-            (o) => o.type === "number",
-          );
-          const isVirtual = node.id.includes("virt");
-          if (isOutputingNumber && !isVirtual) {
-            const numberOutputs = nodeDef.outputs.filter(
-              (o) => o.type === "number",
-            );
-            numberOutputs.forEach((o) => {
-              const payload = {
-                [node.id]: { [o.id]: outputValue[o.id].value as number },
-                //TODO: for combo values other than number edit here and
-                //maybe avoid doing that in a loop but all vals at once
-                //for this I will need to edit reducer
-              };
-
-              dispatch(setNodeOutputValues({ nodeValues: payload }));
-            });
-          }
+          storeOutputToState(nodeDef, node, outputValue);
           return outputValue;
         } else {
           throw new Error("no function");
@@ -157,7 +186,7 @@ const useNodesRuntime = ({
         throw error;
       }
     },
-    [dispatch],
+    [storeOutputToState],
   );
 
   const clearOutputObjects = (outputNodeId: string) => {
@@ -168,6 +197,7 @@ const useNodesRuntime = ({
 
   const startNodeRuntime = useCallback(() => {
     const outputNodes = runtimeNodes.filter((n) => n.type === "output");
+    setLiveNodeIds([]);
     if (outputNodes.length === 0) {
       meshGroup.clear();
       setOutputObjects({});

@@ -7,13 +7,15 @@ import { CircleDotDashed } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "../ui/input";
 import { useAppSelector } from "@/lib/hooks";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
 
 interface ComboNodeSlotProps {
   connectedNodeId: string;
   connectedOutputSlodId: number;
   connected: boolean;
-  value: number;
-  changeThisValue: (value: number) => void;
+  value: number | boolean;
+  changeThisValue: (value: number | boolean) => void;
   slotValueType: SlotValues;
   name: string;
   partialSlotData: Partial<NodeSlot>;
@@ -33,6 +35,7 @@ interface ComboNodeSlotProps {
   };
 }
 
+// DraggableNodeComboSlot.tsx (updated)
 const DraggableNodeComboSlot = ({
   connectedNodeId,
   connectedOutputSlodId,
@@ -54,46 +57,73 @@ const DraggableNodeComboSlot = ({
   const { nodeId, slotId, slotIO: slotType } = partialSlotData;
   const ref = useRef<SVGSVGElement>(null);
 
-  const [curVal, setCurVal] = useState(String(value ?? ""));
-  const [savedLocalValue, setSavedLocalValue] = useState(String(value ?? ""));
+  const isNumberSlot = slotValueType === "number";
+
+  // curVal: string for number inputs, boolean for switches
+  const [curVal, setCurVal] = useState<string | boolean>(
+    isNumberSlot
+      ? value !== undefined && value !== null
+        ? String(value)
+        : ""
+      : Boolean(value ?? false),
+  );
+
+  // savedLocalValue starts undefined — only set when user enters connected mode
+  const [savedLocalValue, setSavedLocalValue] = useState<
+    string | boolean | undefined
+  >(undefined);
   const [isValidValue, setIsValidValue] = useState(true);
 
-  useEffect(() => {
-    if (!connected) {
-      setCurVal(String(value ?? ""));
-      setSavedLocalValue((prev) => (prev === "" ? String(value ?? "") : prev));
-    }
-  }, [value, connected]);
-
+  // Save local before becoming connected; restore saved local on disconnect (if any).
   useEffect(() => {
     if (connected) {
+      // user is now controlled by a connection — remember the current local value
       setSavedLocalValue(curVal);
     } else {
-      setCurVal(savedLocalValue ?? "");
-      const num = Number(savedLocalValue);
-      if (!isNaN(num)) changeThisValue(num);
+      // user disconnected — restore the previously saved local value if it exists
+      if (savedLocalValue !== undefined) {
+        setCurVal(savedLocalValue);
+        if (isNumberSlot) {
+          const num = Number(savedLocalValue);
+          if (!isNaN(num)) changeThisValue(num);
+        } else {
+          changeThisValue(Boolean(savedLocalValue));
+        }
+      }
+      // if savedLocalValue === undefined: do NOT pull the stored value from props/Redux
+      // and do NOT overwrite curVal — this preserves the user's local input (or initial empty)
     }
+    // we intentionally only want this to run on `connected` flips
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected]); // we intentionally only run when `connected` flips
+  }, [connected]);
 
+  // Only update the visible value from Redux while connected
   useEffect(() => {
-    if (connected) {
-      if (displayValue === null || displayValue === undefined) return;
-      setCurVal(displayValue != null ? String(displayValue) : "");
-    }
-  }, [connected, displayValue]);
+    if (!connected) return;
+    if (displayValue === null || displayValue === undefined) return;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isNumberSlot) {
+      setCurVal(String(displayValue));
+    } else {
+      setCurVal(Boolean(displayValue));
+    }
+  }, [connected, displayValue, isNumberSlot]);
+
+  const handleChangeNum = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     const num = Number(val);
     const valid = !isNaN(num) && val.trim() !== "";
 
     setCurVal(val);
     setIsValidValue(valid);
-    if (valid) {
-      changeThisValue(num);
-    }
+    if (valid) changeThisValue(num);
   };
+
+  const handleChangeBool = (e: boolean) => {
+    setCurVal(e);
+    changeThisValue(e);
+  };
+
   useEffect(() => {
     if (!ref.current) return;
 
@@ -120,6 +150,9 @@ const DraggableNodeComboSlot = ({
     getSlotRelativePosition,
   ]);
 
+  const hasConnectedValue =
+    connected && displayValue !== null && displayValue !== undefined;
+
   return (
     <div
       className="h-12 flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer mx-[-12px] connect-slot"
@@ -131,14 +164,42 @@ const DraggableNodeComboSlot = ({
         size={24}
         className={`bg-background rounded-full ${backgroundColorClasses[slotValueType]} text-primary`}
       />
-      <Input
-        type="text"
-        value={curVal}
-        onChange={(e) => handleChange(e)}
-        className={`${!isValidValue && "text-destructive border-destructive"} w-30 !text-2xl`}
-        disabled={connected}
-      />
-      <p className="text-2xl select-none ml-2">{name}</p>
+      {isNumberSlot ? (
+        <>
+          <Input
+            type="text"
+            value={String(curVal)}
+            onChange={handleChangeNum}
+            className={`${!isValidValue && "text-destructive border-destructive"} ${
+              hasConnectedValue ? "border-constructive" : ""
+            } w-30 !text-2xl`}
+            disabled={connected}
+          />
+          <p
+            className={`text-2xl select-none ml-2 ${hasConnectedValue ? "text-constructive" : ""}`}
+          >
+            {name}
+          </p>
+        </>
+      ) : (
+        <>
+          <Switch
+            id={`${nodeId}-${name}`}
+            checked={Boolean(curVal)}
+            onCheckedChange={(e) => handleChangeBool(e)}
+            disabled={connected}
+            className={hasConnectedValue ? "bg-constructive" : ""}
+          />
+          <div className="m-2 text-2xl">
+            <Label
+              className={`text-2xl ${hasConnectedValue ? "text-constructive" : ""}`}
+              htmlFor={`${nodeId}-${name}`}
+            >
+              {name}
+            </Label>
+          </div>
+        </>
+      )}
     </div>
   );
 };

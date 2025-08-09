@@ -381,7 +381,7 @@ And if the slot is connected I switch the value to the one from redux
 tomorrow think of optimizing this and:
 also add slider node
 
-### --08-08-2025--
+### --09-08-2025--
 
 So because the node output value for numbers is assigned at evaluateAST - I
 can't make the disconnected nodes to update the value. So for now it doesn't
@@ -390,6 +390,14 @@ do that.
 I think that the next thing is to add bool combo output and vector nodes.
 
 also solve the issues of deleting and copying the node project with component
+
+only fixed deleting node values from redux state and copying them - also fixed
+id for virtual nodes and not storing values inside
+
+okay now combo can handle boolean
+
+important thing to do - now runtime has liveNodeIds - need to use this to store
+nodes output so eval doesn't have to go through the same node couple of times
 
 ### current plan
 
@@ -410,6 +418,7 @@ BUGS:
 - delete component doesn't delete node project?
 - copy component doesn't copy node project
 - earcut doesn't work for completely vertical polygons
+- delete node outputValue from state when output gets disconnected
 
 Runtime:
 
