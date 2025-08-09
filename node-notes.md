@@ -360,12 +360,12 @@ now math nodes!
 
 also the nodeNavigation flag is now done using redux - move more state to redux
 
-### --07-08-2025--
+### --06-08-2025--
 
 added scalar math node with new select input (no slot)
 Now work on displaying
 
-### --06-08-2025--
+### --07-08-2025--
 
 work on displaying connected value in combo input
 displaying now works: here's how.
@@ -381,7 +381,17 @@ And if the slot is connected I switch the value to the one from redux
 tomorrow think of optimizing this and:
 also add slider node
 
-current plan:
+### --08-08-2025--
+
+So because the node output value for numbers is assigned at evaluateAST - I
+can't make the disconnected nodes to update the value. So for now it doesn't
+do that.
+
+I think that the next thing is to add bool combo output and vector nodes.
+
+also solve the issues of deleting and copying the node project with component
+
+### current plan
 
 - finish group node - done
 - apply list inputs to linestring node

@@ -129,7 +129,12 @@ const useNodesRuntime = ({
       try {
         if (nodeDef && nodeDef.function) {
           const outputValue = nodeDef.function(node, evaluateAST);
-          if (nodeDef.outputs.find((o) => o.type === "number")) {
+
+          const isOutputingNumber = nodeDef.outputs.find(
+            (o) => o.type === "number",
+          );
+          const isVirtual = node.id.includes("virt");
+          if (isOutputingNumber && !isVirtual) {
             const numberOutputs = nodeDef.outputs.filter(
               (o) => o.type === "number",
             );
@@ -140,6 +145,7 @@ const useNodesRuntime = ({
                 //maybe avoid doing that in a loop but all vals at once
                 //for this I will need to edit reducer
               };
+
               dispatch(setNodeOutputValues({ nodeValues: payload }));
             });
           }

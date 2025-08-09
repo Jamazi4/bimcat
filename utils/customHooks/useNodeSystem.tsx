@@ -407,6 +407,7 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
 
     const newNodes = copiedNodesRef.current.map((n) => {
       const newId = createNodeId();
+
       idMap[n.id] = newId;
       const newValues = { ...n.values };
       if (n.type === "group" && n.values) {

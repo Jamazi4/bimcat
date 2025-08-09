@@ -3,7 +3,7 @@ import { createNodeId } from "../utilFunctions";
 export const defaultNumberContructor = (value: number) => {
   return {
     type: "number",
-    id: createNodeId(),
+    id: createNodeId(true),
     inputs: [],
     values: { "0": value },
   };
@@ -12,7 +12,7 @@ export const defaultNumberContructor = (value: number) => {
 export const defaultBooleanContructor = (value: boolean) => {
   return {
     type: "boolean",
-    id: createNodeId(),
+    id: createNodeId(true),
     inputs: [],
     values: { "0": value },
   };
@@ -21,7 +21,7 @@ export const defaultBooleanContructor = (value: boolean) => {
 export const defaultVectorContructor = (x: number, y: number, z: number) => {
   return {
     type: "vector",
-    id: createNodeId(),
+    id: createNodeId(true),
     inputs: [
       {
         inputId: 0,
@@ -46,7 +46,7 @@ export const defaultVectorContructor = (x: number, y: number, z: number) => {
 export const defaultTransformContructor = () => {
   return {
     type: "transform",
-    id: createNodeId(),
+    id: createNodeId(true),
     inputs: [
       {
         inputId: 0,

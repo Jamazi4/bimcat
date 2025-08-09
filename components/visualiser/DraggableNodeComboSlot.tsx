@@ -78,6 +78,7 @@ const DraggableNodeComboSlot = ({
 
   useEffect(() => {
     if (connected) {
+      if (displayValue === null || displayValue === undefined) return;
       setCurVal(displayValue != null ? String(displayValue) : "");
     }
   }, [connected, displayValue]);

@@ -148,6 +148,7 @@ export const useNodeNavigation = (
   const dispatch = useAppDispatch();
 
   const addEdge = useCallback(
+    //TODO:mode to useNodeSystem
     (
       fromNodeId: string,
       fromSlotId: number,
@@ -236,6 +237,7 @@ export const useNodeNavigation = (
   }, [setConnectingFromNode, setTempEdgePosition]);
 
   const addEdgeToGroupInput = useCallback(
+    //TODO:mode to useNodeSystem
     (
       toNode: GeomNodeBackType | undefined,
       toNodeDef: nodeDefinition,
@@ -316,37 +318,43 @@ export const useNodeNavigation = (
     ],
   );
 
+  const deleteNode = useCallback(() => {
+    //TODO: move to useNodeSystem
+    setNodes((prevNodes) => {
+      return prevNodes.filter(
+        (n) => !selectedNodeIdsRef.current.includes(n.id),
+      );
+    });
+
+    setNodeSlots((prevSlots) => {
+      return prevSlots.filter(
+        (slot) => !selectedNodeIdsRef.current.includes(slot.nodeId),
+      );
+    });
+
+    setNodeDivs((prevNodeDivs) => {
+      const prevNodeDivsArr = Object.entries(prevNodeDivs);
+      const newNodeDivs = prevNodeDivsArr.filter(
+        ([id, _]) => !selectedNodeIdsRef.current.includes(id),
+      );
+      return Object.fromEntries(newNodeDivs);
+    });
+
+    setEdges((prevEdges) => {
+      return prevEdges.filter((edge) => {
+        return (
+          !selectedNodeIdsRef.current.includes(edge.fromNodeId) &&
+          !selectedNodeIdsRef.current.includes(edge.toNodeId)
+        );
+      });
+    });
+  }, [selectedNodeIdsRef, setEdges, setNodeDivs, setNodeSlots, setNodes]);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Delete") {
-        setNodes((prevNodes) => {
-          return prevNodes.filter(
-            (n) => !selectedNodeIdsRef.current.includes(n.id),
-          );
-        });
-
-        setNodeSlots((prevSlots) => {
-          return prevSlots.filter(
-            (slot) => !selectedNodeIdsRef.current.includes(slot.nodeId),
-          );
-        });
-
-        setNodeDivs((prevNodeDivs) => {
-          const prevNodeDivsArr = Object.entries(prevNodeDivs);
-          const newNodeDivs = prevNodeDivsArr.filter(
-            ([id, _]) => !selectedNodeIdsRef.current.includes(id),
-          );
-          return Object.fromEntries(newNodeDivs);
-        });
-
-        setEdges((prevEdges) => {
-          return prevEdges.filter((edge) => {
-            return (
-              !selectedNodeIdsRef.current.includes(edge.fromNodeId) &&
-              !selectedNodeIdsRef.current.includes(edge.toNodeId)
-            );
-          });
-        });
+        e.preventDefault();
+        deleteNode();
       } else if ((e.metaKey || e.ctrlKey) && e.key === "c") {
         e.preventDefault();
         copySelectedNodes();
@@ -358,15 +366,7 @@ export const useNodeNavigation = (
         shiftPressed.current = true;
       }
     },
-    [
-      copySelectedNodes,
-      pasteCopiedNodes,
-      selectedNodeIdsRef,
-      setEdges,
-      setNodeDivs,
-      setNodeSlots,
-      setNodes,
-    ],
+    [copySelectedNodes, deleteNode, pasteCopiedNodes],
   );
 
   const handleNavigationModeSwitch = useCallback(
