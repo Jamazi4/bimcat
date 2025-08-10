@@ -105,29 +105,55 @@ export function createSideGeometry(
   return final;
 }
 
+// export function triangulateLinestrings(
+//   linestrings: THREE.Vector3[][],
+// ): THREE.BufferGeometry | null {
+//   const geometries: THREE.BufferGeometry[] = [];
+//
+//   for (const linestring of linestrings) {
+//     if (linestring.length < 3) continue;
+//
+//     const vertices: number[] = [];
+//     for (const v of linestring) {
+//       vertices.push(v.x, v.y, v.z);
+//     }
+//
+//     const indices = earcut(vertices, [], 3);
+//
+//     if (indices.length === 0) continue;
+//
+//     const geom = new THREE.BufferGeometry();
+//     geom.setAttribute(
+//       "position",
+//       new THREE.Float32BufferAttribute(vertices, 3),
+//     );
+//     geom.setIndex(indices);
+//     geometries.push(geom);
+//   }
+//
+//   if (geometries.length === 0) return null;
+//
+//   const merged = BufferGeometryUtils.mergeGeometries(geometries, false);
+//   merged.computeVertexNormals();
+//   return merged;
+// }
+//
+
 export function triangulateLinestrings(
   linestrings: THREE.Vector3[][],
 ): THREE.BufferGeometry | null {
   const geometries: THREE.BufferGeometry[] = [];
 
   for (const linestring of linestrings) {
-    if (linestring.length < 3) continue;
-
-    const vertices: number[] = [];
-    for (const v of linestring) {
-      vertices.push(v.x, v.y, v.z);
-    }
-
-    const indices = earcut(vertices, [], 3);
-
-    if (indices.length === 0) continue;
+    const result = triangulatePolygon3D(linestring);
+    if (!result) continue;
 
     const geom = new THREE.BufferGeometry();
     geom.setAttribute(
       "position",
-      new THREE.Float32BufferAttribute(vertices, 3),
+      new THREE.Float32BufferAttribute(result.positions, 3),
     );
-    geom.setIndex(indices);
+    geom.setIndex(result.indices);
     geometries.push(geom);
   }
 
@@ -136,4 +162,47 @@ export function triangulateLinestrings(
   const merged = BufferGeometryUtils.mergeGeometries(geometries, false);
   merged.computeVertexNormals();
   return merged;
+}
+
+/**
+ * Triangulates a single 3D polygon (Vector3 array) by projecting it onto its best-fit plane.
+ * Returns an object containing the indices and original positions array.
+ */
+export function triangulatePolygon3D(polygon: THREE.Vector3[]): {
+  indices: number[];
+  positions: number[];
+} | null {
+  if (polygon.length < 3) return null;
+
+  // Compute normal from first 3 points (assuming mostly planar)
+  const normal = new THREE.Vector3()
+    .crossVectors(
+      new THREE.Vector3().subVectors(polygon[1], polygon[0]),
+      new THREE.Vector3().subVectors(polygon[2], polygon[0]),
+    )
+    .normalize();
+  if (normal.lengthSq() === 0) return null;
+
+  // Local basis (u,v) in plane
+  const u = new THREE.Vector3().subVectors(polygon[1], polygon[0]).normalize();
+  const v = new THREE.Vector3().crossVectors(normal, u).normalize();
+
+  // Project to 2D coordinates in plane space
+  const vertices2D: number[] = [];
+  for (const p of polygon) {
+    const ap = new THREE.Vector3().subVectors(p, polygon[0]);
+    vertices2D.push(ap.dot(u), ap.dot(v));
+  }
+
+  // Triangulate in 2D
+  const indices = earcut(vertices2D);
+  if (indices.length === 0) return null;
+
+  // Flatten original positions into Float32-friendly array
+  const positions: number[] = [];
+  for (const p of polygon) {
+    positions.push(p.x, p.y, p.z);
+  }
+
+  return { indices, positions };
 }

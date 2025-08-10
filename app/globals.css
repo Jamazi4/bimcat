@@ -56,7 +56,7 @@
   --color-geometry-input: var(--background);
   --color-transform-input: var(--transform-input);
   --hue-number-input: 0;
-  --hue-boolean-input: 57;
+  --hue-boolean-input: 50;
   --hue-vector-input: 103;
   --hue-linestring-input: 270;
   --hue-mesh-input: 222;

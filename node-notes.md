@@ -405,6 +405,14 @@ planes and extruded geometry don't work in one group:
 geometry at index 1. Make sure all geometries have the same number of
 attributes. function @ groupNode.ts:54`
 
+### --10-08-2025--
+
+so far - copying and deleting component now handles node project
+database purged
+planes and circles now don't output 'uv' attribute in buffergeom
+
+thinking about sliders and vector math and pickEdge
+
 ### current plan
 
 - finish group node - done
@@ -412,11 +420,18 @@ attributes. function @ groupNode.ts:54`
 - math nodes - progress
 - ui/pset nodes and component view integration
 
-### Geometry processing rules
+## Geometry processing and node rules
+
+### Geometry processing
 
 - all buffer geometry output should have position, index and normal attributes
   but no uv
 - linestring is a nested array of vectors. each array is one connected linestring
+
+### Node
+
+- node values of index >= 100 are list inputs, where 100 is the index of the
+  parent list input
 
 ## General
 
@@ -427,10 +442,6 @@ BUGS:
 - left-click on node
 - enabled node menu buttons when not in node navigation
 - ctrl-c not working in input fields
-- delete component doesn't delete node project?
-- copy component doesn't copy node project
-- earcut doesn't work for completely vertical polygons
-- delete node outputValue from state when output gets disconnected
 
 Runtime:
 
@@ -440,7 +451,6 @@ Runtime:
 
 UI:
 
-- combo needs to support boolean
 - highlight wrong links - at least to wrong input type will be easy - then also
   eval errors
 - lock node menu buttons
@@ -456,6 +466,11 @@ UI:
 
 done:
 
+- delete component doesn't delete node project?
+- copy component doesn't copy node project
+- earcut doesn't work for completely vertical polygons
+- delete node outputValue from state when output gets disconnected
+- combo needs to support boolean
 - group node
 - ctrl-r or something to switch between node and 3d navigation
 - capped/uncapped shapes

@@ -101,16 +101,16 @@ export const updateNodeProject = async (
       where: { id: componentId },
       select: {
         userId: true,
-        nodeProjectId: true,
         id: true,
         geometry: { select: { id: true } },
+        nodes: { select: { id: true } },
       },
     });
     if (!component) throw new Error("Could not find component");
 
     if (dbUser.id !== component?.userId || !component)
       throw new Error("No Component or unauthorized");
-    if (!component.nodeProjectId)
+    if (!component.nodes || !component.nodes.id)
       throw new Error("No node project for this component");
 
     const oldGeomIds = component.geometry.map((geom) => geom.id);
@@ -156,7 +156,7 @@ export const updateNodeProject = async (
       });
 
       await tx.nodeProject.update({
-        where: { id: component.nodeProjectId! },
+        where: { id: component.nodes?.id },
         data: { nodes: nodes, edges: edges },
       });
     });
@@ -242,6 +242,7 @@ export const fetchSingleComponentAction = async (id: string) => {
       where: { id },
       include: {
         geometry: true,
+        nodes: true,
       },
     });
 
@@ -399,7 +400,9 @@ export const updatePsetsAction = async (
   const psetTitle = formData.get("psetTitle") as string;
   const keysToRemove = ["componentId", "psetTitle"];
   const newPsetData = Object.fromEntries(
-    Array.from(formData.entries()).filter(([key]) => !keysToRemove.includes(key)),
+    Array.from(formData.entries()).filter(
+      ([key]) => !keysToRemove.includes(key),
+    ),
   );
 
   try {
@@ -605,8 +608,9 @@ export const deleteComponentAction = async (componentIds: string[]) => {
 
     revalidatePath(`/components/browse`);
     return {
-      message: `Successfully removed ${components.length} component${components.length > 1 ? "s" : ""
-        }.`,
+      message: `Successfully removed ${components.length} component${
+        components.length > 1 ? "s" : ""
+      }.`,
     };
   } catch (error) {
     return renderError(error);
@@ -641,8 +645,8 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
     const affectedLibraries =
       publicComponents.length > 0
         ? publicComponents.flatMap((component) => {
-          return component.libraries.filter((library) => library.public);
-        })
+            return component.libraries.filter((library) => library.public);
+          })
         : [];
 
     const affectedLibrariesUnique = Object.values(
@@ -699,8 +703,9 @@ export const toggleComponentPrivateAction = async (componentIds: string[]) => {
     revalidatePath(`/components/browse`);
 
     return {
-      message: `Successfully toggled private for ${components.length
-        } component${components.length > 1 ? "s" : ""}.`,
+      message: `Successfully toggled private for ${
+        components.length
+      } component${components.length > 1 ? "s" : ""}.`,
     };
   } catch (error) {
     return renderError(error);
@@ -743,7 +748,7 @@ export const copyComponentAction = async (id: string, name: string) => {
   try {
     const oldComponent = await prisma.component.findUnique({
       where: { id },
-      include: { geometry: { select: { id: true } } },
+      include: { geometry: { select: { id: true } }, nodes: true },
     });
 
     const dbUser = await getDbUser();
@@ -757,9 +762,9 @@ export const copyComponentAction = async (id: string, name: string) => {
       oldComponent.psets,
     );
 
-    await prisma.component.create({
+    const newComponent = await prisma.component.create({
       data: {
-        userId: dbUser?.id,
+        userId: dbUser.id,
         name,
         psets: validatedPsets,
         author,
@@ -768,6 +773,17 @@ export const copyComponentAction = async (id: string, name: string) => {
         },
       },
     });
+
+    // If the old component had a NodeProject, copy it
+    if (oldComponent.nodes) {
+      await prisma.nodeProject.create({
+        data: {
+          componentId: newComponent.id,
+          nodes: JSON.parse(JSON.stringify(oldComponent.nodes.nodes)),
+          edges: JSON.parse(JSON.stringify(oldComponent.nodes.edges)),
+        },
+      });
+    }
 
     revalidatePath(`/components/browse`);
 

@@ -2,13 +2,16 @@ import { z, ZodSchema } from "zod";
 import { GeomNodeSchemaBack, NodeEdgeSchema } from "./nodeTypes";
 
 export function validateWithZodSchema<T>(
-  schema: ZodSchema<T>,
+  schema: z.ZodType<T>,
   data: unknown,
 ): T {
   const result = schema.safeParse(data);
   if (!result.success) {
-    const errors = result.error.errors.map((error) => error.message);
-    throw new Error(errors.join(","));
+    console.error("Zod validation errors:", result.error.errors);
+    const errors = result.error.errors.map((error) => {
+      return `${error.path.join(".")}: ${error.message}`;
+    });
+    throw new Error(errors.join(", "));
   }
   return result.data;
 }
@@ -54,8 +57,9 @@ export const componentArraySchema = z.array(componentSchema);
 
 export const NodeProjectSchema = z.object({
   id: z.string(),
-  nodes: z.array(GeomNodeSchemaBack),
-  edges: z.array(NodeEdgeSchema),
+  nodes: z.array(GeomNodeSchemaBack).optional(),
+  edges: z.array(NodeEdgeSchema).optional(),
+  componentId: z.string(),
 });
 
 export type NodeProjectType = z.infer<typeof NodeProjectSchema>;
@@ -71,8 +75,7 @@ export const componentWithGeometrySchema = z.object({
   author: z.string(),
   public: z.boolean(),
   editable: z.boolean(),
-  nodes: NodeProjectSchema.optional(),
-  nodeProjectId: z.nullable(z.string()),
+  nodes: NodeProjectSchema.nullable().optional(),
 });
 
 export type componentWithGeometrySchemaType = z.infer<

@@ -36,7 +36,7 @@ const ComponentContent = async ({
         isPublic={component.public}
       />
       <ComponentContentWrapper
-        isUsingNodes={!!component.nodeProjectId}
+        isUsingNodes={!!component.nodes?.id}
         componentId={id}
         componentGeometry={component.geometry}
         componentEditable={component.editable}

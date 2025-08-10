@@ -1,4 +1,3 @@
-import earcut from "earcut";
 import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
 import {
@@ -16,6 +15,7 @@ import {
   createSideGeometry,
   extractOrderedBoundaryLoop,
   triangulateLinestrings,
+  triangulatePolygon3D,
 } from "../geometryProcessing/extrusion";
 
 export function extrudeNode(nodeDefId: number): nodeDefinition {
@@ -97,17 +97,16 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
             let vertexOffset = 0;
 
             for (const polygon of baseLinestrings) {
-              const flat3D: number[] = [];
-              for (const v of polygon) {
-                flat3D.push(v.x, v.y, v.z);
-                positions.push(v.x, v.y, v.z);
+              const result = triangulatePolygon3D(polygon);
+              if (result) {
+                for (const idx of result.indices) {
+                  indices.push(idx + vertexOffset);
+                }
+                for (let i = 0; i < result.positions.length; i++) {
+                  positions.push(result.positions[i]);
+                }
+                vertexOffset += polygon.length;
               }
-
-              const tris = earcut(flat3D, [], 3);
-              for (const idx of tris) {
-                indices.push(idx + vertexOffset);
-              }
-              vertexOffset += polygon.length;
             }
           }
         } else if (initGeom.type === "mesh") {
