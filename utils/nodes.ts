@@ -11,6 +11,7 @@ import { booleanNode } from "./nodeDefinitions/booleanNode";
 import { groupNode } from "./nodeDefinitions/groupNode";
 import { scalarMathNode } from "./nodeDefinitions/scalarMathNode";
 import { sliderNode } from "./nodeDefinitions/sliderNode";
+import { exposeNode } from "./nodeDefinitions/exposeNode";
 
 export const nodeDefinitions: nodeDefinition[] = [
   outputNode(1),
@@ -25,4 +26,5 @@ export const nodeDefinitions: nodeDefinition[] = [
   groupNode(10),
   scalarMathNode(11),
   sliderNode(12),
+  exposeNode(13),
 ];

@@ -12,9 +12,9 @@ export function sliderNode(nodeDefId: number): nodeDefinition {
         slotValueType: "number",
         id: 0,
         value: 1,
-        name: "start",
+        name: "min",
       },
-      { type: "combo", slotValueType: "number", id: 1, value: 2, name: "stop" },
+      { type: "combo", slotValueType: "number", id: 1, value: 2, name: "max" },
       {
         type: "combo",
         slotValueType: "number",

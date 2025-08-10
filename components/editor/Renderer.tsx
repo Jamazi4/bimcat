@@ -38,7 +38,7 @@ const Renderer = ({
   };
 
   return (
-    <div className="relative bg-background border rounded w-full aspect-square">
+    <div className="relative bg-background border rounded w-full  h-[calc(80vh-4rem)]">
       {isUsingNodes && (
         <Button
           size="icon"

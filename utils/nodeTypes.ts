@@ -128,6 +128,7 @@ export const nodeCategories = [
   "modifier",
   "variable",
   "math",
+  "UI",
 ] as const;
 export type nodeCategory = (typeof nodeCategories)[number];
 

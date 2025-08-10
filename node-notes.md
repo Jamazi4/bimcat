@@ -1,5 +1,18 @@
 # Node Editor
 
+## Geometry processing and node rules
+
+### Geometry processing
+
+- all buffer geometry output should have position, index and normal attributes
+  but no uv
+- linestring is a nested array of vectors. each array is one connected linestring
+
+### Node
+
+- node values of index >= 100 are list inputs, where 100 is the index of the
+  parent list input
+
 ## DIARY
 
 ### --08-06-2025--
@@ -396,9 +409,6 @@ id for virtual nodes and not storing values inside
 
 okay now combo can handle boolean
 
-important thing to do - now runtime has liveNodeIds - need to use this to store
-nodes output so eval doesn't have to go through the same node couple of times
-
 planes and extruded geometry don't work in one group:
 
 `groupNode.ts:54 THREE.BufferGeometryUtils: .mergeGeometries() failed with
@@ -411,31 +421,33 @@ so far - copying and deleting component now handles node project
 database purged
 planes and circles now don't output 'uv' attribute in buffergeom
 
-thinking about sliders and vector math and pickEdge
+slider done.
+
+vector math (would be best with get vector?) get length would be also good
+but that's the best when I already have pick edge and pick face.
+
+#### plan for ui controls
+
+- 'EXPOSE' node would have a number/bool input and a string input for control
+  name and no output
+- it would store the node id of connected node
+- on component save it would save additional field into component:
+  a. control name
+  b. control type (number, slider, bool)
+  c. cur val (or start, stop, step curval for slider)
+  d. node id
+- on opening component add button to enable controls.
+- on enable controls the stored geom disappears and I spawn headless node
+  runtime
 
 ### current plan
 
 - finish group node - done
 - apply list inputs to linestring node - done
-- math nodes - progress
+- math nodes - progress/finish later?
 - ui/pset nodes and component view integration
 
-## Geometry processing and node rules
-
-### Geometry processing
-
-- all buffer geometry output should have position, index and normal attributes
-  but no uv
-- linestring is a nested array of vectors. each array is one connected linestring
-
-### Node
-
-- node values of index >= 100 are list inputs, where 100 is the index of the
-  parent list input
-
 ## General
-
-the problems to solve can be divided into two categories:
 
 BUGS:
 
@@ -446,6 +458,8 @@ BUGS:
 Runtime:
 
 - cache node outputs
+- now runtime has liveNodeIds - need to use this to store nodes output so eval
+  doesn't go through the same node couple of times
 - pick reference from 3D
 - fill polygon node (triangulate)
 
@@ -457,12 +471,24 @@ UI:
 - color picker in output node
 - addNode menu to have search - and display under right click
 - ctrl-z and ctrl-shift-r
-
-  additionally some tools that might need adding
-
 - measure tool
 - expose var (so it's adjustable in the browser) and dynamic props
-- don't allow to open node editor/don't fetch node project if not author
+
+Nodes:
+
+a. easy
+
+- triangulate linestring (w/ holes?)
+- apply transform
+- get length/get area/ get volume
+- add origin to transform node (and in transform object type)
+
+b. hard
+
+- boolean operations
+- pick from 3D
+- solidify
+- subdivide?
 
 done:
 
@@ -489,11 +515,3 @@ done:
 - translate/scale/angles or quaternion,
 - change/lock inputs conditionally
 - error when switching capped and the extrusion output is switching
-
-AI reverse engineering geometry to nodes
-
-matrix X (node type hot encoded) x Y (number of nodes) let's say max 20? x
-Z (Z dim = Y dim = connectivity)
-above idea doesn't capture values in nodes...
-
-loss based on both generated geom accuracy(not differentiable?) and node scheme

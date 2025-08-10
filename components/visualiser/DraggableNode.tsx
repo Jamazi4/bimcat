@@ -3,7 +3,6 @@
 import { nodeDefinitions } from "@/utils/nodes";
 import {
   Dispatch,
-  JSX,
   memo,
   SetStateAction,
   useCallback,
@@ -11,21 +10,19 @@ import {
   useMemo,
   useRef,
 } from "react";
-import {
-  GeomNodeBackType,
-  inputWithSlotValueType,
-  NodeEdgeType,
-  NodeSlot,
-  SlotValues,
-} from "@/utils/nodeTypes";
+import { GeomNodeBackType, NodeEdgeType, NodeSlot } from "@/utils/nodeTypes";
 import DraggableNodeInputGroup from "./DraggableNodeInputGroup";
 import DraggableNodeOutputSlot from "./DraggableNodeOutputSlot";
 import DraggableNodeInputSlot from "./DraggableNodeInputSlot";
 import DraggableNodeInputBoolean from "./DraggableNodeInputBoolean";
 import DraggableNodeInputNumber from "./DraggableNodeInputNumber";
 import DraggableNodeComboSlot from "./DraggableNodeComboSlot";
-import DraggableNodeSelectInput from "./DraggableNodeSelectInput";
 import DraggableNodeSliderInput from "./DraggableNodeSliderInput";
+import {
+  extractGroupSlots,
+  extractListInputs,
+  extractSelectInputs,
+} from "@/utils/nodeDefinitions/nodeUtilFunctions";
 
 interface DraggableNodeProps {
   switchSelectInputValue: (
@@ -81,6 +78,8 @@ const DraggableNode = memo(function DraggableNode({
   const nodeRef = useRef<HTMLDivElement>(null);
   const changeThisNodeValues = changeNodeValue.bind(null, node.id);
 
+  const highlight = curTheme === "dark" ? "brightness-120" : "brightness-70";
+
   const connectedSlotIds = useMemo(() => {
     return edges.filter((e) => e.toNodeId === node.id).map((e) => e.toSlotId);
   }, [edges, node.id]);
@@ -109,96 +108,20 @@ const DraggableNode = memo(function DraggableNode({
     [getViewTransformScale],
   );
 
-  const highlight = curTheme === "dark" ? "brightness-120" : "brightness-70";
-
-  const groupSlots = nodeDef.inputs.reduce(
-    (acc, cur) => {
-      if (cur.type == "group") {
-        if (!acc[cur.groupIndex]) acc[cur.groupIndex] = [];
-        acc[cur.groupIndex].push(cur);
-      }
-      return acc;
-    },
-    {} as Record<number, typeof nodeDef.inputs>,
+  const groupSlots = extractGroupSlots(nodeDef);
+  const { listSlots, activeGroupIndex } = extractListInputs(
+    nodeDef,
+    node,
+    getSlotRelativePosition,
+    nodeRef,
+    finishConnecting,
+    registerNodeSlot,
   );
-
-  const inputs = nodeDef.inputs;
-  const listSlots: JSX.Element[] = [];
-  let activeGroupIndex: number;
-  {
-    //this part is for figuring out what will be the type of list inputs if
-    //parent list input is group
-    activeGroupIndex = inputs.filter(
-      (i) => i.value === true && i.type === "group",
-    )[0]?.id;
-    const curInputIds = inputs.map((input) => input.id);
-    if (node.values) {
-      Object.entries(node.values).forEach(([inputId, val]) => {
-        const inputIdParsed = parseInt(inputId);
-        if (
-          val === true &&
-          curInputIds.includes(inputIdParsed) &&
-          nodeDef.inputs[inputIdParsed].type === "group"
-        ) {
-          activeGroupIndex = parseInt(inputId);
-        }
-      });
-    }
-
-    //proceed with generating list inputs
-    if (node.values) {
-      const listInput = nodeDef.inputs.find((i) => i.isList === true);
-      let curInputType: SlotValues;
-      if (listInput && listInput.type === "group") {
-        curInputType = (
-          nodeDef.inputs[activeGroupIndex] as inputWithSlotValueType
-        ).slotValueType;
-      } else if (listInput) {
-        curInputType = (listInput as inputWithSlotValueType).slotValueType;
-      }
-      Object.entries(node.values).forEach(([vInputId, _]) => {
-        const vInputIdParsed = parseInt(vInputId);
-        if (vInputIdParsed >= 100) {
-          const partialSlotData: Partial<NodeSlot> = {
-            nodeId: node.id,
-            slotId: vInputIdParsed,
-            slotIO: "input",
-          };
-          listSlots.push(
-            <DraggableNodeInputSlot
-              nodeValues={node.values}
-              optional={true}
-              slotValueType={curInputType}
-              getSlotRelativePosition={getSlotRelativePosition}
-              nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
-              finishConnecting={finishConnecting}
-              partialSlotData={partialSlotData}
-              registerNodeSlot={registerNodeSlot}
-              key={vInputIdParsed}
-              name={curInputType}
-            />,
-          );
-        }
-      });
-    }
-  }
-
-  const selectInputs: JSX.Element[] = [];
-
-  nodeDef.inputs.forEach((i) => {
-    if (i.type === "select") {
-      const activeIndex = node.values?.[i.id] as string;
-      selectInputs.push(
-        <DraggableNodeSelectInput
-          switchSelectInputValue={switchSelectInputValue}
-          activeIndex={parseInt(activeIndex)}
-          inputValues={i.options}
-          nodeId={node.id}
-          inputId={i.id}
-        />,
-      );
-    }
-  });
+  const selectInputs = extractSelectInputs(
+    nodeDef,
+    node,
+    switchSelectInputValue,
+  );
 
   return (
     <div
