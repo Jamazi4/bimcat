@@ -95,7 +95,7 @@ export type NodeInputType = (
       slotValueType: SlotValues;
       value: number | boolean | string;
     }
-  | { type: "number" | "boolean" | "string" }
+  | { type: "number" | "boolean" | "string"; isSlider?: boolean }
 ) & {
   defaultValue?: ASTNode;
   name: string;

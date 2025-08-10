@@ -19,11 +19,9 @@ export function NavbarMenu() {
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <Link href="/" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Home
-            </NavigationMenuLink>
-          </Link>
+          <NavigationMenuLink href="/" className={navigationMenuTriggerStyle()}>
+            Home
+          </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuTrigger>Components</NavigationMenuTrigger>
@@ -39,11 +37,12 @@ export function NavbarMenu() {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href="/libraries" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Libraries
-            </NavigationMenuLink>
-          </Link>
+          <NavigationMenuLink
+            href="/libraries"
+            className={navigationMenuTriggerStyle()}
+          >
+            Libraries
+          </NavigationMenuLink>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>

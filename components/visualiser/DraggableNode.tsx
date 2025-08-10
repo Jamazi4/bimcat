@@ -25,6 +25,7 @@ import DraggableNodeInputBoolean from "./DraggableNodeInputBoolean";
 import DraggableNodeInputNumber from "./DraggableNodeInputNumber";
 import DraggableNodeComboSlot from "./DraggableNodeComboSlot";
 import DraggableNodeSelectInput from "./DraggableNodeSelectInput";
+import DraggableNodeSliderInput from "./DraggableNodeSliderInput";
 
 interface DraggableNodeProps {
   switchSelectInputValue: (
@@ -253,7 +254,13 @@ const DraggableNode = memo(function DraggableNode({
               const changeThisValue = changeThisNodeValues.bind(null, input.id);
               if (!node.values) return;
 
-              return (
+              return input.isSlider ? (
+                <DraggableNodeSliderInput
+                  key={input.id}
+                  value={node.values[input.id] as number}
+                  changeThisValue={changeThisValue}
+                />
+              ) : (
                 <DraggableNodeInputNumber
                   key={input.id}
                   value={node.values[input.id] as number}
