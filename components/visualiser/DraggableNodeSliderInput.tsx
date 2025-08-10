@@ -17,12 +17,14 @@ const DraggableNodeSliderInput = ({
     changeThisValue(val);
   };
   return (
-    <div className="h-12 flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-2 connect-slot">
-      <Slider
-        value={[parseFloat(curVal)]}
-        onValueChange={(e) => handleChange(e)}
-        className={`"w-30 !text-2xl`}
-      />
+    <div className="h-12">
+      <div className="absolute h-12 w-full p-4 flex space-x-1 items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer connect-slot">
+        <Slider
+          value={[parseFloat(curVal)]}
+          onValueChange={(e) => handleChange(e)}
+          className={`"w-30 !text-2xl`}
+        />
+      </div>
     </div>
   );
 };

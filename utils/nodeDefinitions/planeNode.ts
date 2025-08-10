@@ -14,14 +14,14 @@ export function planeNode(nodeDefId: number): nodeDefinition {
       {
         type: "combo",
         value: 1,
-        name: "width",
+        name: "X",
         id: 0,
         slotValueType: "number",
       },
       {
         type: "combo",
         value: 1,
-        name: "height",
+        name: "Y",
         id: 1,
         slotValueType: "number",
       },
