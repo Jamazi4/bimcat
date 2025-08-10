@@ -23,6 +23,7 @@ import {
   extractListInputs,
   extractSelectInputs,
 } from "@/utils/nodeDefinitions/nodeUtilFunctions";
+import DraggableNodeInputString from "./DraggableNodeInputString";
 
 interface DraggableNodeProps {
   switchSelectInputValue: (
@@ -173,7 +174,17 @@ const DraggableNode = memo(function DraggableNode({
           })}
 
           {nodeDef.inputs.map((input, i) => {
-            if (input.type === "number") {
+            if (input.type === "string") {
+              const changeThisValue = changeThisNodeValues.bind(null, input.id);
+
+              return (
+                <DraggableNodeInputString
+                  value={(node.values?.[input.id] as string) || ""}
+                  changeThisValue={changeThisValue}
+                  key={i}
+                />
+              );
+            } else if (input.type === "number") {
               const changeThisValue = changeThisNodeValues.bind(null, input.id);
               if (!node.values) return;
 

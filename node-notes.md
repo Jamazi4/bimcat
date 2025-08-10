@@ -480,8 +480,11 @@ a. easy
 
 - triangulate linestring (w/ holes?)
 - apply transform
-- get length/get area/ get volume
-- add origin to transform node (and in transform object type)
+- get length/get area/get volume
+- get normal
+- normalize
+- add origin to transform node (and in transform object type)!
+- pset/psetKeyValue
 
 b. hard
 
