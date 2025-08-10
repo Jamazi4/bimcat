@@ -430,7 +430,7 @@ but that's the best when I already have pick edge and pick face.
 
 - 'EXPOSE' node would have a number/bool input and a string input for control
   name and no output
-- it would store the node id of connected node
+- it would store the node id of connected node (where? - special redux reducer?)
 - on component save it would save additional field into component:
   a. control name
   b. control type (number, slider, bool)
