@@ -399,12 +399,24 @@ okay now combo can handle boolean
 important thing to do - now runtime has liveNodeIds - need to use this to store
 nodes output so eval doesn't have to go through the same node couple of times
 
+planes and extruded geometry don't work in one group:
+
+`groupNode.ts:54 THREE.BufferGeometryUtils: .mergeGeometries() failed with
+geometry at index 1. Make sure all geometries have the same number of
+attributes. function @ groupNode.ts:54`
+
 ### current plan
 
 - finish group node - done
-- apply list inputs to linestring node
-- math nodes
+- apply list inputs to linestring node - done
+- math nodes - progress
 - ui/pset nodes and component view integration
+
+### Geometry processing rules
+
+- all buffer geometry output should have position, index and normal attributes
+  but no uv
+- linestring is a nested array of vectors. each array is one connected linestring
 
 ## General
 

@@ -61,6 +61,7 @@ export function circleNode(nodeDefId: number): nodeDefinition {
         }
 
         const linestringClean = linestring.slice(1);
+        geom.deleteAttribute("uv");
 
         return {
           3: { type: "mesh", value: geom },

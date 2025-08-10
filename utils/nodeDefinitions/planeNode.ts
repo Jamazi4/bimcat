@@ -51,6 +51,7 @@ export function planeNode(nodeDefId: number): nodeDefinition {
         const transformMatrix = composeTransformMatrix(transform.value);
 
         geom.applyMatrix4(transformMatrix);
+        geom.deleteAttribute("uv");
 
         const linestring = extractOrderedBoundaryLoop(geom)[0];
         linestring.push(linestring[0]);
@@ -59,6 +60,7 @@ export function planeNode(nodeDefId: number): nodeDefinition {
           4: { type: "linestring", value: [linestring] },
         };
       }
+
       throw new Error("Invalid inputs to plane node");
     },
   };
