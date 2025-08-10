@@ -97,6 +97,7 @@ export const updateNodeProject = async (
   try {
     const dbUser = await getDbUser();
     if (!dbUser) throw new Error("Could not find user");
+
     const component = await prisma.component.findUnique({
       where: { id: componentId },
       select: {
@@ -106,8 +107,8 @@ export const updateNodeProject = async (
         nodes: { select: { id: true } },
       },
     });
-    if (!component) throw new Error("Could not find component");
 
+    if (!component) throw new Error("Could not find component");
     if (dbUser.id !== component?.userId || !component)
       throw new Error("No Component or unauthorized");
     if (!component.nodes || !component.nodes.id)
@@ -120,16 +121,28 @@ export const updateNodeProject = async (
         geometry.map((g) => tx.componentGeometry.create({ data: g })),
       );
 
+      const usage = await tx.component.findMany({
+        where: {
+          geometry: {
+            some: {
+              id: { in: oldGeomIds },
+            },
+          },
+        },
+        select: {
+          id: true,
+          geometry: {
+            select: { id: true },
+            where: { id: { in: oldGeomIds } },
+          },
+        },
+      });
+
       await tx.component.update({
         where: { id: componentId },
         data: {
           geometry: { set: [] },
         },
-      });
-
-      const usage = await tx.component.findMany({
-        where: { id: { in: oldGeomIds } },
-        select: { geometry: { select: { id: true } } },
       });
 
       const usageMap: Record<string, number> = {};
@@ -140,7 +153,9 @@ export const updateNodeProject = async (
         }
       }
 
-      const geomsToDelete = oldGeomIds.filter((id) => usageMap[id] === 1);
+      const geomsToDelete = oldGeomIds.filter(
+        (id) => !usageMap[id] || usageMap[id] <= 1,
+      );
 
       await tx.component.update({
         where: { id: componentId },
@@ -151,9 +166,11 @@ export const updateNodeProject = async (
         },
       });
 
-      await tx.componentGeometry.deleteMany({
-        where: { id: { in: geomsToDelete } },
-      });
+      if (geomsToDelete.length > 0) {
+        await tx.componentGeometry.deleteMany({
+          where: { id: { in: geomsToDelete } },
+        });
+      }
 
       await tx.nodeProject.update({
         where: { id: component.nodes?.id },
