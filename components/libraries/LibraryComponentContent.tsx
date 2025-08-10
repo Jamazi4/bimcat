@@ -45,7 +45,7 @@ const LibraryComponentContent = async ({
         isPublic={component.public}
       />
       <ComponentContentWrapper
-        isUsingNodes={!!component.nodeProjectId}
+        isUsingNodes={!!component.nodes?.id}
         componentId={componentId}
         componentGeometry={component.geometry}
         componentEditable={component.editable}

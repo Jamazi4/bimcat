@@ -272,6 +272,7 @@ export const generateIfcFile = async (
   });
 
   const bin = ifcApi.SaveModel(modelId);
+  const uint8Array = new Uint8Array(bin);
 
-  return new Blob([bin], { type: "application/octet-stream" });
+  return new Blob([uint8Array], { type: "application/octet-stream" });
 };

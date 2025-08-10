@@ -146,8 +146,8 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
   const fetchNodes = useCallback(async (componentId: string) => {
     const nodeProject = await fetchNodeProject(componentId);
     if (!nodeProject) return;
-    setNodes(nodeProject.nodes);
-    setEdges(nodeProject.edges);
+    setNodes(nodeProject.nodes || []);
+    setEdges(nodeProject.edges || []);
   }, []);
 
   const saveNodeProject = useCallback(

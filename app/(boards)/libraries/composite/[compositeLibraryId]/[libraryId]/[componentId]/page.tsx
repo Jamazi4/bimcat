@@ -50,7 +50,7 @@ const Page = async ({
         isPublic={result.component.public}
       />
       <ComponentContentWrapper
-        isUsingNodes={!!result.component.nodeProjectId}
+        isUsingNodes={!!result.component.nodes?.id}
         componentId={componentId}
         componentGeometry={result.component.geometry}
         componentEditable={result.component.editable}
