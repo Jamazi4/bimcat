@@ -435,6 +435,9 @@ still working on the bug.
 I think that currently the node system is highly non-optimal. I can get the
 node output values while building AST?
 
+bug solved and also new logic for deleting edge and pasting nodes - related to
+list inputs
+
 #### plan for ui controls
 
 - 'EXPOSE' node would have a number/bool input and a string input for control
