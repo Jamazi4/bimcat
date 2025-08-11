@@ -13,7 +13,10 @@ import useNodesRuntime from "./useNodesRuntime";
 import { ComponentGeometry } from "../types";
 import useRuntimeNodes from "./useRuntimeNodes";
 import {
+  EdgeRewiring,
   GeomNodeBackType,
+  ListInputAnalysis,
+  NodeDefinitionShort,
   NodeEdgeType,
   NodeSlot,
   NodeValues,
@@ -407,25 +410,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     setCopiedEdges(curCopiedEdges);
     copyOffset.current = 30;
   }, []);
-
-  // Helper function to analyze list input state for a node
-  // Shared helper types
-  type EdgeRewiring = { oldEdge: NodeEdgeType; newToSlotId: number };
-
-  type NodeDefinitionShort = {
-    type: string;
-    inputs: Array<{ id: number; isList?: boolean }>;
-  };
-
-  type ListInputAnalysis = {
-    parentInput: { id: number; isList: boolean };
-    parentEdge: NodeEdgeType | undefined;
-    listEdges: NodeEdgeType[];
-    listValueKeys: number[];
-    edgesToNode: NodeEdgeType[];
-    hasParentEdge: boolean;
-    hasListEdges: boolean;
-  } | null;
 
   // Shared helper function to analyze list inputs for a node
   const analyzeListInputs = useCallback(

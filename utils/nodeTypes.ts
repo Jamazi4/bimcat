@@ -185,3 +185,20 @@ export type inputWithSlotValueType = Extract<
   NodeInputType,
   { type: "group" | "slot" | "combo" }
 >;
+
+export type EdgeRewiring = { oldEdge: NodeEdgeType; newToSlotId: number };
+
+export type NodeDefinitionShort = {
+  type: string;
+  inputs: Array<{ id: number; isList?: boolean }>;
+};
+
+export type ListInputAnalysis = {
+  parentInput: { id: number; isList: boolean };
+  parentEdge: NodeEdgeType | undefined;
+  listEdges: NodeEdgeType[];
+  listValueKeys: number[];
+  edgesToNode: NodeEdgeType[];
+  hasParentEdge: boolean;
+  hasListEdges: boolean;
+} | null;
