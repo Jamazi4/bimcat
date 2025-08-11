@@ -426,6 +426,15 @@ slider done.
 vector math (would be best with get vector?) get length would be also good
 but that's the best when I already have pick edge and pick face.
 
+### --11-08-2025--
+
+noticed bug: copied group with inputs attached removes inputs
+
+still working on the bug.
+
+I think that currently the node system is highly non-optimal. I can get the
+node output values while building AST?
+
 #### plan for ui controls
 
 - 'EXPOSE' node would have a number/bool input and a string input for control
@@ -454,6 +463,8 @@ BUGS:
 - left-click on node
 - enabled node menu buttons when not in node navigation
 - ctrl-c not working in input fields
+- no capital letters in string input
+- copied group node destroys connections if they are copied with it
 
 Runtime:
 
@@ -485,6 +496,10 @@ a. easy
 - normalize
 - add origin to transform node (and in transform object type)!
 - pset/psetKeyValue
+- filter - faces by normal, edges by length (maybe dir) verts by bool?
+- math min/max/calmp
+- bigger than/smaller than or/and
+- concatenate string/cast num to string
 
 b. hard
 
@@ -492,6 +507,7 @@ b. hard
 - pick from 3D
 - solidify
 - subdivide?
+- if block
 
 done:
 

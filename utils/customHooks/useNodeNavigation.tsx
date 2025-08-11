@@ -519,7 +519,7 @@ export const useNodeNavigation = (
       const isListChild = toSlotId >= 100;
 
       if (isListChild) {
-        let listParentValueType: SlotValues = "number";
+        let listParentValueType: SlotValues = "number"; //placeholder
         const listParentSlots = toNodeDef.inputs.filter(
           (i) => i.isList === true,
         );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchNodeProject,
   updateNodeProject,
@@ -111,6 +111,14 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
   const runtimeNodes = useRuntimeNodes(nodes);
 
   const curClickedNodeId = useRef<string>("");
+
+  const nodeTypesWithListInputs = useMemo(() => {
+    return nodeDefinitions
+      .filter((nd) => {
+        return nd.inputs.find((i) => i.isList);
+      })
+      .map((nd) => nd.type);
+  }, []);
 
   const { startNodeRuntime, renderNodeOutput } = useNodesRuntime({
     runtimeNodes,
@@ -400,46 +408,423 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     copyOffset.current = 30;
   }, []);
 
+  // const pasteCopiedNodes = useCallback(() => {
+  //   if (!copiedNodesRef.current.length) return;
+  //
+  //   const oldIdToNewIdMap: Record<string, string> = {};
+  //
+  //   const rewiredListEdges: NodeEdgeType[] = [];
+  //
+  //   const newNodes = copiedNodesRef.current.map((n) => {
+  //     const newId = createNodeId();
+  //
+  //     oldIdToNewIdMap[n.id] = newId;
+  //
+  //     const newValues = { ...n.values };
+  //
+  //     let copiedParentEdge: NodeEdgeType | null | undefined;
+  //
+  //     if (nodeTypesWithListInputs.includes(n.type) && n.values) {
+  //       const edgesToCurNode = copiedEdgesRef.current.filter(
+  //         (e) => e.toNodeId === n.id,
+  //       );
+  //       const nodeDef = nodeDefinitions.find((nd) => nd.type === n.type);
+  //       const parentId = nodeDef?.inputs.find((i) => i.isList)?.id;
+  //       copiedParentEdge = edgesToCurNode.find((e) => e.toSlotId === parentId);
+  //       const lastValueId = Math.max(...Object.keys(n.values).map(Number));
+  //       const firstValueId = Math.min(
+  //         ...Object.keys(n.values)
+  //           .filter((key) => parseInt(key) >= 100)
+  //           .map(Number),
+  //       );
+  //
+  //       if (copiedParentEdge || edgesToCurNode.length === 0) {
+  //         Object.entries(n.values).forEach(([key, _]) => {
+  //           const parsedKey = parseInt(key);
+  //           const keepValue = copiedEdgesRef.current.find(
+  //             (e) => e.toNodeId === n.id && e.toSlotId === parsedKey,
+  //           );
+  //           const isLastKeptValue =
+  //             edgesToCurNode.length !== 0 && parsedKey === lastValueId;
+  //
+  //           if (parseInt(key) >= 100 && !(keepValue || isLastKeptValue)) {
+  //             delete newValues[key];
+  //           }
+  //         });
+  //       } else if (!copiedParentEdge && edgesToCurNode.length !== 0) {
+  //         Object.entries(n.values).forEach(([key, _]) => {
+  //           const parsedKey = parseInt(key);
+  //           const keepValue = copiedEdgesRef.current.find(
+  //             (e) => e.toNodeId === n.id && e.toSlotId === parsedKey,
+  //           );
+  //
+  //           if (parseInt(key) >= 100 && !keepValue) {
+  //             delete newValues[key];
+  //           }
+  //         });
+  //         copiedEdgesRef.current.forEach((e) => {
+  //           if (e.toSlotId === firstValueId) {
+  //             const newEdge = { ...e };
+  //             newEdge.toSlotId = parentId!;
+  //             rewiredListEdges.push(newEdge);
+  //           } else if (e.toSlotId > firstValueId) {
+  //             const newEdge = { ...e };
+  //             const sortedSlotIds = edgesToCurNode
+  //               .map((edge) => edge.toSlotId)
+  //               .sort((a, b) => a - b);
+  //             const currentIndex = sortedSlotIds.indexOf(e.toSlotId);
+  //             newEdge.toSlotId = 100 + (currentIndex - 1);
+  //             rewiredListEdges.push(newEdge);
+  //           }
+  //         });
+  //       }
+  //     }
+  //
+  //     return {
+  //       ...n,
+  //       id: newId,
+  //       x: n.x + copyOffset.current,
+  //       y: n.y + copyOffset.current,
+  //       values: newValues,
+  //     };
+  //   });
+  //
+  //   copyOffset.current = copyOffset.current + 30;
+  //
+  //   const newEdges = copiedEdgesRef.current.map((e) => {
+  //     let curEdge = e;
+  //     if (rewiredListEdges.find((re) => re.id === e.id)) {
+  //       curEdge = rewiredListEdges.find(
+  //         (curRewired) => curRewired.id === e.id,
+  //       )!;
+  //     }
+  //     return {
+  //       ...curEdge,
+  //       id: createEdgeId(),
+  //       fromNodeId: oldIdToNewIdMap[curEdge.fromNodeId],
+  //       toNodeId: oldIdToNewIdMap[curEdge.toNodeId],
+  //     };
+  //   });
+  //
+  //   setNodes((prevNodes) => [...prevNodes, ...newNodes]);
+  //   setEdges((prevEdges) => [...prevEdges, ...newEdges]);
+  //   setSelectedNodeIds(newNodes.map((n) => n.id));
+  // }, [nodeTypesWithListInputs]);
+  //
+  //
+
+  // Helper function to analyze list input state for a node
+  // Shared helper types
+  type EdgeRewiring = { oldEdge: NodeEdgeType; newToSlotId: number };
+
+  type NodeDefinition = {
+    type: string;
+    inputs: Array<{ id: number; isList?: boolean }>;
+  };
+
+  type ListInputAnalysis = {
+    parentInput: { id: number; isList: boolean };
+    parentEdge: NodeEdgeType | undefined;
+    listEdges: NodeEdgeType[];
+    listValueKeys: number[];
+    edgesToNode: NodeEdgeType[];
+    hasParentEdge: boolean;
+    hasListEdges: boolean;
+  } | null;
+
+  // Shared helper function to analyze list inputs for a node
+  const analyzeListInputs = useCallback(
+    (
+      node: GeomNodeBackType,
+      edges: NodeEdgeType[],
+      nodeDefinitions: NodeDefinition[],
+      nodeTypesWithListInputs: string[],
+    ): ListInputAnalysis => {
+      if (!nodeTypesWithListInputs.includes(node.type) || !node.values) {
+        return null;
+      }
+
+      const edgesToNode = edges.filter((e) => e.toNodeId === node.id);
+      const nodeDef = nodeDefinitions.find((nd) => nd.type === node.type);
+      const parentInputCandidate = nodeDef?.inputs.find((i) => i.isList);
+
+      // Ensure we have a valid list input with required properties
+      if (!parentInputCandidate || !parentInputCandidate.isList) return null;
+
+      const parentInput = { id: parentInputCandidate.id, isList: true };
+      const parentEdge = edgesToNode.find((e) => e.toSlotId === parentInput.id);
+      const listEdges = edgesToNode
+        .filter((e) => e.toSlotId >= 100)
+        .sort((a, b) => a.toSlotId - b.toSlotId);
+
+      const listValueKeys = Object.keys(node.values)
+        .filter((key) => parseInt(key) >= 100)
+        .map(Number)
+        .sort((a, b) => a - b);
+
+      return {
+        parentInput,
+        parentEdge,
+        listEdges,
+        listValueKeys,
+        edgesToNode,
+        hasParentEdge: !!parentEdge,
+        hasListEdges: listEdges.length > 0,
+      };
+    },
+    [],
+  );
+
+  // Shared helper function to process node values and generate edge rewiring info
+  const processNodeValues = useCallback(
+    (
+      node: GeomNodeBackType,
+      analysis: ListInputAnalysis,
+      mode: "paste" | "removeParent" = "paste",
+    ): {
+      newValues: Record<string, string | number | boolean>;
+      edgeRewiring: EdgeRewiring[];
+    } => {
+      if (!analysis || !node.values)
+        return { newValues: { ...node.values }, edgeRewiring: [] };
+
+      const newValues: Record<string, string | number | boolean> = {
+        ...node.values,
+      };
+      const edgeRewiring: EdgeRewiring[] = [];
+
+      if (mode === "paste") {
+        // Paste mode: handle different scenarios based on parent edge presence
+        if (analysis.hasParentEdge || !analysis.hasListEdges) {
+          // Normal case: keep values that have edges, plus the last value
+          const lastValueKey = Math.max(...analysis.listValueKeys);
+
+          Object.keys(newValues).forEach((key) => {
+            const keyNum = parseInt(key);
+            if (keyNum >= 100) {
+              const hasEdge = analysis.listEdges.some(
+                (e) => e.toSlotId === keyNum,
+              );
+              const isLastValue =
+                keyNum === lastValueKey && analysis.hasListEdges;
+
+              if (!hasEdge && !isLastValue) {
+                delete newValues[key];
+              }
+            }
+          });
+        } else {
+          // Missing parent case: rewire first list edge to parent, renumber others
+          const [firstEdge, ...remainingEdges] = analysis.listEdges;
+
+          // Clean all list values first
+          Object.keys(newValues).forEach((key) => {
+            if (parseInt(key) >= 100) {
+              delete newValues[key];
+            }
+          });
+
+          // Rewire first edge to parent
+          edgeRewiring.push({
+            oldEdge: firstEdge,
+            newToSlotId: analysis.parentInput.id,
+          });
+
+          // Renumber remaining edges sequentially
+          remainingEdges.forEach((edge, index) => {
+            const newSlotId = 100 + index;
+            edgeRewiring.push({
+              oldEdge: edge,
+              newToSlotId: newSlotId,
+            });
+
+            // Preserve the original value if it existed
+            const originalValue = node.values?.[edge.toSlotId];
+            if (originalValue !== undefined) {
+              newValues[newSlotId] = originalValue;
+            }
+          });
+
+          // Add default false value at the end
+          if (remainingEdges.length >= 0) {
+            newValues[100 + remainingEdges.length] = false;
+          }
+        }
+      } else if (mode === "removeParent") {
+        // Remove parent mode: always rewire first list edge to parent, renumber others
+        if (analysis.hasListEdges) {
+          const [_, ...remainingEdges] = analysis.listEdges;
+
+          // Clear all list values first
+          Object.keys(newValues).forEach((key) => {
+            if (parseInt(key) >= 100) {
+              delete newValues[key];
+            }
+          });
+
+          // First edge will be rewired to parent (handled by caller)
+          // Renumber remaining edges sequentially
+          remainingEdges.forEach((edge, index) => {
+            const newSlotId = 100 + index;
+            edgeRewiring.push({
+              oldEdge: edge,
+              newToSlotId: newSlotId,
+            });
+
+            // Preserve the original value if it existed
+            const originalValue = node.values?.[edge.toSlotId];
+            if (originalValue !== undefined) {
+              newValues[newSlotId] = originalValue;
+            }
+          });
+
+          // Add default false value at the end
+          if (remainingEdges.length >= 0) {
+            newValues[100 + remainingEdges.length] = false;
+          }
+        } else {
+          // No list edges - just clear all list values
+          Object.keys(newValues).forEach((key) => {
+            const keyNum = parseInt(key);
+            if (keyNum >= 100) {
+              delete newValues[keyNum];
+            }
+          });
+        }
+      }
+
+      return { newValues, edgeRewiring };
+    },
+    [],
+  );
+
+  // Refactored pasteCopiedNodes using shared helpers
   const pasteCopiedNodes = useCallback(() => {
     if (!copiedNodesRef.current.length) return;
 
-    const idMap: Record<string, string> = {};
+    const oldIdToNewIdMap: Record<string, string> = {};
+    const nodeProcessingResults = new Map<string, EdgeRewiring[]>();
 
-    const newNodes = copiedNodesRef.current.map((n) => {
+    const newNodes = copiedNodesRef.current.map((node) => {
       const newId = createNodeId();
+      oldIdToNewIdMap[node.id] = newId;
 
-      idMap[n.id] = newId;
-      const newValues = { ...n.values };
-      if (n.type === "group" && n.values) {
-        Object.entries(n.values).forEach(([key, _]) => {
-          if (parseInt(key) >= 100) {
-            delete newValues[key];
-          }
-        });
+      const analysis = analyzeListInputs(
+        node,
+        copiedEdgesRef.current,
+        nodeDefinitions,
+        nodeTypesWithListInputs,
+      );
+      const { newValues, edgeRewiring } = processNodeValues(
+        node,
+        analysis,
+        "paste",
+      );
+
+      // Store rewiring info for edge processing
+      if (edgeRewiring.length > 0) {
+        nodeProcessingResults.set(node.id, edgeRewiring);
       }
 
       return {
-        ...n,
+        ...node,
         id: newId,
-        x: n.x + copyOffset.current,
-        y: n.y + copyOffset.current,
+        x: node.x + copyOffset.current,
+        y: node.y + copyOffset.current,
         values: newValues,
       };
     });
 
-    copyOffset.current = copyOffset.current + 30;
+    copyOffset.current += 30;
 
-    const newEdges = copiedEdgesRef.current.map((e) => ({
-      ...e,
-      id: createEdgeId(),
-      fromNodeId: idMap[e.fromNodeId],
-      toNodeId: idMap[e.toNodeId],
-    }));
+    // Create new edges with rewiring applied
+    const newEdges = copiedEdgesRef.current.map((edge) => {
+      let toSlotId = edge.toSlotId;
+
+      // Check if this edge needs rewiring
+      const rewiring = nodeProcessingResults.get(edge.toNodeId);
+      if (rewiring) {
+        const rewrite = rewiring.find((r) => r.oldEdge.id === edge.id);
+        if (rewrite) {
+          toSlotId = rewrite.newToSlotId;
+        }
+      }
+
+      return {
+        ...edge,
+        id: createEdgeId(),
+        fromNodeId: oldIdToNewIdMap[edge.fromNodeId],
+        toNodeId: oldIdToNewIdMap[edge.toNodeId],
+        toSlotId,
+      };
+    });
 
     setNodes((prevNodes) => [...prevNodes, ...newNodes]);
     setEdges((prevEdges) => [...prevEdges, ...newEdges]);
     setSelectedNodeIds(newNodes.map((n) => n.id));
-  }, []);
+  }, [analyzeListInputs, nodeTypesWithListInputs, processNodeValues]);
+
+  // Refactored removeParentListEdge using shared helpers
+  const removeParentListEdge = useCallback(
+    (edge: NodeEdgeType, node: GeomNodeBackType) => {
+      const analysis = analyzeListInputs(
+        node,
+        edgesRef.current,
+        nodeDefinitions,
+        nodeTypesWithListInputs,
+      );
+      if (!analysis) return;
+
+      if (analysis.hasListEdges) {
+        const [firstListEdge] = analysis.listEdges;
+        const { newValues, edgeRewiring } = processNodeValues(
+          node,
+          analysis,
+          "removeParent",
+        );
+
+        // Rewire first list edge to parent slot (the edge being removed)
+        setEdges((prevEdges) =>
+          prevEdges.map((e) => {
+            if (e.id === firstListEdge.id) {
+              return { ...e, toSlotId: edge.toSlotId };
+            }
+            return e;
+          }),
+        );
+
+        // Apply edge rewiring for remaining edges
+        if (edgeRewiring.length > 0) {
+          setEdges((prevEdges) =>
+            prevEdges.map((e) => {
+              const rewrite = edgeRewiring.find((r) => r.oldEdge.id === e.id);
+              if (rewrite) {
+                return { ...e, toSlotId: rewrite.newToSlotId };
+              }
+              return e;
+            }),
+          );
+        }
+
+        // Update node values
+        setNodes((prevNodes) =>
+          prevNodes.map((n) =>
+            n.id === edge.toNodeId ? { ...n, values: newValues } : n,
+          ),
+        );
+      } else {
+        // No list edges - just clear all list values
+        const { newValues } = processNodeValues(node, analysis, "removeParent");
+
+        setNodes((prevNodes) =>
+          prevNodes.map((n) =>
+            n.id === edge.toNodeId ? { ...n, values: newValues } : n,
+          ),
+        );
+      }
+    },
+    [analyzeListInputs, nodeTypesWithListInputs, processNodeValues],
+  );
 
   const registerNodeSlot = useCallback((slotData: NodeSlot) => {
     setNodeSlots((prev) => {
@@ -539,12 +924,14 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     },
     [],
   );
+
   const deleteEdge = useCallback(
     (edgeId: string) => {
       const edge = edgesRef.current.find((e) => e.id === edgeId);
       if (!edge) return;
 
       const node = nodesRef.current.find((n) => n.id === edge.toNodeId);
+      if (!node) return;
       const nodeDef = nodeDefinitions.find((nd) => nd.type === node?.type);
       const inputDef = nodeDef?.inputs.find((i) => i.id === edge.toSlotId);
       const isParentList = inputDef?.isList;
@@ -554,82 +941,10 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
       if (edge.toSlotId >= 100) {
         removeListSlot(edge.toNodeId, edge.toSlotId);
       } else if (isParentList) {
-        const currentValues = { ...node?.values };
-
-        const listEdges = edgesRef.current
-          .filter((e) => e.toNodeId === edge.toNodeId && e.toSlotId >= 100)
-          .sort((a, b) => a.toSlotId - b.toSlotId);
-
-        if (listEdges.length > 0) {
-          const firstListEdge = listEdges[0];
-
-          setEdges((prevEdges) =>
-            prevEdges.map((e) => {
-              if (e.id === firstListEdge.id) {
-                return { ...e, toSlotId: edge.toSlotId };
-              }
-              return e;
-            }),
-          );
-
-          const remainingListEntries = Object.entries(currentValues)
-            .filter(([key]) => {
-              const keyNum = parseInt(key);
-              return keyNum >= 100 && keyNum !== firstListEdge.toSlotId;
-            })
-            .sort(([a], [b]) => parseInt(a) - parseInt(b));
-
-          Object.keys(currentValues).forEach((key) => {
-            if (parseInt(key) >= 100) {
-              delete currentValues[parseInt(key)];
-            }
-          });
-
-          const numRemaining = Math.max(0, remainingListEntries.length - 1);
-
-          for (let i = 0; i < numRemaining; i++) {
-            const [, val] = remainingListEntries[i];
-            currentValues[100 + i] = val;
-          }
-          currentValues[100 + numRemaining] = false;
-
-          setEdges((prevEdges) =>
-            prevEdges.map((e) => {
-              if (
-                e.toNodeId === edge.toNodeId &&
-                e.toSlotId > firstListEdge.toSlotId &&
-                e.id !== firstListEdge.id
-              ) {
-                return { ...e, toSlotId: e.toSlotId - 1 };
-              }
-              return e;
-            }),
-          );
-
-          setNodes((prevNodes) =>
-            prevNodes.map((n) =>
-              n.id === edge.toNodeId ? { ...n, values: currentValues } : n,
-            ),
-          );
-        } else {
-          const newValues = { ...currentValues };
-
-          Object.keys(newValues).forEach((key) => {
-            const keyNum = parseInt(key);
-            if (keyNum >= 100) {
-              delete newValues[keyNum];
-            }
-          });
-
-          setNodes((prevNodes) =>
-            prevNodes.map((n) =>
-              n.id === edge.toNodeId ? { ...n, values: newValues } : n,
-            ),
-          );
-        }
+        removeParentListEdge(edge, node);
       }
     },
-    [removeListSlot],
+    [removeListSlot, removeParentListEdge],
   );
 
   const getViewTransformScale = useCallback(() => {

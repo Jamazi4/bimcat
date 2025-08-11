@@ -163,6 +163,7 @@ export const updateNodeProject = async (
           geometry: {
             connect: newGeometryRecords.map((g) => ({ id: g.id })),
           },
+          updatedAt: new Date(),
         },
       });
 
