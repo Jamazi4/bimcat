@@ -363,93 +363,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     return { x: worldX, y: worldY };
   }, []);
 
-  const deleteNode = useCallback(() => {
-    //TODO: move to useNodeSystem
-
-    dispatch(deleteNodeOutputValue({ nodeIds: selectedNodeIdsRef.current }));
-
-    setNodes((prevNodes) => {
-      return prevNodes.filter(
-        (n) => !selectedNodeIdsRef.current.includes(n.id),
-      );
-    });
-
-    setNodeSlots((prevSlots) => {
-      return prevSlots.filter(
-        (slot) => !selectedNodeIdsRef.current.includes(slot.nodeId),
-      );
-    });
-
-    setNodeDivs((prevNodeDivs) => {
-      const prevNodeDivsArr = Object.entries(prevNodeDivs);
-      const newNodeDivs = prevNodeDivsArr.filter(
-        ([id, _]) => !selectedNodeIdsRef.current.includes(id),
-      );
-      return Object.fromEntries(newNodeDivs);
-    });
-
-    setEdges((prevEdges) => {
-      return prevEdges.filter((edge) => {
-        return (
-          !selectedNodeIdsRef.current.includes(edge.fromNodeId) &&
-          !selectedNodeIdsRef.current.includes(edge.toNodeId)
-        );
-      });
-    });
-  }, [dispatch]);
-
-  const addNode = useCallback(
-    (nodeDefId: number) => {
-      const nodeId = createNodeId();
-      const nodeDefinition = nodeDefinitions.find(
-        (node) => node.nodeDefId === nodeDefId,
-      );
-      if (!nodeDefinition) return;
-      const nodeType = nodeDefinition?.type;
-      const relInitPos = 200;
-      const worldPoint = screenToWorld(relInitPos, relInitPos);
-      const randFactor = 100;
-      const nodeX = worldPoint.x + Math.floor(Math.random() * randFactor);
-      const nodeY = worldPoint.y + Math.floor(Math.random() * randFactor);
-
-      const initValues: NodeValues = {};
-
-      nodeDefinition?.inputs.forEach((input) => {
-        if (input.type !== "slot" || input.value) {
-          initValues[input.id] = input.value!;
-        }
-      });
-      const newBackNode: GeomNodeBackType = {
-        id: nodeId,
-        type: nodeType!,
-        x: nodeX,
-        y: nodeY,
-      };
-
-      if (initValues) {
-        newBackNode["values"] = initValues;
-      }
-
-      setNodes((prevNodes) => [...prevNodes, newBackNode]);
-    },
-    [screenToWorld],
-  );
-
-  const copySelectedNodes = useCallback(() => {
-    const curCopiedNodes = nodesRef.current.filter((n) =>
-      selectedNodeIdsRef.current.includes(n.id),
-    );
-    setCopiedNodes(curCopiedNodes);
-
-    const curCopiedEdges = edgesRef.current.filter(
-      (e) =>
-        selectedNodeIdsRef.current.includes(e.fromNodeId) &&
-        selectedNodeIdsRef.current.includes(e.toNodeId),
-    );
-    setCopiedEdges(curCopiedEdges);
-    copyOffset.current = 30;
-  }, []);
-
   // Shared helper function to analyze list inputs for a node
   const analyzeListInputs = useCallback(
     (
@@ -514,7 +427,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
       if (mode === "paste") {
         // Paste mode: handle different scenarios based on parent edge presence
         if (analysis.hasParentEdge) {
-          console.log("hello");
           // Normal case: keep values that have edges, plus one empty slot
           // after the highest connected edge
           const connectedSlots = analysis.listEdges.map((e) => e.toSlotId);
@@ -631,6 +543,217 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     [],
   );
 
+  // Refactored removeParentListEdge using shared helpers
+  const removeParentListEdge = useCallback(
+    (edge: NodeEdgeType, node: GeomNodeBackType) => {
+      const analysis = analyzeListInputs(
+        node,
+        edgesRef.current,
+        nodeDefinitions,
+        nodeTypesWithListInputs,
+      );
+      if (!analysis) return;
+
+      if (analysis.hasListEdges) {
+        const [firstListEdge] = analysis.listEdges;
+        const { newValues, edgeRewiring } = processNodeValues(
+          node,
+          analysis,
+          "removeParent",
+        );
+
+        // Rewire first list edge to parent slot (the edge being removed)
+        setEdges((prevEdges) =>
+          prevEdges.map((e) => {
+            if (e.id === firstListEdge.id) {
+              return { ...e, toSlotId: edge.toSlotId };
+            }
+            return e;
+          }),
+        );
+
+        // Apply edge rewiring for remaining edges
+        if (edgeRewiring.length > 0) {
+          setEdges((prevEdges) =>
+            prevEdges.map((e) => {
+              const rewrite = edgeRewiring.find((r) => r.oldEdge.id === e.id);
+              if (rewrite) {
+                return { ...e, toSlotId: rewrite.newToSlotId };
+              }
+              return e;
+            }),
+          );
+        }
+
+        // Update node values
+        setNodes((prevNodes) =>
+          prevNodes.map((n) =>
+            n.id === edge.toNodeId ? { ...n, values: newValues } : n,
+          ),
+        );
+      } else {
+        // No list edges - just clear all list values
+        const { newValues } = processNodeValues(node, analysis, "removeParent");
+
+        setNodes((prevNodes) =>
+          prevNodes.map((n) =>
+            n.id === edge.toNodeId ? { ...n, values: newValues } : n,
+          ),
+        );
+      }
+    },
+    [analyzeListInputs, nodeTypesWithListInputs, processNodeValues],
+  );
+
+  const deleteEdge = useCallback(
+    (edgeId: string) => {
+      const edge = edgesRef.current.find((e) => e.id === edgeId);
+      if (!edge) return;
+
+      const node = nodesRef.current.find((n) => n.id === edge.toNodeId);
+      if (!node) return;
+      const nodeDef = nodeDefinitions.find((nd) => nd.type === node?.type);
+      const inputDef = nodeDef?.inputs.find((i) => i.id === edge.toSlotId);
+      const isParentList = inputDef?.isList;
+
+      setEdges((prevEdges) => prevEdges.filter((e) => e.id !== edgeId));
+
+      if (edge.toSlotId >= 100) {
+        removeListSlot(edge.toNodeId, edge.toSlotId);
+      } else if (isParentList) {
+        removeParentListEdge(edge, node);
+      }
+    },
+    [removeListSlot, removeParentListEdge],
+  );
+
+  const deleteNode = useCallback(() => {
+    dispatch(deleteNodeOutputValue({ nodeIds: selectedNodeIdsRef.current }));
+
+    const edgesToDelete = edgesRef.current.filter((e) => {
+      return (
+        selectedNodeIdsRef.current.includes(e.fromNodeId) ||
+        selectedNodeIdsRef.current.includes(e.toNodeId)
+      );
+    });
+
+    const nodeIdsConnected = edgesToDelete.map((e) => e.toNodeId);
+    const nodesConnected = nodesRef.current.filter((n) =>
+      nodeIdsConnected.includes(n.id),
+    );
+    const nodesConnectedContainingListInputs = nodesConnected.filter((n) => {
+      return nodeTypesWithListInputs.includes(n.type);
+    });
+
+    const edgesLeadingToListInputs: NodeEdgeType[] = [];
+    if (nodesConnectedContainingListInputs.length > 0) {
+      const nodeIdsConnectedContainingListInputs =
+        nodesConnectedContainingListInputs.map((n) => n.id);
+      const edgesToNodesContainingListInputs = edgesToDelete.filter((e) => {
+        return nodeIdsConnectedContainingListInputs.includes(e.toNodeId);
+      });
+
+      edgesLeadingToListInputs.push(
+        ...edgesToNodesContainingListInputs.filter((e) => e.toSlotId >= 100),
+      );
+
+      nodesConnectedContainingListInputs.forEach((n) => {
+        const nodeDef = nodeDefinitions.find((nd) => nd.type === n.type);
+        const listId = nodeDef?.inputs.find((i) => i.isList)?.id;
+        edgesToNodesContainingListInputs.forEach((e) => {
+          if (e.toSlotId === listId) {
+            edgesLeadingToListInputs.push(e);
+          }
+        });
+      });
+    }
+
+    edgesLeadingToListInputs.forEach((e) => {
+      deleteEdge(e.id);
+    });
+
+    setEdges((prevEdges) => {
+      return prevEdges.filter((edge) => {
+        return (
+          !selectedNodeIdsRef.current.includes(edge.fromNodeId) &&
+          !selectedNodeIdsRef.current.includes(edge.toNodeId)
+        );
+      });
+    });
+
+    setNodes((prevNodes) => {
+      return prevNodes.filter(
+        (n) => !selectedNodeIdsRef.current.includes(n.id),
+      );
+    });
+
+    setNodeSlots((prevSlots) => {
+      return prevSlots.filter(
+        (slot) => !selectedNodeIdsRef.current.includes(slot.nodeId),
+      );
+    });
+
+    setNodeDivs((prevNodeDivs) => {
+      const prevNodeDivsArr = Object.entries(prevNodeDivs);
+      const newNodeDivs = prevNodeDivsArr.filter(
+        ([id, _]) => !selectedNodeIdsRef.current.includes(id),
+      );
+      return Object.fromEntries(newNodeDivs);
+    });
+  }, [deleteEdge, dispatch, nodeTypesWithListInputs]);
+
+  const addNode = useCallback(
+    (nodeDefId: number) => {
+      const nodeId = createNodeId();
+      const nodeDefinition = nodeDefinitions.find(
+        (node) => node.nodeDefId === nodeDefId,
+      );
+      if (!nodeDefinition) return;
+      const nodeType = nodeDefinition?.type;
+      const relInitPos = 200;
+      const worldPoint = screenToWorld(relInitPos, relInitPos);
+      const randFactor = 100;
+      const nodeX = worldPoint.x + Math.floor(Math.random() * randFactor);
+      const nodeY = worldPoint.y + Math.floor(Math.random() * randFactor);
+
+      const initValues: NodeValues = {};
+
+      nodeDefinition?.inputs.forEach((input) => {
+        if (input.type !== "slot" || input.value) {
+          initValues[input.id] = input.value!;
+        }
+      });
+      const newBackNode: GeomNodeBackType = {
+        id: nodeId,
+        type: nodeType!,
+        x: nodeX,
+        y: nodeY,
+      };
+
+      if (initValues) {
+        newBackNode["values"] = initValues;
+      }
+
+      setNodes((prevNodes) => [...prevNodes, newBackNode]);
+    },
+    [screenToWorld],
+  );
+
+  const copySelectedNodes = useCallback(() => {
+    const curCopiedNodes = nodesRef.current.filter((n) =>
+      selectedNodeIdsRef.current.includes(n.id),
+    );
+    setCopiedNodes(curCopiedNodes);
+
+    const curCopiedEdges = edgesRef.current.filter(
+      (e) =>
+        selectedNodeIdsRef.current.includes(e.fromNodeId) &&
+        selectedNodeIdsRef.current.includes(e.toNodeId),
+    );
+    setCopiedEdges(curCopiedEdges);
+    copyOffset.current = 30;
+  }, []);
+
   // Refactored pasteCopiedNodes using shared helpers
   const pasteCopiedNodes = useCallback(() => {
     if (!copiedNodesRef.current.length) return;
@@ -696,68 +819,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     setEdges((prevEdges) => [...prevEdges, ...newEdges]);
     setSelectedNodeIds(newNodes.map((n) => n.id));
   }, [analyzeListInputs, nodeTypesWithListInputs, processNodeValues]);
-
-  // Refactored removeParentListEdge using shared helpers
-  const removeParentListEdge = useCallback(
-    (edge: NodeEdgeType, node: GeomNodeBackType) => {
-      const analysis = analyzeListInputs(
-        node,
-        edgesRef.current,
-        nodeDefinitions,
-        nodeTypesWithListInputs,
-      );
-      if (!analysis) return;
-
-      if (analysis.hasListEdges) {
-        const [firstListEdge] = analysis.listEdges;
-        const { newValues, edgeRewiring } = processNodeValues(
-          node,
-          analysis,
-          "removeParent",
-        );
-
-        // Rewire first list edge to parent slot (the edge being removed)
-        setEdges((prevEdges) =>
-          prevEdges.map((e) => {
-            if (e.id === firstListEdge.id) {
-              return { ...e, toSlotId: edge.toSlotId };
-            }
-            return e;
-          }),
-        );
-
-        // Apply edge rewiring for remaining edges
-        if (edgeRewiring.length > 0) {
-          setEdges((prevEdges) =>
-            prevEdges.map((e) => {
-              const rewrite = edgeRewiring.find((r) => r.oldEdge.id === e.id);
-              if (rewrite) {
-                return { ...e, toSlotId: rewrite.newToSlotId };
-              }
-              return e;
-            }),
-          );
-        }
-
-        // Update node values
-        setNodes((prevNodes) =>
-          prevNodes.map((n) =>
-            n.id === edge.toNodeId ? { ...n, values: newValues } : n,
-          ),
-        );
-      } else {
-        // No list edges - just clear all list values
-        const { newValues } = processNodeValues(node, analysis, "removeParent");
-
-        setNodes((prevNodes) =>
-          prevNodes.map((n) =>
-            n.id === edge.toNodeId ? { ...n, values: newValues } : n,
-          ),
-        );
-      }
-    },
-    [analyzeListInputs, nodeTypesWithListInputs, processNodeValues],
-  );
 
   const registerNodeSlot = useCallback((slotData: NodeSlot) => {
     setNodeSlots((prev) => {
@@ -856,28 +917,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
       else setConnectingToNode({ nodeId, slotId });
     },
     [],
-  );
-
-  const deleteEdge = useCallback(
-    (edgeId: string) => {
-      const edge = edgesRef.current.find((e) => e.id === edgeId);
-      if (!edge) return;
-
-      const node = nodesRef.current.find((n) => n.id === edge.toNodeId);
-      if (!node) return;
-      const nodeDef = nodeDefinitions.find((nd) => nd.type === node?.type);
-      const inputDef = nodeDef?.inputs.find((i) => i.id === edge.toSlotId);
-      const isParentList = inputDef?.isList;
-
-      setEdges((prevEdges) => prevEdges.filter((e) => e.id !== edgeId));
-
-      if (edge.toSlotId >= 100) {
-        removeListSlot(edge.toNodeId, edge.toSlotId);
-      } else if (isParentList) {
-        removeParentListEdge(edge, node);
-      }
-    },
-    [removeListSlot, removeParentListEdge],
   );
 
   const getViewTransformScale = useCallback(() => {
