@@ -22,6 +22,8 @@ import {
   NodeValues,
 } from "../nodeTypes";
 import { useNodeNavigation } from "./useNodeNavigation";
+import { deleteNodeOutputValue } from "@/lib/features/visualiser/visualiserSlice";
+import { useAppDispatch } from "@/lib/hooks";
 
 export const useNodeSystem = (meshGroup: THREE.Group) => {
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
@@ -114,6 +116,8 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
   const runtimeNodes = useRuntimeNodes(nodes);
 
   const curClickedNodeId = useRef<string>("");
+
+  const dispatch = useAppDispatch();
 
   const nodeTypesWithListInputs = useMemo(() => {
     return nodeDefinitions
@@ -359,6 +363,41 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     return { x: worldX, y: worldY };
   }, []);
 
+  const deleteNode = useCallback(() => {
+    //TODO: move to useNodeSystem
+
+    dispatch(deleteNodeOutputValue({ nodeIds: selectedNodeIdsRef.current }));
+
+    setNodes((prevNodes) => {
+      return prevNodes.filter(
+        (n) => !selectedNodeIdsRef.current.includes(n.id),
+      );
+    });
+
+    setNodeSlots((prevSlots) => {
+      return prevSlots.filter(
+        (slot) => !selectedNodeIdsRef.current.includes(slot.nodeId),
+      );
+    });
+
+    setNodeDivs((prevNodeDivs) => {
+      const prevNodeDivsArr = Object.entries(prevNodeDivs);
+      const newNodeDivs = prevNodeDivsArr.filter(
+        ([id, _]) => !selectedNodeIdsRef.current.includes(id),
+      );
+      return Object.fromEntries(newNodeDivs);
+    });
+
+    setEdges((prevEdges) => {
+      return prevEdges.filter((edge) => {
+        return (
+          !selectedNodeIdsRef.current.includes(edge.fromNodeId) &&
+          !selectedNodeIdsRef.current.includes(edge.toNodeId)
+        );
+      });
+    });
+  }, [dispatch]);
+
   const addNode = useCallback(
     (nodeDefId: number) => {
       const nodeId = createNodeId();
@@ -474,8 +513,10 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
 
       if (mode === "paste") {
         // Paste mode: handle different scenarios based on parent edge presence
-        if (analysis.hasParentEdge || !analysis.hasListEdges) {
-          // Normal case: keep values that have edges, plus one empty slot after the highest connected edge
+        if (analysis.hasParentEdge) {
+          console.log("hello");
+          // Normal case: keep values that have edges, plus one empty slot
+          // after the highest connected edge
           const connectedSlots = analysis.listEdges.map((e) => e.toSlotId);
           const highestConnectedSlot =
             connectedSlots.length > 0 ? Math.max(...connectedSlots) : 99;
@@ -487,6 +528,7 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
               const hasEdge = analysis.listEdges.some(
                 (e) => e.toSlotId === keyNum,
               );
+
               const isRequiredEmptySlot = keyNum === requiredEmptySlot;
 
               if (!hasEdge && !isRequiredEmptySlot) {
@@ -494,8 +536,9 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
               }
             }
           });
-        } else {
-          // Missing parent case: rewire first list edge to parent, renumber others
+        } else if (!analysis.hasParentEdge && analysis.hasListEdges) {
+          // Missing parent case: rewire first list edge to parent, renumber
+          // others
           const [firstEdge, ...remainingEdges] = analysis.listEdges;
 
           // Clean all list values first
@@ -530,9 +573,18 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
           if (remainingEdges.length >= 0) {
             newValues[100 + remainingEdges.length] = false;
           }
+          //No list edges copied - remove all values
+        } else {
+          Object.keys(newValues).forEach((key) => {
+            const keyNum = parseInt(key);
+            if (keyNum >= 100) {
+              delete newValues[key];
+            }
+          });
         }
       } else if (mode === "removeParent") {
-        // Remove parent mode: always rewire first list edge to parent, renumber others
+        // Remove parent mode: always rewire first list edge to parent,
+        // renumber others
         if (analysis.hasListEdges) {
           const [_, ...remainingEdges] = analysis.listEdges;
 
@@ -833,10 +885,9 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
   }, []);
 
   const { handleEditorMouseDown, handleWheel } = useNodeNavigation(
+    deleteNode,
     setNodes,
     selectedNodeIdsRef,
-    setNodeSlots,
-    setNodeDivs,
     setEdges,
     copySelectedNodes,
     pasteCopiedNodes,
@@ -897,7 +948,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     removeEdgeToSlot,
     removeListSlot,
     switchSelectInputValue,
+    deleteNode,
   };
 };
-
-export default useNodeSystem;

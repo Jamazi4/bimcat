@@ -22,16 +22,12 @@ import {
 } from "../nodeDefinitions/nodeUtilFunctions";
 import { createEdgeId } from "../utilFunctions";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import {
-  deleteNodeOutputValue,
-  switchNodeNavigation,
-} from "@/lib/features/visualiser/visualiserSlice";
+import { switchNodeNavigation } from "@/lib/features/visualiser/visualiserSlice";
 
 export const useNodeNavigation = (
+  deleteNode: () => void,
   setNodes: Dispatch<SetStateAction<GeomNodeBackType[]>>,
   selectedNodeIdsRef: RefObject<string[]>,
-  setNodeSlots: Dispatch<SetStateAction<NodeSlot[]>>,
-  setNodeDivs: Dispatch<SetStateAction<Record<string, HTMLDivElement>>>,
   setEdges: Dispatch<SetStateAction<NodeEdgeType[]>>,
   copySelectedNodes: () => void,
   pasteCopiedNodes: () => void,
@@ -320,48 +316,6 @@ export const useNodeNavigation = (
       switchGroupInputActive,
     ],
   );
-
-  const deleteNode = useCallback(() => {
-    //TODO: move to useNodeSystem
-
-    dispatch(deleteNodeOutputValue({ nodeIds: selectedNodeIdsRef.current }));
-
-    setNodes((prevNodes) => {
-      return prevNodes.filter(
-        (n) => !selectedNodeIdsRef.current.includes(n.id),
-      );
-    });
-
-    setNodeSlots((prevSlots) => {
-      return prevSlots.filter(
-        (slot) => !selectedNodeIdsRef.current.includes(slot.nodeId),
-      );
-    });
-
-    setNodeDivs((prevNodeDivs) => {
-      const prevNodeDivsArr = Object.entries(prevNodeDivs);
-      const newNodeDivs = prevNodeDivsArr.filter(
-        ([id, _]) => !selectedNodeIdsRef.current.includes(id),
-      );
-      return Object.fromEntries(newNodeDivs);
-    });
-
-    setEdges((prevEdges) => {
-      return prevEdges.filter((edge) => {
-        return (
-          !selectedNodeIdsRef.current.includes(edge.fromNodeId) &&
-          !selectedNodeIdsRef.current.includes(edge.toNodeId)
-        );
-      });
-    });
-  }, [
-    dispatch,
-    selectedNodeIdsRef,
-    setEdges,
-    setNodeDivs,
-    setNodeSlots,
-    setNodes,
-  ]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
