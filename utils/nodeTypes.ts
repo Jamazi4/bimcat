@@ -132,6 +132,12 @@ export const nodeCategories = [
 ] as const;
 export type nodeCategory = (typeof nodeCategories)[number];
 
+export const nodeTypeControlTypeMap = {
+  slider: "slider",
+  number: "numberInput",
+  boolean: "checkbox",
+};
+
 export interface nodeDefinition {
   nodeDefId: number;
   category: nodeCategory;

@@ -448,6 +448,9 @@ componentWithGeometrySchema as optional and create prisma schema for it
 
 ### --13-08-2025--
 
+now I'm at least getting correct values for ui controls on saveNodeProject
+TODO added there mentioning slider values
+
 #### plan for ui controls
 
 - 'EXPOSE' node would have a number/bool input and a string input for control

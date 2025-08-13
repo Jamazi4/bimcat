@@ -19,11 +19,12 @@ import {
   NodeDefinitionShort,
   NodeEdgeType,
   NodeSlot,
+  nodeTypeControlTypeMap,
   NodeValues,
 } from "../nodeTypes";
 import { useNodeNavigation } from "./useNodeNavigation";
 import { deleteNodeOutputValue } from "@/lib/features/visualiser/visualiserSlice";
-import { useAppDispatch } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 export const useNodeSystem = (meshGroup: THREE.Group) => {
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
@@ -165,8 +166,52 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     setEdges(nodeProject.edges || []);
   }, []);
 
+  const nodeStateValues = useAppSelector(
+    (state) => state.visualiserSlice.nodeValues,
+  );
+
   const saveNodeProject = useCallback(
     async (componentId: string) => {
+      const uiControls = nodesRef.current.flatMap((n) => {
+        if (n.type === "ui control") {
+          const controlName = n.values?.[0] || "unnamed";
+          const edgeFromControlledNode = edgesRef.current.find(
+            (e) => e.toNodeId === n.id,
+          );
+          const controlledNodeId = edgeFromControlledNode?.fromNodeId;
+          const controlledNode = nodesRef.current.find(
+            (cn) => cn.id === controlledNodeId,
+          );
+
+          if (!controlledNodeId) return [];
+
+          const controlledNodeValue =
+            nodeStateValues[controlledNodeId][
+              edgeFromControlledNode.fromSlotId
+            ];
+          const controlledNodeType = controlledNode?.type;
+
+          if (
+            controlledNodeType !== "number" &&
+            controlledNodeType !== "slider" &&
+            controlledNodeType !== "boolean"
+          ) {
+            toast(`${controlName} can only control slider, number or boolean.`);
+            return [];
+          }
+          const controlType = nodeTypeControlTypeMap[controlledNodeType];
+          //TODO: for slider I also need either min/max or ui element
+          //slider value for rendering slider with correct state
+          return {
+            controlName,
+            controlledNodeId,
+            controlledNodeValue,
+            controlType,
+          };
+        } else return [];
+      });
+
+      console.log(uiControls);
       const geometry: ComponentGeometry[] = meshGroup.children
         .filter((mesh): mesh is THREE.Mesh => mesh instanceof THREE.Mesh)
         .map((mesh) => {
@@ -189,7 +234,7 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
       );
       toast(response.message);
     },
-    [meshGroup.children],
+    [meshGroup.children, nodeStateValues],
   );
 
   const switchSelectInputValue = useCallback(

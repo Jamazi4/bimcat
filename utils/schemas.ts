@@ -1,4 +1,4 @@
-import { z, ZodSchema } from "zod";
+import { z } from "zod";
 import { GeomNodeSchemaBack, NodeEdgeSchema } from "./nodeTypes";
 
 export function validateWithZodSchema<T>(
