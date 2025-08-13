@@ -1,5 +1,6 @@
 import { ASTNode, nodeDefinition, NodeEvalResult } from "../nodeTypes";
 import * as THREE from "three";
+import { lineMat, meshMat, pointMat, wireframeMat } from "../threeJsConstants";
 
 export function outputNode(nodeDefId: number): nodeDefinition {
   return {
@@ -14,36 +15,35 @@ export function outputNode(nodeDefId: number): nodeDefinition {
       node: ASTNode,
       evalFunction: (node: ASTNode) => NodeEvalResult,
     ) => {
+      //TODO: maybe output just the correct type and bufferGeom and handle the
+      //rendering separately
       const outputInput = node.inputs[0];
       const input = evalFunction(outputInput.ast)[outputInput.fromOutputId];
 
       switch (input.type) {
         case "vector": {
           const geom = new THREE.BufferGeometry().setFromPoints([input.value]);
-          const mat = new THREE.PointsMaterial({
-            color: 0x7aadfa,
-            size: 0.05,
-          });
-          const mesh = new THREE.Points(geom, mat);
+          const mesh = new THREE.Points(geom, pointMat);
           return { 1: { type: "geometry", value: mesh } };
         }
         case "linestring": {
-
           const geoms = input.value.map((string) => {
-            return new THREE.BufferGeometry().setFromPoints(string)
-          })
-          const mat = new THREE.LineBasicMaterial({ color: 0x7aadfa });
-          const lineGroup = new THREE.Group()
-          geoms.forEach((geom) => lineGroup.add(new THREE.Line(geom, mat)))
+            return new THREE.BufferGeometry().setFromPoints(string);
+          });
+          const lineGroup = new THREE.Group();
+          geoms.forEach((geom) => lineGroup.add(new THREE.Line(geom, lineMat)));
           return { 1: { type: "geometry", value: lineGroup } };
         }
         case "mesh": {
-          const mat = new THREE.MeshStandardMaterial({
-            color: 0x7aadfa,
-            side: THREE.DoubleSide,
-          });
-          const mesh = new THREE.Mesh(input.value, mat);
-          return { 1: { type: "geometry", value: mesh } };
+          const surfaceMesh = new THREE.Mesh(input.value, meshMat);
+
+          const wireframeMesh = new THREE.Mesh(input.value, wireframeMat);
+
+          const combined = new THREE.Group();
+          combined.add(surfaceMesh);
+          combined.add(wireframeMesh);
+
+          return { 1: { type: "geometry", value: combined } };
         }
         default:
           throw new Error("Unsupported input to output node");

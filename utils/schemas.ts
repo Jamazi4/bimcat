@@ -34,6 +34,15 @@ export const PsetSchema = z.object({
   content: PsetContentSchema,
 });
 
+export const ComponentControlsSchema = z.array(
+  z.object({
+    controlName: z.string(),
+    nodeId: z.string(),
+    value: z.union([z.string(), z.boolean(), z.number()]),
+    constrolType: z.enum(["numberInput", "slider", "checkbox"]),
+  }),
+);
+
 export const PsetArraySchema = z.array(PsetSchema);
 
 export type Pset = z.infer<typeof PsetSchema>;

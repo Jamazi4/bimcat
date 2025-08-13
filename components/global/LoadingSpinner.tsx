@@ -2,7 +2,7 @@ import { LoaderCircle } from "lucide-react";
 
 const LoadingSpinner = () => {
   return (
-    <div className="inset-0 flex items-center justify-center z-[100] mx-auto my-auto h-screen w-full">
+    <div className="absolute inset-0 flex items-center justify-center z-[100] mx-auto my-auto h-screen w-full">
       <LoaderCircle className="animate-spin w-10 h-10" />
     </div>
   );

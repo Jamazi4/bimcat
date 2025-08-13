@@ -23,6 +23,7 @@ const DraggableNodeSliderInput = ({
           value={[parseFloat(curVal)]}
           onValueChange={(e) => handleChange(e)}
           className={`"w-30 !text-2xl`}
+          step={0.1}
         />
       </div>
     </div>

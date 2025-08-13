@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { Button } from "../ui/button";
 import { Workflow } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { mainColor, meshMat } from "@/utils/threeJsConstants";
 
 const Renderer = ({
   geometry,
@@ -75,7 +76,7 @@ const Renderer = ({
                 <group key={index} rotation={[Math.PI / 2, 0, 0]}>
                   <mesh geometry={geom} scale={1}>
                     <meshStandardMaterial
-                      color="orange"
+                      color={mainColor}
                       side={THREE.DoubleSide}
                     />
                   </mesh>

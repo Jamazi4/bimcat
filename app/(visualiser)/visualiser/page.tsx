@@ -64,7 +64,7 @@ const Page = () => {
         onPointerMissed={handlePointerMissed}
       >
         <ambientLight intensity={0.2} />
-        <directionalLight position={[-100, -100, 100]} intensity={1} />
+        <directionalLight position={[-100, -100, 100]} intensity={3} />
         <directionalLight position={[100, 80, 50]} intensity={3} />
 
         <Grid

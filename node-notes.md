@@ -438,6 +438,16 @@ node output values while building AST?
 bug solved and also new logic for deleting edge and pasting nodes - related to
 list inputs
 
+### --12-08-2025--
+
+solved bug where deleting node connected to list input didn't resolve list input
+state.
+
+created zod schema for componentControls - now plug it into
+componentWithGeometrySchema as optional and create prisma schema for it
+
+### --13-08-2025--
+
 #### plan for ui controls
 
 - 'EXPOSE' node would have a number/bool input and a string input for control
@@ -467,53 +477,72 @@ BUGS:
 - enabled node menu buttons when not in node navigation
 - ctrl-c not working in input fields
 - no capital letters in string input
-- copied group node destroys connections if they are copied with it
 
 Runtime:
 
+- ctrl-z and ctrl-shift-r
 - cache node outputs
 - now runtime has liveNodeIds - need to use this to store nodes output so eval
   doesn't go through the same node couple of times
 - pick reference from 3D
-- fill polygon node (triangulate)
 
 UI:
 
+- expose var (so it's adjustable in the browser) and dynamic props
 - highlight wrong links - at least to wrong input type will be easy - then also
   eval errors
 - lock node menu buttons
 - color picker in output node
 - addNode menu to have search - and display under right click
-- ctrl-z and ctrl-shift-r
+- regions with color and name (SVG)
 - measure tool
-- expose var (so it's adjustable in the browser) and dynamic props
 
 Nodes:
 
-a. easy
+A. Easy
 
-- triangulate linestring (w/ holes?)
-- apply transform
-- get length/get area/get volume
-- get normal
-- normalize
-- add origin to transform node (and in transform object type)!
 - pset/psetKeyValue
-- filter - faces by normal, edges by length (maybe dir) verts by bool?
-- math min/max/calmp
-- bigger than/smaller than or/and
+- string
 - concatenate string/cast num to string
 
-b. hard
+- preview value
 
-- boolean operations
+- add origin to transform node (and in transform object type)!
+- triangulate linestring (w/ holes?)
+- apply transform (add origin to transform opt arg)
+- get length/get area/get volume
+
+- get normal
+- normalize
+
+- math min/max/clamp
+- bigger than/smaller than or/and
+
+- string operations
+
+B. Hard
+
+- forEach (points/edges/faces) - example usage:
+  - outputs:
+    - merged,
+    - index,
+    - elements
+  - inputs:
+    - linestring/mesh,
+    - processed,
+    - mode(select: linestring, mesh, face, edge, point)
+  - element and/or index => some processing => processed
+
 - pick from 3D
+- mirror
+- boolean mesh operations
 - solidify
 - subdivide?
-- if block
+- function node
 
-done:
+Done:
 
+- copied group node destroys connections if they are copied with it
 - delete component doesn't delete node project?
 - copy component doesn't copy node project
 - earcut doesn't work for completely vertical polygons
@@ -536,4 +565,5 @@ done:
 - solidify(can do with extrude) node, transform node with
 - translate/scale/angles or quaternion,
 - change/lock inputs conditionally
+- fill polygon node (triangulate)
 - error when switching capped and the extrusion output is switching
