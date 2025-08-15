@@ -8,13 +8,15 @@ import * as THREE from "three";
 import { Button } from "../ui/button";
 import { Workflow } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { mainColor, meshMat } from "@/utils/threeJsConstants";
+import { mainColor } from "@/utils/threeJsConstants";
 
 const Renderer = ({
+  paramGeometry,
   geometry,
   componentId,
   isUsingNodes,
 }: {
+  paramGeometry: THREE.Group<THREE.Object3DEventMap> | null;
   geometry: ComponentGeometry[];
   componentId: string;
   isUsingNodes: boolean;
@@ -69,24 +71,28 @@ const Renderer = ({
         />
 
         <Bounds fit clip margin={1.2}>
-          <group>
-            {geometries.map((geom, index) => {
-              for (let index = 0; index < 2; index++) {}
-              return (
-                <group key={index} rotation={[Math.PI / 2, 0, 0]}>
-                  <mesh geometry={geom} scale={1}>
-                    <meshStandardMaterial
-                      color={mainColor}
-                      side={THREE.DoubleSide}
-                    />
-                  </mesh>
-                  <mesh geometry={geom} scale={1}>
-                    <meshStandardMaterial color="black" wireframe />
-                  </mesh>
-                </group>
-              );
-            })}
-          </group>
+          {paramGeometry!.children.length > 0 ? (
+            <primitive object={paramGeometry!} />
+          ) : (
+            <group>
+              {geometries.map((geom, index) => {
+                for (let index = 0; index < 2; index++) {}
+                return (
+                  <group key={index} rotation={[Math.PI / 2, 0, 0]}>
+                    <mesh geometry={geom} scale={1}>
+                      <meshStandardMaterial
+                        color={mainColor}
+                        side={THREE.DoubleSide}
+                      />
+                    </mesh>
+                    <mesh geometry={geom} scale={1}>
+                      <meshStandardMaterial color="black" wireframe />
+                    </mesh>
+                  </group>
+                );
+              })}
+            </group>
+          )}
         </Bounds>
 
         <OrbitControls enableZoom={true} />

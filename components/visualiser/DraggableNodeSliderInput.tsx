@@ -12,7 +12,6 @@ const DraggableNodeSliderInput = ({
 
   const handleChange = (e: number[]) => {
     const val = e[0];
-
     setCurVal(String(val));
     changeThisValue(val);
   };

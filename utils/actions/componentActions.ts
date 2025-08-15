@@ -11,6 +11,7 @@ import {
   PsetArraySchema,
   componentArraySchema,
   NodeProjectSchema,
+  ComponentControlsType,
 } from "../schemas";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getDbUser } from "./globalActions";
@@ -89,6 +90,7 @@ export const createNodeComponentAction = async (
 };
 
 export const updateNodeProject = async (
+  uiControls: ComponentControlsType,
   nodes: GeomNodeBackType[],
   edges: NodeEdgeType[],
   componentId: string,
@@ -175,7 +177,7 @@ export const updateNodeProject = async (
 
       await tx.nodeProject.update({
         where: { id: component.nodes?.id },
-        data: { nodes: nodes, edges: edges },
+        data: { nodes: nodes, edges: edges, uiControls: uiControls },
       });
     });
 
@@ -260,7 +262,9 @@ export const fetchSingleComponentAction = async (id: string) => {
       where: { id },
       include: {
         geometry: true,
-        nodes: true,
+        nodes: { select: { uiControls: true, id: true, componentId: true } },
+        //TODO: this is only used to check if nodes exist, optimize query so
+        //it doesn't fetch entire nodes if I'm just looking at the component
       },
     });
 

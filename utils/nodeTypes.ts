@@ -136,7 +136,7 @@ export const nodeTypeControlTypeMap = {
   slider: "slider",
   number: "numberInput",
   boolean: "checkbox",
-};
+} as const;
 
 export interface nodeDefinition {
   nodeDefId: number;

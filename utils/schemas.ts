@@ -38,10 +38,15 @@ export const ComponentControlsSchema = z.array(
   z.object({
     controlName: z.string(),
     nodeId: z.string(),
-    value: z.union([z.string(), z.boolean(), z.number()]),
-    constrolType: z.enum(["numberInput", "slider", "checkbox"]),
+    outputValue: z.union([z.string(), z.boolean(), z.number()]),
+    controlValue: z.union([z.string(), z.boolean(), z.number()]),
+    //controlValue will be different only for sliders, it's used to initially
+    //render correct slider state in UI
+    controlType: z.enum(["numberInput", "slider", "checkbox"]),
   }),
 );
+
+export type ComponentControlsType = z.infer<typeof ComponentControlsSchema>;
 
 export const PsetArraySchema = z.array(PsetSchema);
 
@@ -69,6 +74,7 @@ export const NodeProjectSchema = z.object({
   nodes: z.array(GeomNodeSchemaBack).optional(),
   edges: z.array(NodeEdgeSchema).optional(),
   componentId: z.string(),
+  uiControls: ComponentControlsSchema.nullable().optional(),
 });
 
 export type NodeProjectType = z.infer<typeof NodeProjectSchema>;

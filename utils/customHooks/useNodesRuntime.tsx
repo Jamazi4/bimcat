@@ -140,12 +140,12 @@ const useNodesRuntime = ({
 
   const storeOutputToState = useCallback(
     (nodeDef: nodeDefinition, node: ASTNode, outputValue: NodeEvalResult) => {
-      const isOutputingNumber = nodeDef.outputs.find(
+      const isOutputingNumOrBool = nodeDef.outputs.find(
         (o) => o.type === "number" || o.type === "boolean",
       );
       const isVirtual = node.id.includes("virt");
 
-      if (isOutputingNumber && !isVirtual) {
+      if (isOutputingNumOrBool && !isVirtual) {
         const collectedOutputs = nodeDef.outputs.filter(
           (o) => o.type === "number" || o.type === "boolean",
         );

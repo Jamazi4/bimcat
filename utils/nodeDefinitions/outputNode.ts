@@ -36,8 +36,10 @@ export function outputNode(nodeDefId: number): nodeDefinition {
         }
         case "mesh": {
           const surfaceMesh = new THREE.Mesh(input.value, meshMat);
+          surfaceMesh.name = "surface";
 
           const wireframeMesh = new THREE.Mesh(input.value, wireframeMat);
+          wireframeMesh.name = "wireframe";
 
           const combined = new THREE.Group();
           combined.add(surfaceMesh);

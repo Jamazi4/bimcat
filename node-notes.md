@@ -451,6 +451,14 @@ componentWithGeometrySchema as optional and create prisma schema for it
 now I'm at least getting correct values for ui controls on saveNodeProject
 TODO added there mentioning slider values
 
+### --15-08-2025--
+
+Controls are working now. Lot's of tidying up needed probably.
+Now need to make downloadIfc work so it downloads edited geometry
+
+in ComponentContentWrapper need to add tooltip to lock maybe and make it load
+when it's actually loading.
+
 #### plan for ui controls
 
 - 'EXPOSE' node would have a number/bool input and a string input for control

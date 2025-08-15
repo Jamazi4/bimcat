@@ -25,6 +25,7 @@ import {
 import { useNodeNavigation } from "./useNodeNavigation";
 import { deleteNodeOutputValue } from "@/lib/features/visualiser/visualiserSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { ComponentControlsType } from "../schemas";
 
 export const useNodeSystem = (meshGroup: THREE.Group) => {
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
@@ -166,56 +167,71 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     setEdges(nodeProject.edges || []);
   }, []);
 
-  const nodeStateValues = useAppSelector(
+  const nodeStateOutputValues = useAppSelector(
     (state) => state.visualiserSlice.nodeValues,
   );
 
   const saveNodeProject = useCallback(
     async (componentId: string) => {
-      const uiControls = nodesRef.current.flatMap((n) => {
-        if (n.type === "ui control") {
-          const controlName = n.values?.[0] || "unnamed";
-          const edgeFromControlledNode = edgesRef.current.find(
-            (e) => e.toNodeId === n.id,
-          );
-          const controlledNodeId = edgeFromControlledNode?.fromNodeId;
-          const controlledNode = nodesRef.current.find(
-            (cn) => cn.id === controlledNodeId,
-          );
+      const uiControls: ComponentControlsType = nodesRef.current.flatMap(
+        (n) => {
+          if (n.type === "ui control") {
+            const controlName = (n.values?.[0] as string) || "unnamed";
+            const edgeFromControlledNode = edgesRef.current.find(
+              (e) => e.toNodeId === n.id,
+            );
+            const controlledNodeId = edgeFromControlledNode?.fromNodeId;
+            const controlledNode = nodesRef.current.find(
+              (cn) => cn.id === controlledNodeId,
+            );
 
-          if (!controlledNodeId) return [];
+            if (!controlledNodeId || !controlledNode || !controlledNode.values)
+              return [];
 
-          const controlledNodeValue =
-            nodeStateValues[controlledNodeId][
-              edgeFromControlledNode.fromSlotId
-            ];
-          const controlledNodeType = controlledNode?.type;
+            const controlledNodeValue =
+              nodeStateOutputValues[controlledNodeId][
+                edgeFromControlledNode.fromSlotId
+              ];
 
-          if (
-            controlledNodeType !== "number" &&
-            controlledNodeType !== "slider" &&
-            controlledNodeType !== "boolean"
-          ) {
-            toast(`${controlName} can only control slider, number or boolean.`);
-            return [];
-          }
-          const controlType = nodeTypeControlTypeMap[controlledNodeType];
-          //TODO: for slider I also need either min/max or ui element
-          //slider value for rendering slider with correct state
-          return {
-            controlName,
-            controlledNodeId,
-            controlledNodeValue,
-            controlType,
-          };
-        } else return [];
-      });
+            if (!controlledNodeValue) return [];
 
-      console.log(uiControls);
+            const controlledNodeType = controlledNode?.type;
+
+            if (
+              controlledNodeType !== "number" &&
+              controlledNodeType !== "slider" &&
+              controlledNodeType !== "boolean"
+            ) {
+              toast(
+                `${controlName} can only control slider, number or boolean.`,
+              );
+              return [];
+            }
+
+            // hardCoded node values since I only support num, bool and slider
+            const controlValue =
+              controlledNode.type === "slider"
+                ? controlledNode.values[3]
+                : controlledNode.values[0];
+
+            const controlType = nodeTypeControlTypeMap[controlledNodeType];
+
+            return {
+              controlName,
+              nodeId: controlledNodeId,
+              outputValue: controlledNodeValue,
+              controlValue,
+              controlType,
+            };
+          } else return [];
+        },
+      );
+
       const geometry: ComponentGeometry[] = meshGroup.children
-        .filter((mesh): mesh is THREE.Mesh => mesh instanceof THREE.Mesh)
+        .filter((mesh): mesh is THREE.Group => mesh instanceof THREE.Group)
         .map((mesh) => {
-          const bufferGeom = mesh.geometry.clone();
+          const surfaceGeom = mesh.getObjectByName("surface") as THREE.Mesh;
+          const bufferGeom = surfaceGeom.geometry.clone();
           const rotationMatrix = new THREE.Matrix4().makeRotationX(
             -Math.PI / 2,
           );
@@ -226,15 +242,18 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
             indices: Array.from(bufferGeom.index?.array || []),
           };
         });
+
       const response = await updateNodeProject(
+        uiControls,
         nodesRef.current,
         edgesRef.current,
         componentId,
         geometry,
       );
+
       toast(response.message);
     },
-    [meshGroup.children, nodeStateValues],
+    [meshGroup.children, nodeStateOutputValues],
   );
 
   const switchSelectInputValue = useCallback(

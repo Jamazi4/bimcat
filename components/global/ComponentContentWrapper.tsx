@@ -1,7 +1,13 @@
+"use client";
+
+import * as THREE from "three";
 import { ComponentGeometry } from "@/utils/types";
 import PsetsList from "../editor/PsetsList";
 import Renderer from "../editor/Renderer";
-import { Pset } from "@/utils/schemas";
+import { ComponentControlsType, Pset } from "@/utils/schemas";
+import ComponentControlsPanel from "../editor/ComponentControlsPanel";
+import { useNodeSystem } from "@/utils/customHooks/useNodeSystem";
+import { useCallback, useEffect, useState } from "react";
 
 const ComponentContentWrapper = ({
   componentGeometry,
@@ -9,13 +15,35 @@ const ComponentContentWrapper = ({
   componentPsets,
   componentId,
   isUsingNodes,
+  uiControls,
 }: {
   componentGeometry: ComponentGeometry[];
   componentPsets: Pset[] | undefined;
   componentEditable: boolean;
   componentId: string;
   isUsingNodes: boolean;
+  uiControls?: ComponentControlsType;
 }) => {
+  const controlsAvailable = !!uiControls;
+  const [paramMeshGroup, setParamMeshGroup] = useState<THREE.Group | null>(
+    new THREE.Group(),
+  );
+  const [pendingFetch, setPendingFetch] = useState(true); //use to load button
+  const [activeControls, setActiveControls] = useState(false);
+
+  const ns = useNodeSystem(paramMeshGroup!);
+  const { fetchNodes, changeNodeValue } = ns;
+
+  const fetchNodesWrapper = useCallback(async () => {
+    if (!activeControls) return;
+    await fetchNodes(componentId);
+    setPendingFetch(false);
+  }, [componentId, activeControls, fetchNodes]);
+
+  useEffect(() => {
+    fetchNodesWrapper();
+  }, [ns.fetchNodes, fetchNodesWrapper]);
+
   return (
     <div>
       <div
@@ -25,6 +53,7 @@ const ComponentContentWrapper = ({
         <div className="lg:col-span-4">
           {componentGeometry ? (
             <Renderer
+              paramGeometry={paramMeshGroup}
               geometry={componentGeometry}
               componentId={componentId}
               isUsingNodes={isUsingNodes}
@@ -40,6 +69,15 @@ const ComponentContentWrapper = ({
           />
         </div>
       </div>
+      {controlsAvailable && (
+        <ComponentControlsPanel
+          paramMeshGroup={paramMeshGroup}
+          activeControls={activeControls}
+          setActiveControls={setActiveControls}
+          uiControls={uiControls}
+          changeNodeValue={changeNodeValue}
+        />
+      )}
     </div>
   );
 };

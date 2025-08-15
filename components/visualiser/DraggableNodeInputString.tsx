@@ -14,7 +14,6 @@ const DraggableNodeInputString = ({
     const val = e.target.value;
     setCurVal(val);
     changeThisValue(val);
-    console.log("changed");
   };
   return (
     <div className="h-12 w-60">

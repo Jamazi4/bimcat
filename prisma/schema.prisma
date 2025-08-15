@@ -37,6 +37,7 @@ model NodeProject {
   edges       Json
   componentId String     @unique
   Component   Component? @relation("NodeProjectToComponent", fields: [componentId], references: [id], onDelete: Cascade)
+  uiControls  Json?
 }
 
 model Library {

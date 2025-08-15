@@ -41,6 +41,7 @@ const ComponentContent = async ({
         componentGeometry={component.geometry}
         componentEditable={component.editable}
         componentPsets={component.psets}
+        uiControls={component.nodes?.uiControls || undefined}
       />
     </div>
   );
