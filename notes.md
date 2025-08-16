@@ -531,6 +531,12 @@ additionally to the points above:
 - more over - browser needs to keep track of page I'm currently on and go back
   to the page I was when entering an component
 
+### --16-08-2025--
+
+- PSET BUGS:
+  - psets with the same name work as the same element
+  - empty psets silently don't go to ifc
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite

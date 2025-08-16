@@ -36,7 +36,8 @@ const ComponentContentWrapper = ({
   isUsingNodes: boolean;
   uiControls?: ComponentControlsType;
 }) => {
-  const controlsAvailable = !!uiControls;
+  const controlsAvailable =
+    uiControls !== null && uiControls !== undefined && uiControls.length > 0;
   const [paramMeshGroup, _] = useState<THREE.Group | null>(new THREE.Group());
   const [pendingFetch, setPendingFetch] = useState(true); //use to load button
   const [activeControls, setActiveControls] = useState(false);

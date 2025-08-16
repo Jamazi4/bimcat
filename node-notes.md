@@ -471,26 +471,12 @@ maybe also split vector? First getNormal or smth would be good
 
 anyway after that I need to do dynamic props and then prolly also all string nodes
 
-#### plan for ui controls
+#### new current plan as of 18-08
 
-- 'EXPOSE' node would have a number/bool input and a string input for control
-  name and no output
-- it would store the node id of connected node (where? - special redux reducer?)
-- on component save it would save additional field into component:
-  a. control name
-  b. control type (number, slider, bool)
-  c. cur val (or start, stop, step curval for slider)
-  d. node id
-- on opening component add button to enable controls.
-- on enable controls the stored geom disappears and I spawn headless node
-  runtime
-
-### current plan
-
-- finish group node - done
-- apply list inputs to linestring node - done
-- math nodes - progress/finish later?
-- ui/pset nodes and component view integration
+- scrollable pset area
+- pset + prop nodes
+- any getter/getters (length/area?)
+- dynamic props / automatic bimcat propset
 
 ## General
 
@@ -511,7 +497,8 @@ Runtime:
 
 UI:
 
-- expose var (so it's adjustable in the browser) and dynamic props
+- save control state to user's profile? - add control presets?
+- and dynamic props
 - highlight wrong links - at least to wrong input type will be easy - then also
   eval errors
 - lock node menu buttons
@@ -590,3 +577,22 @@ Done:
 - change/lock inputs conditionally
 - fill polygon node (triangulate)
 - error when switching capped and the extrusion output is switching
+
+#### plan for ui controls
+
+- 'EXPOSE' node would have a number/bool input and a string input for control
+  name and no output
+- it would store the node id of connected node (where? - special redux reducer?)
+- on component save it would save additional field into component:
+  a. control name
+  b. control type (number, slider, bool)
+  c. cur val (or start, stop, step curval for slider)
+  d. node id
+- on opening component add button to enable controls.
+- on enable controls the stored geom disappears and I spawn headless node
+  runtime
+
+- finish group node - done
+- apply list inputs to linestring node - done
+- math nodes - progress/finish later?
+- ui/pset nodes and component view integration - done

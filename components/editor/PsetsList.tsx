@@ -5,11 +5,13 @@ import AddPsetButton from "./AddPsetButton";
 
 function PsetsList({ psets, editable }: { psets: Pset[]; editable: boolean }) {
   return (
-    <>
-      <PsetAccordion edit={editable} psets={psets} />
+    <div className="max-h-[calc(80vh-4rem)] overflow-y-auto scrollbar-thin">
+      <div className="mr-2">
+        <PsetAccordion edit={editable} psets={psets} />
 
-      {editable && <AddPsetButton />}
-    </>
+        {editable && <AddPsetButton />}
+      </div>
+    </div>
   );
 }
 export default PsetsList;

@@ -126,10 +126,12 @@ const ComponentControlsPanel = ({
           {!activeControls ? <Lock /> : <Unlock />}
         </Button>
       </div>
-      <div className={`grid grid-cols-2 gap-4`}>
+      <div
+        className={`grid grid-cols-2 gap-4 max-h-48 overflow-y-auto pr-1 scrollbar-thin`}
+      >
         {uiControls.map((c) => {
           return (
-            <div key={c.nodeId} className=" p-2 border-b bg-accent rounded-md">
+            <div key={c.nodeId} className="p-2 border-b bg-accent rounded-md">
               <div className="place-content-between flex text-sm">
                 <Label className={labelClassname} htmlFor={c.nodeId}>
                   {c.controlName}
@@ -176,6 +178,7 @@ const ComponentControlsPanel = ({
                     id={c.nodeId}
                     disabled={!activeControls}
                     value={controlStates[c.nodeId] as string}
+                    step={0.001}
                   />
                 )}
               </div>

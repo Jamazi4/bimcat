@@ -182,3 +182,33 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin !important;
+    scrollbar-color: hsl(var(--primary)) transparent !important;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+    -webkit-appearance: none !important;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent !important;
+    -webkit-appearance: none !important;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(
+      var(--primary)
+    ) !important; /* Use background instead of background-color */
+    border-radius: 9999px !important;
+    -webkit-appearance: none !important;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary-foreground)) !important;
+  }
+  .scrollbar-thin::-webkit-scrollbar-button {
+    display: none !important;
+    -webkit-appearance: none !important;
+  }
+}
