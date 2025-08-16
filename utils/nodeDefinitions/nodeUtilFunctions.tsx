@@ -1,4 +1,5 @@
 import { JSX } from "react";
+import * as THREE from "three";
 import {
   ASTNode,
   ASTNodeInput,
@@ -14,6 +15,7 @@ import {
 } from "../nodeTypes";
 import DraggableNodeInputSlot from "@/components/visualiser/DraggableNodeInputSlot";
 import DraggableNodeSelectInput from "@/components/visualiser/DraggableNodeSelectInput";
+import { ComponentGeometry } from "../types";
 
 export const getComboValues = (
   node: ASTNode,
@@ -222,4 +224,23 @@ export function smartRound(value: number): string {
   }
   // Use toPrecision for significant digits, strip trailing zeros
   return parseFloat(value.toPrecision(6)).toString();
+}
+
+export function convertGroupToDbGeom(
+  meshGroup: THREE.Group<THREE.Object3DEventMap>,
+) {
+  const geometry: ComponentGeometry[] = meshGroup.children
+    .filter((mesh): mesh is THREE.Group => mesh instanceof THREE.Group)
+    .map((mesh) => {
+      const surfaceGeom = mesh.getObjectByName("surface") as THREE.Mesh;
+      const bufferGeom = surfaceGeom.geometry.clone();
+      const rotationMatrix = new THREE.Matrix4().makeRotationX(-Math.PI / 2);
+      bufferGeom.applyMatrix4(rotationMatrix);
+      bufferGeom.computeVertexNormals();
+      return {
+        position: Array.from(bufferGeom.attributes.position.array),
+        indices: Array.from(bufferGeom.index?.array || []),
+      };
+    });
+  return geometry;
 }

@@ -3,6 +3,7 @@ import componentBrowserReducer from "./features/browser/componentBrowserSlice";
 import libraryBrowserReducer from "./features/libraries/libraryBrowserSlice";
 import userStateReducer from "./features/user/userSlice";
 import visualiserStateReducer from "./features/visualiser/visualiserSlice";
+import downloadIfcStateReducer from "./downloadIfcSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -11,6 +12,7 @@ export const makeStore = () => {
       libraryBrowser: libraryBrowserReducer,
       userSlice: userStateReducer,
       visualiserSlice: visualiserStateReducer,
+      downloadIfcSlice: downloadIfcStateReducer,
     },
   });
 };

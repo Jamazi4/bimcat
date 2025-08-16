@@ -16,8 +16,9 @@ import {
   useState,
 } from "react";
 import { Label } from "../ui/label";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { smartRound } from "@/utils/nodeDefinitions/nodeUtilFunctions";
+import { resetDownloadState, setControlsActive } from "@/lib/downloadIfcSlice";
 
 const ComponentControlsPanel = ({
   paramMeshGroup,
@@ -37,17 +38,20 @@ const ComponentControlsPanel = ({
     removeValue?: boolean,
   ) => void;
 }) => {
+  const dispatch = useAppDispatch();
   const handleLock = () => {
     let curLock: boolean = true;
+
     setActiveControls((prev) => {
       curLock = prev;
       return !prev;
     });
     if (curLock) {
-      console.log("was locked");
       paramMeshGroup?.clear();
+      dispatch(resetDownloadState());
     } else {
-      console.log("was unlocked");
+      dispatch(resetDownloadState());
+      dispatch(setControlsActive({ active: true }));
     }
   };
 
@@ -93,7 +97,7 @@ const ComponentControlsPanel = ({
     const val = e.target.value;
     setControlStates((prev) => ({
       ...prev,
-      [nodeId]: val, // keep it as string
+      [nodeId]: val,
     }));
 
     const num = Number(val);
@@ -109,7 +113,7 @@ const ComponentControlsPanel = ({
       [nodeId]: checked,
     }));
 
-    changeNodeValue(nodeId, 0, checked); // assuming `2` is your boolean inputId
+    changeNodeValue(nodeId, 0, checked);
   };
 
   const labelClassname = `${!activeControls && "text-muted-foreground"} transition-colors`;

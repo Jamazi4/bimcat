@@ -8,7 +8,7 @@ import * as THREE from "three";
 import { Button } from "../ui/button";
 import { Workflow } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { mainColor } from "@/utils/threeJsConstants";
+import { mainColor, wireframeMat } from "@/utils/threeJsConstants";
 
 const Renderer = ({
   paramGeometry,
@@ -85,9 +85,11 @@ const Renderer = ({
                         side={THREE.DoubleSide}
                       />
                     </mesh>
-                    <mesh geometry={geom} scale={1}>
-                      <meshStandardMaterial color="black" wireframe />
-                    </mesh>
+                    <mesh
+                      geometry={geom}
+                      scale={1}
+                      material={wireframeMat}
+                    ></mesh>
                   </group>
                 );
               })}

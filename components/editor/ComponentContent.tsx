@@ -36,6 +36,8 @@ const ComponentContent = async ({
         isPublic={component.public}
       />
       <ComponentContentWrapper
+        componentAuthor={component.author}
+        componentData={componentData}
         isUsingNodes={!!component.nodes?.id}
         componentId={id}
         componentGeometry={component.geometry}

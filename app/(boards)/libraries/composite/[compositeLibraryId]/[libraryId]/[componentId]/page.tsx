@@ -50,11 +50,14 @@ const Page = async ({
         isPublic={result.component.public}
       />
       <ComponentContentWrapper
+        componentAuthor={result.component.author}
+        componentData={componentData}
         isUsingNodes={!!result.component.nodes?.id}
         componentId={componentId}
         componentGeometry={result.component.geometry}
         componentEditable={result.component.editable}
         componentPsets={result.component.psets}
+        uiControls={result.component.nodes?.uiControls || undefined}
       />
     </div>
   );

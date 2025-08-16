@@ -864,7 +864,10 @@ export const fetchSingleLibraryComponentAction = async (
 
     const component = await prisma.component.findUnique({
       where: { id: componentId },
-      include: { geometry: true },
+      include: {
+        geometry: true,
+        nodes: { select: { uiControls: true, id: true, componentId: true } },
+      },
     });
     if (!component) throw new Error("Could not find component");
 

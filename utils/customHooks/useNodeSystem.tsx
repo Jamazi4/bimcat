@@ -26,6 +26,7 @@ import { useNodeNavigation } from "./useNodeNavigation";
 import { deleteNodeOutputValue } from "@/lib/features/visualiser/visualiserSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { ComponentControlsType } from "../schemas";
+import { convertGroupToDbGeom } from "../nodeDefinitions/nodeUtilFunctions";
 
 export const useNodeSystem = (meshGroup: THREE.Group) => {
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
@@ -227,22 +228,7 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
         },
       );
 
-      const geometry: ComponentGeometry[] = meshGroup.children
-        .filter((mesh): mesh is THREE.Group => mesh instanceof THREE.Group)
-        .map((mesh) => {
-          const surfaceGeom = mesh.getObjectByName("surface") as THREE.Mesh;
-          const bufferGeom = surfaceGeom.geometry.clone();
-          const rotationMatrix = new THREE.Matrix4().makeRotationX(
-            -Math.PI / 2,
-          );
-          bufferGeom.applyMatrix4(rotationMatrix);
-          bufferGeom.computeVertexNormals();
-          return {
-            position: Array.from(bufferGeom.attributes.position.array),
-            indices: Array.from(bufferGeom.index?.array || []),
-          };
-        });
-
+      const geometry: ComponentGeometry[] = convertGroupToDbGeom(meshGroup);
       const response = await updateNodeProject(
         uiControls,
         nodesRef.current,
@@ -253,7 +239,7 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
 
       toast(response.message);
     },
-    [meshGroup.children, nodeStateOutputValues],
+    [meshGroup, nodeStateOutputValues],
   );
 
   const switchSelectInputValue = useCallback(

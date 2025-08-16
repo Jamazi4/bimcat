@@ -1,15 +1,25 @@
 "use client";
 
 import * as THREE from "three";
-import { ComponentGeometry } from "@/utils/types";
+import { ComponentGeometry, SelectedRow } from "@/utils/types";
 import PsetsList from "../editor/PsetsList";
 import Renderer from "../editor/Renderer";
 import { ComponentControlsType, Pset } from "@/utils/schemas";
 import ComponentControlsPanel from "../editor/ComponentControlsPanel";
 import { useNodeSystem } from "@/utils/customHooks/useNodeSystem";
 import { useCallback, useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import {
+  setLiveStateGeometry,
+  setLiveStateInfo,
+  setLiveStatePsets,
+} from "@/lib/downloadIfcSlice";
+import { toast } from "sonner";
+import { convertGroupToDbGeom } from "@/utils/nodeDefinitions/nodeUtilFunctions";
 
 const ComponentContentWrapper = ({
+  componentAuthor,
+  componentData,
   componentGeometry,
   componentEditable,
   componentPsets,
@@ -17,6 +27,8 @@ const ComponentContentWrapper = ({
   isUsingNodes,
   uiControls,
 }: {
+  componentAuthor: string;
+  componentData: SelectedRow;
   componentGeometry: ComponentGeometry[];
   componentPsets: Pset[] | undefined;
   componentEditable: boolean;
@@ -25,11 +37,11 @@ const ComponentContentWrapper = ({
   uiControls?: ComponentControlsType;
 }) => {
   const controlsAvailable = !!uiControls;
-  const [paramMeshGroup, setParamMeshGroup] = useState<THREE.Group | null>(
-    new THREE.Group(),
-  );
+  const [paramMeshGroup, _] = useState<THREE.Group | null>(new THREE.Group());
   const [pendingFetch, setPendingFetch] = useState(true); //use to load button
   const [activeControls, setActiveControls] = useState(false);
+  const dispatch = useAppDispatch();
+  const downloadIfcState = useAppSelector((s) => s.downloadIfcSlice);
 
   const ns = useNodeSystem(paramMeshGroup!);
   const { fetchNodes, changeNodeValue } = ns;
@@ -43,6 +55,42 @@ const ComponentContentWrapper = ({
   useEffect(() => {
     fetchNodesWrapper();
   }, [ns.fetchNodes, fetchNodesWrapper]);
+
+  useEffect(() => {
+    if (downloadIfcState.liveGeometryRequested) {
+      if (pendingFetch) {
+        toast("Fetching parametric data in progress, try again.");
+        return;
+      }
+      if (!paramMeshGroup || paramMeshGroup?.children?.length < 0) {
+        toast("Could not resolve live geometry");
+        return;
+      }
+
+      const liveStateInfo = {
+        info: {
+          name: componentData[componentId].name,
+          author: componentAuthor,
+        },
+      };
+
+      const liveStateGeom = convertGroupToDbGeom(paramMeshGroup);
+
+      dispatch(setLiveStatePsets({ psets: componentPsets || [] }));
+      dispatch(setLiveStateInfo(liveStateInfo));
+      dispatch(setLiveStateGeometry({ geometry: liveStateGeom }));
+    }
+  }, [
+    componentAuthor,
+    componentData,
+    componentId,
+    componentPsets,
+    dispatch,
+    downloadIfcState.liveGeometryRequested,
+    paramMeshGroup,
+    paramMeshGroup?.children,
+    pendingFetch,
+  ]);
 
   return (
     <div>

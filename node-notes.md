@@ -459,6 +459,18 @@ Now need to make downloadIfc work so it downloads edited geometry
 in ComponentContentWrapper need to add tooltip to lock maybe and make it load
 when it's actually loading.
 
+think about not spawning entire nodeSystem but only necessary parts.
+
+fix mesh material in rendering so it doesn't show the meshes are swapped done
+
+### --16-08-2025--
+
+fixed mesh mat, scrollable pset window is needed in browser
+I think that after fixing those I will add a node - getArea and getLength
+maybe also split vector? First getNormal or smth would be good
+
+anyway after that I need to do dynamic props and then prolly also all string nodes
+
 #### plan for ui controls
 
 - 'EXPOSE' node would have a number/bool input and a string input for control

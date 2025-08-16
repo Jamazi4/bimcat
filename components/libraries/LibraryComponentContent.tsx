@@ -45,11 +45,14 @@ const LibraryComponentContent = async ({
         isPublic={component.public}
       />
       <ComponentContentWrapper
+        componentAuthor={component.author}
+        componentData={componentData}
         isUsingNodes={!!component.nodes?.id}
         componentId={componentId}
         componentGeometry={component.geometry}
         componentEditable={component.editable}
         componentPsets={component.psets}
+        uiControls={component.nodes?.uiControls || undefined}
       />
     </div>
   );

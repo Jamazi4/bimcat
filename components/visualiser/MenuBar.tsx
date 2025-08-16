@@ -28,7 +28,6 @@ const MenuBar = ({
   const disableOpenInBrowser = componentId === null;
   const router = useRouter();
   const handleOpenInBrowser = () => {
-    console.log(componentId);
     router.replace(`/components/${componentId}`);
   };
   return (
