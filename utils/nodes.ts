@@ -12,6 +12,9 @@ import { groupNode } from "./nodeDefinitions/groupNode";
 import { scalarMathNode } from "./nodeDefinitions/scalarMathNode";
 import { sliderNode } from "./nodeDefinitions/sliderNode";
 import { uiControlNode } from "./nodeDefinitions/uiControlNode";
+import { getMeshAreaNode } from "./nodeDefinitions/getMeshAreaNode";
+import { getLinestringLengthNode } from "./nodeDefinitions/getLinestringLengthNode";
+import { getMeshVolumeNode } from "./nodeDefinitions/getMeshVolume";
 
 export const nodeDefinitions: nodeDefinition[] = [
   outputNode(1),
@@ -27,4 +30,7 @@ export const nodeDefinitions: nodeDefinition[] = [
   scalarMathNode(11),
   sliderNode(12),
   uiControlNode(13),
+  getMeshAreaNode(14),
+  getLinestringLengthNode(15),
+  getMeshVolumeNode(16),
 ];

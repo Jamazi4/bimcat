@@ -105,40 +105,6 @@ export function createSideGeometry(
   return final;
 }
 
-// export function triangulateLinestrings(
-//   linestrings: THREE.Vector3[][],
-// ): THREE.BufferGeometry | null {
-//   const geometries: THREE.BufferGeometry[] = [];
-//
-//   for (const linestring of linestrings) {
-//     if (linestring.length < 3) continue;
-//
-//     const vertices: number[] = [];
-//     for (const v of linestring) {
-//       vertices.push(v.x, v.y, v.z);
-//     }
-//
-//     const indices = earcut(vertices, [], 3);
-//
-//     if (indices.length === 0) continue;
-//
-//     const geom = new THREE.BufferGeometry();
-//     geom.setAttribute(
-//       "position",
-//       new THREE.Float32BufferAttribute(vertices, 3),
-//     );
-//     geom.setIndex(indices);
-//     geometries.push(geom);
-//   }
-//
-//   if (geometries.length === 0) return null;
-//
-//   const merged = BufferGeometryUtils.mergeGeometries(geometries, false);
-//   merged.computeVertexNormals();
-//   return merged;
-// }
-//
-
 export function triangulateLinestrings(
   linestrings: THREE.Vector3[][],
 ): THREE.BufferGeometry | null {
