@@ -537,6 +537,10 @@ additionally to the points above:
   - psets with the same name work as the same element
   - empty psets silently don't go to ifc
 
+### --17-08-2025--
+
+add frontend block for entering same values in psets or psets with thesame name
+
 ### Current task list
 
 [x]sort out the navigation to library and/or component from composite

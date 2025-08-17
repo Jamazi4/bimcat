@@ -1,35 +1,43 @@
 import { nodeDefinition } from "../nodeTypes";
 
-export function uiControlNode(nodeDefId: number): nodeDefinition {
+export function psetAttributeNode(nodeDefId: number): nodeDefinition {
   return {
     nodeDefId: nodeDefId,
     category: "UI",
-    type: "ui control",
+    type: "attribute",
     inputs: [
       {
         type: "string",
-        name: "control name",
-        id: 0,
         value: "",
+        name: "attribute key",
+        id: 0,
       },
       {
         type: "group",
-        value: true,
         name: "number",
         id: 1,
-        groupIndex: 1,
         slotValueType: "number",
+        groupIndex: 1,
+        value: true,
       },
       {
         type: "group",
-        value: false,
-        name: "boolean",
+        name: "string",
         id: 2,
+        slotValueType: "string",
         groupIndex: 1,
+        value: false,
+      },
+      {
+        type: "group",
+        name: "boolean",
+        id: 3,
         slotValueType: "boolean",
+        groupIndex: 1,
+        value: false,
       },
     ],
-    outputs: [],
+    outputs: [{ type: "string", name: "attribute", id: 4 }],
     function: (_, __) => {
       return {};
     },

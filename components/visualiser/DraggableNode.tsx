@@ -176,9 +176,11 @@ const DraggableNode = memo(function DraggableNode({
           {nodeDef.inputs.map((input, i) => {
             if (input.type === "string") {
               const changeThisValue = changeThisNodeValues.bind(null, input.id);
+              const placeholder = input.name;
 
               return (
                 <DraggableNodeInputString
+                  placeholder={placeholder}
                   value={(node.values?.[input.id] as string) || ""}
                   changeThisValue={changeThisValue}
                   key={i}

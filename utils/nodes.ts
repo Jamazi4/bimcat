@@ -15,6 +15,8 @@ import { uiControlNode } from "./nodeDefinitions/uiControlNode";
 import { getMeshAreaNode } from "./nodeDefinitions/getMeshAreaNode";
 import { getLinestringLengthNode } from "./nodeDefinitions/getLinestringLengthNode";
 import { getMeshVolumeNode } from "./nodeDefinitions/getMeshVolume";
+import { psetNode } from "./nodeDefinitions/psetNode";
+import { psetAttributeNode } from "./nodeDefinitions/psetAttributeNode";
 
 export const nodeDefinitions: nodeDefinition[] = [
   outputNode(1),
@@ -33,4 +35,6 @@ export const nodeDefinitions: nodeDefinition[] = [
   getMeshAreaNode(14),
   getLinestringLengthNode(15),
   getMeshVolumeNode(16),
+  psetNode(17),
+  psetAttributeNode(18),
 ];

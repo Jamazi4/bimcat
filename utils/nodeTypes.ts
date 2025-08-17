@@ -69,6 +69,7 @@ export type EvalValue =
   | { type: "vector"; value: THREE.Vector3 }
   | { type: "linestring"; value: THREE.Vector3[][] }
   | { type: "mesh"; value: THREE.BufferGeometry }
+  | { type: "string"; value: string }
   | { type: "geometry"; value: THREE.Object3D }; // result of output node only
 
 export type NodeEvalResult = { [outputSlotId: number]: EvalValue };
@@ -80,6 +81,7 @@ export type SlotValues =
   | "vector"
   | "linestring"
   | "mesh"
+  | "string"
   | "geometry";
 
 export type NodeInputType = (
@@ -176,6 +178,7 @@ export const fillColorClasses = {
   mesh: "fill-mesh-input",
   geometry: "fill-geometry-input",
   transform: "fill-transform-input",
+  string: "fill-string-input",
 };
 
 export const backgroundColorClasses = {
@@ -186,6 +189,7 @@ export const backgroundColorClasses = {
   mesh: "bg-mesh-input",
   geometry: "bg-geometry-input",
   transform: "bg-transform-input",
+  string: "bg-string-input",
 };
 
 export type inputWithSlotValueType = Extract<

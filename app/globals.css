@@ -55,12 +55,14 @@
   --color-mesh-input: var(--mesh-input);
   --color-geometry-input: var(--background);
   --color-transform-input: var(--transform-input);
+  --color-string-input: var(--string-input);
   --hue-number-input: 0;
   --hue-boolean-input: 50;
   --hue-vector-input: 103;
   --hue-linestring-input: 270;
   --hue-mesh-input: 222;
   --hue-transform-input: 180;
+  --hue-string-input: 300;
 
   --sat-light-inputs: 50%;
   --sat-dark-inputs: 90%;
@@ -121,6 +123,9 @@
       var(--hue-transform-input) var(--sat-light-inputs)
         var(--ltns-light-inputs)
     );
+    --string-input: hsl(
+      var(--hue-string-input) var(--sat-light-inputs) var(--ltns-light-inputs)
+    );
   }
 
   .dark {
@@ -170,6 +175,9 @@
     );
     --transform-input: hsl(
       var(--hue-transform-input) var(--sat-dark-inputs) var(--ltns-dark-inputs)
+    );
+    --string-input: hsl(
+      var(--hue-string-input) var(--sat-dark-inputs) var(--ltns-dark-inputs)
     );
   }
 }

@@ -465,13 +465,46 @@ fix mesh material in rendering so it doesn't show the meshes are swapped done
 
 ### --16-08-2025--
 
-fixed mesh mat, scrollable pset window is needed in browser
+fixed mesh mat, scrollable pset window is needed in browser - done
 I think that after fixing those I will add a node - getArea and getLength
 maybe also split vector? First getNormal or smth would be good
 
 anyway after that I need to do dynamic props and then prolly also all string nodes
 
-#### new current plan as of 18-08
+### --17-08-2025--
+
+getArea, getLength and getVolume nodes added under new category "getters"
+
+- maybe add viewer to them and two outputs - string/number
+- concat string
+
+how to do pset/
+
+- pset node will have string title and string slots
+- each string slot will take in a string BUT
+- it will parse this string so that ":" separates keys and vals
+- prop node will take in two input strings - format them as above and output
+  string
+
+This will allow to to this by hand that's why I'm thinking of making prop node
+output a string but JSON?
+
+okay now the dynamic psets are saving from the node project. Now just need
+to handle their dynamic changes when the controls are activated.
+
+Need really neeed need to block user from creating duplicate pset titles
+or duplicate keys in the same pset. Not only inside the browser but also
+inside the node project
+
+Probably also good idea to disallow editing/removing dynamic values at least
+
+handle edge cases when user is adding dynamically pset that already exists on
+component or two pset nodes with the same title or two attributes with the same
+name connected to the same pset node
+
+pset node needs to say attribute for each list input, currently says string
+
+#### new current plan as of 16-08
 
 - scrollable pset area
 - pset + prop nodes
@@ -497,11 +530,11 @@ Runtime:
 
 UI:
 
-- save control state to user's profile? - add control presets?
 - and dynamic props
+- save control state to user's profile? - add control presets?
 - highlight wrong links - at least to wrong input type will be easy - then also
   eval errors
-- lock node menu buttons
+- lock/hide node menu buttons
 - color picker in output node
 - addNode menu to have search - and display under right click
 - regions with color and name (SVG)
@@ -520,15 +553,12 @@ A. Easy
 - add origin to transform node (and in transform object type)!
 - triangulate linestring (w/ holes?)
 - apply transform (add origin to transform opt arg)
-- get length/get area/get volume
 
 - get normal
 - normalize
 
 - math min/max/clamp
 - bigger than/smaller than or/and
-
-- string operations
 
 B. Hard
 
@@ -549,8 +579,9 @@ B. Hard
 - solidify
 - subdivide?
 - function node
+- getFaces/points/edges - all/single (id)/range(ids)
 
-Done:
+## Backlog
 
 - copied group node destroys connections if they are copied with it
 - delete component doesn't delete node project?
@@ -573,12 +604,13 @@ Done:
 - switching node type in real time (euler-quaternion and extrude mesh/linestring)
 - for extrude remove buffer positions ending up as not a part of indices
 - solidify(can do with extrude) node, transform node with
-- translate/scale/angles or quaternion,
+- translate/scale/angles or quaternion
 - change/lock inputs conditionally
 - fill polygon node (triangulate)
 - error when switching capped and the extrusion output is switching
+- get length/get area/get volume
 
-#### plan for ui controls
+### plan for ui controls
 
 - 'EXPOSE' node would have a number/bool input and a string input for control
   name and no output

@@ -32,6 +32,8 @@ export type PsetContentSchemaType = z.infer<typeof PsetContentSchema>;
 export const PsetSchema = z.object({
   title: z.string(),
   content: PsetContentSchema,
+  dynamic: z.array(z.string()).nullable().optional(),
+  //dynamic is array of attribute keys that are dynamic
 });
 
 export const ComponentControlsSchema = z.array(

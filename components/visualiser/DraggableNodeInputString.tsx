@@ -4,9 +4,11 @@ import { Input } from "../ui/input";
 const DraggableNodeInputString = ({
   value,
   changeThisValue,
+  placeholder,
 }: {
   value: string;
   changeThisValue: (value: string) => void;
+  placeholder: string;
 }) => {
   const [curVal, setCurVal] = useState(String(value));
 
@@ -22,7 +24,7 @@ const DraggableNodeInputString = ({
           type="text"
           value={curVal}
           onChange={(e) => handleChange(e)}
-          placeholder="control name"
+          placeholder={placeholder}
           className={`w-full !text-2xl`}
         />
       </div>

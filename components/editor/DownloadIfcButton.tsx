@@ -39,7 +39,6 @@ const DownloadIfcButton = () => {
     setPending(true);
     if (downloadIfcState.parametersActive === true) {
       dispatch(requestLiveGeometry({ request: true }));
-      console.log("i returned");
       return;
     }
 

@@ -25,7 +25,7 @@ import {
 import { useNodeNavigation } from "./useNodeNavigation";
 import { deleteNodeOutputValue } from "@/lib/features/visualiser/visualiserSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { ComponentControlsType } from "../schemas";
+import { ComponentControlsType, Pset } from "../schemas";
 import { convertGroupToDbGeom } from "../nodeDefinitions/nodeUtilFunctions";
 
 export const useNodeSystem = (meshGroup: THREE.Group) => {
@@ -172,62 +172,108 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     (state) => state.visualiserSlice.nodeValues,
   );
 
+  const resolveUiControls = useCallback(() => {
+    const uiControls: ComponentControlsType = nodesRef.current.flatMap((n) => {
+      if (n.type === "ui control") {
+        const controlName = (n.values?.[0] as string) || "unnamed";
+        const edgeFromControlledNode = edgesRef.current.find(
+          (e) => e.toNodeId === n.id,
+        );
+        const controlledNodeId = edgeFromControlledNode?.fromNodeId;
+        const controlledNode = nodesRef.current.find(
+          (cn) => cn.id === controlledNodeId,
+        );
+
+        if (!controlledNodeId || !controlledNode || !controlledNode.values)
+          return [];
+
+        const controlledNodeValue =
+          nodeStateOutputValues[controlledNodeId][
+            edgeFromControlledNode.fromSlotId
+          ];
+
+        if (!controlledNodeValue) return [];
+
+        const controlledNodeType = controlledNode?.type;
+
+        if (
+          controlledNodeType !== "number" &&
+          controlledNodeType !== "slider" &&
+          controlledNodeType !== "boolean"
+        ) {
+          toast(`${controlName} can only control slider, number or boolean.`);
+          return [];
+        }
+
+        // hardCoded node values since I only support num, bool and slider
+        const controlValue =
+          controlledNode.type === "slider"
+            ? controlledNode.values[3]
+            : controlledNode.values[0];
+
+        const controlType = nodeTypeControlTypeMap[controlledNodeType];
+
+        return {
+          controlName,
+          nodeId: controlledNodeId,
+          outputValue: controlledNodeValue,
+          controlValue,
+          controlType,
+        };
+      } else return [];
+    });
+    return uiControls;
+  }, [nodeStateOutputValues]);
+
+  const resolveDynPsets = useCallback(() => {
+    return nodesRef.current.flatMap((n) => {
+      if (n.type === "pset") {
+        const psetName = (n.values?.[0] as string) || "unnamed";
+
+        const attrEdges = edgesRef.current.filter((e) => e.toNodeId === n.id);
+        const attrNodeIds = attrEdges.map((e) => e.fromNodeId);
+        const attrNodes = nodesRef.current.filter((nd) =>
+          attrNodeIds.includes(nd.id),
+        );
+        const attrNames = attrNodes.reduce<Record<string, string>>(
+          (acc, cur) => {
+            acc[cur.id] = (cur.values?.[0] as string) || " ";
+
+            return acc;
+          },
+          {},
+        );
+
+        const valEdges = edgesRef.current.filter((e) =>
+          attrNodeIds.includes(e.toNodeId),
+        );
+
+        const attrVals = valEdges.reduce<
+          Record<string, string | boolean | number>
+        >((acc, cur) => {
+          acc[cur.toNodeId] =
+            nodeStateOutputValues[cur.fromNodeId][cur.fromSlotId];
+          return acc;
+        }, {});
+
+        const dynPset: Pset = {
+          title: psetName,
+          content: [],
+        };
+
+        attrNodeIds.forEach((id) => {
+          dynPset.content.push({ [attrNames[id]]: attrVals[id] });
+        });
+        return dynPset;
+      }
+      return [];
+    });
+  }, [nodeStateOutputValues]);
+
   const saveNodeProject = useCallback(
     async (componentId: string) => {
-      const uiControls: ComponentControlsType = nodesRef.current.flatMap(
-        (n) => {
-          if (n.type === "ui control") {
-            const controlName = (n.values?.[0] as string) || "unnamed";
-            const edgeFromControlledNode = edgesRef.current.find(
-              (e) => e.toNodeId === n.id,
-            );
-            const controlledNodeId = edgeFromControlledNode?.fromNodeId;
-            const controlledNode = nodesRef.current.find(
-              (cn) => cn.id === controlledNodeId,
-            );
-
-            if (!controlledNodeId || !controlledNode || !controlledNode.values)
-              return [];
-
-            const controlledNodeValue =
-              nodeStateOutputValues[controlledNodeId][
-                edgeFromControlledNode.fromSlotId
-              ];
-
-            if (!controlledNodeValue) return [];
-
-            const controlledNodeType = controlledNode?.type;
-
-            if (
-              controlledNodeType !== "number" &&
-              controlledNodeType !== "slider" &&
-              controlledNodeType !== "boolean"
-            ) {
-              toast(
-                `${controlName} can only control slider, number or boolean.`,
-              );
-              return [];
-            }
-
-            // hardCoded node values since I only support num, bool and slider
-            const controlValue =
-              controlledNode.type === "slider"
-                ? controlledNode.values[3]
-                : controlledNode.values[0];
-
-            const controlType = nodeTypeControlTypeMap[controlledNodeType];
-
-            return {
-              controlName,
-              nodeId: controlledNodeId,
-              outputValue: controlledNodeValue,
-              controlValue,
-              controlType,
-            };
-          } else return [];
-        },
-      );
-
+      const uiControls: ComponentControlsType = resolveUiControls();
+      const dynPsets = resolveDynPsets();
       const geometry: ComponentGeometry[] = convertGroupToDbGeom(meshGroup);
       const response = await updateNodeProject(
         uiControls,
@@ -235,11 +281,12 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
         edgesRef.current,
         componentId,
         geometry,
+        dynPsets,
       );
 
       toast(response.message);
     },
-    [meshGroup, nodeStateOutputValues],
+    [meshGroup, resolveDynPsets, resolveUiControls],
   );
 
   const switchSelectInputValue = useCallback(

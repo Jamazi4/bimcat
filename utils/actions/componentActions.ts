@@ -12,6 +12,7 @@ import {
   componentArraySchema,
   NodeProjectSchema,
   ComponentControlsType,
+  PsetContentSchemaType,
 } from "../schemas";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getDbUser } from "./globalActions";
@@ -89,12 +90,81 @@ export const createNodeComponentAction = async (
   }
 };
 
+function mergeDynamicPsets(validatedPsets: Pset[], dynPsets: Pset[]): Pset[] {
+  const dynMap = new Map(dynPsets.map((d) => [d.title, d]));
+  const result: Pset[] = [];
+
+  for (const p of validatedPsets) {
+    const dynAttrs = p.dynamic ?? [];
+    const dynPset = dynMap.get(p.title);
+
+    // CASE 1: remove pset if all content keys are dynamic and no dynPset
+    const allKeys = p.content.map((c) => Object.keys(c)[0]);
+    const allDynamic = allKeys.every((k) => dynAttrs.includes(k));
+    if (allDynamic && !dynPset) {
+      continue; // skip this pset entirely
+    }
+
+    // CASE 2: has dynamic keys → remove them + overwrite with dynPset
+    if (dynAttrs.length > 0) {
+      // filter out dynamic keys from original content
+      const filteredContent = p.content.filter(
+        (c) => !dynAttrs.includes(Object.keys(c)[0]),
+      );
+
+      // take dyn content (overwrite semantics)
+      const dynEntries: PsetContentSchemaType = dynPset ? dynPset.content : [];
+
+      // Get unique keys from dynEntries to avoid duplicates
+      const dynKeys = [...new Set(dynEntries.map((c) => Object.keys(c)[0]))];
+
+      result.push({
+        ...p,
+        content: [...filteredContent, ...dynEntries],
+        dynamic: dynKeys,
+      });
+      continue;
+    }
+
+    // CASE 3: no dynamic keys, but dynPset exists → just add its attrs
+    if (!dynAttrs.length && dynPset) {
+      const dynKeys = [
+        ...new Set(dynPset.content.map((c) => Object.keys(c)[0])),
+      ];
+      result.push({
+        ...p,
+        content: [...p.content, ...dynPset.content],
+        dynamic: dynKeys,
+      });
+      continue;
+    }
+
+    // default: keep unchanged
+    result.push(p);
+  }
+
+  // Add brand-new dynPsets (not in validatedPsets at all)
+  const existingTitles = new Set(result.map((p) => p.title));
+  for (const dp of dynPsets) {
+    if (!existingTitles.has(dp.title)) {
+      const dynKeys = [...new Set(dp.content.map((c) => Object.keys(c)[0]))];
+      result.push({
+        ...dp,
+        dynamic: dynKeys,
+      });
+    }
+  }
+
+  return result;
+}
+
 export const updateNodeProject = async (
   uiControls: ComponentControlsType,
   nodes: GeomNodeBackType[],
   edges: NodeEdgeType[],
   componentId: string,
   geometry: ComponentGeometry[],
+  dynPsets?: Pset[],
 ) => {
   try {
     const dbUser = await getDbUser();
@@ -107,8 +177,14 @@ export const updateNodeProject = async (
         id: true,
         geometry: { select: { id: true } },
         nodes: { select: { id: true } },
+        psets: true,
       },
     });
+
+    const validatedPsets = validateWithZodSchema(
+      PsetArraySchema,
+      component?.psets,
+    );
 
     if (!component) throw new Error("Could not find component");
     if (dbUser.id !== component?.userId || !component)
@@ -159,9 +235,12 @@ export const updateNodeProject = async (
         (id) => !usageMap[id] || usageMap[id] <= 1,
       );
 
+      const newPsets = mergeDynamicPsets(validatedPsets, dynPsets || []);
+
       await tx.component.update({
         where: { id: componentId },
         data: {
+          psets: newPsets,
           geometry: {
             connect: newGeometryRecords.map((g) => ({ id: g.id })),
           },
@@ -181,6 +260,8 @@ export const updateNodeProject = async (
       });
     });
 
+    if (dynPsets && dynPsets.length > 0)
+      revalidatePath(`/components/${component.id}`);
     return { message: "Node project succesfully saved" };
   } catch (error) {
     return renderError(error);
@@ -440,8 +521,8 @@ export const updatePsetsAction = async (
     });
 
     if (!component) throw new Error("No component with this id");
-    const componentWithEditable = await addEditableToComponent(component);
 
+    const componentWithEditable = await addEditableToComponent(component);
     if (!componentWithEditable.editable)
       throw new Error("User has no rights to edit this component");
 
@@ -454,12 +535,28 @@ export const updatePsetsAction = async (
 
     const newPsets: Pset[] = validatedComponent.psets.map((pset: Pset) => {
       if (pset.title === psetTitle) {
-        return {
+        const newContentKeys = Object.keys(newPsetData);
+        const originalDynamicKeys = pset.dynamic ?? [];
+
+        // Filter dynamic keys: keep only those that still exist in the new content
+        const updatedDynamicKeys = originalDynamicKeys.filter((dynamicKey) =>
+          newContentKeys.includes(dynamicKey),
+        );
+
+        // Create the updated pset
+        const updatedPset: Pset = {
           title: psetTitle,
           content: Object.entries(newPsetData).map(([key, value]) => ({
             [key]: value as string | number | boolean,
           })),
         };
+
+        // Only add dynamic property if there are dynamic keys remaining
+        if (updatedDynamicKeys.length > 0) {
+          updatedPset.dynamic = updatedDynamicKeys;
+        }
+
+        return updatedPset;
       }
       return pset;
     });
@@ -472,6 +569,7 @@ export const updatePsetsAction = async (
         psets: newPsets,
       },
     });
+
     revalidatePath(`/components/${componentId}`);
     return { message: `${psetTitle} updated successfully!` };
   } catch (error) {
