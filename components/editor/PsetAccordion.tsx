@@ -18,7 +18,7 @@ const PsetAccordion = ({
   psets,
   edit,
 }: {
-  resolveDynPsets: () => psetType[];
+  resolveDynPsets?: () => psetType[];
   psets: psetType[];
   edit: boolean;
 }) => {
@@ -29,7 +29,7 @@ const PsetAccordion = ({
   const [dynPsets, setDynPsets] = useState<psetType[]>([]);
 
   useEffect(() => {
-    if (parametersActive) {
+    if (parametersActive && resolveDynPsets) {
       setDynPsets(resolveDynPsets());
     }
   }, [parametersActive, resolveDynPsets, nodeStateValues]);
