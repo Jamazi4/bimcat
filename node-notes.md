@@ -486,9 +486,6 @@ how to do pset/
 - prop node will take in two input strings - format them as above and output
   string
 
-This will allow to to this by hand that's why I'm thinking of making prop node
-output a string but JSON?
-
 okay now the dynamic psets are saving from the node project. Now just need
 to handle their dynamic changes when the controls are activated.
 

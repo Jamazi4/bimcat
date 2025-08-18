@@ -70,7 +70,7 @@ export type EvalValue =
   | { type: "linestring"; value: THREE.Vector3[][] }
   | { type: "mesh"; value: THREE.BufferGeometry }
   | { type: "string"; value: string }
-  | { type: "geometry"; value: THREE.Object3D }; // result of output node only
+  | { type: "geometry"; value: THREE.Object3D | null }; // result of output node only
 
 export type NodeEvalResult = { [outputSlotId: number]: EvalValue };
 

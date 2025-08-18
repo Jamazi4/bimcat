@@ -1,4 +1,5 @@
 import { nodeDefinition } from "../nodeTypes";
+import { getInputValues, getListInputValues } from "./nodeUtilFunctions";
 
 export function psetNode(nodeDefId: number): nodeDefinition {
   return {
@@ -20,9 +21,25 @@ export function psetNode(nodeDefId: number): nodeDefinition {
         isList: true,
       },
     ],
-    outputs: [],
-    function: (_, __) => {
-      return {};
+    outputs: [{ type: "string", id: 2, name: "pset" }],
+    function: (node, evalFunction) => {
+      const inputVal = getListInputValues(
+        node.values,
+        node.inputs,
+        evalFunction,
+      );
+      const firstOne = getInputValues(node.inputs, evalFunction, [1])[0];
+
+      let output = "";
+      inputVal.forEach((v) => {
+        if (v && v.value) {
+          output += String(v.value) + "/";
+        }
+      });
+
+      output += firstOne.value;
+
+      return { 2: { type: "string", value: output } };
     },
   };
 }

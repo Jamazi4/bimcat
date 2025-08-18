@@ -140,12 +140,15 @@ export const extractListInputs = (
     if (node.values) {
       const listInput = nodeDef.inputs.find((i) => i.isList === true);
       let curInputType: SlotValues;
+      let inputName: string;
       if (listInput && listInput.type === "group") {
         curInputType = (
           nodeDef.inputs[activeGroupIndex] as inputWithSlotValueType
         ).slotValueType;
+        inputName = nodeDef.inputs[activeGroupIndex].name;
       } else if (listInput) {
         curInputType = (listInput as inputWithSlotValueType).slotValueType;
+        inputName = listInput.name;
       }
       Object.entries(node.values).forEach(([vInputId, _]) => {
         const vInputIdParsed = parseInt(vInputId);
@@ -166,7 +169,7 @@ export const extractListInputs = (
               partialSlotData={partialSlotData}
               registerNodeSlot={registerNodeSlot}
               key={vInputIdParsed}
-              name={curInputType}
+              name={inputName}
             />,
           );
         }

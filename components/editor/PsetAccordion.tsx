@@ -1,3 +1,5 @@
+"use client";
+
 import type { Pset as psetType } from "@/utils/schemas";
 import PsetRow from "./PsetRow";
 import EditPsetButton from "./EditPsetButton";

@@ -72,8 +72,13 @@ const NodeEditor = ({ nodeMeshGroup }: { nodeMeshGroup: THREE.Group }) => {
 
   const handleSaveProject = async () => {
     setPendingSave(true);
-    await saveNodeProject(componentId);
-    setPendingSave(false);
+    try {
+      await saveNodeProject(componentId);
+      setPendingSave(false);
+    } catch (error) {
+      console.log(error);
+      setPendingSave(false);
+    }
   };
 
   return (

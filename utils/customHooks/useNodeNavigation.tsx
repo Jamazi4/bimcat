@@ -514,7 +514,8 @@ export const useNodeNavigation = (
         inputValueType === "geometry" &&
         (outputType === "mesh" ||
           outputType === "linestring" ||
-          outputType === "vector");
+          outputType === "vector" ||
+          outputType === "string");
 
       if (isSameType || isOutputNode) {
         addEdge(

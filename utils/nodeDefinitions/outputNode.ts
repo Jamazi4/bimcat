@@ -8,7 +8,7 @@ export function outputNode(nodeDefId: number): nodeDefinition {
     category: "general",
     type: "output",
     inputs: [
-      { type: "slot", id: 0, name: "geometry", slotValueType: "geometry" },
+      { type: "slot", id: 0, name: "output", slotValueType: "geometry" },
     ],
     outputs: [],
     function: (
@@ -46,6 +46,9 @@ export function outputNode(nodeDefId: number): nodeDefinition {
           combined.add(wireframeMesh);
 
           return { 1: { type: "geometry", value: combined } };
+        }
+        case "string": {
+          return { 1: { type: "geometry", value: null } };
         }
         default:
           throw new Error("Unsupported input to output node");

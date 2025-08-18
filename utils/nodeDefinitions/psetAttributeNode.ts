@@ -1,4 +1,5 @@
 import { nodeDefinition } from "../nodeTypes";
+import { getActiveInputIds, getInputValues } from "./nodeUtilFunctions";
 
 export function psetAttributeNode(nodeDefId: number): nodeDefinition {
   return {
@@ -38,8 +39,12 @@ export function psetAttributeNode(nodeDefId: number): nodeDefinition {
       },
     ],
     outputs: [{ type: "string", name: "attribute", id: 4 }],
-    function: (_, __) => {
-      return {};
+    function: (node, evalFunction) => {
+      const activeInputs = getActiveInputIds(node.values, [1, 2, 3]);
+      const val = getInputValues(node.inputs, evalFunction, activeInputs)[0];
+      const key = node.values[0];
+      const output = `${key}: ${val.value}`;
+      return { 4: { type: "string", value: output } };
     },
   };
 }

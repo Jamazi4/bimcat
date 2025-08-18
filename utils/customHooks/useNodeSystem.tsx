@@ -273,7 +273,17 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
   const saveNodeProject = useCallback(
     async (componentId: string) => {
       const uiControls: ComponentControlsType = resolveUiControls();
-      const dynPsets = resolveDynPsets();
+      let dynPsets: Pset[] = [];
+
+      try {
+        dynPsets = resolveDynPsets();
+      } catch (error) {
+        console.log(error);
+        toast(
+          "Could not resolve dynamic psets, make sure pset node is connected to output.",
+        );
+      }
+
       const geometry: ComponentGeometry[] = convertGroupToDbGeom(meshGroup);
       const response = await updateNodeProject(
         uiControls,
@@ -283,7 +293,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
         geometry,
         dynPsets,
       );
-
       toast(response.message);
     },
     [meshGroup, resolveDynPsets, resolveUiControls],

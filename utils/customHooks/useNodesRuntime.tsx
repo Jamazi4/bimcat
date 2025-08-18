@@ -79,7 +79,7 @@ const useNodesRuntime = ({
             if (!activeInputs.includes(inputDef.id)) return [];
           }
 
-          if (!inputDef.defaultValue && !edge) {
+          if (!inputDef.defaultValue && !edge && nodeDef.type !== "output") {
             throw new Error(`${node.type} needs ${inputDef.name}`);
           }
 
@@ -180,7 +180,9 @@ const useNodesRuntime = ({
           storeOutputToState(nodeDef, node, outputValue);
           return outputValue;
         } else {
-          throw new Error("no function");
+          throw new Error(
+            "Evaluate AST Error - no node definition or function",
+          );
         }
       } catch (error) {
         throw error;
@@ -197,6 +199,7 @@ const useNodesRuntime = ({
 
   const startNodeRuntime = useCallback(() => {
     const outputNodes = runtimeNodes.filter((n) => n.type === "output");
+
     setLiveNodeIds([]);
     if (outputNodes.length === 0) {
       meshGroup.clear();
@@ -204,16 +207,16 @@ const useNodesRuntime = ({
       return;
     }
 
-    for (const outputNode of outputNodes) {
-      const edge = edges.find((e) => e.toNodeId === outputNode.id);
+    for (const node of outputNodes) {
+      const ast = buildAST(node.id);
+      const edge = edges.find((e) => e.toNodeId === node.id);
       if (!edge) {
-        clearOutputObjects(outputNode.id);
+        clearOutputObjects(node.id);
         continue;
       }
-
       try {
-        const ast = buildAST(outputNode.id);
         const result = evaluateAST(ast)[1];
+
         //because output always returns on slot 1
 
         const outputObject3D = result.value;
@@ -224,14 +227,14 @@ const useNodesRuntime = ({
 
         if (result.type === "geometry") {
           setOutputObjects((prevState) => {
-            return { ...prevState, [outputNode.id]: outputObject3D };
+            return { ...prevState, [node.id]: outputObject3D };
           });
         } else {
           console.warn("Result is not a renderable geometry:", result);
-          clearOutputObjects(outputNode.id);
+          clearOutputObjects(node.id);
         }
       } catch (error) {
-        clearOutputObjects(outputNode.id);
+        clearOutputObjects(node.id);
         throw error;
       }
     }
