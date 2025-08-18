@@ -46,6 +46,7 @@ const ComponentControlsPanel = ({
       curLock = prev;
       return !prev;
     });
+
     if (curLock) {
       paramMeshGroup?.clear();
       dispatch(resetDownloadState());

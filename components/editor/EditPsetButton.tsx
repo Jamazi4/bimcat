@@ -28,9 +28,11 @@ import { Input } from "../ui/input";
 import SubmitButton from "../global/SubmitButton";
 
 function EditPsetButton({
+  dynamic,
   content,
   title,
 }: {
+  dynamic: string[] | undefined | null;
   content: PsetContent[];
   title: string;
 }) {
@@ -102,6 +104,7 @@ function EditPsetButton({
                   <div className="flex gap-4">
                     <div className="flex-grow">
                       <Input
+                        disabled={dynamic?.includes(name)}
                         id={name}
                         name={name}
                         value={value}
@@ -109,17 +112,20 @@ function EditPsetButton({
                       />
                     </div>
 
-                    <Button
-                      className="cursor-pointer text-destructive"
-                      type="button"
-                      size="icon"
-                      variant="outline"
-                      onClick={() => {
-                        removePsetRow(index);
-                      }}
-                    >
-                      <X />
-                    </Button>
+                    {!dynamic?.includes(name) && (
+                      <Button
+                        disabled={dynamic?.includes(name)}
+                        className="cursor-pointer text-destructive"
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        onClick={() => {
+                          removePsetRow(index);
+                        }}
+                      >
+                        <X />
+                      </Button>
+                    )}
                   </div>
                 </div>
               );

@@ -1094,5 +1094,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     removeListSlot,
     switchSelectInputValue,
     deleteNode,
+    resolveDynPsets,
   };
 };

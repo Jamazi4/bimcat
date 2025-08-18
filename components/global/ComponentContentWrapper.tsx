@@ -45,7 +45,7 @@ const ComponentContentWrapper = ({
   const downloadIfcState = useAppSelector((s) => s.downloadIfcSlice);
 
   const ns = useNodeSystem(paramMeshGroup!);
-  const { fetchNodes, changeNodeValue } = ns;
+  const { fetchNodes, changeNodeValue, resolveDynPsets } = ns;
 
   const fetchNodesWrapper = useCallback(async () => {
     if (!activeControls) return;
@@ -113,6 +113,7 @@ const ComponentContentWrapper = ({
         </div>
         <div className="lg:col-span-2">
           <PsetsList
+            resolveDynPsets={resolveDynPsets}
             psets={componentPsets ?? []}
             editable={componentEditable}
           />
