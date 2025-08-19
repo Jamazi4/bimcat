@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/accordion";
 import RemovePsetButton from "./RemovePsetButton";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { setLiveStatePsets } from "@/lib/downloadIfcSlice";
 
 const PsetAccordion = ({
@@ -41,10 +41,10 @@ const PsetAccordion = ({
     }
   }, [parametersActive, resolveDynPsets]);
 
-  let dynPsetsMerged: Pset[] = [];
+  const dynPsetsMerged = useMemo(() => {
+    if (dynPsets.length === 0) return [];
 
-  if (dynPsets.length > 0) {
-    dynPsetsMerged = psets.map((pset) => {
+    return psets.map((pset) => {
       const curTitle = pset.title;
       const dynamicNames = pset.dynamic;
 
@@ -58,20 +58,22 @@ const PsetAccordion = ({
               ?.content.find((c) => Object.keys(c)[0] === key);
 
             const dynVal = dynRecord ? dynRecord[key] : entry[key];
-
             return { [key]: dynVal };
-          } else return entry;
+          }
+          return entry;
         });
 
         return { ...pset, content: updatingContent };
-      } else return pset;
+      }
+
+      return pset;
     });
-  }
+  }, [psets, dynPsets]);
 
   useEffect(() => {
     if (!liveGeometryRequested) return;
-    dispatch(setLiveStatePsets({ psets: dynPsets }));
-  }, [dispatch, dynPsets, liveGeometryRequested]);
+    dispatch(setLiveStatePsets({ psets: dynPsetsMerged }));
+  }, [dispatch, dynPsetsMerged, liveGeometryRequested]);
 
   return (
     <Accordion type="multiple" className="w-full flex-1">

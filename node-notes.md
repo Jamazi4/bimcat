@@ -515,12 +515,24 @@ Maybe also spawn virtual output along with pset since it's not really intuitive
 
 but first make pset vals save to ifc.
 
-#### new current plan as of 16-08
+### --19-08-2025--
 
-- scrollable pset area
-- pset + prop nodes
-- any getter/getters (length/area?)
-- dynamic props / automatic bimcat propset
+dynamic psets modified by parameters are now saving in the ifc
+
+still should rename the string output to attribute or UI or smth as string
+will be used for sure in the future
+
+now I think I will go with add node ui in combo and then probably triangulate
+with holes and then apply transform node
+
+FOUND A BUG: only dynPsets are getting into ifc now when saving modified
+component
+
+#### new current plan as of 20-08
+
+- ui combo
+- triangulate/holes
+- appply transform
 
 ## General
 
@@ -620,6 +632,10 @@ B. Hard
 - fill polygon node (triangulate)
 - error when switching capped and the extrusion output is switching
 - get length/get area/get volume
+- scrollable pset area
+- pset + prop nodes done
+- any getter/getters (length/area?) done
+- dynamic props / automatic bimcat propset done
 
 ### plan for ui controls
 

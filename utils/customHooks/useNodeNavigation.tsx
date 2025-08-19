@@ -329,7 +329,6 @@ export const useNodeNavigation = (
         e.preventDefault();
         pasteCopiedNodes();
       } else if (e.shiftKey) {
-        e.preventDefault();
         shiftPressed.current = true;
       }
     },
