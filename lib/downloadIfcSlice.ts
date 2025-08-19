@@ -1,4 +1,5 @@
-import { ComponentGeometry, Pset } from "@/utils/types";
+import { Pset } from "@/utils/schemas";
+import { ComponentGeometry } from "@/utils/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface modelState {
@@ -56,7 +57,11 @@ const downloadIfcSlice = createSlice({
     setControlsActive: (state, action: PayloadAction<{ active: boolean }>) => {
       state.parametersActive = action.payload.active;
     },
-    resetDownloadState: () => initialState,
+    resetDownloadState: (state) => {
+      state.modelState = { ...initialState.modelState };
+      state.requestCompleted = { ...initialState.requestCompleted };
+      state.liveGeometryRequested = false;
+    },
   },
 });
 

@@ -501,6 +501,20 @@ name connected to the same pset node
 
 pset node needs to say attribute for each list input, currently says string
 
+### --18-08-2025--
+
+attributes now update in browser view when controls are active.
+pset node needs to be connected to output, else is not saved, but saving works
+
+now need to make dynamic psets save in the ifc
+
+should probably also handle them not as a string type but separate attribute
+type since inserting the string will NEVER work there.
+
+Maybe also spawn virtual output along with pset since it's not really intuitive
+
+but first make pset vals save to ifc.
+
 #### new current plan as of 16-08
 
 - scrollable pset area

@@ -50,6 +50,7 @@ const ComponentControlsPanel = ({
     if (curLock) {
       paramMeshGroup?.clear();
       dispatch(resetDownloadState());
+      dispatch(setControlsActive({ active: false }));
     } else {
       dispatch(resetDownloadState());
       dispatch(setControlsActive({ active: true }));

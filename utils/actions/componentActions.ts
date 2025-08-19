@@ -14,7 +14,7 @@ import {
   ComponentControlsType,
   PsetContentSchemaType,
 } from "../schemas";
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getDbUser } from "./globalActions";
 import {
   createNodeId,
@@ -488,12 +488,12 @@ export const fetchAllComponentsAction = async (
     throw error;
   }
 };
-
-export const cachedFetchAllComponents = unstable_cache(
-  async (params: BrowserSearchParamsType) => fetchAllComponentsAction(params),
-  [],
-  { tags: ["allComponents"] },
-);
+//
+// export const cachedFetchAllComponents = unstable_cache(
+//   async (params: BrowserSearchParamsType) => fetchAllComponentsAction(params),
+//   [],
+//   { tags: ["allComponents"] },
+// );
 
 export const updatePsetsAction = async (
   _prevState: unknown,

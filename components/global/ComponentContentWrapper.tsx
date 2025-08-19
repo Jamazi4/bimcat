@@ -9,11 +9,7 @@ import ComponentControlsPanel from "../editor/ComponentControlsPanel";
 import { useNodeSystem } from "@/utils/customHooks/useNodeSystem";
 import { useCallback, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import {
-  setLiveStateGeometry,
-  setLiveStateInfo,
-  setLiveStatePsets,
-} from "@/lib/downloadIfcSlice";
+import { setLiveStateGeometry, setLiveStateInfo } from "@/lib/downloadIfcSlice";
 import { toast } from "sonner";
 import { convertGroupToDbGeom } from "@/utils/nodeDefinitions/nodeUtilFunctions";
 
@@ -77,7 +73,6 @@ const ComponentContentWrapper = ({
 
       const liveStateGeom = convertGroupToDbGeom(paramMeshGroup);
 
-      dispatch(setLiveStatePsets({ psets: componentPsets || [] }));
       dispatch(setLiveStateInfo(liveStateInfo));
       dispatch(setLiveStateGeometry({ geometry: liveStateGeom }));
     }

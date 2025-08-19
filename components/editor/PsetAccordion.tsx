@@ -1,6 +1,6 @@
 "use client";
 
-import type { Pset as psetType } from "@/utils/schemas";
+import type { Pset } from "@/utils/schemas";
 import PsetRow from "./PsetRow";
 import EditPsetButton from "./EditPsetButton";
 import {
@@ -10,38 +10,49 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import RemovePsetButton from "./RemovePsetButton";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { useEffect, useState } from "react";
+import { setLiveStatePsets } from "@/lib/downloadIfcSlice";
 
 const PsetAccordion = ({
   resolveDynPsets,
   psets,
   edit,
 }: {
-  resolveDynPsets?: () => psetType[];
-  psets: psetType[];
+  resolveDynPsets?: () => Pset[];
+  psets: Pset[];
   edit: boolean;
 }) => {
+  const dispatch = useAppDispatch();
   const parametersActive = useAppSelector(
     (s) => s.downloadIfcSlice.parametersActive,
   );
-  const nodeStateValues = useAppSelector((s) => s.visualiserSlice.nodeValues);
-  const [dynPsets, setDynPsets] = useState<psetType[]>([]);
+  console.log(parametersActive);
+  const liveGeometryRequested = useAppSelector(
+    (s) => s.downloadIfcSlice.liveGeometryRequested,
+  );
+  const [dynPsets, setDynPsets] = useState<Pset[]>([]);
 
   useEffect(() => {
-    if (parametersActive && resolveDynPsets) {
+    if (!resolveDynPsets) return;
+    if (parametersActive) {
       setDynPsets(resolveDynPsets());
+    } else {
+      setDynPsets([]);
     }
-  }, [parametersActive, resolveDynPsets, nodeStateValues]);
+  }, [parametersActive, resolveDynPsets]);
 
-  let updatingPsets: psetType[] = [];
+  let dynPsetsMerged: Pset[] = [];
+
   if (dynPsets.length > 0) {
-    updatingPsets = psets.map((pset) => {
+    dynPsetsMerged = psets.map((pset) => {
       const curTitle = pset.title;
       const dynamicNames = pset.dynamic;
+
       if (dynamicNames && dynamicNames.length > 0) {
         const updatingContent = pset.content.map((entry) => {
           const key = Object.keys(entry)[0];
+
           if (dynamicNames.includes(key)) {
             const dynRecord = dynPsets
               .find((dp) => dp.title === curTitle)
@@ -52,16 +63,22 @@ const PsetAccordion = ({
             return { [key]: dynVal };
           } else return entry;
         });
+
         return { ...pset, content: updatingContent };
       } else return pset;
     });
   }
 
+  useEffect(() => {
+    if (!liveGeometryRequested) return;
+    dispatch(setLiveStatePsets({ psets: dynPsets }));
+  }, [dispatch, dynPsets, liveGeometryRequested]);
+
   //TODO: now make them save to ifc when updated
 
   return (
     <Accordion type="multiple" className="w-full flex-1">
-      {(parametersActive && dynPsets.length > 0 ? updatingPsets : psets).map(
+      {(parametersActive && dynPsets.length > 0 ? dynPsetsMerged : psets).map(
         (pset, index) => {
           return (
             <AccordionItem value={pset.title} key={`${pset.title}${index}`}>
@@ -96,7 +113,7 @@ const PsetAccordion = ({
 };
 export default PsetAccordion;
 
-const Attributes = ({ pset }: { pset: psetType }) => {
+const Attributes = ({ pset }: { pset: Pset }) => {
   return pset.content.map((entry, index) => {
     const [[name, value]] = Object.entries(entry);
     const isDynamic = pset.dynamic?.includes(name);
