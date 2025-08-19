@@ -199,6 +199,8 @@ const useNodesRuntime = ({
 
   const startNodeRuntime = useCallback(() => {
     const outputNodes = runtimeNodes.filter((n) => n.type === "output");
+    const psetNodes = runtimeNodes.filter((n) => n.type === "pset");
+    const rootNodes = [...outputNodes, ...psetNodes];
 
     setLiveNodeIds([]);
     if (outputNodes.length === 0) {
@@ -207,8 +209,16 @@ const useNodesRuntime = ({
       return;
     }
 
-    for (const node of outputNodes) {
+    for (const node of rootNodes) {
       const ast = buildAST(node.id);
+
+      if (node.type === "pset") {
+        const psetEdge = edges.find((e) => e.toNodeId === node.id);
+        if (!psetEdge) return;
+        evaluateAST(ast);
+        continue;
+      }
+
       const edge = edges.find((e) => e.toNodeId === node.id);
       if (!edge) {
         clearOutputObjects(node.id);
@@ -216,7 +226,6 @@ const useNodesRuntime = ({
       }
       try {
         const result = evaluateAST(ast)[1];
-
         //because output always returns on slot 1
 
         const outputObject3D = result.value;
@@ -224,6 +233,7 @@ const useNodesRuntime = ({
         if (!(outputObject3D instanceof THREE.Object3D)) {
           return;
         }
+        //TODO: CCS-7
 
         if (result.type === "geometry") {
           setOutputObjects((prevState) => {

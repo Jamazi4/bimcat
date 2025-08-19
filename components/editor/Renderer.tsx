@@ -57,8 +57,9 @@ const Renderer = ({
         camera={{ position: [0, 0, 1], up: [0, 0, 1] }}
         className=" h-1/2"
       >
-        <ambientLight intensity={2} />
-        <directionalLight position={[-100, 100, -100]} intensity={0.5} />
+        <ambientLight intensity={0.2} />
+        <directionalLight position={[-100, -100, 100]} intensity={3} />
+        <directionalLight position={[100, 80, 50]} intensity={3} />
         <Grid
           side={2}
           sectionSize={1}
@@ -82,6 +83,7 @@ const Renderer = ({
                     <mesh geometry={geom} scale={1}>
                       <meshStandardMaterial
                         color={mainColor}
+                        roughness={0.8}
                         side={THREE.DoubleSide}
                       />
                     </mesh>

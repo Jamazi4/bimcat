@@ -225,13 +225,13 @@ export function smartRound(value: number): string {
   if (Number.isInteger(value)) {
     return value.toString();
   }
-  // Use toPrecision for significant digits, strip trailing zeros
   return parseFloat(value.toPrecision(6)).toString();
 }
 
 export function convertGroupToDbGeom(
   meshGroup: THREE.Group<THREE.Object3DEventMap>,
 ) {
+  //TODO: CCS-7
   const geometry: ComponentGeometry[] = meshGroup.children
     .filter((mesh): mesh is THREE.Group => mesh instanceof THREE.Group)
     .map((mesh) => {

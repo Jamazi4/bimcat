@@ -27,7 +27,6 @@ const PsetAccordion = ({
   const parametersActive = useAppSelector(
     (s) => s.downloadIfcSlice.parametersActive,
   );
-  console.log(parametersActive);
   const liveGeometryRequested = useAppSelector(
     (s) => s.downloadIfcSlice.liveGeometryRequested,
   );
@@ -73,8 +72,6 @@ const PsetAccordion = ({
     if (!liveGeometryRequested) return;
     dispatch(setLiveStatePsets({ psets: dynPsets }));
   }, [dispatch, dynPsets, liveGeometryRequested]);
-
-  //TODO: now make them save to ifc when updated
 
   return (
     <Accordion type="multiple" className="w-full flex-1">

@@ -21,7 +21,7 @@ export function psetNode(nodeDefId: number): nodeDefinition {
         isList: true,
       },
     ],
-    outputs: [{ type: "string", id: 2, name: "pset" }],
+    outputs: [],
     function: (node, evalFunction) => {
       const inputVal = getListInputValues(
         node.values,

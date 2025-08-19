@@ -279,9 +279,7 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
         dynPsets = resolveDynPsets();
       } catch (error) {
         console.log(error);
-        toast(
-          "Could not resolve dynamic psets, make sure pset node is connected to output.",
-        );
+        toast("Could not resolve dynamic psets.");
       }
 
       const geometry: ComponentGeometry[] = convertGroupToDbGeom(meshGroup);
