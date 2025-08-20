@@ -27,7 +27,9 @@ const AddNodeMenu = ({ addNode }: { addNode: (nodeDefId: number) => void }) => {
           );
           return (
             <DropdownMenuSub key={index}>
-              <DropdownMenuSubTrigger>{cat}</DropdownMenuSubTrigger>
+              <DropdownMenuSubTrigger className="capitalize">
+                {cat}
+              </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
                   {curCatNodeDefs.map((n) => {
@@ -36,7 +38,7 @@ const AddNodeMenu = ({ addNode }: { addNode: (nodeDefId: number) => void }) => {
                         key={n.nodeDefId}
                         onClick={() => addNode(n.nodeDefId)}
                       >
-                        {n.type}
+                        {n.type.toUpperCase()}
                       </DropdownMenuItem>
                     );
                   })}

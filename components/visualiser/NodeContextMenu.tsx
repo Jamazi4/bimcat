@@ -89,12 +89,12 @@ function NodeContextMenu({ x, y, onClose, addNode }: ContextMenuProps) {
       onWheel={(e) => e.stopPropagation()}
       style={{ left: adjustedX, top: adjustedY }}
     >
-      <Card className="p-2 shadow-lg border bg-popover">
+      <Card className="p-2 shadow-lg border bg-popover rounded-md">
         <div className="relative mb-2">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             ref={inputRef}
-            placeholder="Search actions..."
+            placeholder="Search nodes"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9 h-8"
@@ -119,7 +119,7 @@ function NodeContextMenu({ x, y, onClose, addNode }: ContextMenuProps) {
                   onClick={() => handleItemSelect(item)}
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
-                  <span>{item.name}</span>
+                  <span>{item.name.toUpperCase()}</span>
                   <span className="ml-auto text-xs text-muted-foreground capitalize">
                     {item.category}
                   </span>
