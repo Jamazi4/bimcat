@@ -79,7 +79,12 @@ const useNodesRuntime = ({
             if (!activeInputs.includes(inputDef.id)) return [];
           }
 
-          if (!inputDef.defaultValue && !edge && nodeDef.type !== "output") {
+          if (
+            !inputDef.defaultValue &&
+            !edge &&
+            nodeDef.type !== "output" &&
+            nodeDef.type !== "pset"
+          ) {
             throw new Error(`${node.type} needs ${inputDef.name}`);
           }
 

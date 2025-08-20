@@ -526,7 +526,7 @@ now I think I will go with add node ui in combo and then probably triangulate
 with holes and then apply transform node
 
 FOUND A BUG: only dynPsets are getting into ifc now when saving modified
-component
+component - solved
 
 #### new current plan as of 20-08
 

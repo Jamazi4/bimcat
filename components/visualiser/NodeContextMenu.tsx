@@ -3,46 +3,39 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import {
-  Search,
-  FileText,
-  ImageIcon,
-  Video,
-  Music,
-  Folder,
-  Settings,
-} from "lucide-react";
+import { Search } from "lucide-react";
+import { nodeDefinitions } from "@/utils/nodes";
 
-interface ContextMenuProps {
+export interface ContextMenuProps {
   x: number;
   y: number;
+  addNode: (
+    nodeDefId: number,
+    customPos?: {
+      x: number;
+      y: number;
+    },
+  ) => void;
   onClose: () => void;
 }
 
-const sampleItems = [
-  { id: 1, name: "Create New Document", icon: FileText, category: "file" },
-  { id: 2, name: "Upload Image", icon: ImageIcon, category: "media" },
-  { id: 3, name: "Add Video", icon: Video, category: "media" },
-  { id: 4, name: "Import Music", icon: Music, category: "media" },
-  { id: 5, name: "New Folder", icon: Folder, category: "file" },
-  { id: 6, name: "Settings", icon: Settings, category: "system" },
-  { id: 7, name: "Export Document", icon: FileText, category: "file" },
-  { id: 8, name: "Share Image", icon: ImageIcon, category: "media" },
-];
+const itemList = nodeDefinitions.map((nd) => {
+  return { id: nd.nodeDefId, name: nd.type, category: nd.category };
+});
 
-function NodeContextMenu({ x, y, onClose }: ContextMenuProps) {
+function NodeContextMenu({ x, y, onClose, addNode }: ContextMenuProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredItems, setFilteredItems] = useState(sampleItems);
+  const [filteredItems, setFilteredItems] = useState(itemList);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleItemSelect = useCallback(
-    (item: (typeof sampleItems)[0]) => {
-      console.log("Selected:", item.name);
+    (item: (typeof itemList)[0]) => {
+      addNode(item.id, { x, y });
       onClose();
     },
-    [onClose],
+    [addNode, onClose, x, y],
   );
 
   useEffect(() => {
@@ -52,7 +45,7 @@ function NodeContextMenu({ x, y, onClose }: ContextMenuProps) {
 
   useEffect(() => {
     // Filter items based on search term
-    const filtered = sampleItems.filter((item) =>
+    const filtered = itemList.filter((item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
     setFilteredItems(filtered);
@@ -91,6 +84,9 @@ function NodeContextMenu({ x, y, onClose }: ContextMenuProps) {
     <div
       ref={menuRef}
       className="fixed z-50 w-72"
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
+      onWheel={(e) => e.stopPropagation()}
       style={{ left: adjustedX, top: adjustedY }}
     >
       <Card className="p-2 shadow-lg border bg-popover">
@@ -112,7 +108,6 @@ function NodeContextMenu({ x, y, onClose }: ContextMenuProps) {
             </div>
           ) : (
             filteredItems.map((item, index) => {
-              const Icon = item.icon;
               return (
                 <div
                   key={item.id}
@@ -124,7 +119,6 @@ function NodeContextMenu({ x, y, onClose }: ContextMenuProps) {
                   onClick={() => handleItemSelect(item)}
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
-                  <Icon className="h-4 w-4" />
                   <span>{item.name}</span>
                   <span className="ml-auto text-xs text-muted-foreground capitalize">
                     {item.category}

@@ -22,7 +22,10 @@ import {
 } from "../nodeDefinitions/nodeUtilFunctions";
 import { createEdgeId } from "../utilFunctions";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { switchNodeNavigation } from "@/lib/features/visualiser/visualiserSlice";
+import {
+  setContextMenuOpen,
+  switchNodeNavigation,
+} from "@/lib/features/visualiser/visualiserSlice";
 
 export const useNodeNavigation = (
   deleteNode: () => void,
@@ -432,215 +435,233 @@ export const useNodeNavigation = (
     ],
   );
 
-  const handleMouseUp = useCallback(() => {
-    if (connectingToNodeRef.current && connectingFromNodeRef.current) {
-      const toNode = nodesRef.current.find(
-        (n) => n.id === connectingToNodeRef.current?.nodeId,
+  const handleMouseUp = useCallback(
+    (e: MouseEvent) => {
+      dispatch(
+        setContextMenuOpen({
+          contextMenuOpen: { x: e.clientX, y: e.clientY, isOpen: false },
+        }),
       );
 
-      const toNodeDef = nodeDefinitions.find(
-        (def) => toNode?.type === def.type,
-      );
-
-      if (!toNodeDef) {
-        cancelConnecting();
-        throw new Error("Could not find correct node definition");
+      if (wasDragging.current === false && e.button === 2) {
+        dispatch(
+          setContextMenuOpen({
+            contextMenuOpen: { x: e.clientX, y: e.clientY, isOpen: true },
+          }),
+        );
       }
 
-      const inputSlot = toNodeDef?.inputs.find(
-        (i) => i.id === connectingToNodeRef.current?.slotId,
-      );
-
-      const inputType = inputSlot?.type;
-      const slotTypes = ["group", "slot", "combo"];
-      const inputValueType =
-        inputSlot && slotTypes.includes(inputSlot.type)
-          ? (inputSlot as inputWithSlotValueType).slotValueType
-          : null;
-
-      const fromNode = nodesRef.current.find(
-        (n) => n.id === connectingFromNodeRef.current?.nodeId,
-      );
-      const outputType = nodeDefinitions
-        .find((def) => fromNode?.type === def.type)
-        ?.outputs.find(
-          (o) => o.id === connectingFromNodeRef.current?.slotId,
-        )?.type;
-
-      const toSlotId = connectingToNodeRef.current.slotId;
-
-      const isListChild = toSlotId >= 100;
-
-      if (isListChild) {
-        let listParentValueType: SlotValues = "number"; //placeholder
-        const listParentSlots = toNodeDef.inputs.filter(
-          (i) => i.isList === true,
+      if (connectingToNodeRef.current && connectingFromNodeRef.current) {
+        const toNode = nodesRef.current.find(
+          (n) => n.id === connectingToNodeRef.current?.nodeId,
         );
-        if (listParentSlots.length > 1) {
-          listParentSlots.forEach((slot) => {
-            if (toNode?.values?.[slot.id] === true) {
-              listParentValueType = (slot as inputWithSlotValueType)
-                .slotValueType;
-            }
-          });
-        } else {
-          listParentValueType = (listParentSlots[0] as inputWithSlotValueType)
-            .slotValueType;
+
+        const toNodeDef = nodeDefinitions.find(
+          (def) => toNode?.type === def.type,
+        );
+
+        if (!toNodeDef) {
+          cancelConnecting();
+          throw new Error("Could not find correct node definition");
         }
 
-        if (outputType !== listParentValueType) {
+        const inputSlot = toNodeDef?.inputs.find(
+          (i) => i.id === connectingToNodeRef.current?.slotId,
+        );
+
+        const inputType = inputSlot?.type;
+        const slotTypes = ["group", "slot", "combo"];
+        const inputValueType =
+          inputSlot && slotTypes.includes(inputSlot.type)
+            ? (inputSlot as inputWithSlotValueType).slotValueType
+            : null;
+
+        const fromNode = nodesRef.current.find(
+          (n) => n.id === connectingFromNodeRef.current?.nodeId,
+        );
+        const outputType = nodeDefinitions
+          .find((def) => fromNode?.type === def.type)
+          ?.outputs.find(
+            (o) => o.id === connectingFromNodeRef.current?.slotId,
+          )?.type;
+
+        const toSlotId = connectingToNodeRef.current.slotId;
+
+        const isListChild = toSlotId >= 100;
+
+        if (isListChild) {
+          let listParentValueType: SlotValues = "number"; //placeholder
+          const listParentSlots = toNodeDef.inputs.filter(
+            (i) => i.isList === true,
+          );
+          if (listParentSlots.length > 1) {
+            listParentSlots.forEach((slot) => {
+              if (toNode?.values?.[slot.id] === true) {
+                listParentValueType = (slot as inputWithSlotValueType)
+                  .slotValueType;
+              }
+            });
+          } else {
+            listParentValueType = (listParentSlots[0] as inputWithSlotValueType)
+              .slotValueType;
+          }
+
+          if (outputType !== listParentValueType) {
+            cancelConnecting();
+            return;
+          }
+
+          addEdge(
+            connectingFromNodeRef.current.nodeId,
+            connectingFromNodeRef.current.slotId,
+            connectingToNodeRef.current.nodeId,
+            connectingToNodeRef.current.slotId,
+          );
+
           cancelConnecting();
           return;
         }
 
-        addEdge(
-          connectingFromNodeRef.current.nodeId,
-          connectingFromNodeRef.current.slotId,
-          connectingToNodeRef.current.nodeId,
-          connectingToNodeRef.current.slotId,
+        if (inputType === "group") {
+          addEdgeToGroupInput(toNode, toNodeDef, inputValueType, outputType);
+        }
+
+        const isSameType = outputType === inputValueType;
+        const isOutputNode =
+          inputValueType === "geometry" &&
+          (outputType === "mesh" ||
+            outputType === "linestring" ||
+            outputType === "vector" ||
+            outputType === "string");
+
+        if (isSameType || isOutputNode) {
+          addEdge(
+            connectingFromNodeRef.current.nodeId,
+            connectingFromNodeRef.current.slotId,
+            connectingToNodeRef.current.nodeId,
+            connectingToNodeRef.current.slotId,
+          );
+          cancelConnecting();
+          return;
+        } else {
+          cancelConnecting();
+          return;
+        }
+      }
+
+      if (
+        draggingNodesRef.current.length === 1 &&
+        wasDragging.current === false
+      ) {
+        if (shiftPressed.current === true) {
+          setSelectedNodeIds([
+            ...selectedNodeIdsRef.current,
+            draggingNodesRef.current[0].id,
+          ]);
+        } else {
+          setSelectedNodeIds([draggingNodesRef.current[0].id]);
+        }
+        setDraggingNodes([]);
+        return;
+      } else if (
+        draggingNodesRef.current.length > 1 &&
+        shiftPressed.current === true &&
+        wasDragging.current === false
+      ) {
+        const newSelectedNodeIds = selectedNodeIdsRef.current.filter(
+          (nid) => nid !== curClickedNodeId.current,
         );
-
-        cancelConnecting();
+        setSelectedNodeIds(newSelectedNodeIds);
+        setDraggingNodes([]);
         return;
       }
 
-      if (inputType === "group") {
-        addEdgeToGroupInput(toNode, toNodeDef, inputValueType, outputType);
-      }
-
-      const isSameType = outputType === inputValueType;
-      const isOutputNode =
-        inputValueType === "geometry" &&
-        (outputType === "mesh" ||
-          outputType === "linestring" ||
-          outputType === "vector" ||
-          outputType === "string");
-
-      if (isSameType || isOutputNode) {
-        addEdge(
-          connectingFromNodeRef.current.nodeId,
-          connectingFromNodeRef.current.slotId,
-          connectingToNodeRef.current.nodeId,
-          connectingToNodeRef.current.slotId,
-        );
-        cancelConnecting();
-        return;
-      } else {
-        cancelConnecting();
-        return;
-      }
-    }
-
-    if (
-      draggingNodesRef.current.length === 1 &&
-      wasDragging.current === false
-    ) {
-      if (shiftPressed.current === true) {
-        setSelectedNodeIds([
-          ...selectedNodeIdsRef.current,
-          draggingNodesRef.current[0].id,
-        ]);
-      } else {
-        setSelectedNodeIds([draggingNodesRef.current[0].id]);
-      }
+      cancelConnecting();
       setDraggingNodes([]);
-      return;
-    } else if (
-      draggingNodesRef.current.length > 1 &&
-      shiftPressed.current === true &&
-      wasDragging.current === false
-    ) {
-      const newSelectedNodeIds = selectedNodeIdsRef.current.filter(
-        (nid) => nid !== curClickedNodeId.current,
-      );
-      setSelectedNodeIds(newSelectedNodeIds);
-      setDraggingNodes([]);
-      return;
-    }
+      setIsPanning(false);
 
-    cancelConnecting();
-    setDraggingNodes([]);
-    setIsPanning(false);
+      wasDragging.current = false;
 
-    wasDragging.current = false;
+      if (!!selectionRectRef.current) {
+        if (!editorRef.current) return;
+        const editorBoundingRect = editorRef.current.getBoundingClientRect();
+        const editorOffsetX = editorBoundingRect.left;
+        const editorOffsetY = editorBoundingRect.top;
 
-    if (!!selectionRectRef.current) {
-      if (!editorRef.current) return;
-      const editorBoundingRect = editorRef.current.getBoundingClientRect();
-      const editorOffsetX = editorBoundingRect.left;
-      const editorOffsetY = editorBoundingRect.top;
-
-      const upperLeftSelectionX = Math.min(
-        selectionRectRef.current.x1,
-        selectionRectRef.current.x2,
-      );
-      const upperLeftSelectionY = Math.min(
-        selectionRectRef.current.y1,
-        selectionRectRef.current.y2,
-      );
-      const bottomRightSelectionX = Math.max(
-        selectionRectRef.current.x1,
-        selectionRectRef.current.x2,
-      );
-      const bottomRightSelectionY = Math.max(
-        selectionRectRef.current.y1,
-        selectionRectRef.current.y2,
-      );
-
-      const selectedIds = Object.entries(nodeDivsRef.current)
-        .filter(([_, div]) => {
-          const boundingRect = div.getBoundingClientRect();
-
-          const nodeTop = boundingRect.top - editorOffsetY;
-          const nodeLeft = boundingRect.left - editorOffsetX;
-          const nodeBottom = boundingRect.bottom - editorOffsetY;
-          const nodeRight = boundingRect.right - editorOffsetX;
-
-          const inside =
-            nodeTop > upperLeftSelectionY &&
-            nodeLeft > upperLeftSelectionX &&
-            nodeBottom < bottomRightSelectionY &&
-            nodeRight < bottomRightSelectionX;
-          return inside;
-        })
-        .map(([id, _]) => id);
-
-      if (shiftPressed.current === false) {
-        setSelectedNodeIds(selectedIds);
-      } else {
-        const subtractiveSelection = [
-          ...selectedNodeIdsRef.current,
-          ...selectedIds,
-        ].filter(
-          (id) =>
-            !(
-              selectedIds.includes(id) &&
-              selectedNodeIdsRef.current.includes(id)
-            ),
+        const upperLeftSelectionX = Math.min(
+          selectionRectRef.current.x1,
+          selectionRectRef.current.x2,
         );
-        setSelectedNodeIds(subtractiveSelection);
+        const upperLeftSelectionY = Math.min(
+          selectionRectRef.current.y1,
+          selectionRectRef.current.y2,
+        );
+        const bottomRightSelectionX = Math.max(
+          selectionRectRef.current.x1,
+          selectionRectRef.current.x2,
+        );
+        const bottomRightSelectionY = Math.max(
+          selectionRectRef.current.y1,
+          selectionRectRef.current.y2,
+        );
+
+        const selectedIds = Object.entries(nodeDivsRef.current)
+          .filter(([_, div]) => {
+            const boundingRect = div.getBoundingClientRect();
+
+            const nodeTop = boundingRect.top - editorOffsetY;
+            const nodeLeft = boundingRect.left - editorOffsetX;
+            const nodeBottom = boundingRect.bottom - editorOffsetY;
+            const nodeRight = boundingRect.right - editorOffsetX;
+
+            const inside =
+              nodeTop > upperLeftSelectionY &&
+              nodeLeft > upperLeftSelectionX &&
+              nodeBottom < bottomRightSelectionY &&
+              nodeRight < bottomRightSelectionX;
+            return inside;
+          })
+          .map(([id, _]) => id);
+
+        if (shiftPressed.current === false) {
+          setSelectedNodeIds(selectedIds);
+        } else {
+          const subtractiveSelection = [
+            ...selectedNodeIdsRef.current,
+            ...selectedIds,
+          ].filter(
+            (id) =>
+              !(
+                selectedIds.includes(id) &&
+                selectedNodeIdsRef.current.includes(id)
+              ),
+          );
+          setSelectedNodeIds(subtractiveSelection);
+        }
       }
-    }
-    setSelectionRect(null);
-  }, [
-    addEdge,
-    addEdgeToGroupInput,
-    cancelConnecting,
-    connectingFromNodeRef,
-    connectingToNodeRef,
-    curClickedNodeId,
-    draggingNodesRef,
-    editorRef,
-    nodeDivsRef,
-    nodesRef,
-    selectedNodeIdsRef,
-    selectionRectRef,
-    setDraggingNodes,
-    setIsPanning,
-    setSelectedNodeIds,
-    setSelectionRect,
-    wasDragging,
-  ]);
+      setSelectionRect(null);
+    },
+    [
+      addEdge,
+      addEdgeToGroupInput,
+      cancelConnecting,
+      connectingFromNodeRef,
+      connectingToNodeRef,
+      curClickedNodeId,
+      dispatch,
+      draggingNodesRef,
+      editorRef,
+      nodeDivsRef,
+      nodesRef,
+      selectedNodeIdsRef,
+      selectionRectRef,
+      setDraggingNodes,
+      setIsPanning,
+      setSelectedNodeIds,
+      setSelectionRect,
+      wasDragging,
+    ],
+  );
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
@@ -707,6 +728,10 @@ export const useNodeNavigation = (
     ],
   );
 
+  const preventContextMenu = useCallback((e: PointerEvent) => {
+    e.preventDefault();
+  }, []);
+
   useEffect(() => {
     const isInteracting =
       (draggingNodes.length > 0 ||
@@ -728,15 +753,11 @@ export const useNodeNavigation = (
     if (nodeNavigation) {
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("keyup", handleKeyUp);
-      document.addEventListener("contextmenu", function (e) {
-        e.preventDefault();
-      });
+      document.addEventListener("contextmenu", preventContextMenu);
     } else {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
-      document.removeEventListener("contextmenu", function (e) {
-        e.preventDefault();
-      });
+      document.removeEventListener("contextmenu", preventContextMenu);
     }
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
@@ -758,6 +779,7 @@ export const useNodeNavigation = (
     isPanning,
     selectionRect,
     handleNavigationModeSwitch,
+    preventContextMenu,
   ]);
 
   return { handleWheel, handleEditorMouseDown };

@@ -8,7 +8,9 @@ import * as THREE from "three";
 import NodeMenu from "./NodeMenu";
 import SVGRenderer from "./SVGRenderer";
 import { useTheme } from "next-themes";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import NodeContextMenu from "./NodeContextMenu";
+import { setContextMenuOpen } from "@/lib/features/visualiser/visualiserSlice";
 
 const NodeEditor = ({ nodeMeshGroup }: { nodeMeshGroup: THREE.Group }) => {
   const { theme, systemTheme } = useTheme();
@@ -17,8 +19,13 @@ const NodeEditor = ({ nodeMeshGroup }: { nodeMeshGroup: THREE.Group }) => {
     curTheme.current = theme === "system" ? systemTheme : theme;
   }, [theme, systemTheme]);
 
+  const dispatch = useAppDispatch();
+
   const nodeNavigation = useAppSelector(
     (state) => state.visualiserSlice.nodeNavigation,
+  );
+  const contextMenuOpen = useAppSelector(
+    (state) => state.visualiserSlice.contextMenuOpen,
   );
 
   const [pendingSave, setPendingSave] = useState(false);
@@ -134,6 +141,20 @@ const NodeEditor = ({ nodeMeshGroup }: { nodeMeshGroup: THREE.Group }) => {
         pendingSave={pendingSave}
         handleSaveProject={handleSaveProject}
       />
+      {contextMenuOpen.isOpen && nodeNavigation && (
+        <NodeContextMenu
+          addNode={addNode}
+          x={contextMenuOpen.x}
+          y={contextMenuOpen.y}
+          onClose={() => {
+            dispatch(
+              setContextMenuOpen({
+                contextMenuOpen: { x: 0, y: 0, isOpen: false },
+              }),
+            );
+          }}
+        />
+      )}
     </div>
   );
 };

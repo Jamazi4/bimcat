@@ -807,18 +807,28 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
   }, [deleteEdge, dispatch, nodeTypesWithListInputs]);
 
   const addNode = useCallback(
-    (nodeDefId: number) => {
+    (nodeDefId: number, customPos?: { x: number; y: number }) => {
       const nodeId = createNodeId();
       const nodeDefinition = nodeDefinitions.find(
         (node) => node.nodeDefId === nodeDefId,
       );
       if (!nodeDefinition) return;
       const nodeType = nodeDefinition?.type;
+
       const relInitPos = 200;
       const worldPoint = screenToWorld(relInitPos, relInitPos);
       const randFactor = 100;
-      const nodeX = worldPoint.x + Math.floor(Math.random() * randFactor);
-      const nodeY = worldPoint.y + Math.floor(Math.random() * randFactor);
+
+      let nodeX: number = 0;
+      let nodeY: number = 0;
+      if (customPos) {
+        const customWorldPos = screenToWorld(customPos.x, customPos.y);
+        nodeX = customWorldPos.x;
+        nodeY = customWorldPos.y;
+      } else {
+        nodeX = worldPoint.x + Math.floor(Math.random() * randFactor);
+        nodeY = worldPoint.y + Math.floor(Math.random() * randFactor);
+      }
 
       const initValues: NodeValues = {};
 
