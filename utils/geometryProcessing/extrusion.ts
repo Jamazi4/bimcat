@@ -172,3 +172,71 @@ export function triangulatePolygon3D(polygon: THREE.Vector3[]): {
 
   return { indices, positions };
 }
+
+/**
+ * Triangulates an outer polygon + holes (all as 3D linestrings).
+ * Projects everything to 2D, runs earcut with hole indices, then returns a BufferGeometry.
+ *
+ * @param outer The outer boundary polygon (Vector3[])
+ * @param holes Array of hole polygons (Vector3[][])
+ */
+export function triangulateLinestringsWithHoles(
+  outer: THREE.Vector3[],
+  holes: THREE.Vector3[][],
+): THREE.BufferGeometry | null {
+  if (outer.length < 3) return null;
+
+  // --- 1. Compute local plane (same as triangulatePolygon3D) ---
+  const normal = new THREE.Vector3()
+    .crossVectors(
+      new THREE.Vector3().subVectors(outer[1], outer[0]),
+      new THREE.Vector3().subVectors(outer[2], outer[0]),
+    )
+    .normalize();
+  if (normal.lengthSq() === 0) return null;
+
+  const u = new THREE.Vector3().subVectors(outer[1], outer[0]).normalize();
+  const v = new THREE.Vector3().crossVectors(normal, u).normalize();
+
+  // --- 2. Flatten outer + holes into single vertices2D array ---
+  const vertices2D: number[] = [];
+  const positions: number[] = [];
+  const holeIndices: number[] = [];
+
+  // Outer first
+  for (const p of outer) {
+    const ap = new THREE.Vector3().subVectors(p, outer[0]);
+    vertices2D.push(ap.dot(u), ap.dot(v));
+    positions.push(p.x, p.y, p.z);
+  }
+
+  let indexOffset = outer.length;
+
+  // Then each hole
+  for (const hole of holes) {
+    if (hole.length < 3) continue; // skip invalid holes
+    holeIndices.push(vertices2D.length / 2); // mark starting index of this hole
+    for (const p of hole) {
+      const ap = new THREE.Vector3().subVectors(p, outer[0]);
+      vertices2D.push(ap.dot(u), ap.dot(v));
+      positions.push(p.x, p.y, p.z);
+    }
+    indexOffset += hole.length;
+  }
+
+  // --- 3. Triangulate with earcut ---
+  const indices = earcut(
+    vertices2D,
+    holeIndices.length > 0 ? holeIndices : undefined,
+    2,
+  );
+  if (indices.length === 0) return null;
+
+  // --- 4. Build BufferGeometry ---
+  const geom = new THREE.BufferGeometry();
+  geom.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geom.setIndex(indices);
+  geom.computeVertexNormals();
+
+  return geom;
+}

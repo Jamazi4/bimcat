@@ -69,3 +69,24 @@ export const defaultTransformContructor = () => {
     values: {},
   };
 };
+
+export const defaultLinestringConstructor = () => {
+  return {
+    type: "linestring",
+    id: createNodeId(),
+    inputs: [
+      {
+        inputId: 0,
+        ast: defaultVectorContructor(0, 0, 0),
+        fromOutputId: 3,
+      },
+
+      {
+        inputId: 0,
+        ast: defaultVectorContructor(0, 0, 0),
+        fromOutputId: 3,
+      },
+    ],
+    values: {},
+  };
+};

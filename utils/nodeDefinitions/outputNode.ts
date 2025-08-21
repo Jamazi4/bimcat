@@ -31,7 +31,12 @@ export function outputNode(nodeDefId: number): nodeDefinition {
             return new THREE.BufferGeometry().setFromPoints(string);
           });
           const lineGroup = new THREE.Group();
-          geoms.forEach((geom) => lineGroup.add(new THREE.Line(geom, lineMat)));
+
+          geoms.forEach((geom) => {
+            const line = new THREE.Line(geom, lineMat);
+            line.name = "surface";
+            lineGroup.add(line);
+          });
           return { 1: { type: "geometry", value: lineGroup } };
         }
         case "mesh": {

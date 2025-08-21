@@ -225,6 +225,7 @@ export function smartRound(value: number): string {
   if (Number.isInteger(value)) {
     return value.toString();
   }
+  // Use toPrecision for significant digits, strip trailing zeros
   return parseFloat(value.toPrecision(6)).toString();
 }
 

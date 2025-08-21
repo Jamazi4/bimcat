@@ -17,6 +17,7 @@ import { getLinestringLengthNode } from "./nodeDefinitions/getLinestringLengthNo
 import { getMeshVolumeNode } from "./nodeDefinitions/getMeshVolume";
 import { psetNode } from "./nodeDefinitions/psetNode";
 import { psetAttributeNode } from "./nodeDefinitions/psetAttributeNode";
+import { triangulateNode } from "./nodeDefinitions/triangulateNode";
 
 export const nodeDefinitions: nodeDefinition[] = [
   outputNode(1),
@@ -37,4 +38,5 @@ export const nodeDefinitions: nodeDefinition[] = [
   getMeshVolumeNode(16),
   psetNode(17),
   psetAttributeNode(18),
+  triangulateNode(19),
 ];

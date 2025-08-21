@@ -528,10 +528,14 @@ with holes and then apply transform node
 FOUND A BUG: only dynPsets are getting into ifc now when saving modified
 component - solved
 
+### --21-08-2025--
+
+solved above bug and another where updating psets deleted all dynamic attrs
+
 #### new current plan as of 20-08
 
-- ui combo
 - triangulate/holes
+- add origin to transform objects
 - appply transform
 
 ## General
