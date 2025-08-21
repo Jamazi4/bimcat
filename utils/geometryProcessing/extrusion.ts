@@ -8,7 +8,13 @@ export function extractOrderedBoundaryLoop(
   geometry: THREE.BufferGeometry,
 ): THREE.Vector3[][] {
   const struct = new HalfedgeDS();
-  struct.setFromGeometry(geometry);
+
+  try {
+    struct.setFromGeometry(geometry);
+  } catch (error) {
+    console.warn(error);
+    throw new Error("Invalid Geometry.");
+  }
 
   const visited = new Set<Halfedge>();
   const loops: THREE.Vector3[][] = [];

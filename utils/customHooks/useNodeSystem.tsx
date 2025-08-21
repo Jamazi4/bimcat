@@ -251,8 +251,13 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
         const attrVals = valEdges.reduce<
           Record<string, string | boolean | number>
         >((acc, cur) => {
-          acc[cur.toNodeId] =
-            nodeStateOutputValues[cur.fromNodeId][cur.fromSlotId];
+          const fromNodeOutputs = nodeStateOutputValues[cur.fromNodeId];
+          if (fromNodeOutputs && cur.fromSlotId in fromNodeOutputs) {
+            acc[cur.toNodeId] =
+              nodeStateOutputValues[cur.fromNodeId][cur.fromSlotId];
+          } else {
+            acc[cur.toNodeId] = 0;
+          }
           return acc;
         }, {});
 

@@ -532,6 +532,12 @@ component - solved
 
 solved above bug and another where updating psets deleted all dynamic attrs
 
+added quick triangulate with holes. It accepts only single linestring
+but holes can be nested.
+
+possibly lots of bugs. Now I have an issue sometimes and it's unstable for
+dynamic psets
+
 #### new current plan as of 20-08
 
 - triangulate/holes

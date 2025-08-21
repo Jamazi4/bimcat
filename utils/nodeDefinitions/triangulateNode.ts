@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { nodeDefinition } from "../nodeTypes";
-import { getInputValues, getListInputValues } from "./nodeUtilFunctions";
+import { getInputValues } from "./nodeUtilFunctions";
 import { triangulateLinestringsWithHoles } from "../geometryProcessing/extrusion";
 import { defaultLinestringConstructor } from "./defaultNodes";
 
