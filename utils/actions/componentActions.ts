@@ -344,8 +344,6 @@ export const fetchSingleComponentAction = async (id: string) => {
       include: {
         geometry: true,
         nodes: { select: { uiControls: true, id: true, componentId: true } },
-        //TODO: this is only used to check if nodes exist, optimize query so
-        //it doesn't fetch entire nodes if I'm just looking at the component
       },
     });
 
@@ -507,6 +505,8 @@ export const updatePsetsAction = async (
       ([key]) => !keysToRemove.includes(key),
     ),
   );
+
+  console.log(newPsetData);
 
   try {
     const component = await prisma.component.findUnique({

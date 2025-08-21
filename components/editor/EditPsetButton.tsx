@@ -88,7 +88,7 @@ function EditPsetButton({
           <DialogHeader>
             <DialogTitle className="capitalize">Editing {title}</DialogTitle>
             <DialogDescription>
-              Make changes to component properties. Click save when you are
+              Make changes to component properties. Click Accept when you are
               done.
             </DialogDescription>
           </DialogHeader>
@@ -104,7 +104,7 @@ function EditPsetButton({
                   <div className="flex gap-4">
                     <div className="flex-grow">
                       <Input
-                        disabled={dynamic?.includes(name)}
+                        readOnly={dynamic?.includes(name)}
                         id={name}
                         name={name}
                         value={value}
