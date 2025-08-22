@@ -8,7 +8,6 @@ export function extractOrderedBoundaryLoop(
   geometry: THREE.BufferGeometry,
 ): THREE.Vector3[][] {
   const struct = new HalfedgeDS();
-
   try {
     struct.setFromGeometry(geometry);
   } catch (error) {
@@ -190,7 +189,10 @@ export function triangulateLinestringsWithHoles(
   outer: THREE.Vector3[],
   holes: THREE.Vector3[][],
 ): THREE.BufferGeometry | null {
-  if (outer.length < 3) return null;
+  if (outer.length < 3) {
+    console.warn("Triangulate with holes outer needs at least 3 points");
+    return null;
+  }
 
   // --- 1. Compute local plane (same as triangulatePolygon3D) ---
   const normal = new THREE.Vector3()
@@ -199,7 +201,10 @@ export function triangulateLinestringsWithHoles(
       new THREE.Vector3().subVectors(outer[2], outer[0]),
     )
     .normalize();
-  if (normal.lengthSq() === 0) return null;
+  if (normal.lengthSq() === 0) {
+    console.warn("Triangulate with holes invalid normal for outer");
+    return null;
+  }
 
   const u = new THREE.Vector3().subVectors(outer[1], outer[0]).normalize();
   const v = new THREE.Vector3().crossVectors(normal, u).normalize();
@@ -229,20 +234,56 @@ export function triangulateLinestringsWithHoles(
     }
     indexOffset += hole.length;
   }
-
-  // --- 3. Triangulate with earcut ---
   const indices = earcut(
     vertices2D,
     holeIndices.length > 0 ? holeIndices : undefined,
     2,
   );
+
   if (indices.length === 0) return null;
 
-  // --- 4. Build BufferGeometry ---
+  // ADD THIS: Remove degenerate triangles
+  const cleanIndices: number[] = [];
+  for (let i = 0; i < indices.length; i += 3) {
+    const a = indices[i];
+    const b = indices[i + 1];
+    const c = indices[i + 2];
+
+    // Skip degenerate triangles
+    if (a !== b && b !== c && c !== a) {
+      // Also check if vertices are actually different in 3D space
+      const va = new THREE.Vector3(
+        positions[a * 3],
+        positions[a * 3 + 1],
+        positions[a * 3 + 2],
+      );
+      const vb = new THREE.Vector3(
+        positions[b * 3],
+        positions[b * 3 + 1],
+        positions[b * 3 + 2],
+      );
+      const vc = new THREE.Vector3(
+        positions[c * 3],
+        positions[c * 3 + 1],
+        positions[c * 3 + 2],
+      );
+
+      const EPSILON = 1e-10;
+      if (
+        va.distanceTo(vb) > EPSILON &&
+        vb.distanceTo(vc) > EPSILON &&
+        vc.distanceTo(va) > EPSILON
+      ) {
+        cleanIndices.push(a, b, c);
+      }
+    }
+  }
+
+  if (cleanIndices.length === 0) return null;
+
   const geom = new THREE.BufferGeometry();
   geom.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-  geom.setIndex(indices);
+  geom.setIndex(cleanIndices); // Use cleaned indices
   geom.computeVertexNormals();
-
   return geom;
 }

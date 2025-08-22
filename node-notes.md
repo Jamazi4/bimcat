@@ -533,10 +533,11 @@ component - solved
 solved above bug and another where updating psets deleted all dynamic attrs
 
 added quick triangulate with holes. It accepts only single linestring
-but holes can be nested.
+but holes can be nested. Need to test it a lot
 
-possibly lots of bugs. Now I have an issue sometimes and it's unstable for
-dynamic psets
+With this I need to project linestring on mesh and color in output
+
+before or after transform/origin/applyTransform
 
 #### new current plan as of 20-08
 

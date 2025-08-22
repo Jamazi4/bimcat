@@ -19,6 +19,7 @@ import { Label } from "../ui/label";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { smartRound } from "@/utils/nodeDefinitions/nodeUtilFunctions";
 import { resetDownloadState, setControlsActive } from "@/lib/downloadIfcSlice";
+import { isValid } from "zod";
 
 const ComponentControlsPanel = ({
   paramMeshGroup,
