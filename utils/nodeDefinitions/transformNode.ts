@@ -11,34 +11,49 @@ export function transformNode(nodeDefId: number): nodeDefinition {
     type: "transform",
     inputs: [
       {
+        type: "boolean",
+        name: "custom origin",
+        id: 0,
+        value: false,
+      },
+      {
         type: "slot",
         name: "position",
-        id: 0,
+        id: 1,
         slotValueType: "vector",
         defaultValue: defaultVectorContructor(0, 0, 0),
       },
       {
         type: "slot",
         name: "scale",
-        id: 1,
+        id: 2,
         slotValueType: "vector",
         defaultValue: defaultVectorContructor(1, 1, 1),
       },
       {
         type: "slot",
         name: "rotation",
-        id: 2,
+        id: 3,
         slotValueType: "vector",
         defaultValue: defaultVectorContructor(0, 0, 0),
       },
+      {
+        type: "slot",
+        name: "origin",
+        id: 4,
+        slotValueType: "vector",
+        defaultValue: defaultVectorContructor(0, 0, 0),
+        onBooleanTrueId: 0,
+      },
     ],
-    outputs: [{ type: "transform", name: "transform", id: 3 }],
+    outputs: [{ type: "transform", name: "transform", id: 5 }],
     function: (node, evalFunction) => {
-      const [position, scale, rotation] = getInputValues(
+      const [position, scale, rotation, origin] = getInputValues(
         node.inputs,
         evalFunction,
-        [0, 1, 2],
+        [1, 2, 3, 4],
       );
+      const customOrigin = node.values[0];
 
       const transform: TransformObject = {
         position: new THREE.Vector3(0, 0, 0),
@@ -49,7 +64,8 @@ export function transformNode(nodeDefId: number): nodeDefinition {
       if (
         position.type === "vector" &&
         scale.type === "vector" &&
-        rotation.type === "vector"
+        rotation.type === "vector" &&
+        origin.type === "vector"
       ) {
         transform.position = position.value;
         transform.scale = scale.value;
@@ -59,9 +75,13 @@ export function transformNode(nodeDefId: number): nodeDefinition {
           toRadians(rotation.value.y),
           toRadians(rotation.value.z),
         );
+
+        if (customOrigin !== false) {
+          transform.origin = origin.value;
+        }
       }
 
-      return { 3: { type: "transform", value: transform } };
+      return { 5: { type: "transform", value: transform } };
     },
   };
 }

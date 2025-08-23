@@ -57,6 +57,7 @@ const NodeEditor = ({ nodeMeshGroup }: { nodeMeshGroup: THREE.Group }) => {
     getViewTransformScale,
     switchGroupInputActive,
     switchSelectInputValue,
+    removeEdgeToSlot,
   } = useNodeSystem(nodeMeshGroup);
 
   const fetchNodesWrapper = useCallback(async () => {
@@ -132,6 +133,7 @@ const NodeEditor = ({ nodeMeshGroup }: { nodeMeshGroup: THREE.Group }) => {
               node={node}
               startDraggingNode={startDraggingNode}
               registerNodeSlot={registerNodeSlot}
+              removeEdgeToSlot={removeEdgeToSlot}
             />
           );
         })}

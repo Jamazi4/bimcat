@@ -19,13 +19,13 @@ export function groupBy3Vector(position: ArrayLike<number>): THREE.Vector3[] {
   return grouped;
 }
 
-export function includesVector(
-  array: THREE.Vector3[],
-  v: THREE.Vector3,
-  epsilon = 1e-6,
-): boolean {
-  return array.some((vec) => vec.distanceToSquared(v) < epsilon * epsilon);
-}
+// export function includesVector(
+//   array: THREE.Vector3[],
+//   v: THREE.Vector3,
+//   epsilon = 1e-6,
+// ): boolean {
+//   return array.some((vec) => vec.distanceToSquared(v) < epsilon * epsilon);
+// }
 
 export function toRadians(deg: number) {
   return deg * (Math.PI / 180);
@@ -48,30 +48,65 @@ export function composeRelativeTransformMatrix(
   baseGeom: THREE.BufferGeometry,
   transform: TransformObject,
 ) {
-  baseGeom.computeBoundingBox();
-  const center = new THREE.Vector3();
-  baseGeom.boundingBox?.getCenter(center);
+  let center;
+  if (transform.origin !== undefined && transform.origin !== null) {
+    center = transform.origin.clone();
+  } else {
+    baseGeom.computeBoundingBox();
+    center = new THREE.Vector3();
+    baseGeom.boundingBox?.getCenter(center);
+  }
 
+  // Step 1: Translate to origin (center becomes 0,0,0)
   const toOrigin = new THREE.Matrix4().makeTranslation(
     -center.x,
     -center.y,
     -center.z,
   );
 
-  const transformMatrix = composeTransformMatrix(transform);
+  // Step 2: Apply rotation and scale around origin (0,0,0)
+  // NO POSITION - position should be applied before this function is called
+  const rotationEuler = new THREE.Euler(
+    transform.rotation.x,
+    transform.rotation.y,
+    transform.rotation.z,
+  );
+  const rotationScaleMatrix = new THREE.Matrix4().compose(
+    new THREE.Vector3(0, 0, 0), // No position
+    new THREE.Quaternion().setFromEuler(rotationEuler),
+    transform.scale,
+  );
 
-  const backToPosition = new THREE.Matrix4().makeTranslation(
+  // Step 3: Translate back to center position
+  const backToCenter = new THREE.Matrix4().makeTranslation(
     center.x,
     center.y,
     center.z,
   );
 
+  // Combine transformations (no position here!)
   const finalMatrix = new THREE.Matrix4()
-    .multiply(backToPosition)
-    .multiply(transformMatrix)
-    .multiply(toOrigin);
+    .multiply(backToCenter) // 3. Move back to center
+    .multiply(rotationScaleMatrix) // 2. Rotate and scale around origin
+    .multiply(toOrigin); // 1. Move center to origin
 
   return finalMatrix;
+}
+
+export function applyTransform(
+  baseGeom: THREE.BufferGeometry,
+  transform: TransformObject,
+) {
+  const positionMatrix = new THREE.Matrix4().makeTranslation(
+    transform.position.x,
+    transform.position.y,
+    transform.position.z,
+  );
+
+  baseGeom.applyMatrix4(positionMatrix);
+
+  const transformMatrix = composeRelativeTransformMatrix(baseGeom, transform);
+  baseGeom.applyMatrix4(transformMatrix);
 }
 
 export function isClosedLoop(points: THREE.Vector3[]): boolean {

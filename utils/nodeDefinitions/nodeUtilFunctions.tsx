@@ -16,6 +16,7 @@ import {
 import DraggableNodeInputSlot from "@/components/visualiser/DraggableNodeInputSlot";
 import DraggableNodeSelectInput from "@/components/visualiser/DraggableNodeSelectInput";
 import { ComponentGeometry } from "../types";
+import { nodeDefinitions } from "../nodes";
 
 export const getComboValues = (
   node: ASTNode,
@@ -248,3 +249,11 @@ export function convertGroupToDbGeom(
     });
   return geometry;
 }
+
+export const resolveFromOutputId = (inputDef: NodeInputType) => {
+  const childAst = inputDef.defaultValue!;
+  if (!childAst) return 1; //output node
+  const childDef = nodeDefinitions.find((d) => d.type === childAst.type);
+  if (!childDef) throw new Error(`Unknown default node type: ${childAst.type}`);
+  return childDef.outputs[0].id;
+};

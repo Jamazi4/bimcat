@@ -2,7 +2,7 @@ import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
 import { defaultTransformContructor } from "./defaultNodes";
 import { getComboValues, getInputValues } from "./nodeUtilFunctions";
-import { composeTransformMatrix } from "../geometryProcessing/geometryHelpers";
+import { applyTransform } from "../geometryProcessing/geometryHelpers";
 import { extractOrderedBoundaryLoop } from "../geometryProcessing/extrusion";
 
 export function planeNode(nodeDefId: number): nodeDefinition {
@@ -48,9 +48,8 @@ export function planeNode(nodeDefId: number): nodeDefinition {
       ) {
         const geom = new THREE.PlaneGeometry(dim1, dim2);
 
-        const transformMatrix = composeTransformMatrix(transform.value);
+        applyTransform(geom, transform.value);
 
-        geom.applyMatrix4(transformMatrix);
         geom.deleteAttribute("uv");
 
         const linestring = extractOrderedBoundaryLoop(geom)[0];

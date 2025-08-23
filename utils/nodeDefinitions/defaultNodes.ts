@@ -50,18 +50,28 @@ export const defaultTransformContructor = () => {
     inputs: [
       {
         inputId: 0,
+        ast: defaultBooleanContructor(false),
+        fromOutputId: 1,
+      },
+      {
+        inputId: 1,
         ast: defaultVectorContructor(0, 0, 0),
         fromOutputId: 3,
         //Because vector has 3 inputs, we must assume that the value it outputs
         //is at the 4th slot which has index 3
       },
       {
-        inputId: 1,
+        inputId: 2,
         ast: defaultVectorContructor(1, 1, 1),
         fromOutputId: 3,
       },
       {
-        inputId: 2,
+        inputId: 3,
+        ast: defaultVectorContructor(0, 0, 0),
+        fromOutputId: 3,
+      },
+      {
+        inputId: 4,
         ast: defaultVectorContructor(0, 0, 0),
         fromOutputId: 3,
       },

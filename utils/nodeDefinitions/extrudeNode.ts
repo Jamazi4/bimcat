@@ -7,6 +7,7 @@ import {
 } from "./nodeUtilFunctions";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 import {
+  applyTransform,
   closeLinestrings,
   composeRelativeTransformMatrix,
   isClosedLoop,
@@ -122,20 +123,36 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         baseGeom = BufferGeometryUtils.mergeVertices(baseGeom);
         baseGeom.computeVertexNormals();
         baseGeom.deleteAttribute("uv");
-        const transformMatrix = composeRelativeTransformMatrix(
-          baseGeom,
+
+        const positionMatrix = new THREE.Matrix4().makeTranslation(
+          transform.value.position.x,
+          transform.value.position.y,
+          transform.value.position.z,
+        );
+
+        // Create positioned copy for relative transform calculation
+        const positionedBaseGeom = baseGeom.clone();
+        positionedBaseGeom.applyMatrix4(positionMatrix);
+
+        // Then apply relative transform (rotation/scale around origin)
+        const relativeTransformMatrix = composeRelativeTransformMatrix(
+          positionedBaseGeom,
           transform.value,
         );
 
-        const tempMesh = baseGeom.clone();
-        tempMesh.applyMatrix4(transformMatrix);
+        const tempMesh = positionedBaseGeom.clone();
+        tempMesh.applyMatrix4(relativeTransformMatrix);
 
         if (!isInputMesh) {
           baseLinestrings.forEach((linestring) => {
             const temp: THREE.Vector3[] = [];
             linestring.forEach((v) => {
-              const newVector = v.clone().applyMatrix4(transformMatrix);
-              temp.push(newVector);
+              // Apply the same 2-step transform to each vertex
+              const positioned = v.clone().applyMatrix4(positionMatrix);
+              const transformed = positioned
+                .clone()
+                .applyMatrix4(relativeTransformMatrix);
+              temp.push(transformed);
             });
             linestringExtrusionOutput.push(temp);
           });
@@ -160,11 +177,11 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           linestringExtrusionOutput,
         )!;
 
-        if (!meshExtrusionOutput) throw new Error("Error creating caps");
+        if (!meshExtrusionOutput) throw new Error("Error creating cap");
 
         const sideGeom = createSideGeometry(
           baseLinestrings,
-          transformMatrix,
+          transform.value,
           isBaseClosed,
         );
         if (!sideGeom) throw new Error("Could not create side geometries");

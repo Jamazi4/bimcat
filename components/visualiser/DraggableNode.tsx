@@ -57,6 +57,7 @@ interface DraggableNodeProps {
   getViewTransformScale: () => number;
   setNodeDivs: Dispatch<SetStateAction<Record<string, HTMLDivElement>>>;
   curTheme: string;
+  removeEdgeToSlot: (toNodeId: string, toSlotId: number) => void;
 }
 
 const DraggableNode = memo(function DraggableNode({
@@ -74,6 +75,7 @@ const DraggableNode = memo(function DraggableNode({
   getViewTransformScale,
   setNodeDivs,
   curTheme,
+  removeEdgeToSlot,
 }: DraggableNodeProps) {
   const nodeDef = nodeDefinitions.filter((def) => def.type === node.type)[0];
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -206,9 +208,14 @@ const DraggableNode = memo(function DraggableNode({
             } else if (input.type === "boolean") {
               const changeThisValue = changeThisNodeValues.bind(null, input.id);
               if (!node.values) return;
+              const dependentInputId = nodeDef.inputs.find(
+                (i) => i.onBooleanTrueId === input.id,
+              )?.id;
 
               return (
                 <DraggableNodeInputBoolean
+                  removeEdgeToSlot={removeEdgeToSlot}
+                  dependentInputId={dependentInputId}
                   nodeId={node.id}
                   name={input.name}
                   key={input.id}
@@ -223,6 +230,23 @@ const DraggableNode = memo(function DraggableNode({
                 slotId: input.id,
                 slotIO: "input",
               };
+              if (input.onBooleanTrueId !== undefined) {
+                const render = node.values?.[input.onBooleanTrueId];
+
+                const tiedInputId = input.onBooleanTrueId;
+
+                const tiedInputActive =
+                  (node.values?.[tiedInputId] as boolean) ??
+                  (nodeDef.inputs[tiedInputId].value as boolean) ??
+                  false;
+
+                const shouldDisplay = input.onBooleanInverted
+                  ? !tiedInputActive
+                  : tiedInputActive;
+
+                if (!shouldDisplay) return null;
+                if (!render) return;
+              }
 
               return (
                 <DraggableNodeInputSlot

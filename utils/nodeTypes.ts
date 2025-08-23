@@ -60,6 +60,7 @@ export type TransformObject = {
   position: THREE.Vector3;
   scale: THREE.Vector3;
   rotation: THREE.Vector3;
+  origin?: THREE.Vector3;
 };
 
 export type EvalValue =
@@ -108,6 +109,8 @@ export type NodeInputType = (
   //for list inputs - each new list input will have id n + 100. connecting to
   //main list input will add to node.values 100: true; 101: false. connecting
   //to 101 will make 101: true; 102: false and so on...
+  onBooleanTrueId?: number;
+  onBooleanInverted?: boolean;
 };
 
 export type NodeOutputType = {

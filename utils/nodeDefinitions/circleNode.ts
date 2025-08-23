@@ -2,7 +2,7 @@ import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
 import { getComboValues, getInputValues } from "./nodeUtilFunctions";
 import { defaultTransformContructor } from "./defaultNodes";
-import { composeTransformMatrix } from "../geometryProcessing/geometryHelpers";
+import { applyTransform } from "../geometryProcessing/geometryHelpers";
 
 export function circleNode(nodeDefId: number): nodeDefinition {
   return {
@@ -47,8 +47,7 @@ export function circleNode(nodeDefId: number): nodeDefinition {
       ) {
         const geom = new THREE.CircleGeometry(radius, segments);
 
-        const transformMatrix = composeTransformMatrix(transform.value);
-        geom.applyMatrix4(transformMatrix);
+        applyTransform(geom, transform.value);
 
         const positionAttr = geom.getAttribute("position");
         const linestring: THREE.Vector3[] = [];

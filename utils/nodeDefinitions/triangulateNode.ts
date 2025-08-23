@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 import { nodeDefinition } from "../nodeTypes";
 import { getInputValues } from "./nodeUtilFunctions";
 import { triangulateLinestringsWithHoles } from "../geometryProcessing/extrusion";
@@ -49,9 +50,10 @@ export function triangulateNode(nodeDefId: number): nodeDefinition {
 
         const geom = triangulateLinestringsWithHoles(outer, holePolys);
         if (!geom) throw new Error("Error triangulating linestring with holes");
+        const final = BufferGeometryUtils.mergeVertices(geom);
 
         return {
-          2: { type: "mesh", value: geom },
+          2: { type: "mesh", value: final },
         };
       }
       throw new Error("Invalid inputs to triangulate node");
