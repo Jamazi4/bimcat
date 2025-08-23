@@ -1,6 +1,7 @@
 import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
 import { getInputValues, smartRound } from "./nodeUtilFunctions";
+import { getBufferGeomCentroid } from "../geometryProcessing/geometryHelpers";
 
 export function getMeshVolumeNode(nodeDefId: number): nodeDefinition {
   return {
@@ -26,12 +27,10 @@ export function getMeshVolumeNode(nodeDefId: number): nodeDefinition {
         const posAttr = geometry.value.attributes.position;
 
         // Calculate mesh centroid (average of all vertices)
-        const centroid = new THREE.Vector3();
-        for (let i = 0; i < posAttr.count; i++) {
-          const v = new THREE.Vector3().fromBufferAttribute(posAttr, i);
-          centroid.add(v);
-        }
-        centroid.divideScalar(posAttr.count);
+        //
+        // TODO:Check if this actually works correctly
+        //
+        const centroid = getBufferGeomCentroid(posAttr);
 
         // Calculate volume using centroid as reference point
         let volume = 0;

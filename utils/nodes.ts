@@ -18,6 +18,8 @@ import { getMeshVolumeNode } from "./nodeDefinitions/getMeshVolume";
 import { psetNode } from "./nodeDefinitions/psetNode";
 import { psetAttributeNode } from "./nodeDefinitions/psetAttributeNode";
 import { triangulateNode } from "./nodeDefinitions/triangulateNode";
+import { getNormalNode } from "./nodeDefinitions/getNormalNode";
+import { getOriginNode } from "./nodeDefinitions/getOriginNode";
 
 export const nodeDefinitions: nodeDefinition[] = [
   outputNode(1),
@@ -39,4 +41,6 @@ export const nodeDefinitions: nodeDefinition[] = [
   psetNode(17),
   psetAttributeNode(18),
   triangulateNode(19),
+  getNormalNode(20),
+  getOriginNode(21),
 ];

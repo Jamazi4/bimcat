@@ -19,7 +19,6 @@ import { Label } from "../ui/label";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { smartRound } from "@/utils/nodeDefinitions/nodeUtilFunctions";
 import { resetDownloadState, setControlsActive } from "@/lib/downloadIfcSlice";
-import { isValid } from "zod";
 
 const ComponentControlsPanel = ({
   paramMeshGroup,
@@ -27,7 +26,9 @@ const ComponentControlsPanel = ({
   activeControls,
   setActiveControls,
   changeNodeValue,
+  pending,
 }: {
+  pending: boolean;
   paramMeshGroup: THREE.Group<THREE.Object3DEventMap> | null;
   uiControls: ComponentControlsType;
   activeControls: boolean;
@@ -140,7 +141,7 @@ const ComponentControlsPanel = ({
                   {c.controlName}
                 </Label>
                 <h2 className={labelClassname}>
-                  {activeControls
+                  {activeControls && !pending
                     ? smartRound(
                         Number(
                           nodeStateValues?.[c.nodeId]?.[
@@ -157,7 +158,7 @@ const ComponentControlsPanel = ({
                     onValueChange={(e) => handleSliderChange(e, c.nodeId)}
                     className={controlClassName}
                     id={c.nodeId}
-                    disabled={!activeControls}
+                    disabled={!activeControls || pending}
                     value={[+controlStates[c.nodeId]]}
                   />
                 )}
@@ -169,7 +170,7 @@ const ComponentControlsPanel = ({
                     }
                     className={controlClassName}
                     id={c.nodeId}
-                    disabled={!activeControls}
+                    disabled={!activeControls || pending}
                     checked={Boolean(controlStates[c.nodeId])}
                   />
                 )}
@@ -179,7 +180,7 @@ const ComponentControlsPanel = ({
                     onChange={(e) => handleNumberChange(e, c.nodeId)}
                     className={controlClassName}
                     id={c.nodeId}
-                    disabled={!activeControls}
+                    disabled={!activeControls || pending}
                     value={controlStates[c.nodeId] as string}
                     step={0.001}
                   />

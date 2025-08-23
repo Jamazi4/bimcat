@@ -45,6 +45,7 @@ const ComponentContentWrapper = ({
 
   const fetchNodesWrapper = useCallback(async () => {
     if (!activeControls) return;
+    setPendingFetch(true);
     await fetchNodes(componentId);
     setPendingFetch(false);
   }, [componentId, activeControls, fetchNodes]);
@@ -116,6 +117,7 @@ const ComponentContentWrapper = ({
       </div>
       {controlsAvailable && (
         <ComponentControlsPanel
+          pending={pendingFetch}
           paramMeshGroup={paramMeshGroup}
           activeControls={activeControls}
           setActiveControls={setActiveControls}

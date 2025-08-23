@@ -146,6 +146,7 @@ export function triangulatePolygon3D(polygon: THREE.Vector3[]): {
   if (polygon.length < 3) return null;
 
   // Compute normal from first 3 points (assuming mostly planar)
+  // TODO: extend this to calculate normal from entire polygon
   const normal = new THREE.Vector3()
     .crossVectors(
       new THREE.Vector3().subVectors(polygon[1], polygon[0]),
@@ -195,6 +196,7 @@ export function triangulateLinestringsWithHoles(
   }
 
   // --- 1. Compute local plane (same as triangulatePolygon3D) ---
+  // TODO: as in triangulatePolygon3D - handle normal for entire polygon
   const normal = new THREE.Vector3()
     .crossVectors(
       new THREE.Vector3().subVectors(outer[1], outer[0]),
