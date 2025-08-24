@@ -16,17 +16,24 @@ import {
   EdgeRewiring,
   GeomNodeBackType,
   ListInputAnalysis,
+  nodeDefinition,
   NodeDefinitionShort,
   NodeEdgeType,
   NodeSlot,
   nodeTypeControlTypeMap,
   NodeValues,
+  SlotValues,
 } from "../nodeTypes";
 import { useNodeNavigation } from "./useNodeNavigation";
 import { deleteNodeOutputValue } from "@/lib/features/visualiser/visualiserSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { ComponentControlsType, Pset } from "../schemas";
-import { convertGroupToDbGeom } from "../nodeDefinitions/nodeUtilFunctions";
+import {
+  convertGroupToDbGeom,
+  getActiveGroupInputType,
+  getActiveInputIds,
+  getGroupInputIds,
+} from "../nodeDefinitions/nodeUtilFunctions";
 
 export const useNodeSystem = (meshGroup: THREE.Group) => {
   const [nodes, setNodes] = useState<GeomNodeBackType[]>([]);
@@ -172,6 +179,225 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     (state) => state.visualiserSlice.nodeValues,
   );
 
+  const addEdge = useCallback(
+    (
+      fromNodeId: string,
+      fromSlotId: number,
+      toNodeId: string,
+      toSlotId: number,
+    ) => {
+      const newEdge: NodeEdgeType = {
+        id: createEdgeId(),
+        fromNodeId,
+        fromSlotId,
+        toNodeId,
+        toSlotId,
+      };
+      const isListSlot = toSlotId >= 100;
+      const toNode = nodesRef.current.find((n) => n.id === toNodeId);
+      const nodeDef = nodeDefinitions.find((nd) => nd.type === toNode?.type);
+      const inputDef = nodeDef?.inputs.find((i) => i.id === toSlotId);
+      const isParentList = inputDef?.isList;
+
+      const wasTargetSlotOccupied = edgesRef.current.some(
+        (edge) => edge.toNodeId === toNodeId && edge.toSlotId === toSlotId,
+      );
+      setEdges((prevEdges) => {
+        const newEdges = prevEdges.filter(
+          (edge) => !(edge.toNodeId === toNodeId && edge.toSlotId === toSlotId),
+        );
+        return [...newEdges, newEdge];
+      });
+
+      if (isListSlot || isParentList) {
+        setNodes((prevNodes) =>
+          prevNodes.map((node) => {
+            if (node.id !== toNodeId) return node;
+            const currentValues = { ...node.values };
+
+            if (
+              (isListSlot && !wasTargetSlotOccupied) ||
+              (isParentList && !wasTargetSlotOccupied)
+            ) {
+              if (isListSlot) {
+                const currentListSlots = Object.keys(currentValues)
+                  .map(Number)
+                  .filter((k) => k >= 100)
+                  .sort((a, b) => a - b);
+
+                const maxSlot =
+                  currentListSlots.length > 0
+                    ? Math.max(...currentListSlots)
+                    : 99;
+
+                const nextSlotId = maxSlot + 1;
+                currentValues[nextSlotId] = false;
+              } else if (isParentList) {
+                const hasListSlots = Object.keys(currentValues).some(
+                  (k) => parseInt(k) >= 100,
+                );
+                if (!hasListSlots) {
+                  const currentListSlots = Object.keys(currentValues)
+                    .map(Number)
+                    .filter((k) => k >= 100)
+                    .sort((a, b) => a - b);
+                  const maxSlot =
+                    currentListSlots.length > 0
+                      ? Math.max(...currentListSlots)
+                      : 99;
+                  const nextSlotId = maxSlot + 1;
+                  currentValues[nextSlotId] = false;
+                }
+              }
+            }
+            return {
+              ...node,
+              values: currentValues,
+            };
+          }),
+        );
+      }
+    },
+    [nodesRef, setEdges, setNodes],
+  );
+
+  const switchGroupInputActive = useCallback(
+    (nodeId: string, groupIndices: number[], activeIndex: number) => {
+      const node = nodesRef.current.find((n) => n.id === nodeId);
+      if (!node || !node.values) return;
+
+      const nodeDef = nodeDefinitions.find((nd) => nd.type === node.type);
+
+      setEdges((prevEdges) =>
+        prevEdges.filter((e) => {
+          if (e.toSlotId >= 100 || groupIndices.includes(e.toSlotId)) {
+            return e.toNodeId !== nodeId;
+          } else return true;
+        }),
+      );
+
+      const dynamicOutputs = nodeDef?.outputs.filter(
+        (o) => o.onInputSelectedId !== undefined,
+      );
+
+      dynamicOutputs?.forEach((output) => {
+        if (groupIndices.includes(output.onInputSelectedId!)) {
+          setEdges((prevEdges) =>
+            prevEdges.filter(
+              (e) => !(e.fromNodeId === nodeId && e.fromSlotId === output.id),
+            ),
+          );
+        }
+      });
+
+      const currentValues = { ...node.values };
+
+      groupIndices.forEach((id) => {
+        currentValues[id] = id === activeIndex;
+      });
+
+      Object.keys(currentValues).forEach((key) => {
+        const slotId = parseInt(key);
+        if (slotId >= 100) {
+          delete currentValues[slotId];
+        }
+      });
+      setNodes((prevNodes) =>
+        prevNodes.map((n) =>
+          n.id === nodeId ? { ...n, values: currentValues } : n,
+        ),
+      );
+    },
+    [],
+  );
+
+  const cancelConnecting = useCallback(() => {
+    setConnectingFromNode(null);
+    setTempEdgePosition(null);
+  }, [setConnectingFromNode, setTempEdgePosition]);
+
+  const addEdgeToGroupInput = useCallback(
+    //TODO:mode to useNodeSystem
+    (
+      toNode: GeomNodeBackType | undefined,
+      toNodeDef: nodeDefinition,
+      inputValueType: SlotValues | null,
+      outputType: SlotValues | undefined,
+    ) => {
+      if (!connectingToNodeRef.current)
+        throw new Error("No active to node ref");
+
+      const groupInputIds = getGroupInputIds(
+        toNodeDef,
+        connectingToNodeRef.current?.slotId,
+      );
+
+      if (!groupInputIds) {
+        cancelConnecting();
+        throw new Error("Could not find group input Ids");
+      }
+
+      const activeInputIds = getActiveInputIds(toNode!.values!, groupInputIds);
+      const allowedInputTypes = toNodeDef?.inputs
+        .filter((input) => input.type === "group")
+        .map((group) => group.slotValueType);
+
+      const activeInputType = getActiveGroupInputType(
+        toNodeDef,
+        activeInputIds,
+      );
+
+      if (!inputValueType) {
+        cancelConnecting();
+        throw new Error("Could not find group input value type");
+      }
+
+      if (
+        activeInputType !== outputType &&
+        allowedInputTypes?.includes(inputValueType)
+      ) {
+        const newActiveInputId = toNodeDef.inputs.find(
+          (input) =>
+            input.type === "group" &&
+            groupInputIds.includes(input.id) &&
+            input.slotValueType === outputType,
+        )?.id;
+
+        if (newActiveInputId === undefined) {
+          cancelConnecting();
+          return;
+        }
+
+        switchGroupInputActive(toNode!.id, groupInputIds, newActiveInputId);
+
+        addEdge(
+          connectingFromNodeRef.current!.nodeId,
+          connectingFromNodeRef.current!.slotId,
+          connectingToNodeRef.current!.nodeId,
+          connectingToNodeRef.current!.slotId,
+        );
+        cancelConnecting();
+        return;
+      } else if (activeInputType === outputType) {
+        addEdge(
+          connectingFromNodeRef.current!.nodeId,
+          connectingFromNodeRef.current!.slotId,
+          connectingToNodeRef.current!.nodeId,
+          connectingToNodeRef.current!.slotId,
+        );
+        cancelConnecting();
+        return;
+      }
+    },
+    [
+      addEdge,
+      cancelConnecting,
+      connectingFromNodeRef,
+      connectingToNodeRef,
+      switchGroupInputActive,
+    ],
+  );
+
   const resolveUiControls = useCallback(() => {
     const uiControls: ComponentControlsType = nodesRef.current.flatMap((n) => {
       if (n.type === "ui control") {
@@ -310,56 +536,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
           n.id === nodeId
             ? { ...n, values: { ...n.values, [inputId]: activeValueId } }
             : n,
-        ),
-      );
-    },
-    [],
-  );
-
-  const switchGroupInputActive = useCallback(
-    (nodeId: string, groupIndices: number[], activeIndex: number) => {
-      const node = nodesRef.current.find((n) => n.id === nodeId);
-      if (!node || !node.values) return;
-
-      const nodeDef = nodeDefinitions.find((nd) => nd.type === node.type);
-
-      setEdges((prevEdges) =>
-        prevEdges.filter((e) => {
-          if (e.toSlotId >= 100 || groupIndices.includes(e.toSlotId)) {
-            return e.toNodeId !== nodeId;
-          } else return true;
-        }),
-      );
-
-      const dynamicOutputs = nodeDef?.outputs.filter(
-        (o) => o.onInputSelectedId !== undefined,
-      );
-
-      dynamicOutputs?.forEach((output) => {
-        if (groupIndices.includes(output.onInputSelectedId!)) {
-          setEdges((prevEdges) =>
-            prevEdges.filter(
-              (e) => !(e.fromNodeId === nodeId && e.fromSlotId === output.id),
-            ),
-          );
-        }
-      });
-
-      const currentValues = { ...node.values };
-
-      groupIndices.forEach((id) => {
-        currentValues[id] = id === activeIndex;
-      });
-
-      Object.keys(currentValues).forEach((key) => {
-        const slotId = parseInt(key);
-        if (slotId >= 100) {
-          delete currentValues[slotId];
-        }
-      });
-      setNodes((prevNodes) =>
-        prevNodes.map((n) =>
-          n.id === nodeId ? { ...n, values: currentValues } : n,
         ),
       );
     },
@@ -1043,10 +1219,12 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
   }, []);
 
   const { handleEditorMouseDown, handleWheel } = useNodeNavigation(
+    addEdgeToGroupInput,
+    cancelConnecting,
+    addEdge,
     deleteNode,
     setNodes,
     selectedNodeIdsRef,
-    setEdges,
     copySelectedNodes,
     pasteCopiedNodes,
     wasDragging,
@@ -1064,8 +1242,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     setTempEdgePosition,
     connectingToNodeRef,
     nodesRef,
-    setConnectingFromNode,
-    switchGroupInputActive,
     setSelectedNodeIds,
     setDraggingNodes,
     curClickedNodeId,
@@ -1108,5 +1284,7 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
     switchSelectInputValue,
     deleteNode,
     resolveDynPsets,
+    addEdge,
+    cancelConnecting,
   };
 };

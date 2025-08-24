@@ -10,17 +10,10 @@ import {
   GeomNodeBackType,
   inputWithSlotValueType,
   nodeDefinition,
-  NodeEdgeType,
   NodeSlot,
   SlotValues,
 } from "../nodeTypes";
 import { nodeDefinitions } from "../nodes";
-import {
-  getActiveInputIds,
-  getActiveGroupInputType,
-  getGroupInputIds,
-} from "../nodeDefinitions/nodeUtilFunctions";
-import { createEdgeId } from "../utilFunctions";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   setContextMenuOpen,
@@ -28,10 +21,22 @@ import {
 } from "@/lib/features/visualiser/visualiserSlice";
 
 export const useNodeNavigation = (
+  addEdgeToGroupInput: (
+    toNode: GeomNodeBackType | undefined,
+    toNodeDef: nodeDefinition,
+    inputValueType: SlotValues | null,
+    outputType: SlotValues | undefined,
+  ) => void,
+  cancelConnecting: () => void,
+  addEdge: (
+    fromNodeId: string,
+    fromSlotId: number,
+    toNodeId: string,
+    toSlotId: number,
+  ) => void,
   deleteNode: () => void,
   setNodes: Dispatch<SetStateAction<GeomNodeBackType[]>>,
   selectedNodeIdsRef: RefObject<string[]>,
-  setEdges: Dispatch<SetStateAction<NodeEdgeType[]>>,
   copySelectedNodes: () => void,
   pasteCopiedNodes: () => void,
   wasDragging: RefObject<boolean>,
@@ -91,17 +96,6 @@ export const useNodeNavigation = (
     slotId: number;
   } | null>,
   nodesRef: RefObject<GeomNodeBackType[]>,
-  setConnectingFromNode: Dispatch<
-    SetStateAction<{
-      nodeId: string;
-      slotId: number;
-    } | null>
-  >,
-  switchGroupInputActive: (
-    nodeId: string,
-    groupIndices: number[],
-    activeIndex: number,
-  ) => void,
   setSelectedNodeIds: Dispatch<SetStateAction<string[]>>,
   setDraggingNodes: Dispatch<
     SetStateAction<
@@ -148,177 +142,6 @@ export const useNodeNavigation = (
     (state) => state.visualiserSlice.nodeNavigation,
   );
   const dispatch = useAppDispatch();
-
-  const addEdge = useCallback(
-    //TODO:mode to useNodeSystem
-    (
-      fromNodeId: string,
-      fromSlotId: number,
-      toNodeId: string,
-      toSlotId: number,
-    ) => {
-      const newEdge: NodeEdgeType = {
-        id: createEdgeId(),
-        fromNodeId,
-        fromSlotId,
-        toNodeId,
-        toSlotId,
-      };
-      const isListSlot = toSlotId >= 100;
-      const toNode = nodesRef.current.find((n) => n.id === toNodeId);
-      const nodeDef = nodeDefinitions.find((nd) => nd.type === toNode?.type);
-      const inputDef = nodeDef?.inputs.find((i) => i.id === toSlotId);
-      const isParentList = inputDef?.isList;
-
-      let wasTargetSlotOccupied = false;
-      setEdges((prevEdges) => {
-        wasTargetSlotOccupied = prevEdges.some(
-          (edge) => edge.toNodeId === toNodeId && edge.toSlotId === toSlotId,
-        );
-        const newEdges = prevEdges.filter(
-          (edge) => !(edge.toNodeId === toNodeId && edge.toSlotId === toSlotId),
-        );
-        return [...newEdges, newEdge];
-      });
-
-      if (isListSlot || isParentList) {
-        setNodes((prevNodes) =>
-          prevNodes.map((node) => {
-            if (node.id !== toNodeId) return node;
-            const currentValues = { ...node.values };
-
-            if (
-              (isListSlot && !wasTargetSlotOccupied) ||
-              (isParentList && !wasTargetSlotOccupied)
-            ) {
-              if (isListSlot) {
-                const currentListSlots = Object.keys(currentValues)
-                  .map(Number)
-                  .filter((k) => k >= 100)
-                  .sort((a, b) => a - b);
-
-                const maxSlot =
-                  currentListSlots.length > 0
-                    ? Math.max(...currentListSlots)
-                    : 99;
-
-                const nextSlotId = maxSlot + 1;
-                currentValues[nextSlotId] = false;
-              } else if (isParentList) {
-                const hasListSlots = Object.keys(currentValues).some(
-                  (k) => parseInt(k) >= 100,
-                );
-                if (!hasListSlots) {
-                  const currentListSlots = Object.keys(currentValues)
-                    .map(Number)
-                    .filter((k) => k >= 100)
-                    .sort((a, b) => a - b);
-                  const maxSlot =
-                    currentListSlots.length > 0
-                      ? Math.max(...currentListSlots)
-                      : 99;
-                  const nextSlotId = maxSlot + 1;
-                  currentValues[nextSlotId] = false;
-                }
-              }
-            }
-            return {
-              ...node,
-              values: currentValues,
-            };
-          }),
-        );
-      }
-    },
-    [nodesRef, setEdges, setNodes],
-  );
-
-  const cancelConnecting = useCallback(() => {
-    setConnectingFromNode(null);
-    setTempEdgePosition(null);
-  }, [setConnectingFromNode, setTempEdgePosition]);
-
-  const addEdgeToGroupInput = useCallback(
-    //TODO:mode to useNodeSystem
-    (
-      toNode: GeomNodeBackType | undefined,
-      toNodeDef: nodeDefinition,
-      inputValueType: SlotValues | null,
-      outputType: SlotValues | undefined,
-    ) => {
-      if (!connectingToNodeRef.current)
-        throw new Error("No active to node ref");
-
-      const groupInputIds = getGroupInputIds(
-        toNodeDef,
-        connectingToNodeRef.current?.slotId,
-      );
-
-      if (!groupInputIds) {
-        cancelConnecting();
-        throw new Error("Could not find group input Ids");
-      }
-
-      const activeInputIds = getActiveInputIds(toNode!.values!, groupInputIds);
-      const allowedInputTypes = toNodeDef?.inputs
-        .filter((input) => input.type === "group")
-        .map((group) => group.slotValueType);
-
-      const activeInputType = getActiveGroupInputType(
-        toNodeDef,
-        activeInputIds,
-      );
-
-      if (!inputValueType) {
-        cancelConnecting();
-        throw new Error("Could not find group input value type");
-      }
-
-      if (
-        activeInputType !== outputType &&
-        allowedInputTypes?.includes(inputValueType)
-      ) {
-        const newActiveInputId = toNodeDef.inputs.find(
-          (input) =>
-            input.type === "group" &&
-            groupInputIds.includes(input.id) &&
-            input.slotValueType === outputType,
-        )?.id;
-
-        if (newActiveInputId === undefined) {
-          cancelConnecting();
-          return;
-        }
-
-        switchGroupInputActive(toNode!.id, groupInputIds, newActiveInputId);
-
-        addEdge(
-          connectingFromNodeRef.current!.nodeId,
-          connectingFromNodeRef.current!.slotId,
-          connectingToNodeRef.current!.nodeId,
-          connectingToNodeRef.current!.slotId,
-        );
-        cancelConnecting();
-        return;
-      } else if (activeInputType === outputType) {
-        addEdge(
-          connectingFromNodeRef.current!.nodeId,
-          connectingFromNodeRef.current!.slotId,
-          connectingToNodeRef.current!.nodeId,
-          connectingToNodeRef.current!.slotId,
-        );
-        cancelConnecting();
-        return;
-      }
-    },
-    [
-      addEdge,
-      cancelConnecting,
-      connectingFromNodeRef,
-      connectingToNodeRef,
-      switchGroupInputActive,
-    ],
-  );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
