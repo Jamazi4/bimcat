@@ -123,6 +123,7 @@ export function closeLinestrings(
     if (isBaseClosed[i] && !isClosedLoop(base)) base.push(base[0].clone());
   }
 }
+
 export function getResultantNormal(
   geom: THREE.BufferGeometry<THREE.NormalBufferAttributes>,
 ) {
@@ -150,26 +151,34 @@ export function getResultantNormal(
     resultant.add(cb);
   }
 
-  // Normalize to get the direction
   resultant.normalize();
 
   return resultant;
 }
 
 export function getLinestringCentroid(linestring: THREE.Vector3[][]) {
-  const sum = new THREE.Vector3(0, 0, 0);
-  let totalPoints = 0;
+  const centroid = new THREE.Vector3();
+  let totalLength = 0;
 
   for (const group of linestring) {
-    for (const p of group) {
-      sum.add(p);
-      totalPoints++;
+    for (let i = 0; i < group.length - 1; i++) {
+      const p1 = group[i];
+      const p2 = group[i + 1];
+      const segmentMid = new THREE.Vector3()
+        .addVectors(p1, p2)
+        .multiplyScalar(0.5);
+      const len = p1.distanceTo(p2);
+
+      centroid.addScaledVector(segmentMid, len);
+      totalLength += len;
     }
   }
-  const origin = sum.divideScalar(totalPoints);
-  return origin;
+  return centroid.divideScalar(totalLength);
 }
 
+//This is not accurate as it's not taking the surface area into consideration
+//but now is only used to get inside point for volume calcs - when fixing -
+//update getOriginNode
 export function getBufferGeomCentroid(
   posAttr: THREE.BufferAttribute | THREE.InterleavedBufferAttribute,
 ) {

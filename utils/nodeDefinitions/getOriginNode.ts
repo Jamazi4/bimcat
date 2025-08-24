@@ -1,9 +1,7 @@
+import * as THREE from "three";
 import { nodeDefinition } from "../nodeTypes";
 import { getActiveInputIds, getInputValues } from "./nodeUtilFunctions";
-import {
-  getBufferGeomCentroid,
-  getLinestringCentroid,
-} from "../geometryProcessing/geometryHelpers";
+import { getLinestringCentroid } from "../geometryProcessing/geometryHelpers";
 
 export function getOriginNode(nodeDefId: number): nodeDefinition {
   return {
@@ -34,7 +32,10 @@ export function getOriginNode(nodeDefId: number): nodeDefinition {
       const [geom] = getInputValues(node.inputs, evalFunction, activeInputs);
 
       if (geom.type === "mesh") {
-        const origin = getBufferGeomCentroid(geom.value.attributes.position);
+        const origin = new THREE.Vector3();
+        //you can use centroid here maybe but fix.
+        geom.value.computeBoundingBox();
+        geom.value.boundingBox?.getCenter(origin);
         return {
           2: { type: "vector", value: origin },
         };

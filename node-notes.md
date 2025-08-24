@@ -539,20 +539,39 @@ With this I need to project linestring on mesh and color in output
 
 before or after transform/origin/applyTransform
 
-#### new current plan as of 20-08
+### --24-08-2025--
 
-- triangulate/holes
-- add origin to transform objects
-- appply transform
+Okay I have added get origin, get normal and apply transform. This was a lot.
+
+Now before I move forward I need to optimize the useNodeRuntime as it started
+to choke on a simple pipe model.
+
+currently in notes below I have those points:
+
+`
+
+- cache node outputs
+
+- now runtime has liveNodeIds - need to use this to store nodes output so eval
+  doesn't go through the same node couple of times
+  `
+
+I have to seriously think on how to implement that.
+Two main areas where I can optimize the system:
+
+- rebuilding only part of AST instead of entirety when I just change one value
+- now when value is going to more than one node it get's evaluated multiple times
+
+#### new current plan as of 20-08
 
 ## General
 
 BUGS:
 
+- group node adding slot when connecting to already connected for a swap
 - left-click on node
 - enabled node menu buttons when not in node navigation
 - ctrl-c not working in input fields
-- no capital letters in string input
 
 Runtime:
 
@@ -564,13 +583,11 @@ Runtime:
 
 UI:
 
-- and dynamic props
 - save control state to user's profile? - add control presets?
 - highlight wrong links - at least to wrong input type will be easy - then also
   eval errors
 - lock/hide node menu buttons
 - color picker in output node
-- addNode menu to have search - and display under right click
 - regions with color and name (SVG)
 - measure tool
 
@@ -584,15 +601,11 @@ A. Easy
 
 - preview value
 
-- add origin to transform node (and in transform object type)!
-- triangulate linestring (w/ holes?)
-- apply transform (add origin to transform opt arg)
-
-- get normal
 - normalize
-
 - math min/max/clamp
 - bigger than/smaller than or/and
+
+- pojection? linestring or point onto mesh
 
 B. Hard
 
@@ -647,9 +660,9 @@ B. Hard
 - pset + prop nodes done
 - any getter/getters (length/area?) done
 - dynamic props / automatic bimcat propset done
-
-### plan for ui controls
-
+- triangulate/holes
+- add origin to transform objects
+- appply transform
 - 'EXPOSE' node would have a number/bool input and a string input for control
   name and no output
 - it would store the node id of connected node (where? - special redux reducer?)
@@ -661,8 +674,14 @@ B. Hard
 - on opening component add button to enable controls.
 - on enable controls the stored geom disappears and I spawn headless node
   runtime
-
 - finish group node - done
 - apply list inputs to linestring node - done
 - math nodes - progress/finish later?
 - ui/pset nodes and component view integration - done
+- and dynamic props
+- get normal
+- addNode menu to have search - and display under right click
+- apply transform (add origin to transform opt arg)
+- triangulate linestring (w/ holes?)
+- add origin to transform node (and in transform object type)!
+- no capital letters in string input
