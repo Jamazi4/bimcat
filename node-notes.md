@@ -562,6 +562,13 @@ Two main areas where I can optimize the system:
 - rebuilding only part of AST instead of entirety when I just change one value
 - now when value is going to more than one node it get's evaluated multiple times
 
+okay with the help of claude runtime node now caches nodes outputs so no need
+to evaluate single node a lot of times.
+
+it's now also caching ast so it's not rebuild if nothing has changed.
+
+can use it further to only rebuild ast that is impacted
+
 #### new current plan as of 20-08
 
 ## General
@@ -576,10 +583,8 @@ BUGS:
 Runtime:
 
 - ctrl-z and ctrl-shift-r
-- cache node outputs
-- now runtime has liveNodeIds - need to use this to store nodes output so eval
-  doesn't go through the same node couple of times
 - pick reference from 3D
+- rebuild only impacted parts of AST
 
 UI:
 
@@ -685,3 +690,6 @@ B. Hard
 - triangulate linestring (w/ holes?)
 - add origin to transform node (and in transform object type)!
 - no capital letters in string input
+- cache node outputs
+- now runtime has liveNodeIds - need to use this to store nodes output so eval
+  doesn't go through the same node couple of times

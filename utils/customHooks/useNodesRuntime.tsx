@@ -35,13 +35,31 @@ const useNodesRuntime = ({
   // Cache for node evaluation results
   const nodeCache = useRef<Map<string, NodeCache>>(new Map());
 
+  // Simple AST cache - just store by node ID, invalidate when structure changes
+  const astCache = useRef<Map<string, ASTNode>>(new Map());
+
   // Track which nodes have been processed in current evaluation cycle
   const evaluationCycle = useRef<Set<string>>(new Set());
 
-  // Clear cache when nodes or edges change
+  // Track last known state to detect changes
+  const lastRuntimeNodes = useRef<typeof runtimeNodes>([]);
+  const lastEdges = useRef<typeof edges>([]);
+
+  // Simple cache invalidation - clear all caches when structure changes
   useEffect(() => {
-    nodeCache.current.clear();
-    evaluationCycle.current.clear();
+    const nodesChanged =
+      JSON.stringify(runtimeNodes) !== JSON.stringify(lastRuntimeNodes.current);
+    const edgesChanged =
+      JSON.stringify(edges) !== JSON.stringify(lastEdges.current);
+
+    if (nodesChanged || edgesChanged) {
+      nodeCache.current.clear();
+      astCache.current.clear();
+      evaluationCycle.current.clear();
+
+      lastRuntimeNodes.current = runtimeNodes;
+      lastEdges.current = edges;
+    }
   }, [runtimeNodes, edges]);
 
   //clean up outputObjects when output node is deleted
@@ -99,6 +117,12 @@ const useNodesRuntime = ({
 
   const buildAST = useCallback(
     (nodeId: string): ASTNode => {
+      // Check simple AST cache first
+      const cachedAST = astCache.current.get(nodeId);
+      if (cachedAST) {
+        return cachedAST;
+      }
+
       const node = runtimeNodes.find((n) => n.id === nodeId);
       if (!node) throw new Error(`Missing node ${nodeId}`);
 
@@ -182,12 +206,17 @@ const useNodesRuntime = ({
         });
       }
 
-      return {
+      const astNode: ASTNode = {
         type: node.type,
         id: node.id,
         inputs,
         values: node.values ?? {},
       };
+
+      // Cache the built AST
+      astCache.current.set(nodeId, astNode);
+
+      return astNode;
     },
     [edges, runtimeNodes],
   );
