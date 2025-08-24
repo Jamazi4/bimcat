@@ -1,5 +1,5 @@
 import { nodeDefinition } from "../nodeTypes";
-import { getComboValues } from "./nodeUtilFunctions";
+import { getComboValues, smartRound } from "./nodeUtilFunctions";
 
 export function sliderNode(nodeDefId: number): nodeDefinition {
   return {
@@ -37,9 +37,10 @@ export function sliderNode(nodeDefId: number): nodeDefinition {
       const stepsFromStart = Math.round((cont - start) / step);
       const final = start + stepsFromStart * step;
       const clampedFinal = Math.max(start, Math.min(stop, final));
+      const roundedFinal = smartRound(clampedFinal);
 
       return {
-        4: { type: "number", value: clampedFinal ?? 0 },
+        4: { type: "number", value: Number(roundedFinal) ?? 0 },
       };
     },
   };

@@ -7,7 +7,7 @@ import {
 } from "./nodeUtilFunctions";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 import {
-  applyTransform,
+  applyTransformToLinestring,
   closeLinestrings,
   composeRelativeTransformMatrix,
   isClosedLoop,
@@ -77,7 +77,7 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
       let baseGeom = new THREE.BufferGeometry();
       let baseLinestrings: THREE.Vector3[][] = [];
       let meshExtrusionOutput = new THREE.BufferGeometry();
-      const linestringExtrusionOutput: THREE.Vector3[][] = [];
+      let linestringExtrusionOutput: THREE.Vector3[][] = [];
       let finalOutput = new THREE.BufferGeometry();
       let isBaseClosed: boolean[] = [];
       let isInputMesh: boolean = activeInputs.includes(1);
@@ -144,18 +144,11 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         tempMesh.applyMatrix4(relativeTransformMatrix);
 
         if (!isInputMesh) {
-          baseLinestrings.forEach((linestring) => {
-            const temp: THREE.Vector3[] = [];
-            linestring.forEach((v) => {
-              // Apply the same 2-step transform to each vertex
-              const positioned = v.clone().applyMatrix4(positionMatrix);
-              const transformed = positioned
-                .clone()
-                .applyMatrix4(relativeTransformMatrix);
-              temp.push(transformed);
-            });
-            linestringExtrusionOutput.push(temp);
-          });
+          linestringExtrusionOutput = applyTransformToLinestring(
+            baseLinestrings,
+            positionMatrix,
+            relativeTransformMatrix,
+          );
         } else {
           linestringExtrusionOutput.push(
             ...extractOrderedBoundaryLoop(tempMesh),

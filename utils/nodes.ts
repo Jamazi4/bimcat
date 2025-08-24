@@ -20,6 +20,7 @@ import { psetAttributeNode } from "./nodeDefinitions/psetAttributeNode";
 import { triangulateNode } from "./nodeDefinitions/triangulateNode";
 import { getNormalNode } from "./nodeDefinitions/getNormalNode";
 import { getOriginNode } from "./nodeDefinitions/getOriginNode";
+import { applyTransformNode } from "./nodeDefinitions/applyTransformNode";
 
 export const nodeDefinitions: nodeDefinition[] = [
   outputNode(1),
@@ -43,4 +44,5 @@ export const nodeDefinitions: nodeDefinition[] = [
   triangulateNode(19),
   getNormalNode(20),
   getOriginNode(21),
+  applyTransformNode(22),
 ];

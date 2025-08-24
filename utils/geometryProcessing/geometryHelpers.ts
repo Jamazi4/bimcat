@@ -180,3 +180,21 @@ export function getBufferGeomCentroid(
   }
   return centroid.divideScalar(posAttr.count);
 }
+
+export function applyTransformToLinestring(
+  geom: THREE.Vector3[][],
+  positionMatrix: THREE.Matrix4,
+  relativeMatrix: THREE.Matrix4,
+) {
+  const transformedLinestring: THREE.Vector3[][] = [];
+  geom.forEach((linestring) => {
+    const temp: THREE.Vector3[] = [];
+    linestring.forEach((v) => {
+      const positioned = v.clone().applyMatrix4(positionMatrix);
+      const transformed = positioned.clone().applyMatrix4(relativeMatrix);
+      temp.push(transformed);
+    });
+    transformedLinestring.push(temp);
+  });
+  return transformedLinestring;
+}

@@ -1,5 +1,5 @@
 import { nodeDefinition } from "../nodeTypes";
-import { getComboValues } from "./nodeUtilFunctions";
+import { getComboValues, smartRound } from "./nodeUtilFunctions";
 
 export function scalarMathNode(nodeDefId: number): nodeDefinition {
   return {
@@ -47,8 +47,10 @@ export function scalarMathNode(nodeDefId: number): nodeDefinition {
         }
       }
 
+      const roundedResult = smartRound(result);
+
       return {
-        3: { type: "number", value: result },
+        3: { type: "number", value: Number(roundedResult) },
       };
     },
   };
