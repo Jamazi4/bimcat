@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { nodeDefinitions } from "../nodes";
 import {
   ASTNode,
@@ -16,6 +16,11 @@ import {
 } from "@/lib/features/visualiser/visualiserSlice";
 import { resolveFromOutputId } from "../nodeDefinitions/nodeUtilFunctions";
 
+interface NodeCache {
+  result: NodeEvalResult;
+  dependencies: string[]; // IDs of nodes this node depends on
+}
+
 const useNodesRuntime = ({
   runtimeNodes,
   edges,
@@ -26,6 +31,18 @@ const useNodesRuntime = ({
   >({});
   const dispatch = useAppDispatch();
   const [liveNodeIds, setLiveNodeIds] = useState<string[]>([]);
+
+  // Cache for node evaluation results
+  const nodeCache = useRef<Map<string, NodeCache>>(new Map());
+
+  // Track which nodes have been processed in current evaluation cycle
+  const evaluationCycle = useRef<Set<string>>(new Set());
+
+  // Clear cache when nodes or edges change
+  useEffect(() => {
+    nodeCache.current.clear();
+    evaluationCycle.current.clear();
+  }, [runtimeNodes, edges]);
 
   //clean up outputObjects when output node is deleted
   useEffect(() => {
@@ -45,6 +62,40 @@ const useNodesRuntime = ({
       .map((n) => n.id);
     dispatch(deleteNodeOutputValue({ nodeIds: inactiveNodes }));
   }, [runtimeNodes, meshGroup, dispatch, liveNodeIds]);
+
+  // Check if a node's dependencies have changed
+  const haveDependenciesChanged = useCallback(
+    (nodeId: string, dependencies: string[]): boolean => {
+      const cached = nodeCache.current.get(nodeId);
+      if (!cached) return true;
+
+      // Check if dependencies are the same
+      if (cached.dependencies.length !== dependencies.length) return true;
+
+      return !cached.dependencies.every((dep) => dependencies.includes(dep));
+    },
+    [],
+  );
+
+  // Get all dependencies for a node (recursively)
+  const getNodeDependencies = useCallback(
+    (nodeId: string, visited = new Set<string>()): string[] => {
+      if (visited.has(nodeId)) return []; // Avoid circular dependencies
+      visited.add(nodeId);
+
+      const dependencies: string[] = [];
+
+      const connectedEdges = edges.filter((edge) => edge.toNodeId === nodeId);
+      for (const edge of connectedEdges) {
+        dependencies.push(edge.fromNodeId);
+        // Recursively get dependencies of dependencies
+        dependencies.push(...getNodeDependencies(edge.fromNodeId, visited));
+      }
+
+      return [...new Set(dependencies)]; // Remove duplicates
+    },
+    [edges],
+  );
 
   const buildAST = useCallback(
     (nodeId: string): ASTNode => {
@@ -175,12 +226,49 @@ const useNodesRuntime = ({
 
   const evaluateAST = useCallback(
     (node: ASTNode): NodeEvalResult => {
+      // Check if this node is already being processed in this cycle (circular dependency)
+      if (evaluationCycle.current.has(node.id)) {
+        throw new Error(
+          `Circular dependency detected involving node ${node.id}`,
+        );
+      }
+
+      // Get node dependencies
+      const dependencies = getNodeDependencies(node.id);
+
+      // Check if we can use cached result
+      const cached = nodeCache.current.get(node.id);
+      if (cached && !haveDependenciesChanged(node.id, dependencies)) {
+        // Add to live nodes even if cached
+        setLiveNodeIds((prev) =>
+          prev.includes(node.id) ? prev : [...prev, node.id],
+        );
+        return cached.result;
+      }
+
+      // Mark as being processed
+      evaluationCycle.current.add(node.id);
+
       const nodeDef = nodeDefinitions.find((def) => def.type === node.type);
-      setLiveNodeIds((prev) => [...prev, node.id]);
+      setLiveNodeIds((prev) =>
+        prev.includes(node.id) ? prev : [...prev, node.id],
+      );
+
       try {
         if (nodeDef && nodeDef.function) {
           const outputValue = nodeDef.function(node, evaluateAST);
+
+          // Cache the result
+          nodeCache.current.set(node.id, {
+            result: outputValue,
+            dependencies: dependencies,
+          });
+
           storeOutputToState(nodeDef, node, outputValue);
+
+          // Remove from processing set
+          evaluationCycle.current.delete(node.id);
+
           return outputValue;
         } else {
           throw new Error(
@@ -188,10 +276,12 @@ const useNodesRuntime = ({
           );
         }
       } catch (error) {
+        // Remove from processing set on error
+        evaluationCycle.current.delete(node.id);
         throw error;
       }
     },
-    [storeOutputToState],
+    [storeOutputToState, getNodeDependencies, haveDependenciesChanged],
   );
 
   const clearOutputObjects = (outputNodeId: string) => {
@@ -204,6 +294,9 @@ const useNodesRuntime = ({
     const outputNodes = runtimeNodes.filter((n) => n.type === "output");
     const psetNodes = runtimeNodes.filter((n) => n.type === "pset");
     const rootNodes = [...outputNodes, ...psetNodes];
+
+    // Reset evaluation cycle tracking
+    evaluationCycle.current.clear();
 
     setLiveNodeIds([]);
     if (outputNodes.length === 0) {
