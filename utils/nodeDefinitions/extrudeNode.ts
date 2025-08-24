@@ -52,7 +52,7 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         name: "capped",
         id: 3,
         slotValueType: "boolean",
-        value: true,
+        value: false,
       },
     ],
     outputs: [
@@ -90,24 +90,35 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           isBaseClosed = baseLinestrings.map((l) => isClosedLoop(l));
 
           baseGeom.setFromPoints(baseLinestrings.flat());
-          if (baseLinestrings.length === 2) {
-            baseGeom.setIndex([0, 1]);
-          } else {
-            const positions: number[] = [];
-            const indices: number[] = [];
-            let vertexOffset = 0;
+          const positions: number[] = [];
+          const indices: number[] = [];
+          let vertexOffset = 0;
 
-            for (const polygon of baseLinestrings) {
-              const result = triangulatePolygon3D(polygon);
-              if (result) {
-                for (const idx of result.indices) {
-                  indices.push(idx + vertexOffset);
-                }
-                for (let i = 0; i < result.positions.length; i++) {
-                  positions.push(result.positions[i]);
-                }
-                vertexOffset += polygon.length;
+          for (const polygon of baseLinestrings) {
+            let result: { positions: number[]; indices: number[] } | null;
+
+            if (polygon.length === 2) {
+              const ax = polygon[0].x;
+              const ay = polygon[0].y;
+              const az = polygon[0].z;
+              const bx = polygon[1].x;
+              const by = polygon[1].y;
+              const bz = polygon[1].z;
+              result = {
+                positions: [ax, ay, az, bx, by, bz],
+                indices: [0, 1],
+              };
+            } else {
+              result = triangulatePolygon3D(polygon);
+            }
+            if (result) {
+              for (const idx of result.indices) {
+                indices.push(idx + vertexOffset);
               }
+              for (let i = 0; i < result.positions.length; i++) {
+                positions.push(result.positions[i]);
+              }
+              vertexOffset += polygon.length;
             }
           }
         } else if (initGeom.type === "mesh") {
@@ -170,7 +181,7 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
           linestringExtrusionOutput,
         )!;
 
-        if (!meshExtrusionOutput) throw new Error("Error creating cap");
+        // if (!meshExtrusionOutput) throw new Error("Error creating cap");
 
         const sideGeom = createSideGeometry(
           baseLinestrings,
@@ -190,10 +201,14 @@ export function extrudeNode(nodeDefId: number): nodeDefinition {
         }
 
         if (capped) {
-          finalOutput = BufferGeometryUtils.mergeGeometries([
-            finalOutput,
-            meshExtrusionOutput,
-          ]);
+          try {
+            finalOutput = BufferGeometryUtils.mergeGeometries([
+              finalOutput,
+              meshExtrusionOutput,
+            ]);
+          } catch (error) {
+            throw new Error("Could not create caps");
+          }
         }
 
         return {

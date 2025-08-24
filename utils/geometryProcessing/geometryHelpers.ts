@@ -120,6 +120,7 @@ export function closeLinestrings(
 ) {
   for (let i = 0; i < linestrings.length; i++) {
     const base = linestrings[i];
+    if (base.length === 2) return;
     if (isBaseClosed[i] && !isClosedLoop(base)) base.push(base[0].clone());
   }
 }

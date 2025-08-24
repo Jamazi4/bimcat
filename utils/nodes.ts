@@ -21,6 +21,7 @@ import { triangulateNode } from "./nodeDefinitions/triangulateNode";
 import { getNormalNode } from "./nodeDefinitions/getNormalNode";
 import { getOriginNode } from "./nodeDefinitions/getOriginNode";
 import { applyTransformNode } from "./nodeDefinitions/applyTransformNode";
+import { vectorMathNode } from "./nodeDefinitions/vectorMathNode";
 
 export const nodeDefinitions: nodeDefinition[] = [
   outputNode(1),
@@ -45,4 +46,5 @@ export const nodeDefinitions: nodeDefinition[] = [
   getNormalNode(20),
   getOriginNode(21),
   applyTransformNode(22),
+  vectorMathNode(23),
 ];

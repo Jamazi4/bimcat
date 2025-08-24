@@ -210,7 +210,7 @@ export function triangulateLinestrings(
 
   for (const linestring of linestrings) {
     const result = triangulatePolygon3D(linestring);
-    if (!result) continue;
+    if (!result) return null;
 
     const geom = new THREE.BufferGeometry();
     geom.setAttribute(

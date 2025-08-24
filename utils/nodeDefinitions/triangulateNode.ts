@@ -36,7 +36,9 @@ export function triangulateNode(nodeDefId: number): nodeDefinition {
         linestring.value.length > 0
       ) {
         if (linestring.value.length > 1) {
-          throw new Error("Triangulate accepts only singe linestring");
+          throw new Error(
+            "Triangulate accepts only a single, continuous linestring",
+          );
         }
 
         const outer = linestring.value[0];

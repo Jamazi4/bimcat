@@ -1,10 +1,6 @@
 import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
-import {
-  getActiveInputIds,
-  getComboValues,
-  getInputValues,
-} from "./nodeUtilFunctions";
+import { getActiveInputIds, getInputValues } from "./nodeUtilFunctions";
 import { defaultTransformContructor } from "./defaultNodes";
 import {
   applyTransform,

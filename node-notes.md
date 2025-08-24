@@ -569,7 +569,18 @@ it's now also caching ast so it's not rebuild if nothing has changed.
 
 can use it further to only rebuild ast that is impacted
 
-#### new current plan as of 20-08
+Current issues: trinagulate can only take in a single linestring
+
+#### notes after modelling the headwall --
+
+- split linestring by vecs and an input for index of the vec - getPoint -
+  either linestring or mesh
+
+- apply transform to support vector
+
+- split vector by x y z
+
+- subdivide and some picking method is really necesarry
 
 ## General
 
