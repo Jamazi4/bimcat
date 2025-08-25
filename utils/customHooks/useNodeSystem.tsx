@@ -298,7 +298,7 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
 
       Object.keys(currentValues).forEach((key) => {
         const slotId = parseInt(key);
-        if (slotId >= 100) {
+        if (slotId > 100) {
           delete currentValues[slotId];
         }
       });
@@ -317,7 +317,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
   }, [setConnectingFromNode, setTempEdgePosition]);
 
   const addEdgeToGroupInput = useCallback(
-    //TODO:mode to useNodeSystem
     (
       toNode: GeomNodeBackType | undefined,
       toNodeDef: nodeDefinition,
@@ -413,13 +412,6 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
         if (!controlledNodeId || !controlledNode || !controlledNode.values)
           return [];
 
-        const controlledNodeValue =
-          nodeStateOutputValues[controlledNodeId][
-            edgeFromControlledNode.fromSlotId
-          ];
-
-        if (!controlledNodeValue) return [];
-
         const controlledNodeType = controlledNode?.type;
 
         if (
@@ -430,6 +422,13 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
           toast(`${controlName} can only control slider, number or boolean.`);
           return [];
         }
+
+        const controlledNodeValue =
+          nodeStateOutputValues[controlledNodeId][
+            edgeFromControlledNode.fromSlotId
+          ];
+
+        if (!controlledNodeValue) return [];
 
         // hardCoded node values since I only support num, bool and slider
         const controlValue =
@@ -503,13 +502,21 @@ export const useNodeSystem = (meshGroup: THREE.Group) => {
 
   const saveNodeProject = useCallback(
     async (componentId: string) => {
-      const uiControls: ComponentControlsType = resolveUiControls();
+      let uiControls: ComponentControlsType = [];
+
+      try {
+        uiControls = resolveUiControls();
+      } catch (error) {
+        console.warn(error);
+        toast("Could not resolve UI controls");
+      }
+
       let dynPsets: Pset[] = [];
 
       try {
         dynPsets = resolveDynPsets();
       } catch (error) {
-        console.log(error);
+        console.warn(error);
         toast("Could not resolve dynamic psets.");
       }
 

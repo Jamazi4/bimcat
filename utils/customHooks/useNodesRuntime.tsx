@@ -10,10 +10,7 @@ import {
 } from "../nodeTypes";
 import * as THREE from "three";
 import { useAppDispatch } from "@/lib/hooks";
-import {
-  deleteNodeOutputValue,
-  setNodeOutputValues,
-} from "@/lib/features/visualiser/visualiserSlice";
+import { setNodeOutputValues } from "@/lib/features/visualiser/visualiserSlice";
 import { resolveFromOutputId } from "../nodeDefinitions/nodeUtilFunctions";
 
 interface NodeCache {
@@ -75,10 +72,11 @@ const useNodesRuntime = ({
       return filtered;
     });
 
-    const inactiveNodes = runtimeNodes
-      .filter((n) => !liveNodeIds.includes(n.id))
-      .map((n) => n.id);
-    dispatch(deleteNodeOutputValue({ nodeIds: inactiveNodes }));
+    //TODO: Track if this is needed - enabling clears state on init
+    // const inactiveNodes = runtimeNodes
+    //   .filter((n) => !liveNodeIds.includes(n.id))
+    //   .map((n) => n.id);
+    // dispatch(deleteNodeOutputValue({ nodeIds: inactiveNodes }));
   }, [runtimeNodes, meshGroup, dispatch, liveNodeIds]);
 
   // Check if a node's dependencies have changed

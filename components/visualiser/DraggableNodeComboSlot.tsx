@@ -77,10 +77,8 @@ const DraggableNodeComboSlot = ({
   // Save local before becoming connected; restore saved local on disconnect (if any).
   useEffect(() => {
     if (connected) {
-      // user is now controlled by a connection — remember the current local value
       setSavedLocalValue(curVal);
     } else {
-      // user disconnected — restore the previously saved local value if it exists
       if (savedLocalValue !== undefined) {
         setCurVal(savedLocalValue);
         if (isNumberSlot) {
@@ -90,8 +88,6 @@ const DraggableNodeComboSlot = ({
           changeThisValue(Boolean(savedLocalValue));
         }
       }
-      // if savedLocalValue === undefined: do NOT pull the stored value from props/Redux
-      // and do NOT overwrite curVal — this preserves the user's local input (or initial empty)
     }
     // we intentionally only want this to run on `connected` flips
     // eslint-disable-next-line react-hooks/exhaustive-deps

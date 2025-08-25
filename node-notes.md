@@ -573,20 +573,31 @@ Current issues: trinagulate can only take in a single linestring
 
 #### notes after modelling the headwall --
 
-- split linestring by vecs and an input for index of the vec - getPoint -
-  either linestring or mesh
+X when plugging to occupied parent list and changing type - it removes empty slot
+
+X illegal ui controls fail silently
+
+- apply transform to work for individual origins? - in extrude too
 
 - apply transform to support vector
 
+- mesh in groups is not merging correctly
+
+- triangulating separate linestrings?
+
 - split vector by x y z
 
+- split linestring by vecs and an input for index of the vec - getPoint -
+  either linestring or mesh
+
 - subdivide and some picking method is really necesarry
+
+- vector math to support scalar or a separate node for this
 
 ## General
 
 BUGS:
 
-- group node adding slot when connecting to already connected for a swap
 - left-click on node
 - enabled node menu buttons when not in node navigation
 - ctrl-c not working in input fields
@@ -606,12 +617,13 @@ UI:
 - color picker in output node
 - regions with color and name (SVG)
 - measure tool
+- add copied nodes to selected
+- save node project viewTransform and 3D cam pos
 
 Nodes:
 
 A. Easy
 
-- pset/psetKeyValue
 - string
 - concatenate string/cast num to string
 
@@ -622,6 +634,10 @@ A. Easy
 - bigger than/smaller than or/and
 
 - pojection? linestring or point onto mesh
+- extract boundary
+- close linestrings
+
+- if, and, or
 
 B. Hard
 
@@ -635,6 +651,7 @@ B. Hard
     - processed,
     - mode(select: linestring, mesh, face, edge, point)
   - element and/or index => some processing => processed
+- filter?
 
 - pick from 3D
 - mirror
@@ -704,3 +721,5 @@ B. Hard
 - cache node outputs
 - now runtime has liveNodeIds - need to use this to store nodes output so eval
   doesn't go through the same node couple of times
+- group node adding slot when connecting to already connected for a swap
+- pset/psetKeyValue
