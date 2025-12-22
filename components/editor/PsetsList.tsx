@@ -13,7 +13,7 @@ function PsetsList({
   resolveDynPsets: () => Pset[];
 }) {
   return (
-    <div className="h-[600px] overflow-y-auto scrollbar-thin">
+    <div className="max-h-[600px] overflow-y-auto scrollbar-thin">
       <div className="mr-2">
         <PsetAccordion
           resolveDynPsets={resolveDynPsets}

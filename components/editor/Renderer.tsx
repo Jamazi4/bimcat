@@ -54,7 +54,7 @@ const Renderer = ({
         </Button>
       )}
       <Canvas
-        camera={{ position: [0, 0, 1], up: [0, 0, 1] }}
+        camera={{ position: [1, 1, 2], up: [0, 0, 1] }}
         className=" h-1/2"
       >
         <ambientLight intensity={0.2} />
@@ -71,7 +71,7 @@ const Renderer = ({
           rotation={[Math.PI / 2, 0, 0]}
         />
 
-        <Bounds fit clip margin={1.2}>
+        <Bounds fit clip margin={2}>
           {paramGeometry!.children.length > 0 ? (
             <primitive object={paramGeometry!} />
           ) : (

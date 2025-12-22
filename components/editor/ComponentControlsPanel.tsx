@@ -126,7 +126,12 @@ const ComponentControlsPanel = ({
     <div className="py-0.5 my-4">
       <div className="flex place-content-between items-center">
         <h1 className="font-bold my-2">Parametric Controls</h1>
-        <Button variant="ghost" size="icon" onClick={handleLock}>
+        <Button
+          className="my-2"
+          variant="default"
+          size="icon"
+          onClick={handleLock}
+        >
           {!activeControls ? <Lock /> : <Unlock />}
         </Button>
       </div>
