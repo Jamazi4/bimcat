@@ -144,7 +144,7 @@ export default function Home() {
   );
 }
 
-export function HeroTitle() {
+function HeroTitle() {
   return (
     <div className="perspective-[1000px]">
       <h1
