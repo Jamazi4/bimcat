@@ -1,5 +1,13 @@
 # README
 
+## Description
+
+An .ifc first web platform for creating and managing parametric, data-rich parametric models.
+
+[BimCat](https://bimcat.vercel.app/components/browse)
+
+
+
 ## Sources
 
 1. [IFCNet: A Benchmark Dataset for IFC Entity Classification](https://arxiv.org/pdf/2106.09712)
