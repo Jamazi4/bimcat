@@ -93,22 +93,6 @@ export function composeRelativeTransformMatrix(
   return finalMatrix;
 }
 
-export function applyTransform(
-  baseGeom: THREE.BufferGeometry,
-  transform: TransformObject,
-) {
-  const positionMatrix = new THREE.Matrix4().makeTranslation(
-    transform.position.x,
-    transform.position.y,
-    transform.position.z,
-  );
-
-  baseGeom.applyMatrix4(positionMatrix);
-
-  const transformMatrix = composeRelativeTransformMatrix(baseGeom, transform);
-  baseGeom.applyMatrix4(transformMatrix);
-}
-
 export function isClosedLoop(points: THREE.Vector3[]): boolean {
   if (points.length < 3) return false;
   return points[0].distanceToSquared(points[points.length - 1]) < 1e-6;
@@ -207,4 +191,89 @@ export function applyTransformToLinestring(
     transformedLinestring.push(temp);
   });
   return transformedLinestring;
+}
+
+export function applyTransform(
+  baseGeom: THREE.BufferGeometry,
+  transform: TransformObject,
+) {
+  const positionMatrix = new THREE.Matrix4().makeTranslation(
+    transform.position.x,
+    transform.position.y,
+    transform.position.z,
+  );
+
+  baseGeom.applyMatrix4(positionMatrix);
+
+  const transformMatrix = composeRelativeTransformMatrix(baseGeom, transform);
+  baseGeom.applyMatrix4(transformMatrix);
+}
+
+//------------------BELOW DOESN'T WORK-----------------------------//
+
+export function dedupeFaces(
+  geometry: THREE.BufferGeometry,
+): THREE.BufferGeometry {
+  const index = geometry.getIndex();
+  if (!index) return geometry;
+
+  const seen = new Set<string>();
+  const newIndices: number[] = [];
+
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i),
+      b = index.getX(i + 1),
+      c = index.getX(i + 2);
+    const key = [a, b, c].sort((x, y) => x - y).join("_");
+    if (!seen.has(key)) {
+      seen.add(key);
+      newIndices.push(a, b, c);
+    }
+  }
+
+  const newGeo = geometry.clone();
+  newGeo.setIndex(newIndices);
+  return newGeo;
+}
+
+export function cleanNonManifold(geometry: THREE.BufferGeometry) {
+  const index = geometry.getIndex();
+  if (!index) return geometry;
+
+  const edgeMap = new Map<string, number[]>();
+  const keptFaces: number[] = [];
+
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i),
+      b = index.getX(i + 1),
+      c = index.getX(i + 2);
+    const edges = [
+      [a, b],
+      [b, c],
+      [c, a],
+    ].map(([x, y]) => (x < y ? `${x}_${y}` : `${y}_${x}`));
+
+    // Check if any edge is already in use by 2 faces
+    let manifold = true;
+    for (const e of edges) {
+      const uses = edgeMap.get(e) || [];
+      if (uses.length >= 2) {
+        manifold = false;
+        break;
+      }
+    }
+
+    if (manifold) {
+      keptFaces.push(a, b, c);
+      for (const e of edges) {
+        const uses = edgeMap.get(e) || [];
+        uses.push(i / 3);
+        edgeMap.set(e, uses);
+      }
+    }
+  }
+
+  const clean = geometry.clone();
+  clean.setIndex(keptFaces);
+  return clean;
 }

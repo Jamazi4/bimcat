@@ -1,7 +1,6 @@
 import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
 import { getActiveInputIds, getInputValues } from "./nodeUtilFunctions";
-import { defaultTransformContructor } from "./defaultNodes";
 import {
   applyTransform,
   applyTransformToLinestring,
@@ -35,7 +34,6 @@ export function applyTransformNode(nodeDefId: number): nodeDefinition {
         name: "transform",
         id: 2,
         slotValueType: "transform",
-        defaultValue: defaultTransformContructor(),
       },
     ],
     outputs: [
@@ -59,7 +57,7 @@ export function applyTransformNode(nodeDefId: number): nodeDefinition {
           transform.value.position.z,
         );
         const tempGeom = new THREE.BufferGeometry().setFromPoints(
-          geom.value[0],
+          geom.value.flat(),
         );
         const relativeMatrix = composeRelativeTransformMatrix(
           tempGeom,

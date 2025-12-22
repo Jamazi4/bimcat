@@ -571,17 +571,21 @@ can use it further to only rebuild ast that is impacted
 
 Current issues: trinagulate can only take in a single linestring
 
-#### notes after modelling the headwall --
+### --25-08-2025--
+
+transform for custom origin - wrong order? it's moving before rotation
+
+#### notes after modelling the headwall -- current tasks
 
 X when plugging to occupied parent list and changing type - it removes empty slot
 
 X illegal ui controls fail silently
 
-- apply transform to work for individual origins? - in extrude too
+X apply transform to work for individual origins? - in extrude too
 
 - apply transform to support vector
 
-- mesh in groups is not merging correctly
+- mesh in groups is not merging correctly - important
 
 - triangulating separate linestrings?
 

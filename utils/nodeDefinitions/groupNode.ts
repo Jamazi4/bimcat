@@ -1,7 +1,11 @@
 import { nodeDefinition } from "../nodeTypes";
 import * as THREE from "three";
 import { getInputValues, getListInputValues } from "./nodeUtilFunctions";
-import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
+import {
+  cleanNonManifold,
+  dedupeFaces,
+} from "../geometryProcessing/geometryHelpers";
 
 export function groupNode(nodeDefId: number): nodeDefinition {
   return {
@@ -51,7 +55,11 @@ export function groupNode(nodeDefId: number): nodeDefinition {
           } else return [];
         });
 
-        finalMesh = mergeGeometries([initMeshVal, ...childGeomValues]);
+        finalMesh = BufferGeometryUtils.mergeGeometries(
+          [initMeshVal, ...childGeomValues],
+          true,
+        );
+        finalMesh = BufferGeometryUtils.mergeVertices(finalMesh);
       }
 
       const finalLinestring: THREE.Vector3[][] = [];
@@ -63,6 +71,8 @@ export function groupNode(nodeDefId: number): nodeDefinition {
           }
         });
       }
+
+      console.log(finalMesh);
 
       return {
         2: { type: "linestring", value: finalLinestring },
