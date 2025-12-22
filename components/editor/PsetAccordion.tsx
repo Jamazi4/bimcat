@@ -75,8 +75,14 @@ const PsetAccordion = ({
     dispatch(setLiveStatePsets({ psets: dynPsetsMerged }));
   }, [dispatch, dynPsetsMerged, liveGeometryRequested]);
 
+  const defaultPset = dynPsetsMerged[0] ?? psets[0];
+
   return (
-    <Accordion type="multiple" className="w-full flex-1">
+    <Accordion
+      defaultValue={[defaultPset?.title ?? ""]}
+      type="multiple"
+      className="w-full flex-1"
+    >
       {(parametersActive && dynPsets.length > 0 ? dynPsetsMerged : psets).map(
         (pset, index) => {
           return (
