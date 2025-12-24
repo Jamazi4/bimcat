@@ -128,7 +128,7 @@ const ComponentControlsPanel = ({
         <h1 className="font-bold my-2">Parametric Controls</h1>
         <Button
           className="my-2"
-          variant="default"
+          variant="ghost"
           size="icon"
           onClick={handleLock}
         >
