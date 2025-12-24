@@ -105,7 +105,7 @@ export default function Home() {
           </div>
         </Link>
 
-        <Link href={"/browse"} className="h-full">
+        <Link href={"/components/browse"} className="h-full">
           <div className={`${highlightDivStyles} h-full p-4 sm:p-6`}>
             <h2 className={tableHeaderStyles}>Browse</h2>
             <ol className="space-y-3 mt-4">
