@@ -148,7 +148,7 @@ export function ComponentList<TData, TValue>({
           )}
         </TableBody>
       </Table>
-      <div className="grid items-center grid-cols-3 w-full space-x-2 py-4">
+      <div className="grid items-center grid-cols-2 w-full space-x-2 py-4">
         <div className="text-sm text-muted-foreground space-x-2">
           {isInLibraries ? (
             <LibraryActionButtons
@@ -162,11 +162,6 @@ export function ComponentList<TData, TValue>({
             />
           )}
         </div>
-
-        <p className="text-muted-foreground text-center">
-          Selected {Object.keys(localSelection).length} /{" "}
-          {table.getFilteredRowModel().rows.length}
-        </p>
 
         <div className="space-x-2 items-end justify-end text-end">
           <Button
@@ -187,6 +182,10 @@ export function ComponentList<TData, TValue>({
           </Button>
         </div>
       </div>
+      <p className="text-muted-foreground text-center">
+        Selected {Object.keys(localSelection).length} /{" "}
+        {table.getFilteredRowModel().rows.length}
+      </p>
     </div>
   );
 }

@@ -6,13 +6,13 @@ export default function layout({
   return (
     <div
       className="
-        mt-[92px]
+        mt-[36px]
         max-w-7xl
         mx-auto
         px-4
         flex
         flex-col
-        min-h-[calc(100vh-200px)]
+        min-h-[calc(100vh-150px)]
       "
     >
       <div className="flex-grow">{children}</div>

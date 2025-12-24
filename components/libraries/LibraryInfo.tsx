@@ -11,11 +11,11 @@ const LibraryInfo = ({
   isPublic: boolean;
 }) => {
   const cellClassname = "text-start w-full";
-  const rowClassName = "grid grid-cols-[90px_1fr]";
+  const rowClassName = "grid grid-cols-[50px_1fr] md:grid-cols-[90px_1fr]";
   const colClassname = "grid grid-rows-2 gap-2";
   return (
-    <div className="my-2 mb-4 text-sm md:text-lg">
-      <div className="grid-cols-2 grid  rounded-md p-2 my-2 text-secondary-foreground gap-6 ">
+    <div className="my-2 mb-4 text-xs md:text-lg">
+      <div className="grid-cols-2 grid rounded-md p-2 my-2 text-secondary-foreground gap-6 ">
         <div className={colClassname}>
           <div className={rowClassName}>
             <p>Author:</p>
