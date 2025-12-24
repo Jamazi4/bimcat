@@ -24,11 +24,13 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${roboto.className} antialiased p-0 m-0`}>
+        <body
+          className={`${roboto.className} antialiased p-0 m-0 min-h-screen flex flex-col`}
+        >
           <Providers>
             <AppInitializer />
             <Navbar />
-            <div className="mt-[72px]">{children}</div>
+            <div className="mt-[72px] flex-grow">{children}</div>
           </Providers>
         </body>
       </html>

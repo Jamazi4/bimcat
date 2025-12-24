@@ -63,78 +63,107 @@ export default function Home() {
         <RendererFallback />
       )}
 
-      <div className="grid grid-cols-3 pt-2 lg:pt-4 sm:pt-6 mt-12 px-4 gap-4 border-2 rounded-md bg-accent mb-12 pb-12">
-        <Link href={"/visualiser"}>
-          <div className={highlightDivStyles}>
+      <div
+        className="
+    grid
+    grid-cols-1
+    sm:grid-cols-2
+    lg:grid-cols-3
+    gap-6
+    px-4
+    mt-12
+    pb-12
+  "
+      >
+        <Link href={"/visualiser"} className="h-full">
+          <div className={`${highlightDivStyles} h-full p-4 sm:p-6`}>
             <h2 className={tableHeaderStyles}>Upload or Create</h2>
-            <ol className="space-y-2">
-              <li className="flex">
-                <Dot size={32} />
-                <p>Upload your components from .ifc files</p>
+            <ol className="space-y-3 mt-4">
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">
+                  Upload your components from .ifc files
+                </p>
               </li>
-              <li className="flex">
-                <Dot size={32} />
-                <p>Create parametric models</p>
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">Create parametric models</p>
               </li>
-              <li className="flex">
-                <Dot size={32} />
-                <p>Add dynamic property sets</p>
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">Add dynamic property sets</p>
               </li>
-              <li className="flex">
-                <Dot size={32} />
-                <p>Edit and download</p>
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">Edit and download</p>
               </li>
-              <li className="flex">
-                <Dot size={32} />
-                <p>* Account needed</p>
+              <li className="flex items-start gap-3 opacity-70">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">Account needed</p>
               </li>
             </ol>
           </div>
         </Link>
 
-        <Link href={"/browse"}>
-          <div className={highlightDivStyles}>
+        <Link href={"/browse"} className="h-full">
+          <div className={`${highlightDivStyles} h-full p-4 sm:p-6`}>
             <h2 className={tableHeaderStyles}>Browse</h2>
-            <ol className="space-y-2">
-              <li className="flex">
-                <Dot size={32} />
-                <p>Browse through public components</p>
+            <ol className="space-y-3 mt-4">
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">Browse through public components</p>
               </li>
-              <li className="flex">
-                <Dot size={32} />
-                <p>Filter by author, property set content or name</p>
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">
+                  Filter by author, property set content or name
+                </p>
               </li>
-              <li className="flex">
-                <Dot size={32} />
-                <p>Download .ifc for any available component</p>
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">
+                  Modify parametric models with available controls
+                </p>
+              </li>
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">
+                  Download .ifc for any available component
+                </p>
               </li>
             </ol>
           </div>
         </Link>
 
-        <Link href={"/libraries"}>
-          <div className={highlightDivStyles}>
+        <Link href={"/libraries"} className="h-full">
+          <div className={`${highlightDivStyles} h-full p-4 sm:p-6`}>
             <h2 className={tableHeaderStyles}>Share and Organize</h2>
-            <ol className="space-y-2">
-              <li className="flex">
-                <Dot size={32} />
-                <p>Build libraries of your components</p>
+            <ol className="space-y-3 mt-4">
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">
+                  Build libraries of your components
+                </p>
               </li>
-              <li className="flex">
-                <Dot size={32} />
-                <p>Share libraries with your team</p>
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">Share libraries with your team</p>
               </li>
-              <li className="flex">
-                <Dot size={32} />
-                <p>Manage who can see your libraries</p>
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">
+                  Manage who can see your libraries
+                </p>
               </li>
-              <li className="flex">
-                <Dot size={32} />
-                <p>Merge libraries into composite libraries</p>
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">
+                  Merge libraries into composite libraries
+                </p>
               </li>
-              <li className="flex">
-                <Dot size={32} />
-                <p>Download nested folders of .ifc</p>
+              <li className="flex items-start gap-3">
+                <Dot size={16} className="mt-1 shrink-0" />
+                <p className="leading-snug">Download nested folders of .ifc</p>
               </li>
             </ol>
           </div>
